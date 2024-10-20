@@ -1,0 +1,21 @@
+{
+  "name": "20241_t145_sbo-fee-collection-management-system",
+  "version": "1.0.0",
+  "description": "This is a web-based fee collection system for COT-SBO that automates fee tracking, receipt issuance, and report generation.",
+  "main": "app.js",
+  "scripts": {
+    "startDev": "nodemon app"
+  },
+  "repository": {
+    "type": "git",
+    "url": "(git+https://github.com/RKNahial/20241_T145_SBO-FEE-COLLECTION-MANAGEMENT-SYSTEM.git)"
+  },
+  "author": "Abecia, Abuso, Lagare, Nahial",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}
