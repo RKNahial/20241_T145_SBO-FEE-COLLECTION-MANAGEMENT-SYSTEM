@@ -1,7 +1,7 @@
 const express = require('express');
 const GOVERNOR_ROUTES = express.Router();
 // C. COT-SBO GOVERNOR ROUTES
-    // Governor Login
+    // Governor Login S
     GOVERNOR_ROUTES .post('/governor/login', (req, res) => {
     });
     
