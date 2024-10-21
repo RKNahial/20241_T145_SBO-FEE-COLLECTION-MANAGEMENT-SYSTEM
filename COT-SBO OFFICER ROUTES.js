@@ -5,7 +5,7 @@ const OFFICER_ROUTES = express.Router();
 
 
 // A. COT-SBO OFFICER ROUTES
-    // Officer Login
+    // Officer Logins
    OFFICER_ROUTES.post('/officer/login', (req, res) => {
     });
         
