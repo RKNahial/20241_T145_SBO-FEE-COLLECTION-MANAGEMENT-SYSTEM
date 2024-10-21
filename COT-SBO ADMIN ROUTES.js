@@ -2,7 +2,7 @@ const express = require('express');
 const ADMIN_ROUTES = express.Router();
 
 // D. COT-SBO ADMIN ROUTES
-    // Admin Login
+    // Admin Logins 
     ADMIN_ROUTES.post('/admin/login', (req, res) => {
     });
     
