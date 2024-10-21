@@ -1,7 +1,7 @@
 const express = require('express');
 const TREASURER_ROUTES = express.Router();
 
-// B. COT-SBO TREASURER ROUTES
+// B. COT-SBO TREASURER ROUTEs
     // Treasurer Login
     TREASURER_ROUTES.post('/treasurer/login', (req, res) => {
     });
