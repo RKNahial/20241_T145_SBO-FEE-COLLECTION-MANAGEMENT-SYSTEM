@@ -13,9 +13,16 @@
   "author": "Abecia, Abuso, Lagare, Nahial",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.21.1"
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.3",
+    "ejs": "^3.1.10",
+    "express": "^4.21.1",
+    "express-recaptcha": "^5.1.0",
+    "mongoose": "^8.7.2",
+    "recaptcha": "^1.2.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"
   }
+  
 }
