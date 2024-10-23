@@ -10,9 +10,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve static files from the 'AdminLogin' directory
 app.use(express.static('AdminLogin'));
+
 // Set the view engine to EJS
 app.set('view engine', 'ejs');
-// Set the views directory to AdminLogin
 app.set('views', './AdminLogin');
 
 // Sample route to render the login page
@@ -32,4 +32,4 @@ mongoose.connect('mongodb://localhost:27017/AdminDB')
 const PORT = process.env.PORT || 3026;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-})
+});

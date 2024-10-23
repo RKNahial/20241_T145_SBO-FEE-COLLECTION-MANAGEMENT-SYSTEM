@@ -12,7 +12,7 @@
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background-image: url('buksu.png'); /* replace with your image URL */
+      background-image: url('Buksu.png'); /* replace with your image URL */
       background-size: cover;
       background-position: center;
       min-height: 100vh;
@@ -115,6 +115,13 @@
       <img src="download (20).jpg" alt="Logo" class="logo">
     </div>
     <h2>LOGIN AS ADMIN</h2>
+
+    <% if (typeof message !== 'undefined') { %>
+      <div class="alert alert-danger" role="alert">
+        <%= message %>
+      </div>
+    <% } %>
+
     <form action="/admin/login" method="post">
       <div class="form-group">
         <div class="input-icon-wrapper">
@@ -157,26 +164,7 @@
         toggleButton.classList.remove('fa-eye-slash');
         toggleButton.classList.add('fa-eye');
       }
-    }
-
-    function onSignIn(googleUser ) {
-      var profile = googleUser .getBasicProfile();
-      var id_token = googleUser .getAuthResponse().id_token;
-      fetch('/admin/google-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id_token: id_token })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          window.location.href = '/dashboard';
-        } else {
-          alert('Login failed: ' + data.message);
-        }
-      })
-      .catch(error => console.error('Error:', error));
-    }
+    };
   </script>
 </body>
 </html>

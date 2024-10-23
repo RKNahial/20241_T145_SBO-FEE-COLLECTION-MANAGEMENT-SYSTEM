@@ -2,32 +2,27 @@ const express = require('express');
 const ADMIN_ROUTES = express.Router();
 const AdminModel = require('../models/AdminModel'); // Adjust the path if needed
 const bcrypt = require('bcrypt'); // For password hashing comparison
-const Recaptcha = require('express-recaptcha').RecaptchaV2;
+const { RecaptchaV2 } = require('express-recaptcha');
 
 // Initialize reCAPTCHA with your site and secret keys
-const recaptcha = new Recaptcha('6LeZHWkqAAAAACelXEagXWJuTnWLn-1vjv41y6lx', '6LeZHWkqAAAAAJQDndi_uHvgAmquL1hPG2DvaS4d');
+const recaptcha = new RecaptchaV2('6LeZHWkqAAAAACelXEagXWJuTnWLn-1vjv41y6lx', '6LeZHWkqAAAAAJQDndi_uHvgAmquL1hPG2DvaS4d');
 
 // POST route for admin login
-ADMIN_ROUTES.post('/login', async (req, res) => {
+ADMIN_ROUTES.post('/login', recaptcha.middleware.verify, async (req, res) => {
   const { username, password } = req.body;
-  const recaptchaResponse = req.body['g-recaptcha-response'];
-
+  if (req.recaptcha.error) {
+    return res.render('login', { message: 'Invalid reCAPTCHA response' });
+  }
   try {
-    // Verify reCAPTCHA response
-    const recaptchaVerified = await recaptcha.verify(recaptchaResponse, req.ip);
-    if (!recaptchaVerified) {
-      return res.status(401).send('Invalid reCAPTCHA response');
-    }
-
     // Check if username and password are provided
     if (!username || !password) {
-      return res.status(400).json({ message: 'Username and password are required' });
+      return res.render('login', { message: 'Username and password are required' });
     }
 
     // Find the admin by username
     const admin = await AdminModel.findOne({ username });
     if (!admin) {
-      return res.status(404).json({ message: 'Admin not found' });
+      return res.render('login.ejs', { message: 'Admin not found' });
     }
 
     // Compare the provided password with the stored hashed password
@@ -37,34 +32,12 @@ ADMIN_ROUTES.post('/login', async (req, res) => {
       res.status(200).json({ message: 'Login successful', admin });
     } else {
       // Incorrect password
-      res.status(401).json({ message: 'Invalid credentials' });
+      return res.render('login', { message: 'Invalid credentials' });
     }
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err });
+    res.render('login', { message: 'Server error. Please try again later.' });
   }
-})
-
-// POST route for adding a new admin
-ADMIN_ROUTES.post('/add', (req, res) => {
-  const { last_name, first_name, middle_name, email, password } = req.body;
-
-  // Create a new admin instance
-  const newAdmin = new AdminModel({
-    last_name,
-    first_name,
-    middle_name,
-    email,
-    password: bcrypt.hashSync(password, 10) // Hashing the password before saving
-  });
-
-  // Save the new admin to the database
-  newAdmin.save()
-    .then(() => res.status(201).json({ message: 'Admin created successfully!' }))
-    .catch((err) => res.status(500).json({ message: 'Error creating admin', error: err }));
-});
-
-
-    
+}),
         // Error handling for invalid login
     ADMIN_ROUTES.post('/admin/login/invalid', (req, res) => {
     });
