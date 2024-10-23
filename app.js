@@ -1,9 +1,9 @@
+
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const adminRoutes = require('./ROUTES/COT-SBO ADMIN ROUTES.js'); // Ensure the path is correct
-const app = express();
-
+const app = express()
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

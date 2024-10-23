@@ -19,7 +19,9 @@
     "ejs": "^3.1.10",
     "express": "^4.21.1",
     "express-recaptcha": "^5.1.0",
+    "gapi-script": "^1.2.0",
     "mongoose": "^8.7.2",
+    "react-google-login": "^5.2.2",
     "recaptcha": "^1.2.1"
   },
   "devDependencies": {
