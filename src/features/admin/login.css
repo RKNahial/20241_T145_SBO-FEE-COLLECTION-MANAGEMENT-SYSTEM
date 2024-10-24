@@ -1,0 +1,97 @@
+.login-body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background-image: url('../images/Background.png');
+    background-size: cover;
+    background-position: center;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 15px;
+  }
+
+  .login-container {
+    width: 100%;
+    max-width: 380px;
+    background: rgb(255, 255, 255); /* added opacity */
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(207, 100, 0, 0.4);
+  }
+
+  .logo { width: 60px; height: 60px; }
+  
+  h2 {
+    color: #1e293b;
+    font-weight: 600;
+    text-align: center;
+    margin: 1rem 0;
+    font-size: 1.25rem;
+  }
+
+  .form-group { margin-bottom: 1rem; position: relative; }
+  
+  .input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+  }
+
+  .form-control {
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+  }
+
+  .form-control:focus {
+    border-color: #e15e00;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    outline: none;
+  }
+
+  .toggle-password {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    background-color: #e15e00;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 8px;
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  .btn-primary:hover { background-color: #1e40af; }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    margin: 1.5rem 0;
+  }
+
+  .divider::before,
+  .divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .divider span {
+    padding: 0 1rem;
+    color: #64748b;
+    font-size: 0.875rem;
+  }
+
+  .g-signin2 { display: flex; justify-content: center; }
+  .g-recaptcha { margin: 1rem 0; display: flex; justify-content: center; }
