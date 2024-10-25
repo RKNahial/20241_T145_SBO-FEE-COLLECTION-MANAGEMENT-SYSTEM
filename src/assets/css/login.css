@@ -47,7 +47,7 @@
   }
 
   .form-control:focus {
-    border-color: #e15e00;
+    border-color: #FF8C00;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     outline: none;
   }
@@ -64,7 +64,7 @@
   }
 
   .btn-primary {
-    background-color: #e15e00;
+    background-color: #FF8C00;
     border: none;
     padding: 0.75rem;
     border-radius: 8px;
@@ -72,7 +72,7 @@
     margin-top: 1rem;
   }
 
-  .btn-primary:hover { background-color: #1e40af; }
+  .btn-primary:hover { background-color: #E67E22; }
 
   .divider {
     display: flex;
@@ -95,3 +95,4 @@
 
   .g-signin2 { display: flex; justify-content: center; }
   .g-recaptcha { margin: 1rem 0; display: flex; justify-content: center; }
+

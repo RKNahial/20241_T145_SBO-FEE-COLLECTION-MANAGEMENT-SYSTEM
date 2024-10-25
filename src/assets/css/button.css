@@ -1,0 +1,30 @@
+.system-button {
+    display: inline-block;      
+    color: #333333;                 
+    background-color: #FF8C00;  
+    border: none;               
+    padding: 0.5rem 1rem;        
+    max-width: 5rem;              
+    transition: background-color 0.2s ease, box-shadow 0.2s ease; /* Smooth transition */
+}
+
+.system-button:hover {
+    background-color: #E67E22; 
+}
+
+.system-button:focus {
+    color: #333333;                  
+    background-color: #E67E22; 
+    border: none;   
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(255, 140, 0, 0.5);
+}
+
+
+.system-button:active .btn {
+    color: #333333;                  
+    background-color: #E67E22; 
+    border: none;   
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(255, 140, 0, 0.5);
+}
