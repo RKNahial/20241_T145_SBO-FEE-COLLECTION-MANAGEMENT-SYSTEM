@@ -221,6 +221,7 @@ const TreasurerDashboard = () => {
                                 <div style={{ flex: 1 }}>
                                     <div className="card" style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', paddingTop: '1.25rem', border: 'none' }}>
                                         {/* <CalendarView /> */}
+                                        <p>INSERT CALENDAR VIEW HERE</p>
                                     </div>
                                 </div>
 
