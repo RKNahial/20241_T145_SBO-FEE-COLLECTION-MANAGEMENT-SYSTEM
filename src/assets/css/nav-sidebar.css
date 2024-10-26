@@ -91,9 +91,9 @@
 }
 
 .icon-space{
- margin: 0.30rem;
- margin-left: 0rem;
- margin-right: 1.25rem;
+  margin: 0.30rem;
+  margin-left: 0rem;
+  margin-right: 1.25rem;
 }
 
 .nav {
@@ -122,7 +122,7 @@ body {
     margin: 0;
   }
   .sb-topnav.navbar-dark #sidebarToggle {
-    color: F8F9FD;
+    color: #F8F9FD;
   }
   .sb-topnav.navbar-light #sidebarToggle {
     color: #333333;

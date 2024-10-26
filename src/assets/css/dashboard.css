@@ -1,5 +1,5 @@
 body{
-  background-color: #FEFEFE !important;
+  background-color: #FEFEFE;
 }
 
 .system-orange{
@@ -8,6 +8,10 @@ body{
 
 .system-gray{
   color: #A4A1A1;
+}
+
+.header{
+  color: #333333; 
 }
 
 .welcome-text{
@@ -146,10 +150,6 @@ body{
   left: 0;
   padding: 1rem;
   border-radius: calc(0.25rem - 1px);
-}
-
-.header{
-  color: #333333; 
 }
 
 .card-img,
