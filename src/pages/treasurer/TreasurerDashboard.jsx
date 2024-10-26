@@ -47,6 +47,14 @@ const TreasurerDashboard = () => {
             id_no: '2101103332',
             name: 'Melany Gunayan',
             paid_amount: '200.00',
+        },
+        {
+            id: 5,
+            date: 'October 5, 2024',
+            ref_no: 'PAY2024105-001',
+            id_no: '2101103307',
+            name: 'Leanne Mae Reyes',
+            paid_amount: '200.00',
         }
     ];
 
