@@ -5,7 +5,6 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.table th,
 .table td {
     border: none;
     padding: 1rem;
@@ -15,9 +14,13 @@
 }
 
 .table th {
-    background-color: #F0F0F0;
+    border: none;
+    padding: 1rem;
+    text-align: center;
+    background-color: #ffad5d;
+    color: #333333;
     font-weight: bold;
-    text-transform: uppercase;
+    transition: background-color 0.2s ease;
 }
 
 .table tbody tr {
@@ -30,26 +33,6 @@
 
 .table tbody tr:last-child {
     border-bottom: none;
-}
-
-.table th:nth-child(1),
-.table td:nth-child(1) {
-    width: 10%;
-}
-
-.table th:nth-child(2),
-.table td:nth-child(2) {
-    width: 30%;
-}
-
-.table th:nth-child(3),
-.table td:nth-child(3) {
-    width: 30%;
-}
-
-.table th:nth-child(4),
-.table td:nth-child(4) {
-    width: 30%;
 }
 
 .btn-outline-success,

@@ -17,12 +17,19 @@
   color:#EAEAEA;
   margin: 0.65rem 0 0.3rem;
   font-weight: bold;
+  text-align: left;
 }
 
 .small-text{
   color:#F5F5F5;
 }
 
+.big-icon {
+  font-size: 2rem; 
+  padding-left: 1rem;
+  padding-right: 0.5rem; 
+  color: #EAEAEA; 
+}
 .form-control {
   display: block;  
   width: 100%; 

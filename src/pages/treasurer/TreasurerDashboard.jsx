@@ -19,6 +19,7 @@ const TreasurerDashboard = () => {
         {
             id: 1,
             date: 'October 10, 2024',
+            ref_no: 'PAY20241010-001',
             id_no: '2101101369',
             name: 'Jessler Hilario',
             paid_amount: '200.00',
@@ -26,6 +27,7 @@ const TreasurerDashboard = () => {
         {
             id: 2,
             date: 'October 10, 2024',
+            ref_no: 'PAY20241010-001',
             id_no: '2101105798',
             name: 'Vince Andrew Escoto',
             paid_amount: '200.00',
@@ -33,6 +35,7 @@ const TreasurerDashboard = () => {
         {
             id: 3,
             date: 'October 7, 2024',
+            ref_no: 'PAY2024107-001',
             id_no: '2101105721',
             name: 'Kirk John Tado',
             paid_amount: '200.00',
@@ -40,6 +43,7 @@ const TreasurerDashboard = () => {
         {
             id: 4,
             date: 'October 7, 2024',
+            ref_no: 'PAY2024107-001',
             id_no: '2101103332',
             name: 'Melany Gunayan',
             paid_amount: '200.00',
@@ -69,35 +73,47 @@ const TreasurerDashboard = () => {
                         <div className="row">
                             <div className="col-xl-3 col-md-6"> 
                                 <div className="card orange-card mb-4">
-                                    <div className="card-body">
-                                        <h2 className="text-center big-text">2378</h2>
-                                        <h5 className="text-center small-text">Total Students</h5>
+                                    <div className="card-body d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h2 className="big-text">2378</h2>
+                                            <h5 className="small-text">Total Students</h5>
+                                        </div>
+                                        <i className="fas fa-user-graduate big-icon text-white"></i>
                                     </div>
                                 </div>
                             </div>
                             <div className="col-xl-3 col-md-6">
                                 <div className="card orange-card mb-4">
-                                    <div className="card-body">
-                                        <h2 className="text-center big-text">36</h2>
-                                        <h5 className="text-center small-text">Total Officers</h5>
+                                    <div className="card-body d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h2 className="big-text">36</h2>
+                                            <h5 className="small-text">Total Officers</h5>
+                                        </div>
+                                        <i className="fas fa-user-tie big-icon text-white"></i>
                                     </div>
                                 </div>
                             </div>
                             <div className="col-xl-3 col-md-6">
                                 <div className="card orange-card mb-4">
-                                    <div className="card-body">
-                                        <h2 className="text-center big-text">3</h2>
-                                        <h5 className="text-center small-text">Total Events</h5>
+                                    <div className="card-body d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h2 className="big-text">3</h2>
+                                            <h5 className="small-text">Total Events</h5>
+                                        </div>
+                                        <i className="fas fa-calendar-alt big-icon text-white"></i>
                                     </div>
                                 </div>
                             </div>
                             <div className="col-xl-3 col-md-6">
                                 <div className="card orange-card mb-4">
-                                    <div className="card-body">
-                                        <h2 className="text-center big-text">
-                                            <span style={{ fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>&#8369;</span>5674
-                                        </h2>
-                                        <h5 className="text-center small-text">Total Fees Received</h5>
+                                    <div className="card-body d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h2 className="big-text">
+                                                <span style={{ fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>&#8369;</span>5674
+                                            </h2>
+                                            <h5 className="small-text">Total Fees Received</h5>
+                                        </div>
+                                        <i className="fas fa-money-bill-wave big-icon text-white"></i>
                                     </div>
                                 </div>
                             </div>
@@ -110,27 +126,22 @@ const TreasurerDashboard = () => {
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>Date</th>
+                                        <th>Ref. No</th>
                                         <th>Student ID</th>
                                         <th>Student Name</th>
                                         <th>Paid Amount</th>
-                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {students.map((student, index) => (
                                         <tr key={student.id}>
                                             <td>{index + 1}</td>
+                                            <td>{student.date}</td>
+                                            <td>{student.ref_no}</td>
                                             <td>{student.id_no}</td>
                                             <td>{student.name}</td>
                                             <td>{student.paid_amount}</td>
-                                            <td>
-                                                <button className="btn btn-outline-success edit_student" type="button" data-id={student.id}>
-                                                    <i className="fa fa-edit"></i>
-                                                </button>
-                                                <button className="btn btn-outline-danger archive_student" type="button" data-id={student.id}>
-                                                    <i className="fa fa-archive"></i>
-                                                </button>
-                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
