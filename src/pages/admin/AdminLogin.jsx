@@ -14,9 +14,8 @@ const AdminLogin = () => {
         e.preventDefault();
         try {
             const response = await axios.post('/api/login', { username, password }); // Update with your API endpoint
-            // Handle the response, redirect to dashboard
             console.log('Login successful:', response.data);
-            navigate('officer/dashboard');
+            navigate('/admin/dashboard');
         } catch (error) {
             console.error('Login error:', error);
             setMessage('Invalid username or password.');
@@ -56,7 +55,7 @@ const AdminLogin = () => {
                         <div className="input-icon-wrapper">
                             <input
                                 type="text"
-                                className="form-control"
+                                className="form-control login-form"
                                 id="username"
                                 name="username"
                                 placeholder="Username"
@@ -71,7 +70,7 @@ const AdminLogin = () => {
                         <div className="input-icon-wrapper">
                             <input
                                 type="password"
-                                className="form-control"
+                                className="form-control login-form"
                                 id="password"
                                 name="password"
                                 placeholder="Password"

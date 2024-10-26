@@ -1,6 +1,6 @@
 .system-button {
     display: inline-block;      
-    color: #333333;                 
+    color: #EAEAEA;                 
     background-color: #FF8C00;  
     border: none;               
     padding: 0.5rem 1rem;        
@@ -10,6 +10,7 @@
 
 .system-button:hover {
     background-color: #E67E22; 
+    color: #EAEAEA;
 }
 
 .system-button:focus {
@@ -22,7 +23,7 @@
 
 
 .system-button:active .btn {
-    color: #333333;                  
+    color: #EAEAEA;                  
     background-color: #E67E22; 
     border: none;   
     outline: none;

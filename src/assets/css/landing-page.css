@@ -1,0 +1,208 @@
+:root {
+  --primary-color: #FF8C00; /* Orange */
+  --primary-color-dark: #e07b00; /* Darker shade */
+  --primary-color-light: #ffb74d; /* Lighter shade */
+  --secondary-color: #f9fafe;
+  --text-color: #333333;
+  --white: #ffffff;
+  --max-width: 1200px;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--secondary-color);
+}
+
+.landing-page__nav {
+  max-width: var(--max-width);
+  margin: auto;
+  padding: 1rem;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.landing-page__nav__logo a {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.landing-page__nav__links {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.landing-page__link a {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-color);
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.landing-page__link a:hover {
+  color: var(--primary-color);
+}
+
+.landing-page__nav__btn {
+  padding: 0.5rem 2rem;
+  color: var(--white);
+  background-color: var(--primary-color);
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.landing-page__nav__btn:hover {
+  background-color: var(--primary-color-dark);
+}
+
+.landing-page__container {
+  max-width: var(--max-width);
+  margin: auto;
+  padding: 1rem;
+  min-height: calc(100vh - 100px);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5rem;
+}
+
+.landing-page__content-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.landing-page__content-container h1 {
+  font-size: 3rem;
+  font-weight: 400;
+  line-height: 3.5rem;
+  color: var(--primary-color-dark);
+  margin-bottom: 1rem;
+}
+
+.landing-page__heading--1,
+.landing-page__heading--2 {
+  font-weight: 700;
+}
+
+.landing-page__heading--2 {
+  color: var(--primary-color);
+}
+
+.landing-page__content-container p {
+  font-size: 1rem;
+  color: var(--text-color);
+  margin-bottom: 2rem;
+}
+
+.landing-page__content-container form {
+  display: flex;
+  align-items: center;
+}
+
+.landing-page__content-container input {
+  width: 100%;
+  max-width: 300px;
+  padding: 1rem;
+  font-size: 0.8rem;
+  outline: none;
+  border: none;
+  box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.landing-page__content-container button {
+  width: fit-content;
+  padding: 1rem;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  background-color: var(--primary-color);
+  color: var(--white);
+  outline: none;
+  border: none;
+  box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s;
+  cursor: pointer;
+}
+
+.landing-page__content-container button:hover {
+  background-color: var(--primary-color-dark);
+}
+
+.landing-page__image-container {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  place-content: center;
+}
+
+.landing-page__image-container img {
+  width: 100%;
+  max-width: 300px;
+  margin: auto;
+  border-radius: 10px;
+}
+
+.landing-page__image-container img:nth-child(1) {
+  transform: translateY(70px);
+}
+
+.landing-page__image-container img:nth-child(2) {
+  transform: translateY(-70px);
+}
+
+.landing-page__image-content {
+  position: absolute;
+  width: 100%;
+  max-width: 310px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-35%, 50%);
+  background: linear-gradient(to right, var(--primary-color), var(--primary-color-dark));
+  color: var(--white);
+  padding: 1rem 2rem;
+  border-radius: 10px;
+}
+
+.landing-page__image-content li {
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 900px) {
+  .landing-page__link a:not(.nav__btn) {
+    display: none;
+  }
+
+  .landing-page__container {
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  .landing-page__content-container {
+    text-align: center;
+  }
+
+  .landing-page__content-container form {
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .landing-page__image-container {
+    grid-area: 1/1/2/2;
+  }
+
+  .landing-page__image-container img {
+    transform: translateY(0) !important;
+  }
+}

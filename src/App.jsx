@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { useEffect } from 'react';
 import './App.css';
 
+// IMPORT BOOTSTRAP
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'; 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -12,7 +13,7 @@ import './assets/css/button.css';
 import './assets/css/dashboard.css';
 
 
-// IMPORT PAGE COMPONENTS
+// IMPORT PAGES
 import LandingPage from './pages/LandingPage';
 
 import AdminLogin from './pages/admin/AdminLogin';

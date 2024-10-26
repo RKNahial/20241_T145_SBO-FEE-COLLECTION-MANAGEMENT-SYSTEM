@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; 
 import '../../assets/css/login.css';
 
-const TreasurerLogin = () => {
+const OfficerLogin = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
@@ -16,7 +16,7 @@ const TreasurerLogin = () => {
             const response = await axios.post('/api/login', { username, password }); // Update with your API endpoint
             // Handle the response, redirect to dashboard
             console.log('Login successful:', response.data);
-            navigate('treasurer/dashboard');
+            navigate('/treasurer/dashboard');
         } catch (error) {
             console.error('Login error:', error);
             setMessage('Invalid username or password.');
@@ -56,7 +56,7 @@ const TreasurerLogin = () => {
                         <div className="input-icon-wrapper">
                             <input
                                 type="text"
-                                className="form-control"
+                                className="form-control login-form"
                                 id="username"
                                 name="username"
                                 placeholder="Username"
@@ -71,7 +71,7 @@ const TreasurerLogin = () => {
                         <div className="input-icon-wrapper">
                             <input
                                 type="password"
-                                className="form-control"
+                                className="form-control login-form"
                                 id="password"
                                 name="password"
                                 placeholder="Password"
@@ -101,4 +101,4 @@ const TreasurerLogin = () => {
     );
 };
 
-export default TreasurerLogin;
+export default OfficerLogin;

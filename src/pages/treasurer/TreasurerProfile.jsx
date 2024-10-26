@@ -41,7 +41,7 @@ const TreasurerProfile = () => {
                                                 <label>User Name</label>
                                                 <input
                                                     type="text"
-                                                    className="form-control"
+                                                    className="form-control system"
                                                     placeholder="Enter your name"
                                                 />
                                             </div>

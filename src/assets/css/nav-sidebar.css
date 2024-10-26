@@ -200,9 +200,6 @@ body {
   .sb-sidenav-dark .sb-sidenav-menu .nav-link.active .sb-nav-link-icon {
     color: #FF8C00;
   }
-  .sb-sidenav-dark .sb-sidenav-footer {
-    background-color: #343a40;
-  }
 
   .nav {
     display: flex;

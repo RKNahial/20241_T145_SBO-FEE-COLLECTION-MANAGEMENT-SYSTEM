@@ -8,8 +8,19 @@
 
 .orange-card {
   background-color: #FF8C00 !important; 
-  color:#333333 !important;
   border-radius: 1.25rem !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.big-text {
+  font-size: 2.50rem;
+  color:#EAEAEA;
+  margin: 0.65rem 0 0.3rem;
+  font-weight: bold;
+}
+
+.small-text{
+  color:#F5F5F5;
 }
 
 .form-control {
@@ -29,19 +40,6 @@
   border-color: #FF8C00;
   outline: 0;
 }
-
-.dashboard-content {
-  margin-top: 3.5px; 
-  transition: margin-left 0.3s;
-}
-
-.big-text {
-  font-size: 2.50rem;
-  color:#333333;
-  margin: 0.65rem 0 0.3rem;
-  font-weight: normal;
-}
-
 
 /* CARD */
 .card {
@@ -138,6 +136,10 @@
   left: 0;
   padding: 1rem;
   border-radius: calc(0.25rem - 1px);
+}
+
+.header{
+  color: #333333; 
 }
 
 .card-img,

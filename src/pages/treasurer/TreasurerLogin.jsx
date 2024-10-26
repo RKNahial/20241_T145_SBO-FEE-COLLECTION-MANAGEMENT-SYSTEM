@@ -1,10 +1,10 @@
-// src/pages/officer/OfficerLogin.jsx
+// src/pages/treasurer/TreasurerLogin.jsx
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; 
 import '../../assets/css/login.css';
 
-const OfficerLogin = () => {
+const TreasurerLogin = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
@@ -56,7 +56,7 @@ const OfficerLogin = () => {
                         <div className="input-icon-wrapper">
                             <input
                                 type="text"
-                                className="form-control"
+                                className="form-control login-form"
                                 id="username"
                                 name="username"
                                 placeholder="Username"
@@ -71,7 +71,7 @@ const OfficerLogin = () => {
                         <div className="input-icon-wrapper">
                             <input
                                 type="password"
-                                className="form-control"
+                                className="form-control login-form"
                                 id="password"
                                 name="password"
                                 placeholder="Password"
@@ -101,4 +101,4 @@ const OfficerLogin = () => {
     );
 };
 
-export default OfficerLogin;
+export default TreasurerLogin;
