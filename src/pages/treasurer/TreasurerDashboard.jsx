@@ -1,9 +1,9 @@
 // src/pages/treasurer/TreasurerLogin.jsx
-import React, { useState } from "react";
-import axios from 'axios'; 
+import React, { useState, useEffect } from "react";
+import axios from 'axios';
+import { Bar } from 'react-chartjs-2';
 import TreasurerSidebar from "./TreasurerSidebar"; 
 import TreasurerNavbar from "./TreasurerNavbar";
-
 
 const TreasurerDashboard = () => {
     // NAV AND SIDEBAR
@@ -57,6 +57,47 @@ const TreasurerDashboard = () => {
         }
     ];
 
+    // REPORTS -- only shows white screen
+    // const [reports, setReports] = useState([]);
+    // const [loading, setLoading] = useState(true);
+    // const [error, setError] = useState(null); 
+
+    // useEffect(() => {
+    //     const fetchReports = async () => {
+    //         setLoading(true);
+    //         try {
+    //             const response = await axios.get('/api/reports');
+    //             console.log("Response Data:", response.data);
+    //             if (response.data && response.data.length > 0) {
+    //                 setReports(response.data);
+    //             } else {
+    //                 setError("No reports found.");
+    //             }
+    //         } catch (error) {
+    //             console.error("Error fetching reports data:", error);
+    //             setError("Failed to fetch reports. Please try again later.");
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
+    
+    //     fetchReports();
+    // }, []);
+
+    // const chartData = {
+    //     labels: reports.length > 0 ? reports.map(report => report.title || "Untitled") : ["No Data"],
+    //     datasets: [
+    //         {
+    //             label: 'Report Data',
+    //             data: reports.length > 0 ? reports.map(report => report.value || 0) : [0],
+    //             backgroundColor: 'rgba(255, 99, 132, 0.2)',
+    //             borderColor: 'rgba(255, 99, 132, 1)',
+    //             borderWidth: 1,
+    //         },
+    //     ],
+    // };
+
+
     return (
         <div className="sb-nav-fixed">
             <TreasurerNavbar toggleSidebar={toggleSidebar} />
@@ -73,7 +114,7 @@ const TreasurerDashboard = () => {
                     }}
                 >
                     {/* CONTENT */}
-                    <div className="container-fluid px-5">
+                    <div className="container-fluid px-5 mb-5">
                         <p className="system-gray mt-4 welcome-text">Welcome back, treasurer!</p>
                         
                         {/* ORANGE CARDS */}
@@ -155,6 +196,38 @@ const TreasurerDashboard = () => {
                             </table>
                         </div>
                         {/* TABLE ENDS */}
+
+                        {/* REPORTS AND CALENDAR */}
+                        <div className="card-body">
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                {/* REPORTS */}
+                                <div style={{ flex: 1, marginRight: '1.25rem' }}>
+                                    <div className="card" style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', paddingTop: '1.25rem', border: 'none' }}>
+                                        <p>REPORTS HERE (Dili siya ga-work huhu)</p>
+                                        <p>Bar Graph daw ni</p>
+                                        {/* {loading ? (
+                                            <p>Loading reports...</p>
+                                        ) : error ? (
+                                            <p className="text-danger">{error}</p>
+                                        ) : reports.length === 0 ? (
+                                            <p>No reports available.</p>
+                                        ) : (
+                                            <Bar data={chartData} options={{ responsive: true }} />
+                                        )} */}
+                                    </div>
+                                </div>
+
+                                {/* CALENDAR */}
+                                <div style={{ flex: 1 }}>
+                                    <div className="card" style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', paddingTop: '1.25rem', border: 'none' }}>
+                                        {/* <CalendarView /> */}
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        {/* REPORTS AND CALENDAR END */}
+
                         
                     </div>
                 </div>
