@@ -26,7 +26,7 @@ const TreasurerNavbar = ({ toggleSidebar }) => {
                         data-bs-toggle="dropdown" 
                         aria-expanded="false"
                     >
-                        <img src="/public/images/COT-logo.jpg" alt="COT Logo"style={{ width: '1.857rem', height: '1.857rem'}} />
+                        <img src="/public/images/COT-logo.png" alt="COT Logo"style={{ width: '1.857rem', height: '1.857rem'}} />
                         <span style={{ paddingLeft: '0.5rem', paddingRight: '0.5rem' }}> Treasurer</span>
                     </Link>
                     <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
