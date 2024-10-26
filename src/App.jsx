@@ -10,6 +10,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 // IMPORT SYSTEM CSS
 import './assets/css/nav-sidebar.css';
 import './assets/css/button.css';
+import './assets/css/table.css';
 import './assets/css/dashboard.css';
 
 

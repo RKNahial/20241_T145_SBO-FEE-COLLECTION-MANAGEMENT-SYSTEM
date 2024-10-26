@@ -1,9 +1,17 @@
+body{
+  background-color: #FEFEFE !important;
+}
+
 .system-orange{
   background-color: #FF8C00;
 }
 
 .system-gray{
   color: #A4A1A1;
+}
+
+.welcome-text{
+  font-size: 1.15rem;
 }
 
 .orange-card {

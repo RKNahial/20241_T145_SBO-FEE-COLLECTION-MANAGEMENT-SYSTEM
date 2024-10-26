@@ -9,15 +9,16 @@
 
 .table td {
     border: none;
-    padding: 1rem;
+    padding: 0.75rem;
     text-align: center;
+    background-color: #F8F9FD;
     color: #333333;
     transition: background-color 0.2s ease;
 }
 
 .table th {
     border: none;
-    padding: 1rem;
+    padding: 0.75rem;
     text-align: center;
     background-color: #ffad5d;
     color: #333333;
@@ -26,36 +27,13 @@
 }
 
 .table tbody tr {
-    border-bottom: 1px solid #E3E7EA;
+    border-bottom: 0.00625rem solid #E3E7EA;
 }
 
 .table tbody tr:hover {
-    background-color: #F2F3F6;
+    background-color: #415797 !important;
 }
 
 .table tbody tr:last-child {
     border-bottom: none;
-}
-
-.btn-outline-success,
-.btn-outline-danger {
-    border: 1px solid transparent;
-    background-color: transparent;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-}
-
-.btn-outline-success:hover {
-    background-color: #c3e6cb;
-}
-
-.btn-outline-danger:hover {
-    background-color: #f5c6cb;
-}
-
-.btn-outline-success:focus,
-.btn-outline-danger:focus {
-    background-color: transparent;
-    outline: none;
 }

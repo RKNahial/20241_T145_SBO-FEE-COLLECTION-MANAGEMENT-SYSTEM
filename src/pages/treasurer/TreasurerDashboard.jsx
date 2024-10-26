@@ -1,7 +1,6 @@
 // src/pages/treasurer/TreasurerLogin.jsx
 import React, { useState } from "react";
 import axios from 'axios'; 
-import '../../assets/css/table.css';
 import TreasurerSidebar from "./TreasurerSidebar"; 
 import TreasurerNavbar from "./TreasurerNavbar";
 
@@ -75,7 +74,7 @@ const TreasurerDashboard = () => {
                 >
                     {/* CONTENT */}
                     <div className="container-fluid px-5">
-                        <p className="system-gray mt-4">Welcome back, treasurer!</p>
+                        <p className="system-gray mt-4 welcome-text">Welcome back, treasurer!</p>
                         
                         {/* ORANGE CARDS */}
                         <div className="row">
@@ -156,6 +155,7 @@ const TreasurerDashboard = () => {
                             </table>
                         </div>
                         {/* TABLE ENDS */}
+                        
                     </div>
                 </div>
             </div>
