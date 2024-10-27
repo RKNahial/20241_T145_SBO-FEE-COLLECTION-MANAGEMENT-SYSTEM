@@ -47,6 +47,8 @@
     background: none;
     border: none;
     cursor: pointer;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .btn-edit:hover {
@@ -60,10 +62,90 @@
     background: none;
     border: none;
     cursor: pointer;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .btn-archive:hover {
     color: rgb(165, 19, 19);
     text-decoration: underline; 
     border: none;
+}.system-button {
+    display: inline-block;      
+    color: #EAEAEA;                 
+    background-color: #FF8C00;  
+    border: none;               
+    padding: 0.5rem 1rem;        
+    max-width: 5rem;              
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.system-button:hover {
+    background-color: #E67E22; 
+    color: #EAEAEA;
+}
+
+.system-button:focus,
+.system-button:focus-visible {
+    color: #333333;                  
+    background-color: #E67E22; 
+    border: none;   
+    outline: none; /* Ensure there's no outline */
+    box-shadow: none; /* Remove the box-shadow */
+}
+
+.system-button:active {
+    color: #EAEAEA;                  
+    background-color: #E67E22; 
+    border: none;   
+    outline: none; /* Ensure there's no outline */
+    box-shadow: none; /* Remove the box-shadow */
+}
+
+.btn-primary {
+    background-color: #FF8C00;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 8px;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.btn-primary:hover { 
+    background-color: #E67E22; 
+}
+
+.btn-edit {
+    color: green;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.btn-edit:hover {
+    text-decoration: underline;
+    color: rgb(3, 87, 3);
+    border: none;
+}
+
+.btn-archive {
+    color: red;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.btn-archive:hover {
+    color: rgb(165, 19, 19);
+    text-decoration: underline; 
+    border: none;
+}
+
+button:focus {
+    outline: none !important;
+    box-shadow: none !important;
 }

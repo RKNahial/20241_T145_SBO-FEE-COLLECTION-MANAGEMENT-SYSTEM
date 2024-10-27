@@ -30,10 +30,6 @@
     border-bottom: 0.00625rem solid #E3E7EA;
 }
 
-.table tbody tr:hover {
-    background-color: #415797 !important;
-}
-
 .table tbody tr:last-child {
     border-bottom: none;
 }

@@ -7,151 +7,163 @@ import TreasurerNavbar from "./TreasurerNavbar";
 const TreasurerStudents = () => {
     // NAV AND SIDEBAR
     const [isCollapsed, setIsCollapsed] = useState(false);
-
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
     };
 
-         // Sample data for demonstration only
-         const sampleStud = [
-            {
-                id_no: '1901104188',
-                name: 'Mary Joy Alonzo',
-                year_level: '4th Year',
-                program: 'BSIT'
-            },
-            {
-                id_no: '2101102924',
-                name: 'Jonathan Cruz',
-                year_level: '4th Year',
-                program: 'BSIT'
-            },
-            {
-                id_no: '1901102046',
-                name: 'Reena Dela Cruz',
-                year_level: '3rd Year',
-                program: 'BSIT'
-            },
-            {
-                id_no: '2101101354',
-                name: 'Peter John Garcia',
-                year_level: '4th Year',
-                program: 'BSIT'
-            },
-            {
-                id_no: '1901103113',
-                name: 'Jessa Mae Javier',
-                year_level: '2nd Year',
-                program: 'BSIT'
-            },
-            {
-                id_no: '2101101979',
-                name: 'Mark Anton  Lim',
-                year_level: '1st Year',
-                program: 'BSIT'
-            },
-            {
-                id_no: '2101103848',
-                name: 'Anna Marie Mendoza',
-                year_level: '4th Year',
-                program: 'BSIT'
-            },            
-            {
-                id_no: '1901104713',
-                name: 'Liza Reyes',
-                year_level: '4th Year',
-                program: 'BSIT'
-            },            
-            {
-                id_no: '1901104188',
-                name: 'Samuel Santos',
-                year_level: '4th Year',
-                program: 'BSIT'
-            },
-            {
-                id_no: '1901104235',
-                name: 'Mary Joy Alonzo',
-                year_level: '3rd Year',
-                program: 'BSIT'
-            },
-            {
-                id_no: '1901104188',
-                name: 'I AM',
-                year_level: '4th Year',
-                program: 'BSIT'
-            },
-            {
-                id_no: '2101102924',
-                name: 'ONLY TESTING',
-                year_level: '4th Year',
-                program: 'BSIT'
-            },
-            {
-                id_no: '1901102046',
-                name: 'IF THE PAGINATION',
-                year_level: '3rd Year',
-                program: 'BSIT'
-            },
-            {
-                id_no: '2101101354',
-                name: 'IS WORKING',
-                year_level: '4th Year',
-                program: 'BSIT'
-            },
-            {
-                id_no: '1901103113',
-                name: 'BLAH BLAH BLAH',
-                year_level: '2nd Year',
-                program: 'BSIT'
-            },
-            {
-                id_no: '2101101979',
-                name: 'PLACE NAME',
-                year_level: '1st Year',
-                program: 'BSIT'
-            },
-            {
-                id_no: '2101103848',
-                name: 'PERSON NAME',
-                year_level: '4th Year',
-                program: 'BSIT'
-            },            
-            {
-                id_no: '1901104713',
-                name: 'BACKSTORY STUFF',
-                year_level: '4th Year',
-                program: 'BSIT'
-            },            
-            {
-                id_no: '1901104188',
-                name: 'Samuel Santos',
-                year_level: '4th Year',
-                program: 'BSIT'
-            },
-            {
-                id_no: '1901104235',
-                name: 'Mary Joy Alonzo',
-                year_level: '3rd Year',
-                program: 'BSIT'
-            }
-        ];
+        // Sample data for demonstration only
+        const sampleStud = [
+        {
+            id_no: '1901104188',
+            name: 'Mary Joy Alonzo',
+            year_level: '4th Year',
+            program: 'BSIT'
+        },
+        {
+            id_no: '2101102924',
+            name: 'Jonathan Cruz',
+            year_level: '4th Year',
+            program: 'BSIT'
+        },
+        {
+            id_no: '1901102046',
+            name: 'Reena Dela Cruz',
+            year_level: '3rd Year',
+            program: 'BSIT'
+        },
+        {
+            id_no: '2101101354',
+            name: 'Peter John Garcia',
+            year_level: '4th Year',
+            program: 'BSIT'
+        },
+        {
+            id_no: '1901103113',
+            name: 'Jessa Mae Javier',
+            year_level: '2nd Year',
+            program: 'BSIT'
+        },
+        {
+            id_no: '2101101979',
+            name: 'Mark Anton  Lim',
+            year_level: '1st Year',
+            program: 'BSIT'
+        },
+        {
+            id_no: '2101103848',
+            name: 'Anna Marie Mendoza',
+            year_level: '4th Year',
+            program: 'BSIT'
+        },            
+        {
+            id_no: '1901104713',
+            name: 'Liza Reyes',
+            year_level: '4th Year',
+            program: 'BSIT'
+        },            
+        {
+            id_no: '1901104188',
+            name: 'Samuel Santos',
+            year_level: '4th Year',
+            program: 'BSIT'
+        },
+        {
+            id_no: '1901104235',
+            name: 'Mary Joy Alonzo',
+            year_level: '3rd Year',
+            program: 'BSIT'
+        },
+        {
+            id_no: '1901104188',
+            name: 'I AM',
+            year_level: '4th Year',
+            program: 'BSIT'
+        },
+        {
+            id_no: '2101102924',
+            name: 'ONLY TESTING',
+            year_level: '4th Year',
+            program: 'BSIT'
+        },
+        {
+            id_no: '1901102046',
+            name: 'IF THE PAGINATION',
+            year_level: '3rd Year',
+            program: 'BSIT'
+        },
+        {
+            id_no: '2101101354',
+            name: 'IS WORKING',
+            year_level: '4th Year',
+            program: 'BSIT'
+        },
+        {
+            id_no: '1901103113',
+            name: 'BLAH BLAH BLAH',
+            year_level: '2nd Year',
+            program: 'BSIT'
+        },
+        {
+            id_no: '2101101979',
+            name: 'PLACE NAME',
+            year_level: '1st Year',
+            program: 'BSIT'
+        },
+        {
+            id_no: '2101103848',
+            name: 'PERSON NAME',
+            year_level: '4th Year',
+            program: 'BSIT'
+        },            
+        {
+            id_no: '1901104713',
+            name: 'BACKSTORY STUFF',
+            year_level: '4th Year',
+            program: 'BSIT'
+        },            
+        {
+            id_no: '1901104188',
+            name: 'Samuel Santos',
+            year_level: '4th Year',
+            program: 'BSIT'
+        },
+        {
+            id_no: '1901104235',
+            name: 'Mary Joy Alonzo',
+            year_level: '3rd Year',
+            program: 'BSIT'
+        }
+    ];
+
+    // EDIT STUDENT -- CURRENTLY NOT WORKING
+    // const handleEditClick = (student) => {
+    //     setEditingStudent(student);
+    // };
+
+    // const handleSave = (updatedStudent) => {
+    //     setStudents((prevStudents) => 
+    //         prevStudents.map((s) => 
+    //             s.id_no === updatedStudent.id_no ? updatedStudent : s
+    //         )
+    //     );
+    //     setEditingStudent(null);
+    // };
+
+    // const handleCancel = () => {
+    //     setEditingStudent(null);
+    // };
 
     // PAGINATION
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10; 
-        // Calculate the current items to display
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = sampleStud.slice(indexOfFirstItem, indexOfLastItem);
-        // Total pages
     const totalPages = Math.ceil(sampleStud.length / itemsPerPage);
-        // Pagination handler
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
-        // Calculate showing text
     const showingStart = indexOfFirstItem + 1;
     const showingEnd = Math.min(indexOfLastItem, sampleStud.length);
     const totalEntries = sampleStud.length;
-
 
     return (
         <div className="sb-nav-fixed">
@@ -167,64 +179,51 @@ const TreasurerStudents = () => {
                         marginTop: '3.5rem' 
                     }}
                 >
-                    {/* CONTENT */}
-                    <div className="container-fluid px-4 mb-5">
-                        
-                        {/* Student Standard Management Section */}
-                        {/* <h1 className="mt-4">Student Standard Management</h1>
-                        <ol className="breadcrumb mb-4">
-                            <li className="breadcrumb-item"><a href="index.php">Dashboard</a></li>
-                            <li className="breadcrumb-item active">Student Standard Management</li>
-                        </ol>
-                        
-                        <div className="row">
-                            <div className="col-md-6">
-                                {error && (
-                                    <div className="alert alert-danger alert-dismissible fade show" role="alert">
-                                        <ul className="list-unstyled">
-                                            <li>{error}</li>
-                                        </ul>
-                                        <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                    </div>
-                                )}
-                                <div className="card mb-4">
-                                    <div className="card-header">
-                                        <i className="fas fa-user-plus"></i> Add Student into new Standard
-                                    </div>
-                                    <div className="card-body">
-                                        <form method="post">
-                                            <div className="mb-3">
-                                                <label>Select Student <span className="text-danger">*</span></label>
-                                                <select name="student_id" className="form-control">
-                                                    <option value="">Select Student</option>
-                                                    <option value="1">John Doe</option>
-                                                    <option value="2">Jane Smith</option>
-                                                </select>
-                                            </div>
-                                            <div className="mb-3">
-                                                <label>Select Academic Year <span className="text-danger">*</span></label>
-                                                <select name="acedemic_year_id" className="form-control">
-                                                    <option value="">Select Academic Year</option>
-                                                    <option value="2024">2024</option>
-                                                    <option value="2025">2025</option>
-                                                </select>
-                                            </div>
-                                            <div className="mb-3">
-                                                <label>Select Standard <span className="text-danger">*</span></label>
-                                                <select name="acedemic_standard_id" className="form-control">
-                                                    <option value="">Select Standard</option>
-                                                    <option value="1">Standard 1</option>
-                                                    <option value="2">Standard 2</option>
-                                                </select>
-                                            </div>
-                                            <div className="mt-4 mb-0">
-                                                <input type="submit" name="add_student_standard" className="btn btn-success" value="Add" />
-                                            </div>
-                                        </form>
-                                    </div>
+                     {/* CONTENT */}
+                     <div className="container-fluid px-4 mb-5">
+
+                        {/* EDIT STUDENT FORM (Only shows when edit button is clicked -- CURENTLY NOT WORKING)
+                        {editingStudent && (
+                            <div className="card mb-4">
+                                <div className="card-header">Edit Student</div>
+                                <div className="card-body">
+                                    <form onSubmit={(e) => {
+                                        e.preventDefault();
+                                        handleSave(editingStudent);
+                                    }}>
+                                        <div className="mb-3">
+                                            <label>Student Name</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                value={editingStudent.name}
+                                                onChange={(e) => setEditingStudent({ ...editingStudent, name: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className="mb-3">
+                                            <label>Year Level</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                value={editingStudent.year_level}
+                                                onChange={(e) => setEditingStudent({ ...editingStudent, year_level: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className="mb-3">
+                                            <label>Program</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                value={editingStudent.program}
+                                                onChange={(e) => setEditingStudent({ ...editingStudent, program: e.target.value })}
+                                            />
+                                        </div>
+                                        <button type="submit" className="btn btn-success">Save</button>
+                                        <button type="button" className="btn btn-secondary" onClick={handleCancel}>Cancel</button>
+                                    </form>
                                 </div>
                             </div>
-                        </div> */}
+                        )} */}
 
                         {/* Table Students */}
                         <div className="card mb-4 mt-5">
@@ -272,7 +271,7 @@ const TreasurerStudents = () => {
                                 </table>
 
                                 {/* SHOWING OF ENTRIES AND PAGINATION */}
-                                <div className="d-flex justify-content-between align-items-center mb-3" style={{ color: '#212529', fontSize: '0.875rem' }}>
+                                <div className="d-flex justify-content-between align-items-center mb-2" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
                                     <div>
                                         Showing {showingStart} to {showingEnd} of {totalEntries} entries
                                     </div>
