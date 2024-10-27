@@ -192,6 +192,16 @@ const TreasurerStudents = () => {
                                         handleSave(editingStudent);
                                     }}>
                                         <div className="mb-3">
+                                            <label>Student ID</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                value={editingStudent.name}
+                                                onChange={(e) => setEditingStudent({ ...editingStudent, name: e.target.value })}
+                                            />
+                                        </div>
+                                                                            }}>
+                                        <div className="mb-3">
                                             <label>Student Name</label>
                                             <input
                                                 type="text"
