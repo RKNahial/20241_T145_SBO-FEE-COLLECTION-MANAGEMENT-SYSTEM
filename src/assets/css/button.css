@@ -4,7 +4,8 @@
     background-color: #FF8C00;  
     border: none;               
     padding: 0.5rem 1rem;        
-    max-width: 5rem;              
+    max-width: 10rem;              
+    border-radius: 0.35rem; 
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -28,6 +29,22 @@
     border: none;   
     outline: none;
     box-shadow: 0 0 0 0.2rem rgba(255, 140, 0, 0.5);
+}
+
+.add-button {
+    color: #EAEAEA;
+    background-color: #FF8C00;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.35rem; 
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer; 
+}
+
+.add-button:hover {
+    color: #EAEAEA;
+    background-color: #E67E22; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
 }
 
 

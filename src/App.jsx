@@ -31,6 +31,7 @@ import TreasurerStudents from './pages/treasurer/TreasurerStudents';
 import TreasurerReports from './pages/treasurer/TreasurerReports';
 import TreasurerDues from './pages/treasurer/TreasurerDues';
 import TreasurerProfile from './pages/treasurer/TreasurerProfile';
+import TreasurerAddStud from './pages/treasurer/TreasurerAddStud';
 
 // FOR CUSTOMIZED DOCUMENT TITLE
 const App = () => {
@@ -63,6 +64,9 @@ const App = () => {
             break;
             case '/treasurer/students':
                 document.title = "Treasurer | Students";
+            break;
+            case '/treasurer/students/add-new':
+                document.title = "Treasurer | Add Student";
             break;
             case '/treasurer/reports':
                 document.title = "Treasurer | Reports";
@@ -100,6 +104,7 @@ const App = () => {
                 <Route path="/treasurer/dashboard" element={<TreasurerDashboard />} />
                 <Route path="/treasurer/manage-fee" element={<TreasurerFee />} />
                 <Route path="/treasurer/students" element={<TreasurerStudents/>} />
+                <Route path="/treasurer/students/add-new" element={<TreasurerAddStud/>} />
                 <Route path="/treasurer/reports" element={<TreasurerReports/>} />
                 <Route path="/treasurer/daily-dues" element={<TreasurerDues/>} />
                 <Route path="/treasurer/profile" element={<TreasurerProfile/>} />

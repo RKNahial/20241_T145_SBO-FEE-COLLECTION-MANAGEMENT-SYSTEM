@@ -1,5 +1,6 @@
 // src/pages/treasurer/TreasurerStudents.jsx
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { Link } from 'react-router-dom';
 import axios from 'axios'; 
 import TreasurerSidebar from "./TreasurerSidebar"; 
 import TreasurerNavbar from "./TreasurerNavbar";
@@ -153,6 +154,19 @@ const TreasurerStudents = () => {
     //     setEditingStudent(null);
     // };
 
+    // IMPORT EXCEL
+    const fileInputRef = useRef(null);
+    const handleImportClick = () => {
+        fileInputRef.current.click();
+    };
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        // Handle the file upload logic here
+        console.log(file);
+    };
+
+
     // PAGINATION
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10; 
@@ -235,19 +249,44 @@ const TreasurerStudents = () => {
                             </div>
                         )} */}
 
-                        {/* Table Students */}
                         <div className="card mb-4 mt-5">
                             <div className="card-header">
                                 <div className="row">
                                     <div className="col col-md-6">
                                         <i className="far fa-user me-2"></i> <strong>Students</strong>
                                     </div>
-                                    <div className="col col-md-6" align="right">
-                                        <a href="student_standard.php?action=add" className="btn btn-success btn-sm">Add</a>
-                                    </div>
                                 </div>
                             </div>
                             <div className="card-body">
+
+                                {/* ADD NEW STUDENT AND IMPORT EXCEL BUTTON */}
+                                <div className="d-flex justify-content-between mb-3">
+                                    <div className="d-flex">
+                                        <Link to="/treasurer/students/add-new" className="add-button btn btn-sm me-2">
+                                            <i className="fas fa-plus me-2"></i>
+                                            Add New Student
+                                        </Link>
+                                        <button onClick={handleImportClick} className="add-button btn btn-sm">
+                                            <i className="fas fa-file-excel me-2"></i>
+                                            Import Excel
+                                        </button>
+                                        <input
+                                            type="file"
+                                            accept=".xls,.xlsx"
+                                            ref={fileInputRef}
+                                            style={{ display: 'none' }}
+                                            onChange={handleFileChange}
+                                        />
+                                    </div>
+                                    <form method="get" className="search-bar ">
+                                        <input type="text" placeholder="Search student" className="search-input" />
+                                        <button type="submit" className="search">
+                                            <i className="fas fa-search"></i>
+                                        </button>
+                                    </form>
+                                </div>
+
+                                {/* TABLE STUDENTS*/}
                                 <table className="table table-bordered table-hover">
                                     <thead>
                                         <tr>

@@ -43,17 +43,52 @@
   width: 100%; 
   padding: 0.375rem 0.75rem; 
   font-size: 1rem;
-  line-height: 1.5; 
   color: #495057;  
   background-color: #fff; 
   border: 1px solid #ced4da;  
-  border-radius: 0.25rem;     
+  border-radius: 0.35rem; 
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 .form-control:focus {
   border-color: #FF8C00;
   outline: 0;
+}
+
+/* SEARCH BAR */
+.search-bar {
+  background-color: #FFF;
+  outline: 0.0625rem solid #CDCDCE; 
+  padding-left: 0.75rem;
+  width: 18.75rem;
+  height: 2.1875rem;
+  border-radius: 0.35rem; 
+}
+
+.search-input {
+  background-color: transparent;
+  width: 16.25rem; 
+  height: 2.1875rem; 
+  padding-right: 0.75rem;
+  border: none;
+  border-radius: 0.3125rem; 
+}
+
+.search {
+  background-color: transparent;
+  color: #FF8C00;
+  height: 2.1875rem; 
+  border: none;
+}
+
+.search-bar:focus {
+  outline: none;
+  box-shadow: 0px 2px 5px #C4C6CC;
+}
+
+.search-input:focus {
+  outline: none;
+  box-shadow: none;
 }
 
 /* CARD */

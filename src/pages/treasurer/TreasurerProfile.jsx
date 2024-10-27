@@ -38,7 +38,7 @@ const TreasurerProfile = () => {
                                     <div className="card-body">
                                         <form>
                                             <div className="mb-3">
-                                                <label>User Name</label>
+                                                <label className="mb-1">User Name</label>
                                                 <input
                                                     type="text"
                                                     className="form-control system"
@@ -46,7 +46,7 @@ const TreasurerProfile = () => {
                                                 />
                                             </div>
                                             <div className="mb-3">
-                                                <label>Email Address</label>
+                                                <label className="mb-1">Email Address</label>
                                                 <input
                                                     type="email"
                                                     className="form-control"
@@ -54,7 +54,7 @@ const TreasurerProfile = () => {
                                                 />
                                             </div>
                                             <div className="mb-4">
-                                                <label>Password</label>
+                                                <label className="mb-1">Password</label>
                                                 <input
                                                     type="password"
                                                     className="form-control"
