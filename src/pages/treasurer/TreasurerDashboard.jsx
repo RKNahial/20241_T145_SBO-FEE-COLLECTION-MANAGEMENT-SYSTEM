@@ -170,7 +170,7 @@ const TreasurerDashboard = () => {
                         {/* TABLE */}
                         <div className="card-body">
                             <h5 className="mb-4 header">Recent Payments</h5>
-                            <table className="table">
+                            <table className="table table-hover">
                                 <thead>
                                     <tr>
                                         <th>#</th>

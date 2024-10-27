@@ -7,7 +7,7 @@ import './App.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'; 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-// IMPORT SYSTEM CSS
+// IMPORT CSS
 import './assets/css/nav-sidebar.css';
 import './assets/css/button.css';
 import './assets/css/table.css';
@@ -40,7 +40,7 @@ const App = () => {
             case '/admin/login':
                 document.title = "Login as Admin";
                 break;
-            
+        
             // GOVERNOR
             case '/governor/login':
                 document.title = "Login as Governor";
@@ -55,31 +55,24 @@ const App = () => {
             case '/treasurer/login':
                 document.title = "Login as Treasurer";
                 break;
-
             case '/treasurer/dashboard':
                 document.title = "Treasurer | Dashboard";
                 break;
-            
             case '/treasurer/manage-fee':
                 document.title = "Treasurer | Manage Fee";
             break;
-
             case '/treasurer/students':
                 document.title = "Treasurer | Students";
             break;
-
             case '/treasurer/reports':
                 document.title = "Treasurer | Reports";
             break;
-
             case '/treasurer/daily-dues':
                 document.title = "Treasurer | Daily Dues";
             break;
-
             case '/treasurer/profile':
                 document.title = "Treasurer | Profile";
             break;
-            
             default:
                 document.title = "SBO Fee Collection Management System"; 
         }
