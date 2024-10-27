@@ -32,7 +32,7 @@ const TreasurerAddStud = () => {
                             <div className="col-md-6">
                                 <div className="card mb-4">
                                     <div className="card-header">
-                                        <i className="far fa-plus me-2"></i> Add New Student
+                                        <i className="far fa-plus me-2"></i> <strong>Add New Student</strong>
                                     </div>
                                     <div className="card-body">
                                         <form>

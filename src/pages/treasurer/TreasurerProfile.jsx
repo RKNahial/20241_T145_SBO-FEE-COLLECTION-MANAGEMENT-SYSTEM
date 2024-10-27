@@ -33,7 +33,7 @@ const TreasurerProfile = () => {
                             <div className="col-md-6">
                                 <div className="card mb-4">
                                     <div className="card-header">
-                                        <i className="fas fa-user-edit"></i> <span style={{ paddingLeft: '0.50rem' }}>Edit Profile</span>
+                                        <i className="fas fa-user-edit"></i> <span style={{ paddingLeft: '0.50rem', fontWeight: 'bold' }}>Edit Profile</span>
                                     </div>
                                     <div className="card-body">
                                         <form>
