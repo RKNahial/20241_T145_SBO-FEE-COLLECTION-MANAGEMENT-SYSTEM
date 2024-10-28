@@ -106,13 +106,13 @@ const TreasurerStudents = () => {
         },
         {
             id_no: '2101101979',
-            name: 'PLACE NAME',
+            name: 'PROPER NAME',
             year_level: '1st Year',
             program: 'BSIT'
         },
         {
             id_no: '2101103848',
-            name: 'PERSON NAME',
+            name: 'PLACE NAME',
             year_level: '4th Year',
             program: 'BSIT'
         },            
@@ -136,18 +136,25 @@ const TreasurerStudents = () => {
         }
     ];
 
+    // HANDLE ARCHIVE
+    const handleArchive = (studentName) => {
+        const confirmArchive = window.confirm(`Are you sure you want to archive ${studentName}?`);
+        if (confirmArchive) {
+            // Perform the archive action, e.g., make an API call
+            console.log(`${studentName} has been archived.`);
+        }
+    };
+
     // IMPORT EXCEL
     const fileInputRef = useRef(null);
     const handleImportClick = () => {
         fileInputRef.current.click();
     };
-
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         // Handle the file upload logic here
         console.log(file);
     };
-
 
     // PAGINATION
     const [currentPage, setCurrentPage] = useState(1);
@@ -238,7 +245,7 @@ const TreasurerStudents = () => {
                                                 <Link to={`/treasurer/students/edit/${student.id_no}`} className="btn btn-edit btm-lg">
                                                     <i className="fas fa-edit"></i>
                                                 </Link>
-                                                    <button className="btn btn-archive btn-sm">
+                                                <button className="btn btn-archive btn-sm" onClick={() => handleArchive(student.name)}>
                                                         <i className="fas fa-archive"></i>
                                                     </button>
                                                 </td>
