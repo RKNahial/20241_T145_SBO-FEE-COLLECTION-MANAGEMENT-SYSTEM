@@ -216,7 +216,7 @@ const TreasurerFee = () => {
                                 {/* SELECT CATEGORY AND SEARCH STUDENT */}
                                 <div className="d-flex justify-content-between mb-3">
                                     <div className="d-flex">
-                                        <label className="me-2 mb-0">Payment Category</label>
+                                        <div style={{ width: 'auto' }} ><label className="me-2 mb-0">Payment Category</label></div>
                                         <select className="form-control" defaultValue="">
                                             <option value="" disabled>Select a category</option>
                                             <option value="College Shirt">College Shirt</option>
