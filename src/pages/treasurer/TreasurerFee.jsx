@@ -215,13 +215,15 @@ const TreasurerFee = () => {
                             <div className="card-body">
                                 {/* SELECT CATEGORY AND SEARCH STUDENT */}
                                 <div className="d-flex justify-content-between mb-3">
-                                    <div className="d-flex">
-                                        <div style={{ width: 'auto' }} ><label className="me-2 mb-0">Payment Category</label></div>
-                                        <select className="form-control" defaultValue="">
-                                            <option value="" disabled>Select a category</option>
-                                            <option value="College Shirt">College Shirt</option>
-                                            <option value="Events">Events</option>
-                                        </select>
+                                    <div className="d-flex align-items-center">
+                                        <label className="me-2 mb-0">Payment Category</label>
+                                        <div style={{ width: 'auto' }}>
+                                            <select className="form-control" defaultValue="">
+                                                <option value="" disabled>Select a category</option>
+                                                <option value="College Shirt">College Shirt</option>
+                                                <option value="Events">Events</option>
+                                            </select>
+                                        </div>
                                     </div>
                                     <form method="get" className="search-bar ">
                                         <input type="text" placeholder="Search student" className="search-input" />
