@@ -27,8 +27,7 @@ const TreasurerReports = () => {
                     }}
                 >
                     {/* CONTENT */}
-                    <div className="container-fluid px-4 mb-5">
-                        <p className="system-gray mt-4">Welcome back, treasurer!</p>
+                    <div className="container-fluid px-4 mb-5 form-top">
                         
 
                         <p>THIS IS TREASURER REPORTS</p>

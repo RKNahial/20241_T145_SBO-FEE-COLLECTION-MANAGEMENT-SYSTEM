@@ -27,8 +27,7 @@ const TreasurerProfile = () => {
                     }}
                 >
                     {/* CONTENT */}
-                    <div className="container-fluid px-4">
-                        <h5 className="mt-4 mb-3">My Profile</h5>
+                    <div className="container-fluid mb-5 form-top">
                         <div className="row">
                             <div className="col-md-6">
                                 <div className="card mb-4">
@@ -62,7 +61,7 @@ const TreasurerProfile = () => {
                                                 />
                                             </div>
                                             <div className="mb-0">
-                                                <button type="submit" className="btn system-button">Edit</button>
+                                                <button type="submit" className="btn system-button">  <i className="fa-solid fa-pen me-2"> </i>Edit </button>
                                             </div>
                                         </form>
                                     </div>

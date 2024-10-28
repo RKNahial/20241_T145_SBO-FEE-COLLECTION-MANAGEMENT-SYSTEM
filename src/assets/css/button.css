@@ -1,11 +1,11 @@
 .system-button {
-    display: inline-block;      
+    display: flex;      
     color: #EAEAEA;                 
     background-color: #FF8C00;  
     border: none;               
-    padding: 0.5rem 1rem;        
-    max-width: 10rem;              
+    padding: 0.5rem 1rem;                    
     border-radius: 0.35rem; 
+    white-space: nowrap; 
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 

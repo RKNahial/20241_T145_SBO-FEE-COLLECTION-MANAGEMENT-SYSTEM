@@ -136,24 +136,6 @@ const TreasurerStudents = () => {
         }
     ];
 
-    // EDIT STUDENT -- CURRENTLY NOT WORKING
-    // const handleEditClick = (student) => {
-    //     setEditingStudent(student);
-    // };
-
-    // const handleSave = (updatedStudent) => {
-    //     setStudents((prevStudents) => 
-    //         prevStudents.map((s) => 
-    //             s.id_no === updatedStudent.id_no ? updatedStudent : s
-    //         )
-    //     );
-    //     setEditingStudent(null);
-    // };
-
-    // const handleCancel = () => {
-    //     setEditingStudent(null);
-    // };
-
     // IMPORT EXCEL
     const fileInputRef = useRef(null);
     const handleImportClick = () => {
@@ -194,62 +176,8 @@ const TreasurerStudents = () => {
                     }}
                 >
                      {/* CONTENT */}
-                     <div className="container-fluid px-4 mb-5">
-
-                        {/* EDIT STUDENT FORM (Only shows when edit button is clicked -- CURENTLY NOT WORKING)
-                        {editingStudent && (
-                            <div className="card mb-4">
-                                <div className="card-header">Edit Student</div>
-                                <div className="card-body">
-                                    <form onSubmit={(e) => {
-                                        e.preventDefault();
-                                        handleSave(editingStudent);
-                                    }}>
-                                        <div className="mb-3">
-                                            <label>Student ID</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                value={editingStudent.name}
-                                                onChange={(e) => setEditingStudent({ ...editingStudent, name: e.target.value })}
-                                            />
-                                        </div>
-                                                                            }}>
-                                        <div className="mb-3">
-                                            <label>Student Name</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                value={editingStudent.name}
-                                                onChange={(e) => setEditingStudent({ ...editingStudent, name: e.target.value })}
-                                            />
-                                        </div>
-                                        <div className="mb-3">
-                                            <label>Year Level</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                value={editingStudent.year_level}
-                                                onChange={(e) => setEditingStudent({ ...editingStudent, year_level: e.target.value })}
-                                            />
-                                        </div>
-                                        <div className="mb-3">
-                                            <label>Program</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                value={editingStudent.program}
-                                                onChange={(e) => setEditingStudent({ ...editingStudent, program: e.target.value })}
-                                            />
-                                        </div>
-                                        <button type="submit" className="btn btn-success">Save</button>
-                                        <button type="button" className="btn btn-secondary" onClick={handleCancel}>Cancel</button>
-                                    </form>
-                                </div>
-                            </div>
-                        )} */}
-
-                        <div className="card mb-4 mt-5">
+                     <div className="container-fluid px-4 mb-5 form-top">
+                        <div className="card mb-4">
                             <div className="card-header">
                                 <div className="row">
                                     <div className="col col-md-6">
@@ -307,9 +235,9 @@ const TreasurerStudents = () => {
                                                 <td>{student.year_level}</td>
                                                 <td>{student.program}</td>
                                                 <td>
-                                                    <button className="btn btn-edit btm-lg" onClick={() => handleEditClick(student)}>
-                                                        <i className="fas fa-edit"></i>
-                                                    </button>
+                                                <Link to={`/treasurer/students/edit/${student.id_no}`} className="btn btn-edit btm-lg">
+                                                    <i className="fas fa-edit"></i>
+                                                </Link>
                                                     <button className="btn btn-archive btn-sm">
                                                         <i className="fas fa-archive"></i>
                                                     </button>
