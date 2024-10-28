@@ -178,21 +178,31 @@ const TreasurerFee = () => {
         return <span className={className} onClick={onClick} style={{ cursor: 'pointer' }}>{status}</span>;
     };
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedStudent, setSelectedStudent] = useState(null); // Track selected student for the modal
-
-    const handleStatusClick = (student) => {
-        setSelectedStudent(student);
-        setIsModalOpen(true);
-    };
-
-    const handleModalToggle = () => setIsModalOpen(!isModalOpen);
-
-    const handleSubmit = (formData) => {
-        // Handle the form submission for fee management
-        console.log('Submitted:', formData);
-        setIsModalOpen(false); // Close the modal after submission
-    };
+     // UPDATE PAYMENT MODAL
+     const [isModalOpen, setIsModalOpen] = useState(false);
+     const [selectedStudent, setSelectedStudent] = useState(null);
+     const [successMessage, setSuccessMessage] = useState('');
+ 
+     const handleModalToggle = () => setIsModalOpen(!isModalOpen);
+ 
+     const handleEditClick = (student) => {
+         setSelectedStudent(student);
+         setIsModalOpen(true);
+     };
+ 
+     const handleSubmit = (formData) => {
+         const confirmSave = window.confirm("Do you want to save changes?");
+         if (confirmSave) {
+             console.log('Submitted:', formData);
+             setSuccessMessage("Payment updated successfully!");
+ 
+             setTimeout(() => {
+                 setSuccessMessage('');
+             }, 2500);
+ 
+             setIsModalOpen(false); 
+         }
+     };
 
     // PAGINATION
     const [currentPage, setCurrentPage] = useState(1);
@@ -233,6 +243,12 @@ const TreasurerFee = () => {
                             </div>
 
                             <div className="card-body">
+                                 {/* SUCCESS MESSAGE */}
+                                {successMessage && (
+                                    <div className="alert alert-success" role="alert">
+                                        {successMessage}
+                                    </div>
+                                )}
                                 {/* SELECT CATEGORY AND SEARCH STUDENT */}
                                 <div className="d-flex justify-content-between mb-3">
                                     <div className="d-flex align-items-center">
@@ -263,6 +279,7 @@ const TreasurerFee = () => {
                                             <th>Year Level</th>
                                             <th>Program</th>
                                             <th>Payment Status</th>
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -276,7 +293,21 @@ const TreasurerFee = () => {
                                                 <td>
                                                     <PaymentStatusTag 
                                                         status={student.paymentStatus} 
-                                                        onClick={() => handleStatusClick(student)} />
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <button 
+                                                        className="btn btn-edit btn-lg" 
+                                                        onClick={() => handleEditClick(student)}
+                                                    >
+                                                        <i className="fas fa-edit"></i>
+                                                    </button>
+                                                    <button 
+                                                        className="btn btn-archive btn-sm" 
+                                                        onClick={() => handleArchive(student.name)}
+                                                    >
+                                                        <i className="fas fa-archive"></i>
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))}
@@ -328,7 +359,7 @@ const TreasurerFee = () => {
                 </div>
             </div>
             {/* MODAL FOR UPDATING STUDENT PAYMENT */}
-            {selectedStudent && (
+            {isModalOpen && selectedStudent && (
                 <ManageFeeModal 
                     isOpen={isModalOpen} 
                     onClose={handleModalToggle} 

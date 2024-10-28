@@ -1,6 +1,11 @@
 // src/components/ManageFeeModal.jsx
 import React, { useState, useEffect } from 'react';
 
+const paymentPrices = {
+    "College Shirt": 400.00,
+    "Event": 200.00, // Add other categories and their prices as needed
+};
+
 const ManageFeeModal = ({ isOpen, onClose, onSave, studentName }) => {
     const [amountPaid, setAmountPaid] = useState('');
     const [status, setStatus] = useState('Not Paid');
@@ -30,15 +35,27 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave({ amountPaid, status, date, time, paymentCategory });
+        onSave({ 
+            amountPaid: status === 'Not Paid' ? null : amountPaid,
+            status,
+            date,
+            time,
+            paymentCategory 
+        });
+        resetForm();
+        onClose();
+    };
+
+    const resetForm = () => {
         setAmountPaid('');
         setStatus('Not Paid');
         setPaymentCategory('College Shirt');
         setDate('');
         setTime('');
-        onClose();
     };
 
+    const totalPrice = paymentPrices[paymentCategory] || 0;
+    
     return (
         <div id="modal" onClick={handleClose} style={modalStyles.overlay}>
             <div style={modalStyles.modal}>
@@ -85,8 +102,9 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName }) => {
                                 onChange={(e) => setPaymentCategory(e.target.value)}
                                 style={modalStyles.select}
                             >
-                                <option value="College Shirt">College Shirt</option>
-                                <option value="Event">Event</option>
+                                {Object.keys(paymentPrices).map(category => (
+                                    <option key={category} value={category}>{category}</option>
+                                ))}
                             </select>
                         </div>
                         <div style={modalStyles.totalPriceContainer}>
@@ -94,7 +112,7 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName }) => {
                                 Total Price:
                             </div>
                             <div style={modalStyles.nonEditable}>
-                                400.00
+                                {totalPrice.toFixed(2)}
                             </div>
                         </div>
                     </div>
@@ -105,8 +123,13 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName }) => {
                                 type="number"
                                 value={amountPaid}
                                 onChange={(e) => setAmountPaid(e.target.value)}
-                                required
-                                style={modalStyles.input}
+                                required={status !== 'Not Paid'}
+                                readOnly={status === 'Not Paid'}
+                                style={{
+                                    ...modalStyles.input,
+                                    backgroundColor: status === 'Not Paid' ? '#cccccc' : 'white',
+                                    color: status === 'Not Paid' ? '#666666' : 'black',
+                                }}
                             />
                         </div>
                         <button 
@@ -114,11 +137,14 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName }) => {
                             style={{
                                 ...modalStyles.buttonStyles, 
                                 backgroundColor: hoverReceipt ? '#E67E22' : '#FFA500',
-                                marginTop: '1.20rem'
+                                marginTop: '1.20rem',
+                                opacity: status === 'Not Paid' || amountPaid === '' ? 0.5 : 1,
+                                cursor: status === 'Not Paid' || amountPaid === '' ? 'not-allowed' : 'pointer',
                             }} 
                             onMouseEnter={() => setHoverReceipt(true)}
                             onMouseLeave={() => setHoverReceipt(false)}
                             onClick={() => alert('Receipt sent!')}
+                            disabled={status === 'Not Paid' || amountPaid === ''}
                         >
                             Send Receipt
                         </button>
