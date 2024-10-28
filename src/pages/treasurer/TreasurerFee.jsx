@@ -182,6 +182,7 @@ const TreasurerFee = () => {
      const [isModalOpen, setIsModalOpen] = useState(false);
      const [selectedStudent, setSelectedStudent] = useState(null);
      const [successMessage, setSuccessMessage] = useState('');
+     const [emailSuccessMessage, setEmailSuccessMessage] = useState('');
  
      const handleModalToggle = () => setIsModalOpen(!isModalOpen);
  
@@ -243,10 +244,16 @@ const TreasurerFee = () => {
                             </div>
 
                             <div className="card-body">
-                                 {/* SUCCESS MESSAGE */}
+                                 {/* SAVE UPDATES SUCCESS */}
                                 {successMessage && (
                                     <div className="alert alert-success" role="alert">
                                         {successMessage}
+                                    </div>
+                                )}
+                                {/* EMAIL SENT SUCCESS  */}
+                                {emailSuccessMessage && (
+                                    <div className="alert alert-success" role="alert">
+                                        {emailSuccessMessage}
                                     </div>
                                 )}
                                 {/* SELECT CATEGORY AND SEARCH STUDENT */}
@@ -303,11 +310,18 @@ const TreasurerFee = () => {
                                                         <i className="fas fa-edit"></i>
                                                     </button>
                                                     <button 
-                                                        className="btn btn-archive btn-sm" 
-                                                        onClick={() => handleArchive(student.name)}
-                                                    >
-                                                        <i className="fas fa-archive"></i>
-                                                    </button>
+                                                    className="btn btn-archive" 
+                                                    onClick={() => {
+                                                        if (window.confirm('Are you sure you want to send the receipt?')) {
+                                                            setEmailSuccessMessage('Receipt emailed successfully!');
+                                                            setTimeout(() => {
+                                                                setEmailSuccessMessage('');
+                                                            }, 2500);
+                                                        }
+                                                    }}
+                                                >
+                                                    <i className="fa-regular fa-envelope fa-md"></i>
+                                                </button>
                                                 </td>
                                             </tr>
                                         ))}

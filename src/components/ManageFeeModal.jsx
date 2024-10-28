@@ -124,30 +124,14 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName }) => {
                                 value={amountPaid}
                                 onChange={(e) => setAmountPaid(e.target.value)}
                                 required={status !== 'Not Paid'}
-                                readOnly={status === 'Not Paid'}
+                                readOnly={status === 'Not Paid' || status === 'Refunded'}
                                 style={{
                                     ...modalStyles.input,
-                                    backgroundColor: status === 'Not Paid' ? '#cccccc' : 'white',
-                                    color: status === 'Not Paid' ? '#666666' : 'black',
+                                    backgroundColor: status === 'Not Paid' || status === 'Refunded' ? '#cccccc' : 'white',
+                                    color: status === 'Not Paid' || status === 'Refunded' ? '#666666' : 'black',
                                 }}
                             />
                         </div>
-                        <button 
-                            type="button" 
-                            style={{
-                                ...modalStyles.buttonStyles, 
-                                backgroundColor: hoverReceipt ? '#E67E22' : '#FFA500',
-                                marginTop: '1.20rem',
-                                opacity: status === 'Not Paid' || amountPaid === '' ? 0.5 : 1,
-                                cursor: status === 'Not Paid' || amountPaid === '' ? 'not-allowed' : 'pointer',
-                            }} 
-                            onMouseEnter={() => setHoverReceipt(true)}
-                            onMouseLeave={() => setHoverReceipt(false)}
-                            onClick={() => alert('Receipt sent!')}
-                            disabled={status === 'Not Paid' || amountPaid === ''}
-                        >
-                            Send Receipt
-                        </button>
                     </div>
                     <div style={modalStyles.buttonContainerRight}>
                         <button 
