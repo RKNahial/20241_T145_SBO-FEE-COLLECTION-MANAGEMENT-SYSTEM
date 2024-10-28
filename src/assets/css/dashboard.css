@@ -66,6 +66,8 @@
   margin-top: 1.75rem;
 }
 
+
+
 /* SEARCH BAR */
 .search-bar {
   background-color: #FFF;
@@ -110,19 +112,35 @@
 }
 
 .fully-paid {
-  background-color: #ff8c00  ; 
+  background-color: #ff8c00;
 }
 
 .partially-paid {
-  background-color: #ffb84d  ; 
+  background-color: #ffb84d;
 }
 
 .not-paid {
-  background-color: #ffcc00 ;
+  background-color: #ffcc00;
 }
 
 .refunded {
-  background-color: #ffcc99 ; 
+  background-color: #ffcc99;
+}
+
+.fully-paid:hover {
+  background-color: #e67e22;
+}
+
+.partially-paid:hover {
+  background-color: #e0a44d; 
+}
+
+.not-paid:hover {
+  background-color: #e0c700; 
+}
+
+.refunded:hover {
+  background-color: #f2bdb0; 
 }
 
 /* CARD */

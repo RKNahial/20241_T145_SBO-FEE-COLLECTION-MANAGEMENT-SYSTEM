@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import TreasurerSidebar from "./TreasurerSidebar"; 
 import TreasurerNavbar from "./TreasurerNavbar";
+import ManageFeeModal from '../../components/ManageFeeModal';
 
 const TreasurerFee = () => {
     // NAV AND SIDEBAR
@@ -128,7 +129,7 @@ const TreasurerFee = () => {
             name: 'PLACE NAME',
             year_level: '4th Year',
             program: 'BSIT',
-            paymentStatus: 'Partially Paid'
+            paymentStatus: 'Refunded'
         },            
         {
             id_no: '1901104713',
@@ -149,14 +150,14 @@ const TreasurerFee = () => {
             name: 'Mary Joy Alonzo',
             year_level: '3rd Year',
             program: 'BSIT',
-            paymentStatus: 'Partially Paid'
+            paymentStatus: 'Refunded'
         }
     ];
 
-    // PAYMENT STATUS TAG
-    const PaymentStatusTag = ({ status }) => {
+    // PAYMENT TAG
+    const PaymentStatusTag = ({ status, onClick }) => {
         let className;
-    
+
         switch (status) {
             case 'Fully Paid':
                 className = 'badge fully-paid';
@@ -167,26 +168,45 @@ const TreasurerFee = () => {
             case 'Not Paid':
                 className = 'badge not-paid';
                 break;
+            case 'Refunded':
+                className = 'badge refunded';
+                break;
             default:
                 className = 'badge unknown';
         }
-    
-        return <span className={className}>{status}</span>;
+
+        return <span className={className} onClick={onClick} style={{ cursor: 'pointer' }}>{status}</span>;
     };
 
-     // PAGINATION
-     const [currentPage, setCurrentPage] = useState(1);
-     const itemsPerPage = 10; 
-     const indexOfLastItem = currentPage * itemsPerPage;
-     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-     const currentItems = sampleStud.slice(indexOfFirstItem, indexOfLastItem);
-     const totalPages = Math.ceil(sampleStud.length / itemsPerPage);
-     const paginate = (pageNumber) => setCurrentPage(pageNumber);
-     const showingStart = indexOfFirstItem + 1;
-     const showingEnd = Math.min(indexOfLastItem, sampleStud.length);
-     const totalEntries = sampleStud.length; 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedStudent, setSelectedStudent] = useState(null); // Track selected student for the modal
 
-     return (
+    const handleStatusClick = (student) => {
+        setSelectedStudent(student);
+        setIsModalOpen(true);
+    };
+
+    const handleModalToggle = () => setIsModalOpen(!isModalOpen);
+
+    const handleSubmit = (formData) => {
+        // Handle the form submission for fee management
+        console.log('Submitted:', formData);
+        setIsModalOpen(false); // Close the modal after submission
+    };
+
+    // PAGINATION
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10; 
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = sampleStud.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(sampleStud.length / itemsPerPage);
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+    const showingStart = indexOfFirstItem + 1;
+    const showingEnd = Math.min(indexOfLastItem, sampleStud.length);
+    const totalEntries = sampleStud.length; 
+
+    return (
         <div className="sb-nav-fixed">
             {/* NAVBAR AND SIDEBAR */}
             <TreasurerNavbar toggleSidebar={toggleSidebar} />
@@ -225,7 +245,7 @@ const TreasurerFee = () => {
                                             </select>
                                         </div>
                                     </div>
-                                    <form method="get" className="search-bar ">
+                                    <form method="get" className="search-bar">
                                         <input type="text" placeholder="Search student" className="search-input" />
                                         <button type="submit" className="search">
                                             <i className="fas fa-search"></i>
@@ -233,7 +253,7 @@ const TreasurerFee = () => {
                                     </form>
                                 </div>
 
-                                {/* TABLE STUDENTS*/}
+                                {/* TABLE STUDENTS */}
                                 <table className="table table-bordered table-hover">
                                     <thead>
                                         <tr>
@@ -254,7 +274,9 @@ const TreasurerFee = () => {
                                                 <td>{student.year_level}</td>
                                                 <td>{student.program}</td>
                                                 <td>
-                                                    <PaymentStatusTag status={student.paymentStatus} />
+                                                    <PaymentStatusTag 
+                                                        status={student.paymentStatus} 
+                                                        onClick={() => handleStatusClick(student)} />
                                                 </td>
                                             </tr>
                                         ))}
@@ -299,14 +321,23 @@ const TreasurerFee = () => {
                                         </ul>
                                     </nav>
                                 </div>
-
                             </div>
                         </div>
                     </div>
                     
                 </div>
             </div>
+            {/* MODAL FOR UPDATING STUDENT PAYMENT */}
+            {selectedStudent && (
+                <ManageFeeModal 
+                    isOpen={isModalOpen} 
+                    onClose={handleModalToggle} 
+                    studentName={selectedStudent.name} 
+                    onSave={handleSubmit} 
+                />
+            )}
         </div>
+        
     );
 };
 
