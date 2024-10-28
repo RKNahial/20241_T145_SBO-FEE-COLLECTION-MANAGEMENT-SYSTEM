@@ -12,8 +12,8 @@ const TreasurerStudents = () => {
         setIsCollapsed(prev => !prev);
     };
 
-        // Sample data for demonstration only
-        const sampleStud = [
+    // Sample data for demonstration only
+    const sampleStud = [
         {
             id_no: '1901104188',
             name: 'Mary Joy Alonzo',
@@ -170,6 +170,7 @@ const TreasurerStudents = () => {
 
     return (
         <div className="sb-nav-fixed">
+            {/* NAVBAR AND SIDEBAR */}
             <TreasurerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
                 <TreasurerSidebar isCollapsed={isCollapsed} />
@@ -192,8 +193,8 @@ const TreasurerStudents = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="card-body">
 
+                            <div className="card-body">
                                 {/* ADD NEW STUDENT AND IMPORT EXCEL BUTTON */}
                                 <div className="d-flex justify-content-between mb-3">
                                     <div className="d-flex">

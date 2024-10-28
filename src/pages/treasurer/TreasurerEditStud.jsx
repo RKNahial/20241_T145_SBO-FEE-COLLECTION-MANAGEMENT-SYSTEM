@@ -14,6 +14,7 @@ const TreasurerEditStud = () => {
 
     return (
         <div className="sb-nav-fixed">
+            {/* NAVBAR AND SIDEBAR */}
             <TreasurerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
                 <TreasurerSidebar isCollapsed={isCollapsed} />

@@ -38,9 +38,16 @@
   padding-right: 0.5rem; 
   color: #EAEAEA; 
 }
+
+/* FORMS */
+.d-flex label {
+  margin-right: 10px; 
+  align-self: center; 
+}
+
 .form-control {
   display: block;  
-  width: 100%; 
+  width: auto; 
   padding: 0.375rem 0.75rem; 
   font-size: 1rem;
   color: #495057;  
@@ -95,15 +102,27 @@
   box-shadow: none;
 }
 
-/* ARCHIVE */
-.dark-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5); /* Dark background */
-  z-index: 999; /* Ensure it's on top */
+/* PAYMENT TAGS */
+.badge {
+  color: #FFF;
+  padding: 0.5em 0.75em;
+  border-radius: 0.5rem;
+}
+
+.fully-paid {
+  background-color: #ff8c00  ; 
+}
+
+.partially-paid {
+  background-color: #ffb84d  ; 
+}
+
+.not-paid {
+  background-color: #ffcc00 ;
+}
+
+.refunded {
+  background-color: #ffcc99 ; 
 }
 
 /* CARD */
