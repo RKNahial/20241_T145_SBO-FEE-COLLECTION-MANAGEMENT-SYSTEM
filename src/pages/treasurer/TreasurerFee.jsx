@@ -310,18 +310,19 @@ const TreasurerFee = () => {
                                                         <i className="fas fa-edit"></i>
                                                     </button>
                                                     <button 
-                                                    className="btn btn-archive" 
-                                                    onClick={() => {
-                                                        if (window.confirm('Are you sure you want to send the receipt?')) {
-                                                            setEmailSuccessMessage('Receipt emailed successfully!');
-                                                            setTimeout(() => {
-                                                                setEmailSuccessMessage('');
-                                                            }, 2500);
-                                                        }
-                                                    }}
-                                                >
-                                                    <i className="fa-regular fa-envelope fa-md"></i>
-                                                </button>
+                                                        className="btn btn-email" 
+                                                        onClick={() => {
+                                                            if (window.confirm('Are you sure you want to send the receipt?')) {
+                                                                setEmailSuccessMessage('Receipt emailed successfully!');
+                                                                setTimeout(() => {
+                                                                    setEmailSuccessMessage('');
+                                                                }, 2500);
+                                                            }
+                                                        }}
+                                                        disabled={student.paymentStatus === 'Refunded' || student.paymentStatus === 'Not Paid'}
+                                                    >
+                                                        <i className="fa-regular fa-envelope fa-md"></i>
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))}

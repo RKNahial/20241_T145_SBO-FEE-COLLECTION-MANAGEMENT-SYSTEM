@@ -87,7 +87,24 @@
     color: rgb(165, 19, 19);
     text-decoration: underline; 
     border: none;
-}.system-button {
+}
+
+.btn-email {
+    color: #E67E22;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.btn-archive:disabled {
+    background-color: #cccccc; 
+    color: #999999;
+    cursor: not-allowed; 
+    opacity: 0.6; 
+}
+
+.system-button {
     display: inline-block;      
     color: #EAEAEA;                 
     background-color: #FF8C00;  
