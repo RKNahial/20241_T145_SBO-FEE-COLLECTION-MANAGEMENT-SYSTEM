@@ -13,7 +13,6 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName }) => {
     const [date, setDate] = useState('');
     const [time, setTime] = useState('');
 
-    const [hoverReceipt, setHoverReceipt] = useState(false);
     const [hoverSave, setHoverSave] = useState(false);
     const [hoverCancel, setHoverCancel] = useState(false);
 
@@ -39,7 +38,6 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName }) => {
             amountPaid: status === 'Not Paid' ? null : amountPaid,
             status,
             date,
-            time,
             paymentCategory 
         });
         resetForm();
@@ -82,15 +80,6 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName }) => {
                             type="date"
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
-                            style={modalStyles.input}
-                        />
-                    </div>
-                    <div>
-                        <label>Time:</label>
-                        <input
-                            type="time"
-                            value={time}
-                            onChange={(e) => setTime(e.target.value)}
                             style={modalStyles.input}
                         />
                     </div>
