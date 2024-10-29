@@ -156,6 +156,18 @@ const TreasurerStudents = () => {
         console.log(file);
     };
 
+    // HANDLE GOOGLE NOTES
+    const handleOpenGoogleNotes = (studentId) => {
+        const noteTitle = `Notes for ${studentId}`;
+        const noteContent = `Add your notes for student ${studentId} here.`;
+        
+        // Construct the Google Keep URL
+        const googleKeepUrl = `https://keep.google.com/#NOTE&title=${encodeURIComponent(noteTitle)}&text=${encodeURIComponent(noteContent)}`;
+    
+        // Open in a new tab
+        window.open(googleKeepUrl, '_blank');
+    };
+
     // PAGINATION
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10; 
@@ -231,7 +243,7 @@ const TreasurerStudents = () => {
                                             <th>Student Name</th>
                                             <th>Year Level</th>
                                             <th>Program</th>
-                                            <th>Action</th>
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -246,6 +258,12 @@ const TreasurerStudents = () => {
                                                     <Link to={`/treasurer/students/edit/${student.id_no}`} className="btn btn-edit btn-sm">
                                                         <i className="fas fa-edit"></i>
                                                     </Link>
+                                                    <button 
+                                                    className="btn btn-notes btn-sm" 
+                                                    onClick={() => handleOpenGoogleNotes(student.id_no)}
+                                                >
+                                                    <i className="fas fa-sticky-note"></i> 
+                                                </button>
                                                     <button className="btn btn-archive btn-sm" onClick={() => handleArchive(student.name)}>
                                                             <i className="fas fa-archive"></i>
                                                     </button>
