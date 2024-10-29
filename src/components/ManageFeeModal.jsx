@@ -163,7 +163,7 @@ const modalStyles = {
     modal: {
         background: 'white',
         padding: '1.25rem', 
-        borderRadius: '0.3125rem', 
+        borderRadius: '1rem', 
         width: '25rem', 
         boxShadow: '0 0.125rem 0.625rem rgba(0, 0, 0, 0.1)', 
         zIndex: 1060,

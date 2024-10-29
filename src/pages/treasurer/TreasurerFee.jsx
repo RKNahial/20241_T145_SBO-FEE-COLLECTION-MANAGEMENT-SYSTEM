@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import TreasurerSidebar from "./TreasurerSidebar"; 
 import TreasurerNavbar from "./TreasurerNavbar";
 import ManageFeeModal from '../../components/ManageFeeModal';
+import ViewFeeModal from '../../components/ViewFeeModal';
 
 const TreasurerFee = () => {
     // NAV AND SIDEBAR
@@ -205,6 +206,15 @@ const TreasurerFee = () => {
          }
      };
 
+    //  VIEW PAYMENT MODAL
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+    const [viewedStudent, setViewedStudent] = useState(null);
+
+    const handleViewClick = (student) => {
+        setViewedStudent(student);
+        setIsViewModalOpen(true);
+    };
+
     // PAGINATION
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10; 
@@ -311,7 +321,7 @@ const TreasurerFee = () => {
                                                     </button>
                                                     <button 
                                                         className="btn btn-view mx-2" 
-                                                        onClick={() => handleViewClick(student)} 
+                                                        onClick={() => handleViewClick(student)}
                                                     >
                                                         <i className="fas fa-eye"></i> 
                                                     </button>
@@ -386,6 +396,15 @@ const TreasurerFee = () => {
                     onClose={handleModalToggle} 
                     studentName={selectedStudent.name} 
                     onSave={handleSubmit} 
+                />
+            )}
+
+            {/* MODAL FOR VIEWING STUDENT FEE */}
+            {isViewModalOpen && viewedStudent && (
+                <ViewFeeModal 
+                    isOpen={isViewModalOpen} 
+                    onClose={() => setIsViewModalOpen(false)} 
+                    student={viewedStudent} 
                 />
             )}
         </div>
