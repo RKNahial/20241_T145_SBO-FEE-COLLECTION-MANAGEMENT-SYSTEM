@@ -31,6 +31,37 @@
     box-shadow: 0 0 0 0.2rem rgba(255, 140, 0, 0.5);
 }
 
+.pay-button {
+    color: #EAEAEA;                 
+    background-color: #FF8C00;  
+    border: none;                            
+    border-radius: 0.35rem; 
+    white-space: nowrap; 
+    width: auto; /* Keep as is for auto width */
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pay-button:hover {
+    background-color: #E67E22; 
+    color: #EAEAEA;
+}
+
+.pay-button:focus {
+    color: #333333;                  
+    background-color: #E67E22; 
+    border: none;   
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(255, 140, 0, 0.5);
+}
+
+.pay-button:active {
+    color: #EAEAEA;                  
+    background-color: #E67E22; 
+    border: none;   
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(255, 140, 0, 0.5);
+}
+
 .add-button {
     color: #EAEAEA;
     background-color: #FF8C00;
