@@ -99,6 +99,11 @@
     padding-bottom: 0;
 }
 
+.btn-edit-mx {
+    margin-right: -0.40rem;
+    padding:0;
+}
+
 .btn-edit:hover {
     text-decoration: underline;
     color: rgb(3, 87, 3);
@@ -126,6 +131,26 @@
     border: none;
     cursor: pointer;
     padding: 0;
+}
+
+.btn-view{
+    background-color: transparent; 
+    border: none; 
+    cursor: pointer; 
+    margin-right: 0.0080rem;
+}
+
+.btn-view i {
+    color: #FF8C00;
+    font-size: 0.95rem; 
+}
+
+.btn-view:hover i {
+    color: #FFA500; 
+}
+
+.btn-view:focus {
+    outline: none; 
 }
 
 .btn-archive:disabled {

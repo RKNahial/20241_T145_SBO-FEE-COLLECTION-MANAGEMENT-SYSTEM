@@ -243,7 +243,7 @@ const TreasurerStudents = () => {
                                                 <td>{student.year_level}</td>
                                                 <td>{student.program}</td>
                                                 <td>
-                                                    <Link to={`/treasurer/students/edit/${student.id_no}`} className="btn btn-edit btm-lg">
+                                                    <Link to={`/treasurer/students/edit/${student.id_no}`} className="btn btn-edit btn-sm">
                                                         <i className="fas fa-edit"></i>
                                                     </Link>
                                                     <button className="btn btn-archive btn-sm" onClick={() => handleArchive(student.name)}>

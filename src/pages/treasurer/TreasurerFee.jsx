@@ -304,10 +304,16 @@ const TreasurerFee = () => {
                                                 </td>
                                                 <td>
                                                     <button 
-                                                        className="btn btn-edit btn-lg" 
+                                                        className="btn btn-edit btn-sm" 
                                                         onClick={() => handleEditClick(student)}
                                                     >
-                                                        <i className="fas fa-edit"></i>
+                                                        <i className="fas fa-edit btn-edit-mx"></i>
+                                                    </button>
+                                                    <button 
+                                                        className="btn btn-view mx-2" 
+                                                        onClick={() => handleViewClick(student)} 
+                                                    >
+                                                        <i className="fas fa-eye"></i> 
                                                     </button>
                                                     <button 
                                                         className="btn btn-email" 
