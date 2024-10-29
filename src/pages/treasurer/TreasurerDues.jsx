@@ -289,16 +289,16 @@ const TreasurerDues = () => {
                                                 <td><PaymentStatusTag status={student.paymentStatus} /></td>
                                                 <td><PaymentStatusTag status={student.paymentStatus} /></td>
                                                 <td className="text-center">
-                                                <button 
-                                                    type="button" 
-                                                    className="btn pay-button" 
-                                                    onClick={() => navigate('/pay-in-amount')} // Add onClick handler
-                                                >
-                                                    <i className="fas fa-coins me-1"></i>
-                                                    Pay in Amount
-                                                </button>
-                                            </td>
-                                            </tr>
+                                                    <button 
+                                                        type="button" 
+                                                        className="btn pay-button" 
+                                                        onClick={() => navigate(`/treasurer/manage-fee/amount/${student.id_no}`, { state: { studentName: student.name } })}
+                                                    >
+                                                        <i className="fas fa-coins me-1"></i>
+                                                        Pay in Amount
+                                                    </button>
+                                                </td>
+                                        </tr>
                                         ))}
                                     </tbody>
                                 </table>

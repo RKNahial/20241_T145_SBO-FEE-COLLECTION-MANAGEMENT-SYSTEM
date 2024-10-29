@@ -27,6 +27,7 @@ import OfficerLogin from './pages/officer/OfficerLogin';
 import TreasurerLogin from './pages/treasurer/TreasurerLogin';
 import TreasurerDashboard from './pages/treasurer/TreasurerDashboard';
 import TreasurerFee from './pages/treasurer/TreasurerFee';
+import TreasurerFeeAmount from './pages/treasurer/TreasurerFeeAmount';
 import TreasurerStudents from './pages/treasurer/TreasurerStudents';
 import TreasurerAddStud from './pages/treasurer/TreasurerAddStud';
 import TreasurerEditStud from './pages/treasurer/TreasurerEditStud';
@@ -62,6 +63,9 @@ const App = () => {
                 break;
             case '/treasurer/manage-fee':
                 document.title = "Treasurer | Manage Fee";
+            break;
+            case '/treasurer/manage-fee/amount/:id':
+                document.title = "Treasurer | Pay in Amount";
             break;
             case '/treasurer/students':
                 document.title = "Treasurer | Students";
@@ -107,6 +111,7 @@ const App = () => {
                 <Route path="/treasurer/login" element={<TreasurerLogin />} />
                 <Route path="/treasurer/dashboard" element={<TreasurerDashboard />} />
                 <Route path="/treasurer/manage-fee" element={<TreasurerFee />} />
+                <Route path="/treasurer/manage-fee/amount/:id" element={<TreasurerFeeAmount />} />
                 <Route path="/treasurer/students" element={<TreasurerStudents/>} />
                 <Route path="/treasurer/students/add-new" element={<TreasurerAddStud/>} />
                 <Route path="/treasurer/students/edit/:id" element={<TreasurerEditStud/>} />
