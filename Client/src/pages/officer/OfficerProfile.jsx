@@ -57,7 +57,7 @@ const OfficerProfile = () => {
                                                 />
                                             </div>
                                             <div className="mb-3">
-                                                <label className="mb-1">Email</label>
+                                                <label className="mb-1">Email Address</label>
                                                 <input
                                                     type="email"
                                                     className="form-control"
