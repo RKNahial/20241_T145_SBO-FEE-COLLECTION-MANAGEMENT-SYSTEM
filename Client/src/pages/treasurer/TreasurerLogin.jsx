@@ -1,27 +1,49 @@
-
-// src/pages/treasurer/TreasurerLogin.jsx
-import { Helmet } from 'react-helmet';
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; 
+import axios from 'axios';
+import ReCAPTCHA from 'react-google-recaptcha';
 import '../../assets/css/login.css';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { auth } from '../treasurer/firebase/firebaseConfig';
+import GoogleSignInButton from './googlelogin';
 
-const TreasurerLogin = () => {
-    const [username, setUsername] = useState('');
+const AdminLogin = () => {
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [recaptchaToken, setRecaptchaToken] = useState(null);
     const navigate = useNavigate();
-    
+
+    const handleGoogle = async () => {
+        const provider = new GoogleAuthProvider();
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            console.log('Google sign-in successful:', user);
+            navigate('/treasurer/dashboard'); // Navigate on success
+        } catch (error) {
+            console.error('Google sign-in error:', error);
+            setMessage('Google sign-in failed. Please try again.');
+        }
+    };
+
     const handleLogin = async (e) => {
         e.preventDefault();
+        setLoading(true);
         try {
-            const response = await axios.post('/treasurer/login', { username, password }); // Update with your API endpoint
-            // Handle the response, redirect to dashboard
+            const response = await axios.post('http://localhost:8000/officer/login', {
+                email,
+                password,
+                recaptchaToken
+            });
             console.log('Login successful:', response.data);
             navigate('/treasurer/dashboard');
         } catch (error) {
             console.error('Login error:', error);
-            setMessage('Invalid username or password.');
+            setMessage('Invalid email or password.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -39,11 +61,12 @@ const TreasurerLogin = () => {
         }
     };
 
+    const onRecaptchaChange = (token) => {
+        setRecaptchaToken(token);
+    };
+
     return (
         <div className="login-body">
-            <Helmet>
-                <title>Login as Treasurer</title>
-            </Helmet>
             <div className="login-container">
                 <div className="text-center">
                     <img src="../images/COT-Logo.jpg" alt="COT Logo" className="logo" />
@@ -56,18 +79,18 @@ const TreasurerLogin = () => {
                     </div>
                 )}
 
-                <form>
+                <form onSubmit={handleLogin}>
                     <div className="form-group">
                         <div className="input-icon-wrapper">
                             <input
-                                type="text"
+                                type="email"
                                 className="form-control login-form"
-                                id="username"
-                                name="username"
-                                placeholder="Username"
+                                id="email"
+                                name="email"
+                                placeholder="Email"
                                 required
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                             />
                             <i className="input-icon fas fa-user"></i>
                         </div>
@@ -90,20 +113,27 @@ const TreasurerLogin = () => {
                             </button>
                         </div>
                     </div>
-                    <div className="g-recaptcha" data-sitekey="6LeZHWkqAAAAACelXEagXWJuTnWLn-1vjv41y6lx"></div>
-                    <button type="submit" className="btn btn-primary">
-                        <i className="fas fa-sign-in-alt mr-2"></i> LOGIN
+
+                    <ReCAPTCHA
+                        sitekey="6LcfaG0qAAAAAFTykOtXdpsqkS9ZUeALt2CgFmId"
+                        onChange={onRecaptchaChange}
+                    />
+
+                    <button type="submit" className="btn btn-primary" disabled={loading || !recaptchaToken}>
+                        <i className="fas fa-sign-in-alt mr-2"></i> {loading ? 'Logging in...' : 'LOGIN'}
                     </button>
                 </form>
 
                 <div className="divider">
                     <span>or continue with</span>
                 </div>
-
-                <div className="g-signin2" data-onsuccess="onSignIn"></div>
+                <GoogleSignInButton
+                    onClick={handleGoogle}
+                    disabled={loading}
+                />
             </div>
         </div>
     );
 };
 
-export default TreasurerLogin;
+export default AdminLogin;
