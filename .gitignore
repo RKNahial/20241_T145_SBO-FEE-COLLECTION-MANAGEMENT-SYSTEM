@@ -13,7 +13,7 @@ dist-ssr
 *.local
 
 package-lock.json
-vite/.
+.vite/
 
 # Editor directories and files
 .vscode/*
