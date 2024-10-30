@@ -1,42 +1,98 @@
-// src//pages/treasurer/TreasurerNavbar.jsx
-import React from "react";
-import { Link } from "react-router-dom";
+// src/pages/treasurer/TreasurerProfile.jsx
+import { Helmet } from 'react-helmet';
+import React, { useState } from "react";
+import TreasurerSidebar from "./TreasurerSidebar"; 
+import TreasurerNavbar from "./TreasurerNavbar";
 
-const TreasurerNavbar = ({ toggleSidebar }) => {
+const TreasurerProfile = () => {
+    // NAV AND SIDEBAR
+    const [isCollapsed, setIsCollapsed] = useState(false);
+
+    const toggleSidebar = () => {
+        setIsCollapsed(prev => !prev);
+    };
+
     return (
-        <nav className="sb-topnav navbar navbar-expand navbar navbar-padding">
-            <button 
-                className="btn btn-link btn-sm me-2" 
-                id="sidebarToggle" 
-                onClick={toggleSidebar}
-                style={{ padding: '0.5rem', marginLeft: '1.50rem', display: 'flex', alignItems: 'center' }}
-            >
-                <i className="fas fa-bars orange-burger"></i>
-            </button>
-            <Link className="navbar-brand ps-3 fw-bold" to="/treasurer/dashboard">
-                SBO FEE COLLECTION SYSTEM
-            </Link>
-            <ul className="navbar-nav ms-auto"> 
-                <li className="nav-item dropdown">
-                    <Link 
-                        className="nav-link dropdown-toggle" 
-                        id="navbarDropdown" 
-                        to="#" 
-                        role="button" 
-                        data-bs-toggle="dropdown" 
-                        aria-expanded="false"
-                    >
-                        <img src="/public/images/COT-logo.png" alt="COT Logo"style={{ width: '1.857rem', height: '1.857rem'}} />
-                        <span style={{ paddingLeft: '0.5rem', paddingRight: '0.5rem' }}> Treasurer</span>
-                    </Link>
-                    <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><Link className="dropdown-item" to="/treasurer/profile">Profile</Link></li>
-                        <li><Link className="dropdown-item" to="/sbofeecollection">Logout</Link></li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
+        <div className="sb-nav-fixed">  
+            <Helmet>
+                <title>Treasurer | Profile</title>
+            </Helmet>
+            {/* NAVBAR AND SIDEBAR */}
+            <TreasurerNavbar toggleSidebar={toggleSidebar} />
+            <div style={{ display: 'flex' }}>
+                <TreasurerSidebar isCollapsed={isCollapsed} />
+                <div 
+                    id="layoutSidenav_content" 
+                    style={{ 
+                        marginLeft: isCollapsed ? '5rem' : '15.625rem', 
+                        transition: 'margin-left 0.3s', 
+                        flexGrow: 1,
+                        marginTop: '3.5rem' 
+                    }}
+                >
+                    {/* CONTENT */}
+                    <div className="container-fluid mb-5 form-top">
+                        <div className="row">
+                            <div className="col-md-6">
+                                <div className="card mb-4">
+                                    <div className="card-header">
+                                        <i className="fas fa-user-edit"></i> <span style={{ paddingLeft: '0.50rem', fontWeight: 'bold' }}>Edit Profile</span>
+                                    </div>
+                                    <div className="card-body">
+                                        <form>
+                                            <div className="mb-3">
+                                                <label className="mb-1">Treasurer Name</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control system"
+                                                    placeholder="Enter your name"
+                                                />
+                                            </div>
+                                            <div className="mb-3">
+                                                <label className="mb-1">School ID</label>
+                                                <input
+                                                    type="number"
+                                                    className="form-control system"
+                                                    placeholder="Enter your School ID"
+                                                />
+                                            </div>
+                                            <div className="mb-3">
+                                                <label className="mb-1">Institutional Email</label>
+                                                <input
+                                                    type="email"
+                                                    className="form-control"
+                                                    placeholder="Enter your email"
+                                                />
+                                            </div>
+                                            <div className="mb-4">
+                                                <label className="mb-1">Position</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    placeholder="Enter your position"
+                                                />
+                                            </div>
+                                            <div className="mb-4">
+                                                <label className="mb-1">Password</label>
+                                                <input
+                                                    type="password"
+                                                    className="form-control"
+                                                    placeholder="Enter your password"
+                                                />
+                                            </div>
+                                            <div className="mb-0">
+                                                <button type="submit" className="btn system-button">  <i className="fa-solid fa-pen me-2"> </i>Edit </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 };
 
-export default TreasurerNavbar;
+export default TreasurerProfile;
