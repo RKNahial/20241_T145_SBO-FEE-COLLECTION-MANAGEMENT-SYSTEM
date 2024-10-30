@@ -1,9 +1,9 @@
 // src/pages/treasurer/TreasurerProfile.jsx
 import React, { useState } from "react";
-import TreasurerSidebar from "./TreasurerSidebar"; 
-import TreasurerNavbar from "./TreasurerNavbar";
+import OfficerSidebar from "./OfficerSidebar"; 
+import OfficerNavbar from "./OfficerNavbar";
 
-const TreasurerProfile = () => {
+const OfficerProfile = () => {
     // NAV AND SIDEBAR
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -14,9 +14,9 @@ const TreasurerProfile = () => {
     return (
         <div className="sb-nav-fixed">
             {/* NAVBAR AND SIDEBAR */}
-            <TreasurerNavbar toggleSidebar={toggleSidebar} />
+            <OfficerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
-                <TreasurerSidebar isCollapsed={isCollapsed} />
+                <OfficerSidebar isCollapsed={isCollapsed} />
                 <div 
                     id="layoutSidenav_content" 
                     style={{ 
@@ -37,7 +37,7 @@ const TreasurerProfile = () => {
                                     <div className="card-body">
                                         <form>
                                             <div className="mb-3">
-                                                <label className="mb-1">Treasurer Name</label>
+                                                <label className="mb-1">Officer Name</label>
                                                 <input
                                                     type="text"
                                                     className="form-control system"
@@ -75,4 +75,4 @@ const TreasurerProfile = () => {
     );
 };
 
-export default TreasurerProfile;
+export default OfficerProfile;

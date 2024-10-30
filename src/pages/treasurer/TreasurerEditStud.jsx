@@ -1,6 +1,5 @@
 // src/pages/treasurer/TreasurerAddStud.jsx
 import React, { useState } from "react";
-import axios from 'axios'; 
 import TreasurerSidebar from "./TreasurerSidebar"; 
 import TreasurerNavbar from "./TreasurerNavbar";
 

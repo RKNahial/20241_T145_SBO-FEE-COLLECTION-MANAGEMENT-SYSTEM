@@ -1,9 +1,9 @@
-// src/pages/treasurer/TreasurerAddStud.jsx
+// src/pages/officer/OfficerAddStud.jsx
 import React, { useState } from "react";
-import TreasurerSidebar from "./TreasurerSidebar"; 
-import TreasurerNavbar from "./TreasurerNavbar";
+import OfficerSidebar from "./OfficerSidebar"; 
+import OfficerNavbar from "./OfficerNavbar";
 
-const TreasurerAddStud = () => {
+const OfficerAddStud = () => {
     // NAV AND SIDEBAR
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -14,9 +14,9 @@ const TreasurerAddStud = () => {
     return (
         <div className="sb-nav-fixed">
             {/* NAVBAR AND SIDEBAR */}
-            <TreasurerNavbar toggleSidebar={toggleSidebar} />
+            <OfficerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
-                <TreasurerSidebar isCollapsed={isCollapsed} />
+                <OfficerSidebar isCollapsed={isCollapsed} />
                 <div 
                     id="layoutSidenav_content" 
                     style={{ 
@@ -102,4 +102,4 @@ const TreasurerAddStud = () => {
     );
 };
 
-export default TreasurerAddStud;
+export default OfficerAddStud;

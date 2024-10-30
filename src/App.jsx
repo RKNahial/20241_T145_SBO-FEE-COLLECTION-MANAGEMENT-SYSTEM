@@ -25,12 +25,12 @@ import GovernorLogin from './pages/governor/GovernorLogin';
 
 import OfficerLogin from './pages/officer/OfficerLogin';
 import OfficerDashboard from './pages/officer/OfficerDashboard';
-// import OfficerFee from './pages/officer/OfficerFee';
-// import OfficerStudents from './pages/officer/OfficerStudents';
-// import OfficerAddStud from './pages/officer/OfficerAddStud';
-// import OfficerEditStud from './pages/officer/OfficerEditStud';
-// import OfficerReports from './pages/officer/OfficerReports';
-// import OfficerProfile from './pages/officer/OfficerProfile';
+import OfficerFee from './pages/officer/OfficerFee';
+import OfficerStudents from './pages/officer/OfficerStudents';
+import OfficerAddStud from './pages/officer/OfficerAddStud';
+import OfficerEditStud from './pages/officer/OfficerEditStud';
+import OfficerReports from './pages/officer/OfficerReports';
+import OfficerProfile from './pages/officer/OfficerProfile';
 
 
 import TreasurerLogin from './pages/treasurer/TreasurerLogin';
@@ -135,12 +135,12 @@ const App = () => {
                 {/* OFFICER ROUTES */}
                 <Route path="/officer/login" element={<OfficerLogin />} />
                 <Route path="/officer/dashboard" element={<OfficerDashboard />} />
-                {/* <Route path="/officer/review-fee" element={<OfficerFee />} />
+                <Route path="/officer/review-fee" element={<OfficerFee />} />
                 <Route path="/officer/students" element={<OfficerStudents/>} />
                 <Route path="/officer/students/add-new" element={<OfficerAddStud/>} />
-                <Route path="/officer/students/edit/:id" element={<TOfficerEditStud/>} />
+                <Route path="/officer/students/edit/:id" element={<OfficerEditStud/>} />
                 <Route path="/officer/reports" element={<OfficerReports/>} />
-                <Route path="/officer/profile" element={<OfficerProfile/>} /> */}
+                <Route path="/officer/profile" element={<OfficerProfile/>} />
 
 
                 {/* TREASURER ROUTES*/}

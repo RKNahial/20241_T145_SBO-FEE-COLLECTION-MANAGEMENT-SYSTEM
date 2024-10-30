@@ -1,9 +1,9 @@
 // src/pages/treasurer/TreasurerAddStud.jsx
 import React, { useState } from "react";
-import TreasurerSidebar from "./TreasurerSidebar"; 
-import TreasurerNavbar from "./TreasurerNavbar";
+import OfficerSidebar from "./OfficerSidebar"; 
+import OfficerNavbar from "./OfficerNavbar";
 
-const TreasurerAddStud = () => {
+const OfficerEditStud = () => {
     // NAV AND SIDEBAR
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -14,9 +14,9 @@ const TreasurerAddStud = () => {
     return (
         <div className="sb-nav-fixed">
             {/* NAVBAR AND SIDEBAR */}
-            <TreasurerNavbar toggleSidebar={toggleSidebar} />
+            <OfficerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
-                <TreasurerSidebar isCollapsed={isCollapsed} />
+                <OfficerSidebar isCollapsed={isCollapsed} />
                 <div 
                     id="layoutSidenav_content" 
                     style={{ 
@@ -32,7 +32,7 @@ const TreasurerAddStud = () => {
                             <div className="col-md-6">
                                 <div className="card mb-4">
                                     <div className="card-header">
-                                        <i className="far fa-plus me-2"></i> <strong>Add New Student</strong>
+                                        <i className="fa-solid fa-pen me-2"></i> <strong>Edit Student</strong>
                                     </div>
                                     <div className="card-body">
                                         <form>
@@ -88,7 +88,7 @@ const TreasurerAddStud = () => {
                                                 </select>
                                             </div>
                                             <div className="mb-0">
-                                                <button type="submit" className="btn system-button"> <i className="far fa-plus me-1"></i> Add</button>
+                                                <button type="submit" className="btn system-button"> <i className="fa-solid fa-pen me-1"></i> Edit</button>
                                             </div>
                                         </form>
                                     </div>
@@ -102,4 +102,4 @@ const TreasurerAddStud = () => {
     );
 };
 
-export default TreasurerAddStud;
+export default OfficerEditStud;

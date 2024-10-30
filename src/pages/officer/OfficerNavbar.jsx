@@ -30,7 +30,7 @@ const OfficerNavbar = ({ toggleSidebar }) => {
                         <span style={{ paddingLeft: '0.5rem', paddingRight: '0.5rem' }}> Officer</span>
                     </Link>
                     <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><Link className="dropdown-item" to="/treasurer/profile">Profile</Link></li>
+                        <li><Link className="dropdown-item" to="/officer/profile">Profile</Link></li>
                         <li><Link className="dropdown-item" to="/sbofeecollection">Logout</Link></li>
                     </ul>
                 </li>
