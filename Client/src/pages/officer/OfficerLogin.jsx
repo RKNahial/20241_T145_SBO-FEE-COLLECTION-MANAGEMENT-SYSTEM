@@ -40,7 +40,7 @@ const AdminLogin = () => {
                 recaptchaToken
             });
             console.log('Login successful:', response.data);
-            navigate('/sbofeecollection');
+            navigate('/officer/dashboard');
         } catch (error) {
             console.error('Login error:', error);
             setMessage('Invalid email or password.');
