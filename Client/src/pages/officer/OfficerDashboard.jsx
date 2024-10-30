@@ -1,11 +1,11 @@
-// src/pages/treasurer/TreasurerDashboard.jsx
+// src/pages/officer/OfficerDashboard.jsx
 import { Helmet } from 'react-helmet';
-import React, { useState } from "react";
-// import { Bar } from 'react-chartjs-2';
-import TreasurerSidebar from "./TreasurerSidebar"; 
-import TreasurerNavbar from "./TreasurerNavbar";
+import React, { useState, useEffect } from "react";
+import { Bar } from 'react-chartjs-2';
+import OfficerSidebar from "./OfficerSidebar"; 
+import OfficerNavbar from "./OfficerNavbar";
 
-const TreasurerDashboard = () => {
+const OfficerDashboard = () => {
     // NAV AND SIDEBAR
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -101,12 +101,12 @@ const TreasurerDashboard = () => {
     return (
         <div className="sb-nav-fixed">
             <Helmet>
-                <title>Treasurer | Dashboard</title>
+                <title>Officer | Dashboard</title>
             </Helmet>
             {/* NAVBAR AND SIDEBAR */}
-            <TreasurerNavbar toggleSidebar={toggleSidebar} />
+            <OfficerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
-                <TreasurerSidebar isCollapsed={isCollapsed} />
+                <OfficerSidebar isCollapsed={isCollapsed} />
                 <div 
                     id="layoutSidenav_content" 
                     style={{ 
@@ -119,7 +119,7 @@ const TreasurerDashboard = () => {
                 >
                     {/* CONTENT */}
                     <div className="container-fluid px-5 mb-5">
-                        <p className="system-gray mt-4 welcome-text">Welcome back, treasurer!</p>
+                        <p className="system-gray mt-4 welcome-text">Welcome back, officer!</p>
                         
                         {/* ORANGE CARDS */}
                         <div className="row">
@@ -241,4 +241,4 @@ const TreasurerDashboard = () => {
     );
 };
 
-export default TreasurerDashboard;
+export default OfficerDashboard;

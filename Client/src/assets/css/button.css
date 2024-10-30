@@ -31,6 +31,37 @@
     box-shadow: 0 0 0 0.2rem rgba(255, 140, 0, 0.5);
 }
 
+.pay-button {
+    color: #EAEAEA;                 
+    background-color: #FF8C00;  
+    border: none;                            
+    border-radius: 0.35rem; 
+    white-space: nowrap; 
+    width: auto; /* Keep as is for auto width */
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pay-button:hover {
+    background-color: #E67E22; 
+    color: #EAEAEA;
+}
+
+.pay-button:focus {
+    color: #333333;                  
+    background-color: #E67E22; 
+    border: none;   
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(255, 140, 0, 0.5);
+}
+
+.pay-button:active {
+    color: #EAEAEA;                  
+    background-color: #E67E22; 
+    border: none;   
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(255, 140, 0, 0.5);
+}
+
 .add-button {
     color: #EAEAEA;
     background-color: #FF8C00;
@@ -68,6 +99,11 @@
     padding-bottom: 0;
 }
 
+.btn-edit-mx {
+    margin-right: -0.40rem;
+    padding:0;
+}
+
 .btn-edit:hover {
     text-decoration: underline;
     color: rgb(3, 87, 3);
@@ -79,6 +115,7 @@
     background: none;
     border: none;
     cursor: pointer;
+    padding-left: 1rem;
     padding-top: 0;
     padding-bottom: 0;
 }
@@ -87,7 +124,52 @@
     color: rgb(165, 19, 19);
     text-decoration: underline; 
     border: none;
-}.system-button {
+}
+
+.btn-email {
+    color: #E67E22;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.btn-notes{
+    color: #E67E22;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding-left: 1rem;
+}
+
+.btn-view{
+    background-color: transparent; 
+    border: none; 
+    cursor: pointer; 
+    margin-right: 0.0080rem;
+}
+
+.btn-view i {
+    color: #FF8C00;
+    font-size: 0.95rem; 
+}
+
+.btn-view:hover i {
+    color: #FFA500; 
+}
+
+.btn-view:focus {
+    outline: none; 
+}
+
+.btn-archive:disabled {
+    background-color: #cccccc; 
+    color: #999999;
+    cursor: not-allowed; 
+    opacity: 0.6; 
+}
+
+.system-button {
     display: inline-block;      
     color: #EAEAEA;                 
     background-color: #FF8C00;  

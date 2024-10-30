@@ -1,177 +1,204 @@
-// src/pages/treasurer/TreasurerStudents.jsx
+// src/pages/officer/OfficerrFee.jsx
 import { Helmet } from 'react-helmet';
-import React, { useState, useRef } from "react";
-import { Link } from 'react-router-dom';
-import TreasurerSidebar from "./TreasurerSidebar"; 
-import TreasurerNavbar from "./TreasurerNavbar";
+import React, { useState } from "react";
+import ViewFeeModal from '../../components/ViewFeeModal';
+import OfficerNavbar from "./OfficerNavbar";
+import OfficerSidebar from "./OfficerSidebar";
 
-const TreasurerStudents = () => {
+const OfficerFee = () => {
     // NAV AND SIDEBAR
     const [isCollapsed, setIsCollapsed] = useState(false);
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
     };
 
-    // Sample data for demonstration only
     const sampleStud = [
         {
             id_no: '1901104188',
             name: 'Mary Joy Alonzo',
             year_level: '4th Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            paymentStatus: 'Fully Paid'
         },
         {
             id_no: '2101102924',
             name: 'Jonathan Cruz',
             year_level: '4th Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            paymentStatus: 'Partially Paid'
         },
         {
             id_no: '1901102046',
             name: 'Reena Dela Cruz',
             year_level: '3rd Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            paymentStatus: 'Not Paid'
         },
         {
             id_no: '2101101354',
             name: 'Peter John Garcia',
             year_level: '4th Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            paymentStatus: 'Fully Paid'
         },
         {
             id_no: '1901103113',
             name: 'Jessa Mae Javier',
             year_level: '2nd Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            paymentStatus: 'Partially Paid'
         },
         {
             id_no: '2101101979',
-            name: 'Mark Anton  Lim',
+            name: 'Mark Anton Lim',
             year_level: '1st Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            paymentStatus: 'Not Paid'
         },
         {
             id_no: '2101103848',
             name: 'Anna Marie Mendoza',
             year_level: '4th Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            paymentStatus: 'Fully Paid'
         },            
         {
             id_no: '1901104713',
             name: 'Liza Reyes',
             year_level: '4th Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            paymentStatus: 'Partially Paid'
         },            
         {
             id_no: '1901104188',
             name: 'Samuel Santos',
             year_level: '4th Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            paymentStatus: 'Not Paid'
         },
         {
             id_no: '1901104235',
             name: 'Mary Joy Alonzo',
             year_level: '3rd Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            paymentStatus: 'Fully Paid'
         },
         {
             id_no: '1901104188',
             name: 'I AM',
             year_level: '4th Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            paymentStatus: 'Partially Paid'
         },
         {
             id_no: '2101102924',
             name: 'ONLY TESTING',
             year_level: '4th Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            paymentStatus: 'Not Paid'
         },
         {
             id_no: '1901102046',
             name: 'IF THE PAGINATION',
             year_level: '3rd Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            paymentStatus: 'Fully Paid'
         },
         {
             id_no: '2101101354',
             name: 'IS WORKING',
             year_level: '4th Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            paymentStatus: 'Partially Paid'
         },
         {
             id_no: '1901103113',
             name: 'BLAH BLAH BLAH',
             year_level: '2nd Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            paymentStatus: 'Not Paid'
         },
         {
             id_no: '2101101979',
             name: 'PROPER NAME',
             year_level: '1st Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            paymentStatus: 'Fully Paid'
         },
         {
             id_no: '2101103848',
             name: 'PLACE NAME',
             year_level: '4th Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            paymentStatus: 'Refunded'
         },            
         {
             id_no: '1901104713',
             name: 'BACKSTORY STUFF',
             year_level: '4th Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            paymentStatus: 'Not Paid'
         },            
         {
             id_no: '1901104188',
             name: 'Samuel Santos',
             year_level: '4th Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            paymentStatus: 'Fully Paid'
         },
         {
             id_no: '1901104235',
             name: 'Mary Joy Alonzo',
             year_level: '3rd Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            paymentStatus: 'Refunded'
         }
     ];
 
-    // HANDLE ARCHIVE
-    const [successMessage, setSuccessMessage] = useState("");
-    const handleArchive = (studentName) => {
-        const confirmArchive = window.confirm(`Are you sure you want to archive ${studentName}?`);
-        if (confirmArchive) {
-            // Perform the archive action, e.g., make an API call
-            console.log(`${studentName} has been archived.`);
-            setSuccessMessage(`${studentName} has been successfully archived!`);
-            
-            setTimeout(() => {
-                setSuccessMessage("");
-            }, 2500);
+    // PAYMENT TAG
+    const PaymentStatusTag = ({ status, onClick }) => {
+        let className;
+
+        switch (status) {
+            case 'Fully Paid':
+                className = 'badge fully-paid';
+                break;
+            case 'Partially Paid':
+                className = 'badge partially-paid';
+                break;
+            case 'Not Paid':
+                className = 'badge not-paid';
+                break;
+            case 'Refunded':
+                className = 'badge refunded';
+                break;
+            default:
+                className = 'badge unknown';
         }
+
+        return <span className={className} onClick={onClick} style={{ cursor: 'pointer' }}>{status}</span>;
     };
 
-    // IMPORT EXCEL
-    const fileInputRef = useRef(null);
-    const handleImportClick = () => {
-        fileInputRef.current.click();
-    };
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        // Handle the file upload logic here
-        console.log(file);
-    };
+     // UPDATE PAYMENT MODAL
+     const [isModalOpen, setIsModalOpen] = useState(false);
+     const [selectedStudent, setSelectedStudent] = useState(null);
+     const [successMessage, setSuccessMessage] = useState('');
+     const [emailSuccessMessage, setEmailSuccessMessage] = useState('');
+ 
+     const handleModalToggle = () => setIsModalOpen(!isModalOpen);
+ 
+     const handleEditClick = (student) => {
+         setSelectedStudent(student);
+         setIsModalOpen(true);
+     };
 
-    // HANDLE GOOGLE NOTES
-    const handleOpenGoogleNotes = (studentId) => {
-        const noteTitle = `Notes for ${studentId}`;
-        const noteContent = `Add your notes for student ${studentId} here.`;
-        
-        // Construct the Google Keep URL
-        const googleKeepUrl = `https://keep.google.com/#NOTE&title=${encodeURIComponent(noteTitle)}&text=${encodeURIComponent(noteContent)}`;
-    
-        // Open in a new tab
-        window.open(googleKeepUrl, '_blank');
+    //  VIEW PAYMENT MODAL
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+    const [viewedStudent, setViewedStudent] = useState(null);
+
+    const handleViewClick = (student) => {
+        setViewedStudent(student);
+        setIsViewModalOpen(true);
     };
 
     // PAGINATION
@@ -184,17 +211,17 @@ const TreasurerStudents = () => {
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
     const showingStart = indexOfFirstItem + 1;
     const showingEnd = Math.min(indexOfLastItem, sampleStud.length);
-    const totalEntries = sampleStud.length;
+    const totalEntries = sampleStud.length; 
 
     return (
         <div className="sb-nav-fixed">
             <Helmet>
-                <title>Treasurer | Students</title>
+                <title>Officer | Review Fee</title>
             </Helmet>
             {/* NAVBAR AND SIDEBAR */}
-            <TreasurerNavbar toggleSidebar={toggleSidebar} />
+            <OfficerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
-                <TreasurerSidebar isCollapsed={isCollapsed} />
+                <OfficerSidebar isCollapsed={isCollapsed} />
                 <div 
                     id="layoutSidenav_content" 
                     style={{ 
@@ -210,37 +237,25 @@ const TreasurerStudents = () => {
                             <div className="card-header">
                                 <div className="row">
                                     <div className="col col-md-6">
-                                        <i className="far fa-user me-2"></i> <strong>Students</strong>
+                                        <i className="fas fa-hand-holding-usd me-2"></i> <strong>Review Fee</strong>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="card-body">
-                                {successMessage && (  
-                                        <div className="alert alert-success" role="alert">
-                                            {successMessage}
-                                        </div>
-                                    )}
-                                {/* ADD NEW STUDENT AND IMPORT EXCEL BUTTON */}
+                                {/* SELECT CATEGORY AND SEARCH STUDENT */}
                                 <div className="d-flex justify-content-between mb-3">
-                                    <div className="d-flex">
-                                        <Link to="/treasurer/students/add-new" className="add-button btn btn-sm me-2">
-                                            <i className="fas fa-plus me-2"></i>
-                                            Add New Student
-                                        </Link>
-                                        <button onClick={handleImportClick} className="add-button btn btn-sm">
-                                            <i className="fas fa-file-excel me-2"></i>
-                                            Import Excel
-                                        </button>
-                                        <input
-                                            type="file"
-                                            accept=".xls,.xlsx"
-                                            ref={fileInputRef}
-                                            style={{ display: 'none' }}
-                                            onChange={handleFileChange}
-                                        />
+                                    <div className="d-flex align-items-center">
+                                        <label className="me-2 mb-0">Payment Category</label>
+                                        <div style={{ width: 'auto' }}>
+                                            <select className="form-control" defaultValue="">
+                                                <option value="" disabled>Select a category</option>
+                                                <option value="College Shirt">College Shirt</option>
+                                                <option value="Events">Events</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                    <form method="get" className="search-bar ">
+                                    <form method="get" className="search-bar">
                                         <input type="text" placeholder="Search student" className="search-input" />
                                         <button type="submit" className="search">
                                             <i className="fas fa-search"></i>
@@ -248,7 +263,7 @@ const TreasurerStudents = () => {
                                     </form>
                                 </div>
 
-                                {/* TABLE STUDENTS*/}
+                                {/* TABLE STUDENTS */}
                                 <table className="table table-bordered table-hover">
                                     <thead>
                                         <tr>
@@ -257,7 +272,8 @@ const TreasurerStudents = () => {
                                             <th>Student Name</th>
                                             <th>Year Level</th>
                                             <th>Program</th>
-                                            <th>Actions</th>
+                                            <th>Payment Status</th>
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -269,17 +285,16 @@ const TreasurerStudents = () => {
                                                 <td>{student.year_level}</td>
                                                 <td>{student.program}</td>
                                                 <td>
-                                                    <Link to={`/treasurer/students/edit/${student.id_no}`} className="btn btn-edit btn-sm">
-                                                        <i className="fas fa-edit"></i>
-                                                    </Link>
+                                                    <PaymentStatusTag 
+                                                        status={student.paymentStatus} 
+                                                    />
+                                                </td>
+                                                <td>
                                                     <button 
-                                                    className="btn btn-notes btn-sm" 
-                                                    onClick={() => handleOpenGoogleNotes(student.id_no)}
-                                                >
-                                                    <i className="fas fa-sticky-note"></i> 
-                                                </button>
-                                                    <button className="btn btn-archive btn-sm" onClick={() => handleArchive(student.name)}>
-                                                            <i className="fas fa-archive"></i>
+                                                        className="btn btn-view mx-2" 
+                                                        onClick={() => handleViewClick(student)}
+                                                    >
+                                                        <i className="fas fa-eye"></i> 
                                                     </button>
                                                 </td>
                                             </tr>
@@ -325,15 +340,23 @@ const TreasurerStudents = () => {
                                         </ul>
                                     </nav>
                                 </div>
-
                             </div>
                         </div>
                     </div>
                     
                 </div>
             </div>
+            {/* MODAL FOR VIEWING STUDENT FEE */}
+            {isViewModalOpen && viewedStudent && (
+                <ViewFeeModal 
+                    isOpen={isViewModalOpen} 
+                    onClose={() => setIsViewModalOpen(false)} 
+                    student={viewedStudent} 
+                />
+            )}
         </div>
+        
     );
 };
 
-export default TreasurerStudents;
+export default OfficerFee;

@@ -1,11 +1,11 @@
-// src/pages/treasurer/TreasurerStudents.jsx
+// src/pages/officer/OfficerStudents.jsx
 import { Helmet } from 'react-helmet';
 import React, { useState, useRef } from "react";
 import { Link } from 'react-router-dom';
-import TreasurerSidebar from "./TreasurerSidebar"; 
-import TreasurerNavbar from "./TreasurerNavbar";
+import OfficerSidebar from "./OfficerSidebar"; 
+import OfficerNavbar from "./OfficerNavbar";
 
-const TreasurerStudents = () => {
+const OfficerStudents = () => {
     // NAV AND SIDEBAR
     const [isCollapsed, setIsCollapsed] = useState(false);
     const toggleSidebar = () => {
@@ -189,12 +189,12 @@ const TreasurerStudents = () => {
     return (
         <div className="sb-nav-fixed">
             <Helmet>
-                <title>Treasurer | Students</title>
+                <title>Officer | Students</title>
             </Helmet>
             {/* NAVBAR AND SIDEBAR */}
-            <TreasurerNavbar toggleSidebar={toggleSidebar} />
+            <OfficerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
-                <TreasurerSidebar isCollapsed={isCollapsed} />
+                <OfficerSidebar isCollapsed={isCollapsed} />
                 <div 
                     id="layoutSidenav_content" 
                     style={{ 
@@ -224,7 +224,7 @@ const TreasurerStudents = () => {
                                 {/* ADD NEW STUDENT AND IMPORT EXCEL BUTTON */}
                                 <div className="d-flex justify-content-between mb-3">
                                     <div className="d-flex">
-                                        <Link to="/treasurer/students/add-new" className="add-button btn btn-sm me-2">
+                                        <Link to="/officer/students/add-new" className="add-button btn btn-sm me-2">
                                             <i className="fas fa-plus me-2"></i>
                                             Add New Student
                                         </Link>
@@ -269,7 +269,7 @@ const TreasurerStudents = () => {
                                                 <td>{student.year_level}</td>
                                                 <td>{student.program}</td>
                                                 <td>
-                                                    <Link to={`/treasurer/students/edit/${student.id_no}`} className="btn btn-edit btn-sm">
+                                                    <Link to={`/officer/students/edit/${student.id_no}`} className="btn btn-edit btn-sm">
                                                         <i className="fas fa-edit"></i>
                                                     </Link>
                                                     <button 
@@ -336,4 +336,4 @@ const TreasurerStudents = () => {
     );
 };
 
-export default TreasurerStudents;
+export default OfficerStudents;
