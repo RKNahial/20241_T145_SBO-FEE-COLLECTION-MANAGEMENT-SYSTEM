@@ -1,7 +1,6 @@
 // src/pages/officer/OfficerrFee.jsx
+import { Helmet } from 'react-helmet';
 import React, { useState } from "react";
-import TreasurerSidebar from "./OfficerNavbar"; 
-import TreasurerNavbar from "./OfficerSidebar";
 import ViewFeeModal from '../../components/ViewFeeModal';
 import OfficerNavbar from "./OfficerNavbar";
 import OfficerSidebar from "./OfficerSidebar";
@@ -216,6 +215,9 @@ const OfficerFee = () => {
 
     return (
         <div className="sb-nav-fixed">
+            <Helmet>
+                <title>Officer | Review Fee</title>
+            </Helmet>
             {/* NAVBAR AND SIDEBAR */}
             <OfficerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>

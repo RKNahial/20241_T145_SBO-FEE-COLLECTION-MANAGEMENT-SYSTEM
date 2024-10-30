@@ -1,4 +1,5 @@
 // src/pages/officer/OfficerStudents.jsx
+import { Helmet } from 'react-helmet';
 import React, { useState, useRef } from "react";
 import { Link } from 'react-router-dom';
 import OfficerSidebar from "./OfficerSidebar"; 
@@ -187,6 +188,9 @@ const OfficerStudents = () => {
 
     return (
         <div className="sb-nav-fixed">
+            <Helmet>
+                <title>Officer | Students</title>
+            </Helmet>
             {/* NAVBAR AND SIDEBAR */}
             <OfficerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>

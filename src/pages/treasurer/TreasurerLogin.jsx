@@ -41,7 +41,7 @@ const TreasurerLogin = () => {
     return (
         <div className="login-body">
             <Helmet>
-                <title>Login as treasurer</title>
+                <title>Login as Treasurer</title>
             </Helmet>
             <div className="login-container">
                 <div className="text-center">

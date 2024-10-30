@@ -1,6 +1,6 @@
 // src/pages/officer/OfficerDashboard.jsx
+import { Helmet } from 'react-helmet';
 import React, { useState, useEffect } from "react";
-import axios from 'axios';
 import { Bar } from 'react-chartjs-2';
 import OfficerSidebar from "./OfficerSidebar"; 
 import OfficerNavbar from "./OfficerNavbar";
@@ -100,6 +100,9 @@ const OfficerDashboard = () => {
 
     return (
         <div className="sb-nav-fixed">
+            <Helmet>
+                <title>Officer | Dashboard</title>
+            </Helmet>
             {/* NAVBAR AND SIDEBAR */}
             <OfficerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>

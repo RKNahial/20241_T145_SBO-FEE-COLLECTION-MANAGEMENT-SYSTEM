@@ -1,4 +1,5 @@
 // src/pages/treasurer/TreasurerReports.jsx
+import { Helmet } from 'react-helmet';
 import React, { useState } from "react";
 import OfficerSidebar from "./OfficerSidebar"; 
 import OfficerNavbar from "./OfficerNavbar";
@@ -41,6 +42,9 @@ const OfficerReports = () => {
 
     return (
         <div className="sb-nav-fixed">
+            <Helmet>
+                <title>Officer | Reports</title>
+            </Helmet>
             {/* NAVBAR AND SIDEBAR */}
             <OfficerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>

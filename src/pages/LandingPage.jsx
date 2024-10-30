@@ -1,10 +1,14 @@
 // src/pages/LandingPage.jsx
+import { Helmet } from 'react-helmet';
 import React from "react";
 import '../assets/css/landing-page.css';
 
 const LandingPage = () => {
     return (
         <div className="landing-page">
+            <Helmet>
+                <title>SBO Fee Collection Management System</title>
+            </Helmet>
             <nav className="landing-page__nav">
                 <div className="landing-page__nav__logo"><a href="#">Learning</a></div>
                 <ul className="landing-page__nav__links">

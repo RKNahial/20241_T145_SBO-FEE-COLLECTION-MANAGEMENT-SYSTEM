@@ -1,4 +1,5 @@
 // src/pages/governor/GovernorLogin.jsx
+import { Helmet } from 'react-helmet';
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; 
@@ -39,6 +40,9 @@ const GovernorLogin = () => {
 
     return (
         <div className="login-body">
+            <Helmet>
+                <title>Login as Governor</title>
+            </Helmet>
             <div className="login-container">
                 <div className="text-center">
                     <img src="../images/COT-Logo.jpg" alt="COT Logo" className="logo" />
