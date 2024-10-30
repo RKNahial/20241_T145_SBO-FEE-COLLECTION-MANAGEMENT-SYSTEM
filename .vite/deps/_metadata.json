@@ -1,0 +1,61 @@
+{
+  "hash": "a80cd8d6",
+  "configHash": "6cee5172",
+  "lockfileHash": "1f25da0d",
+  "browserHash": "a0485b89",
+  "optimized": {
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "31da9f1d",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "b6616f82",
+      "needsInterop": true
+    },
+    "react-router-dom": {
+      "src": "../../node_modules/react-router-dom/dist/index.js",
+      "file": "react-router-dom.js",
+      "fileHash": "211f6c67",
+      "needsInterop": false
+    },
+    "bootstrap/dist/js/bootstrap.bundle.min.js": {
+      "src": "../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
+      "file": "bootstrap_dist_js_bootstrap__bundle__min__js.js",
+      "fileHash": "1e55174c",
+      "needsInterop": true
+    },
+    "react-helmet": {
+      "src": "../../node_modules/react-helmet/es/Helmet.js",
+      "file": "react-helmet.js",
+      "fileHash": "ef86e52a",
+      "needsInterop": false
+    },
+    "axios": {
+      "src": "../../node_modules/axios/index.js",
+      "file": "axios.js",
+      "fileHash": "7354cecb",
+      "needsInterop": false
+    },
+    "react-chartjs-2": {
+      "src": "../../node_modules/react-chartjs-2/dist/index.js",
+      "file": "react-chartjs-2.js",
+      "fileHash": "a42947b6",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-JMVEG3FK": {
+      "file": "chunk-JMVEG3FK.js"
+    },
+    "chunk-TWJRYSII": {
+      "file": "chunk-TWJRYSII.js"
+    },
+    "chunk-DC5AMYBS": {
+      "file": "chunk-DC5AMYBS.js"
+    }
+  }
+}

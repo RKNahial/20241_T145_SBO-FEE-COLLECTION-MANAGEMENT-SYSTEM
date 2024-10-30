@@ -27,6 +27,9 @@ const AdminLogin = () => {
         } catch (error) {
             console.error('Google sign-in error:', error);
             setMessage('Google sign-in failed. Please try again.');
+            setTimeout(() => {
+                setMessage('');
+            }, 3000);
         }
     };
 
@@ -44,6 +47,9 @@ const AdminLogin = () => {
         } catch (error) {
             console.error('Login error:', error);
             setMessage('Invalid email or password.');
+            setTimeout(() => {
+                setMessage('');
+            }, 3000);
         } finally {
             setLoading(false);
         }
@@ -76,7 +82,7 @@ const AdminLogin = () => {
                 <div className="text-center">
                     <img src="../images/COT-Logo.jpg" alt="COT Logo" className="logo" />
                 </div>
-                <h2>LOGIN AS OFFICER</h2>
+                <h2>LOGIN AS GOVERNOR</h2>
 
                 {message && (
                     <div className="alert alert-danger" role="alert">
