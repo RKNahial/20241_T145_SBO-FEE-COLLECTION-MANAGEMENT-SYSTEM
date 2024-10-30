@@ -23,7 +23,7 @@ const AdminLogin = () => {
             const result = await signInWithPopup(auth, provider);
             const user = result.user;
             console.log('Google sign-in successful:', user);
-            navigate('/sbofeecollection'); // Navigate on success
+            navigate('/officer/dashboard');
         } catch (error) {
             console.error('Google sign-in error:', error);
             setMessage('Google sign-in failed. Please try again.');
