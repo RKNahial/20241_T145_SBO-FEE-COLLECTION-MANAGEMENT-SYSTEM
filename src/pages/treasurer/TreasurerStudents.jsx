@@ -137,11 +137,17 @@ const TreasurerStudents = () => {
     ];
 
     // HANDLE ARCHIVE
+    const [successMessage, setSuccessMessage] = useState("");
     const handleArchive = (studentName) => {
         const confirmArchive = window.confirm(`Are you sure you want to archive ${studentName}?`);
         if (confirmArchive) {
             // Perform the archive action, e.g., make an API call
             console.log(`${studentName} has been archived.`);
+            setSuccessMessage(`${studentName} has been successfully archived!`);
+            
+            setTimeout(() => {
+                setSuccessMessage("");
+            }, 2500);
         }
     };
 
@@ -207,6 +213,11 @@ const TreasurerStudents = () => {
                             </div>
 
                             <div className="card-body">
+                                {successMessage && (  
+                                        <div className="alert alert-success" role="alert">
+                                            {successMessage}
+                                        </div>
+                                    )}
                                 {/* ADD NEW STUDENT AND IMPORT EXCEL BUTTON */}
                                 <div className="d-flex justify-content-between mb-3">
                                     <div className="d-flex">
