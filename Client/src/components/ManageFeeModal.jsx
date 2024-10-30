@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 
 const paymentPrices = {
     "College Shirt": 400.00,
-    "Event": 200.00,
+    "Event": 75.00,
 };
 
 const ManageFeeModal = ({ isOpen, onClose, onSave, studentName }) => {
