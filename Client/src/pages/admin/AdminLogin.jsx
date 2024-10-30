@@ -41,7 +41,7 @@ const AdminLogin = () => {
             navigate('/sbofeecollection');
         } catch (error) {
             console.error('Login error:', error);
-            setMessage('Invalid email or password.');
+            setMessage('Invalid email or password, Admin Only!');
         } finally {
             setLoading(false);
         }
