@@ -40,7 +40,7 @@ const TreasurerProfile = () => {
                                     </div>
                                     <div className="card-body">
                                         <form>
-                                            <div className="mb-3">
+                                        <div className="mb-3">
                                                 <label className="mb-1">Treasurer Name</label>
                                                 <input
                                                     type="text"
@@ -57,7 +57,7 @@ const TreasurerProfile = () => {
                                                 />
                                             </div>
                                             <div className="mb-3">
-                                                <label className="mb-1">Institutional Email</label>
+                                                <label className="mb-1">Email Address</label>
                                                 <input
                                                     type="email"
                                                     className="form-control"

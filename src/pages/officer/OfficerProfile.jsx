@@ -1,4 +1,4 @@
-// src/pages/treasurer/TreasurerProfile.jsx
+// src/pages/officer/OfficerProfile.jsx
 import { Helmet } from 'react-helmet';
 import React, { useState } from "react";
 import OfficerSidebar from "./OfficerSidebar"; 
@@ -57,7 +57,7 @@ const OfficerProfile = () => {
                                                 />
                                             </div>
                                             <div className="mb-3">
-                                                <label className="mb-1">Institutional Email</label>
+                                                <label className="mb-1">Email Address</label>
                                                 <input
                                                     type="email"
                                                     className="form-control"
