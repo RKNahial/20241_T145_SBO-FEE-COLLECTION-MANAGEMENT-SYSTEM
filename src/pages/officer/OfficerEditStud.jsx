@@ -1,4 +1,4 @@
-// src/pages/treasurer/TreasurerAddStud.jsx
+// src/pages/officer/OfficerEditStud.jsx
 import { Helmet } from 'react-helmet';
 import React, { useState } from "react";
 import OfficerSidebar from "./OfficerSidebar"; 
