@@ -1,6 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes  } from 'react-router-dom';
-import { useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
 
 // IMPORT BOOTSTRAP
@@ -46,78 +45,78 @@ import TreasurerProfile from './pages/treasurer/TreasurerProfile';
 
 // FOR CUSTOMIZED DOCUMENT TITLE
 const App = () => {
-    useEffect(() => {
-        switch (location.pathname) {
-            // ADMIN    
-            case '/admin/login':
-                document.title = "Login as Admin";
-                break;
+    // useEffect(() => {
+    //     switch (location.pathname) {
+    //         // ADMIN    
+    //         case '/admin/login':
+    //             document.title = "Login as Admin";
+    //             break;
         
-            // GOVERNOR
-            case '/governor/login':
-                document.title = "Login as Governor";
-                break;
+    //         // GOVERNOR
+    //         case '/governor/login':
+    //             document.title = "Login as Governor";
+    //             break;
             
-            // OFFICER
-            case '/officer/login':
-                document.title = "Login as Officer";
-                break;
-            case '/officer/dashboard':
-                document.title = "Officer | Dashboard";
-                break;
-            case '/officer/review-fee':
-                document.title = "Officer | Review Fee";
-                break;
-            case '/officer/students':
-                document.title = "Officer | Students";
-            break;
-            case '/officer/students/add-new':
-                document.title = "Officer | Add Student";
-            break;
-            case '/officer/students/edit/:id':
-                document.title = "Officer | Edit Student";
-            break;
-            case '/officer/reports':
-                document.title = "Officer | Reports";
-            break;
-            case '/officer/profile':
-                document.title = "Officer | Profile";
-            break;
-            // TREASURER
-            case '/treasurer/login':
-                document.title = "Login as Treasurer";
-                break;
-            case '/treasurer/dashboard':
-                document.title = "Treasurer | Dashboard";
-                break;
-            case '/treasurer/manage-fee':
-                document.title = "Treasurer | Manage Fee";
-            break;
-            case '/treasurer/manage-fee/amount/:id':
-                document.title = "Treasurer | Pay in Amount";
-            break;
-            case '/treasurer/students':
-                document.title = "Treasurer | Students";
-            break;
-            case '/treasurer/students/add-new':
-                document.title = "Treasurer | Add Student";
-            break;
-            case '/treasurer/students/edit/:id':
-                document.title = "Treasurer | Edit Student";
-            break;
-            case '/treasurer/reports':
-                document.title = "Treasurer | Reports";
-            break;
-            case '/treasurer/daily-dues':
-                document.title = "Treasurer | Daily Dues";
-            break;
-            case '/treasurer/profile':
-                document.title = "Treasurer | Profile";
-            break;
-            default:
-                document.title = "SBO Fee Collection Management System"; 
-        }
-    }, [location]);
+    //         // OFFICER
+    //         case '/officer/login':
+    //             document.title = "Login as Officer";
+    //             break;
+    //         case '/officer/dashboard':
+    //             document.title = "Officer | Dashboard";
+    //             break;
+    //         case '/officer/review-fee':
+    //             document.title = "Officer | Review Fee";
+    //             break;
+    //         case '/officer/students':
+    //             document.title = "Officer | Students";
+    //         break;
+    //         case '/officer/students/add-new':
+    //             document.title = "Officer | Add Student";
+    //         break;
+    //         case '/officer/students/edit/:id':
+    //             document.title = "Officer | Edit Student";
+    //         break;
+    //         case '/officer/reports':
+    //             document.title = "Officer | Reports";
+    //         break;
+    //         case '/officer/profile':
+    //             document.title = "Officer | Profile";
+    //         break;
+    //         // TREASURER
+    //         case '/treasurer/login':
+    //             document.title = "Login as Treasurer";
+    //             break;
+    //         case '/treasurer/dashboard':
+    //             document.title = "Treasurer | Dashboard";
+    //             break;
+    //         case '/treasurer/manage-fee':
+    //             document.title = "Treasurer | Manage Fee";
+    //         break;
+    //         case '/treasurer/manage-fee/amount/:id':
+    //             document.title = "Treasurer | Pay in Amount";
+    //         break;
+    //         case '/treasurer/students':
+    //             document.title = "Treasurer | Students";
+    //         break;
+    //         case '/treasurer/students/add-new':
+    //             document.title = "Treasurer | Add Student";
+    //         break;
+    //         case '/treasurer/students/edit/:id':
+    //             document.title = "Treasurer | Edit Student";
+    //         break;
+    //         case '/treasurer/reports':
+    //             document.title = "Treasurer | Reports";
+    //         break;
+    //         case '/treasurer/daily-dues':
+    //             document.title = "Treasurer | Daily Dues";
+    //         break;
+    //         case '/treasurer/profile':
+    //             document.title = "Treasurer | Profile";
+    //         break;
+    //         default:
+    //             document.title = "SBO Fee Collection Management System"; 
+    //     }
+    // }, [location]);
 
     return (
         <Router>

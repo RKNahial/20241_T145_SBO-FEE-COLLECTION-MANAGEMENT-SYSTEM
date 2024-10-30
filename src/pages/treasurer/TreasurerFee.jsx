@@ -1,4 +1,5 @@
 // src/pages/treasurer/TreasurerFee.jsx
+import { Helmet } from 'react-helmet';
 import React, { useState } from "react";
 import TreasurerSidebar from "./TreasurerSidebar"; 
 import TreasurerNavbar from "./TreasurerNavbar";
@@ -229,6 +230,9 @@ const TreasurerFee = () => {
 
     return (
         <div className="sb-nav-fixed">
+            <Helmet>
+                <title>Treasurer | Manage Fee</title>
+            </Helmet>
             {/* NAVBAR AND SIDEBAR */}
             <TreasurerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>

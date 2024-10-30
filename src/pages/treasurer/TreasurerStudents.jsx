@@ -1,4 +1,5 @@
 // src/pages/treasurer/TreasurerStudents.jsx
+import { Helmet } from 'react-helmet';
 import React, { useState, useRef } from "react";
 import { Link } from 'react-router-dom';
 import TreasurerSidebar from "./TreasurerSidebar"; 
@@ -187,6 +188,9 @@ const TreasurerStudents = () => {
 
     return (
         <div className="sb-nav-fixed">
+            <Helmet>
+                <title>Treasurer | Students</title>
+            </Helmet>
             {/* NAVBAR AND SIDEBAR */}
             <TreasurerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
