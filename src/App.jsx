@@ -22,7 +22,16 @@ import LandingPage from './pages/LandingPage';
 
 import AdminLogin from './pages/admin/AdminLogin';
 import GovernorLogin from './pages/governor/GovernorLogin';
+
 import OfficerLogin from './pages/officer/OfficerLogin';
+import OfficerDashboard from './pages/officer/OfficerDashboard';
+// import OfficerFee from './pages/officer/OfficerFee';
+// import OfficerStudents from './pages/officer/OfficerStudents';
+// import OfficerAddStud from './pages/officer/OfficerAddStud';
+// import OfficerEditStud from './pages/officer/OfficerEditStud';
+// import OfficerReports from './pages/officer/OfficerReports';
+// import OfficerProfile from './pages/officer/OfficerProfile';
+
 
 import TreasurerLogin from './pages/treasurer/TreasurerLogin';
 import TreasurerDashboard from './pages/treasurer/TreasurerDashboard';
@@ -53,7 +62,27 @@ const App = () => {
             case '/officer/login':
                 document.title = "Login as Officer";
                 break;
-            
+            case '/officer/dashboard':
+                document.title = "Officer | Dashboard";
+                break;
+            case '/officer/review-fee':
+                document.title = "Officer | Review Fee";
+                break;
+            case '/officer/students':
+                document.title = "Officer | Students";
+            break;
+            case '/officer/students/add-new':
+                document.title = "Officer | Add Student";
+            break;
+            case '/officer/students/edit/:id':
+                document.title = "Officer | Edit Student";
+            break;
+            case '/officer/reports':
+                document.title = "Officer | Reports";
+            break;
+            case '/officer/profile':
+                document.title = "Officer | Profile";
+            break;
             // TREASURER
             case '/treasurer/login':
                 document.title = "Login as Treasurer";
@@ -105,6 +134,13 @@ const App = () => {
 
                 {/* OFFICER ROUTES */}
                 <Route path="/officer/login" element={<OfficerLogin />} />
+                <Route path="/officer/dashboard" element={<OfficerDashboard />} />
+                {/* <Route path="/officer/review-fee" element={<OfficerFee />} />
+                <Route path="/officer/students" element={<OfficerStudents/>} />
+                <Route path="/officer/students/add-new" element={<OfficerAddStud/>} />
+                <Route path="/officer/students/edit/:id" element={<TOfficerEditStud/>} />
+                <Route path="/officer/reports" element={<OfficerReports/>} />
+                <Route path="/officer/profile" element={<OfficerProfile/>} /> */}
 
 
                 {/* TREASURER ROUTES*/}
