@@ -4,13 +4,17 @@ const dotenv = require('dotenv').config();
 const cors = require('cors');
 const app = express();
 
+
+const corsMiddleware = require('../server/middleware/corsMiddleware');
+const jsonMiddleware = require('../server/middleware/josnMiddlware');
 // Importing route files
 const adminLoginRoutes = require('./routes/adminLogin');
 const officerLoginRoutes = require('./routes/officerLogin');
 const registerAdminRoutes = require('./routes/registerAdmin');
 const registerOfficerRoutes = require('./routes/registerOfficer');
 
-app.use(cors()); // Enable CORS for all routes
+app.use(corsMiddleware);
+app.use(jsonMiddleware);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URL, {
@@ -24,7 +28,7 @@ mongoose.connect(process.env.MONGO_URL, {
     console.error('Database connection error:', err);
 });
 
-app.use(express.json()); // Parse JSON bodies
+
 
 // Correct route prefixes
 app.use('/admin/login', adminLoginRoutes);
