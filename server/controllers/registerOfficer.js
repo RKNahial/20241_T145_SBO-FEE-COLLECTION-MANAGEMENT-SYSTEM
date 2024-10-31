@@ -1,16 +1,14 @@
-const User = require('../models/OfficerSchema');
+const User = require('../models/OfficerSchema'); // Ensure the model name matches your file
 const { hashPassword } = require('../helpers/authOfficer');
-
-// Test endpoint to check if the server is running
-
 
 // User registration
 const registerOfficer = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        // Destructure required fields from request body
+        const { studentID, name, email, password, position } = req.body;
 
         // Validate input
-        if (!name || !email || !password || password.length < 6) {
+        if (!studentID || !name || !email || !password || !position || password.length < 6) {
             return res.status(400).json({ error: 'Invalid input' });
         }
 
@@ -26,7 +24,8 @@ const registerOfficer = async (req, res) => {
         // Log hashed password for debugging (remove in production)
         console.log('Hashed Password:', hashedPassword);
 
-        const user = await User.create({ name, email, password: hashedPassword });
+        // Create a new officer
+        const user = await User.create({ studentID, name, email, password: hashedPassword, position });
 
         // Exclude password from the response for security reasons
         const { password: _, ...userWithoutPassword } = user.toObject();
@@ -37,4 +36,5 @@ const registerOfficer = async (req, res) => {
         res.status(500).json({ error: 'Server error', details: error.message });
     }
 };
-module.exports = {registerOfficer};
+
+module.exports = { registerOfficer };
