@@ -1,6 +1,6 @@
 const express = require('express');
 const Officer = express.Router();
-const { registerOfficer} = require ('../controllers/registerOfficer');
+const { registerOfficer} = require ('../controllers/OfficerController');
 
 
 Officer.post('/', registerOfficer); 
