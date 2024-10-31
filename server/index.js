@@ -18,8 +18,7 @@ app.use(jsonMiddleware);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
+  
 })
 .then(() => {
     console.log('Database Connected');
