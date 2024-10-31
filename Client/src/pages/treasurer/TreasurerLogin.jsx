@@ -4,7 +4,7 @@ import axios from 'axios';
 import ReCAPTCHA from 'react-google-recaptcha';
 import '../../assets/css/login.css';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { auth } from '../services/firebaseConfig';
+import { auth } from '../treasurer/firebase/firebaseConfig';
 import GoogleSignInButton from './googlelogin';
 
 const AdminLogin = () => {

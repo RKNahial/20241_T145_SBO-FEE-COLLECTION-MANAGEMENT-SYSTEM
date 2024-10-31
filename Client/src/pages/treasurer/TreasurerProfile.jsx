@@ -40,7 +40,7 @@ const TreasurerProfile = () => {
                                     </div>
                                     <div className="card-body">
                                         <form>
-                                        <div className="mb-3">
+                                            <div className="mb-3">
                                                 <label className="mb-1">Treasurer Name</label>
                                                 <input
                                                     type="text"
@@ -49,27 +49,11 @@ const TreasurerProfile = () => {
                                                 />
                                             </div>
                                             <div className="mb-3">
-                                                <label className="mb-1">School ID</label>
-                                                <input
-                                                    type="number"
-                                                    className="form-control system"
-                                                    placeholder="Enter your School ID"
-                                                />
-                                            </div>
-                                            <div className="mb-3">
                                                 <label className="mb-1">Email Address</label>
                                                 <input
                                                     type="email"
                                                     className="form-control"
                                                     placeholder="Enter your email"
-                                                />
-                                            </div>
-                                            <div className="mb-4">
-                                                <label className="mb-1">Position</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder="Enter your position"
                                                 />
                                             </div>
                                             <div className="mb-4">

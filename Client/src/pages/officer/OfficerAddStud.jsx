@@ -56,6 +56,14 @@ const OfficerAddStud = () => {
                                                     placeholder="Enter student ID"
                                                 />
                                             </div>
+                                            <div className="mb-3">
+                                                <label className="mb-1">Address</label>
+                                                <input
+                                                    type="email"
+                                                    className="form-control"
+                                                    placeholder="Enter address"
+                                                />
+                                            </div>
                                             <div className="mb-4">
                                                 <label className="mb-1">Institutional Email</label>
                                                 <input
