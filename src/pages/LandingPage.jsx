@@ -89,12 +89,56 @@ const LandingPage = () => {
                 </div>
             </section>
 
-
-            <section id="services">
-                <h2 className="landing-page__heading--2" style={{ fontSize: '1.95rem', paddingBottom: '1.25rem' }}>Our Services</h2>
-                <p>We offer a range of services, including online fee collection, comprehensive reporting tools, and user-friendly interfaces for administrators.</p>
+            <section id="services" className='services'>
+                <div className="container">
+                    <h2 className="landing-page__heading--2 text-center">Our Services</h2>
+                    <div className="row justify-content-center">
+                        <div className="col-md-4 col-sm-12">
+                            <div className="service-card">
+                                <div className="icon-container">
+                                    <i className="fas fa-coins"></i>
+                                </div>
+                                <h3>Payment Tracking</h3>
+                                <p>
+                                    Easily monitor payments for various fees like college shirts and event costs, with clear summaries of payment statuses.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="col-md-4 col-sm-12">
+                            <div className="service-card">
+                                <div className="icon-container">
+                                    <i className="fas fa-receipt"></i>
+                                </div>
+                                <h3>Automated Receipts</h3>
+                                <p>
+                                    Generate and email receipts to students upon successful payment, providing immediate proof of transactions.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="col-md-4 col-sm-12">
+                            <div className="service-card">
+                                <div className="icon-container">
+                                    <i className="fas fa-users"></i>
+                                </div>
+                                <h3>Student and Officer Management</h3>
+                                <p>
+                                    Allow officers and the administrator to add, modify, and archive student and officer records efficiently.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
 
+            <section id="footer" className='footer' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '2rem 0', marginTop: '2rem', backgroundColor: '#f8f9fa' }}>
+    <div className="container">
+        <div className="row align-items-center text-center">
+            <div className="col-md-12">
+                <p style={{ margin: '0', fontSize: '1rem', color: '#333' }}>© 2024 College of Technology Student Body Organization. Developed by LANAng Lakas.</p>
+            </div>
+        </div>
+    </div>
+</section>
         </div>
     );
 };
