@@ -1,13 +1,3 @@
-* {
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-}
-
-body {
-  background-color: var(--secondary-color);
-}
-
 .landing-page__nav {
   max-width: var(--max-width);
   margin: auto;
@@ -316,11 +306,11 @@ body {
 }
 
 /* SERVICES */
-.services{
+.landing-page .services{
   margin-bottom: 2rem;
 }
 
-.row {
+.services .row {
   display: flex; 
   justify-content: center; 
   flex-wrap: wrap; 
