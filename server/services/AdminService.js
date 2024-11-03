@@ -31,7 +31,7 @@ const loginAdminService = async (email, password, recaptchaToken) => {
     return { status: 200, data: { message: 'Login successful!', admin: adminWithoutPassword } };
 };
 
-const registerUserService = async ({ name, email, password, isAdmin }) => {
+const registerUserService = async ({ ID, name, email, password, isAdmin }) => {
     // Validate input
     if (!name || !email || !password || password.length < 6) {
         throw new Error('Invalid input');
@@ -48,6 +48,7 @@ const registerUserService = async ({ name, email, password, isAdmin }) => {
     
     // Create user
     const user = await Admin.create({
+        ID,
         name,
         email,
         password: hashedPassword,

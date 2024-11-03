@@ -1,15 +1,14 @@
-// src/pages/officer/OfficerLogin.jsx
 import React, { useState } from "react";
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import ReCAPTCHA from 'react-google-recaptcha';
 import '../../assets/css/login.css';
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { auth } from '../officer/firebase/firebaseConfig';
 import GoogleSignInButton from './googlelogin';
 
-const AdminLogin = () => {
+const OfficerLogin = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
@@ -18,15 +17,29 @@ const AdminLogin = () => {
     const navigate = useNavigate();
 
     const handleGoogle = async () => {
+        await signOut(auth); // Sign out any existing user
         const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' }); // Prompt account selection every time
+
         try {
             const result = await signInWithPopup(auth, provider);
             const user = result.user;
-            console.log('Google sign-in successful:', user);
-            navigate('/officer/dashboard');
-            setTimeout(() => {
-                setMessage('');
-            }, 3000);
+
+            if (user && user.email) {
+                const response = await axios.post('http://localhost:8000/officer/google', {
+                    email: user.email
+                });
+
+
+                if (response.data.success) {
+                    console.log('Google sign-in successful:', user);
+                    navigate('/officer/dashboard');
+                } else {
+                    setMessage('This Google account is not authorized for officer access.');
+                }
+            } else {
+                setMessage('Google sign-in failed. No user email found.');
+            }
         } catch (error) {
             console.error('Google sign-in error:', error);
             setMessage('Google sign-in failed. Please try again.');
@@ -147,4 +160,4 @@ const AdminLogin = () => {
     );
 };
 
-export default AdminLogin;
+export default OfficerLogin;

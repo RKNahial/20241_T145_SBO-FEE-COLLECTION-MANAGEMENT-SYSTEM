@@ -28,7 +28,7 @@ const loginOfficerService = async (email, password, recaptchaToken) => {
 
 const registerOfficerService = async ({ studentID, name, email, password, position }) => {
     // Validate input
-    if (!studentID || !name || !email || !password || !position || password.length < 6) {
+    if (!studentID || !name || !email || !password || !position || password.length < 10) {
         throw new Error('Invalid input');
     }
 

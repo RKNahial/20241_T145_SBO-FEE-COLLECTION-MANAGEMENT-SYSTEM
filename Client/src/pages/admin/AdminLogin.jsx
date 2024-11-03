@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import ReCAPTCHA from 'react-google-recaptcha';
 import '../../assets/css/login.css';
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { auth } from '../admin/firebase/firebaseConfig';
 import GoogleSignInButton from './googlelogin';
 
@@ -17,21 +17,8 @@ const AdminLogin = () => {
     const [recaptchaToken, setRecaptchaToken] = useState(null);
     const navigate = useNavigate();
 
-    const handleGoogle = async () => {
-        const provider = new GoogleAuthProvider();
-        try {
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-            console.log('Google sign-in successful:', user);
-            navigate('/sbofeecollection'); // Navigate on success
-        } catch (error) {
-            console.error('Google sign-in error:', error);
-            setMessage('Google sign-in failed. Please try again.');
-            setTimeout(() => {
-                setMessage('');
-            }, 3000);
-        }
-    };
+
+
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -53,6 +40,39 @@ const AdminLogin = () => {
             }, 3000);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleGoogle = async () => {
+        // Sign out any existing user to prevent auto-login
+        await signOut(auth);
+
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' }); // Enforce account selection each time
+
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+
+            // Ensure the user object is valid and has an email
+            if (user && user.email) {
+                // Send the email to the backend for verification
+                const response = await axios.post('http://localhost:8000/api/auth/verify-google-user', {
+                    email: user.email
+                });
+
+                if (response.data.authorized) {
+                    console.log('Google sign-in successful:', user);
+                    navigate('/sbofeecollection'); // Redirect to the protected route
+                } else {
+                    setMessage('Access denied. Only authorized admins can log in.');
+                }
+            } else {
+                setMessage('Google sign-in failed. No user email found.');
+            }
+        } catch (error) {
+            console.error('Google sign-in error:', error);
+            setMessage('Google sign-in failed. Please try again.');
         }
     };
 

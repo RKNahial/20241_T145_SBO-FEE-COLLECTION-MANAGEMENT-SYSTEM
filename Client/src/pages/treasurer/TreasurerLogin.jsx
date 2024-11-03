@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import ReCAPTCHA from 'react-google-recaptcha';
 import '../../assets/css/login.css';
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { auth } from '../treasurer/firebase/firebaseConfig';
 import GoogleSignInButton from './googlelogin';
 
@@ -15,19 +15,35 @@ const AdminLogin = () => {
     const [recaptchaToken, setRecaptchaToken] = useState(null);
     const navigate = useNavigate();
 
+
     const handleGoogle = async () => {
         const provider = new GoogleAuthProvider();
         try {
+            // Sign out any existing user session to ensure explicit sign-in
+            if (auth.currentUser) {
+                await signOut(auth);
+            }
+
+            // Trigger Google Sign-In
             const result = await signInWithPopup(auth, provider);
             const user = result.user;
-            console.log('Google sign-in successful:', user);
-            navigate('/treasurer/dashboard'); // Navigate on success
+
+            // Verify if the user is authorized as Treasurer
+            const response = await axios.post('http://localhost:8000/treasurer/google/verify-treasurer', {
+                email: user.email
+            });
+
+            if (response.data.authorized) {
+                console.log('User authorized as Treasurer:', user);
+                navigate('/treasurer/dashboard');
+            } else {
+                setMessage(response.data.message);
+                setTimeout(() => setMessage(''), 3000);
+            }
         } catch (error) {
             console.error('Google sign-in error:', error);
             setMessage('Google sign-in failed. Please try again.');
-            setTimeout(() => {
-                setMessage('');
-            }, 3000);
+            setTimeout(() => setMessage(''), 3000);
         }
     };
 
@@ -35,7 +51,7 @@ const AdminLogin = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await axios.post('http://localhost:8000/officer/login', {
+            const response = await axios.post('http://localhost:8000/treasurer/login', {
                 email,
                 password,
                 recaptchaToken
