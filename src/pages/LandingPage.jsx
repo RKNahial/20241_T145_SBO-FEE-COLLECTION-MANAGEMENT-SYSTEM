@@ -55,52 +55,35 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            <section id="about" className='about'>
-                    <div className="container">
-                    <div className="row">
-                        <div className="col-md-12">
-                        <div className="titlepage">
-                            <h2 className="landing-page__heading--2" style={{ fontSize: '1.95rem', paddingBottom: '1.25rem' }}>About Us</h2>
-                        </div>
+            <section id="about" className='about' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '2rem 0', marginBottom: '2rem'}}>
+                <div className="container">
+                    <div className="row align-items-center">
+                        <div className="col-md-12 text-center">
+                            <div className="titlepage">
+                                <h2 className="landing-page__heading--2" style={{ fontSize: '1.95rem' }}>About Us</h2>
+                            </div>
                         </div>
                     </div>
-                    <div className="row">
-                        <div className="col-md-12">
-                        <div className="about_box">
-                            <span>01</span>
-                            <p>
-                            We prioritize convenience at every step of the rental process. 
-                            With easy online booking and flexible pickup and drop-off options, 
-                            renting a car with us is seamless and hassle-free. Our locations 
-                            are strategically situated for maximum accessibility, ensuring that 
-                            you can quickly get on the road and start your journey with minimal delay.
-                            </p>
+                    <div className="row align-items-center">
+                        <div className="col-md-6">
+                            <div className="about_box">
+                                <span>We’re here to transform fee collection into a simple and transparent process for the student body organization.</span>
+                            </div>
+                            <div className="about_box">
+                                <p>
+                                The SBO Fee Collection Management System is designed for the College of Technology Student Body Organization (COT-SBO) to simplify and enhance fee management. 
+                                Our user-friendly platform minimizes human error and ensures accurate tracking of student fees and payments. 
+                                </p>
+                            </div>
+                            <div className="about_box">
+                                <p>
+                                We value integrity and efficiency, which is why our system incorporates distinct user roles with tailored permissions.
+                                This structure not only secures financial data, which allows your organization to focus on serving our members better.
+                                </p>
+                            </div>
                         </div>
-                        </div>
-                        <div className="col-md-12">
-                        <div className="about_box">
-                            <span>02</span>
-                            <p>
-                            We offer a diverse fleet of vehicles to suit every need and preference. 
-                            Whether you're embarking on a solo road trip, a family vacation, or a 
-                            business excursion, we have the perfect car for you. From compact cars 
-                            for urban adventures to spacious SUVs for outdoor escapades, our selection 
-                            ensures that you'll find the ideal ride for any occasion.
-                            </p>
-                        </div>
-                        </div>
-                        <div className="col-md-12">
-                        <div className="about_box">
-                            <span>03</span>
-                            <p>
-                            Customer satisfaction is our top priority, and we go above and beyond 
-                            to provide exceptional service and support. Our knowledgeable and friendly 
-                            staff are always ready to assist you, whether you have questions about 
-                            vehicle features, need assistance during your rental period, or require 
-                            help resolving any issues. With our dedication to customer care, you can 
-                            trust us to make your car rental experience smooth, enjoyable, and worry-free.
-                            </p>
-                        </div>
+                        <div className="col-md-6">
+                            <img src="public/images/org.jpg" alt="About Us" className="about-image" />
                         </div>
                     </div>
                 </div>
