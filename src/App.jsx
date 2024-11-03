@@ -50,7 +50,7 @@ const App = () => {
             <Routes>
 
                 {/* LANDING PAGE */}
-                <Route path="/sbofeecollection" element={<LandingPage />} />
+                <Route path="/sbo-fee-collection" element={<LandingPage />} />
 
                 {/* ADMIN ROUTES */}
                 <Route path="/admin/login" element={<AdminLogin />} />

@@ -25,7 +25,7 @@ const TreasurerSidebar = ({ isCollapsed }) => {
                                 <i className="fas fa-coins icon-space"></i>{!isCollapsed && <span> Daily Dues</span>}
                             </NavLink>
                         </div>
-                        <NavLink className={({ isActive }) => `nav-link logout-link ${isActive ? 'active' : ''}`} to="/sbofeecollection" end>
+                        <NavLink className={({ isActive }) => `nav-link logout-link ${isActive ? 'active' : ''}`} to="/sbo-fee-collection" end>
                             <i className="fas fa-sign-out-alt icon-space logout-link"></i>{!isCollapsed && <span> Logout</span>}
                         </NavLink>
                     </div>
