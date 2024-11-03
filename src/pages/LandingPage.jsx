@@ -39,8 +39,9 @@ const LandingPage = () => {
             <section className="landing-page__container">
                 <div className="landing-page__content-container">
                     <h1>
-                        <span style={{ fontSize: '1.95rem' }}>Start your Journey</span>
-                        <br /><span className="landing-page__heading--1">Collect Fees with a Click!</span><br />
+                        <span style={{ fontSize: '2rem', paddingBottom: '2rem'}}>Start your Journey</span>
+                        <br /><span className="landing-page__heading--1">Collect Fees</span><br />
+                        <span className="landing-page__heading--2"  style={{ marginTop: '1.25rem', display: 'inline-block' }}>with a Click!</span>
                     </h1>
                     <p>
                         Simplify your fee management with our fee collection system. 
@@ -107,7 +108,7 @@ const LandingPage = () => {
 
 
             <section id="services">
-                <h2 className="landing-page__heading--2" style={{ fontSize: '1.95rem', paddingBottom: '1.25rem' }}>Services</h2>
+                <h2 className="landing-page__heading--2" style={{ fontSize: '1.95rem', paddingBottom: '1.25rem' }}>Our Services</h2>
                 <p>We offer a range of services, including online fee collection, comprehensive reporting tools, and user-friendly interfaces for administrators.</p>
             </section>
 
