@@ -23,7 +23,7 @@ const OfficerSidebar = ({ isCollapsed }) => {
                                 <i className="far fa-file-alt icon-space"></i>{!isCollapsed && <span> Reports</span>}
                             </NavLink>
                         </div>
-                        <NavLink className={({ isActive }) => `nav-link logout-link ${isActive ? 'active' : ''}`} to="/sbofeecollection" end>
+                        <NavLink className={({ isActive }) => `nav-link logout-link ${isActive ? 'active' : ''}`} to="/sbo-fee-collection" end>
                             <i className="fas fa-sign-out-alt icon-space logout-link"></i>{!isCollapsed && <span> Logout</span>}
                         </NavLink>
                     </div>

@@ -12,10 +12,6 @@ import './assets/css/button.css';
 import './assets/css/table.css';
 import './assets/css/dashboard.css';
 
-// IMPORT COMPONENTS
-import EventList from './components/EventList'; 
-import CalendarView from './components/CalendarView';
-
 // IMPORT PAGES
 import LandingPage from './pages/LandingPage';
 
@@ -49,7 +45,7 @@ const App = () => {
             <Routes>
 
                 {/* LANDING PAGE */}
-                <Route path="/sbofeecollection" element={<LandingPage />} />
+                <Route path="/sbo-fee-collection" element={<LandingPage />} />
 
                 {/* ADMIN ROUTES */}
                 <Route path="/admin/login" element={<AdminLogin />} />
