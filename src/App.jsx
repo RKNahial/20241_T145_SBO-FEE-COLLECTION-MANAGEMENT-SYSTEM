@@ -27,6 +27,7 @@ import AdminStudents from './pages/admin/AdminStudents';
 import AdminAddStud from './pages/admin/AdminAddStud';
 import AdminEditStud from './pages/admin/AdminEditStud';
 import AdminOfficers from './pages/admin/AdminOfficers';
+import AdminAddOfficer from './pages/admin/AdminAddOfficer';
 
 import AdminProfile from './pages/admin/AdminProfile';
 
@@ -70,6 +71,8 @@ const App = () => {
                 <Route path="/admin/students/add-new" element={<AdminAddStud/>} />
                 <Route path="/admin/students/edit/:id" element={<AdminEditStud/>} />
                 <Route path="/admin/officers" element={<AdminOfficers/>} />
+                <Route path="/admin/officers/add-new" element={<AdminAddOfficer/>} />
+                
 
                 
                 <Route path="/admin/profile" element={<AdminProfile/>} />

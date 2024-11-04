@@ -36,16 +36,16 @@ const AdminAddOfficer = () => {
                             <div className="col-md-6">
                                 <div className="card mb-4">
                                     <div className="card-header">
-                                        <i className="far fa-plus me-2"></i> <strong>Add New Student</strong>
+                                        <i className="far fa-plus me-2"></i> <strong>Add New Officer</strong>
                                     </div>
                                     <div className="card-body">
                                         <form>
                                             <div className="mb-3">
-                                                <label className="mb-1">Student Name</label>
+                                                <label className="mb-1">Officer Name</label>
                                                 <input
                                                     type="text"
                                                     className="form-control system"
-                                                    placeholder="Enter student name"
+                                                    placeholder="Enter officer name"
                                                 />
                                             </div>
                                             <div className="mb-3">
@@ -65,22 +65,12 @@ const AdminAddOfficer = () => {
                                                 />
                                             </div>
                                             <div className="mb-4">
-                                                <label className="mb-1">Year Level</label>
-                                                <input
-                                                    type="password"
-                                                    className="form-control"
-                                                    placeholder="Enter year level"
-                                                />
-                                            </div>
-                                            <div className="mb-4">
-                                                <label className="mb-1">Choose Program</label>
-                                                <select className="form-control" defaultValue="">
-                                                    <option value="" disabled>Select a program</option>
-                                                    <option value="BSIT">BSIT</option>
-                                                    <option value="BSEMC">BSEMC</option>
-                                                    <option value="BSET">BSET</option>
-                                                    <option value="BSAT">BSAT</option>
-                                                    <option value="BSFT">BSFT</option>
+                                                <label className="mb-1">Choose Position</label>
+                                                <select className="form-control form-select" defaultValue="">
+                                                    <option value="" disabled>Select a position</option>
+                                                    <option value="Governor">Governor</option>
+                                                    <option value="Governor">Governor</option>
+                                                    
                                                 </select>
                                             </div>
                                             <div className="mb-0">
