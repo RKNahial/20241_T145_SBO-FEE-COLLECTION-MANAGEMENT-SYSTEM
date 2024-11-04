@@ -20,6 +20,8 @@ import CalendarView from './components/CalendarView';
 import LandingPage from './pages/LandingPage';
 
 import AdminLogin from './pages/admin/AdminLogin';
+import AdminDashboard from './pages/admin/AdminDashboard';
+
 import GovernorLogin from './pages/governor/GovernorLogin';
 
 import OfficerLogin from './pages/officer/OfficerLogin';
@@ -54,6 +56,7 @@ const App = () => {
 
                 {/* ADMIN ROUTES */}
                 <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
                 {/* GOVERNOR ROUTES */}
                 <Route path="/governor/login" element={<GovernorLogin />} />
