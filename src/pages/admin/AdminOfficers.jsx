@@ -244,13 +244,13 @@ const AdminOfficers = () => {
                                 {/* ADD NEW STUDENT AND IMPORT EXCEL BUTTON */}
                                 <div className="d-flex justify-content-between mb-3">
                                     <div className="d-flex">
-                                        <Link to="/admin/students/add-new" className="add-button btn btn-sm me-2">
+                                        <Link to="/admin/officers/add-new" className="add-button btn btn-sm me-2">
                                             <i className="fas fa-plus me-2"></i>
                                             Add New Officer
                                         </Link>
                                     </div>
                                     <form method="get" className="search-bar ">
-                                        <input type="text" placeholder="Search student" className="search-input" />
+                                        <input type="text" placeholder="Search officer" className="search-input" />
                                         <button type="submit" className="search">
                                             <i className="fas fa-search"></i>
                                         </button>
@@ -262,8 +262,8 @@ const AdminOfficers = () => {
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Student ID</th>
-                                            <th>Student Name</th>
+                                            <th>Officer ID</th>
+                                            <th>Officer Name</th>
                                             <th>Position</th>
                                             <th>Actions</th>
                                         </tr>
@@ -274,8 +274,7 @@ const AdminOfficers = () => {
                                                 <td>{index + indexOfFirstItem + 1}</td> 
                                                 <td>{student.id_no}</td>
                                                 <td>{student.name}</td>
-                                                <td>{student.year_level}</td>
-                                                <td>{student.program}</td>
+                                                <td>{student.position}</td>
                                                 <td>
                                                     <Link to={`/admin/officers/edit/${student.id_no}`} className="btn btn-edit btn-sm">
                                                         <i className="fas fa-edit"></i>

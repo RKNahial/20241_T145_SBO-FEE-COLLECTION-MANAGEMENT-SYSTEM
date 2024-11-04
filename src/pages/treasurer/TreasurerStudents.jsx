@@ -18,121 +18,141 @@ const TreasurerStudents = () => {
             id_no: '1901104188',
             name: 'Mary Joy Alonzo',
             year_level: '4th Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            status: 'Active'
         },
         {
             id_no: '2101102924',
             name: 'Jonathan Cruz',
             year_level: '4th Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            status: 'Active'
         },
         {
             id_no: '1901102046',
             name: 'Reena Dela Cruz',
             year_level: '3rd Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            status: 'Archived'
         },
         {
             id_no: '2101101354',
             name: 'Peter John Garcia',
             year_level: '4th Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            status: 'Active'
         },
         {
             id_no: '1901103113',
             name: 'Jessa Mae Javier',
             year_level: '2nd Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            status: 'Active'
         },
         {
             id_no: '2101101979',
-            name: 'Mark Anton  Lim',
+            name: 'Mark Anton Lim',
             year_level: '1st Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            status: 'Archived'
         },
         {
             id_no: '2101103848',
             name: 'Anna Marie Mendoza',
             year_level: '4th Year',
-            program: 'BSIT'
-        },            
+            program: 'BSIT',
+            status: 'Active'
+        },
         {
             id_no: '1901104713',
             name: 'Liza Reyes',
             year_level: '4th Year',
-            program: 'BSIT'
-        },            
+            program: 'BSIT',
+            status: 'Archived'
+        },
         {
             id_no: '1901104188',
             name: 'Samuel Santos',
             year_level: '4th Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            status: 'Active'
         },
         {
             id_no: '1901104235',
             name: 'Mary Joy Alonzo',
             year_level: '3rd Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            status: 'Active'
         },
         {
             id_no: '1901104188',
             name: 'I AM',
             year_level: '4th Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            status: 'Archived'
         },
         {
             id_no: '2101102924',
             name: 'ONLY TESTING',
             year_level: '4th Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            status: 'Active'
         },
         {
             id_no: '1901102046',
             name: 'IF THE PAGINATION',
             year_level: '3rd Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            status: 'Active'
         },
         {
             id_no: '2101101354',
             name: 'IS WORKING',
             year_level: '4th Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            status: 'Active'
         },
         {
             id_no: '1901103113',
             name: 'BLAH BLAH BLAH',
             year_level: '2nd Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            status: 'Archived'
         },
         {
             id_no: '2101101979',
             name: 'PROPER NAME',
             year_level: '1st Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            status: 'Active'
         },
         {
             id_no: '2101103848',
             name: 'PLACE NAME',
             year_level: '4th Year',
-            program: 'BSIT'
-        },            
+            program: 'BSIT',
+            status: 'Active'
+        },
         {
             id_no: '1901104713',
             name: 'BACKSTORY STUFF',
             year_level: '4th Year',
-            program: 'BSIT'
-        },            
+            program: 'BSIT',
+            status: 'Archived'
+        },
         {
             id_no: '1901104188',
             name: 'Samuel Santos',
             year_level: '4th Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            status: 'Active'
         },
         {
             id_no: '1901104235',
             name: 'Mary Joy Alonzo',
             year_level: '3rd Year',
-            program: 'BSIT'
+            program: 'BSIT',
+            status: 'Active'
         }
     ];
 
@@ -150,6 +170,8 @@ const TreasurerStudents = () => {
             }, 2500);
         }
     };
+
+    // HANDLE UNARCHIVE
 
     // IMPORT EXCEL
     const fileInputRef = useRef(null);
@@ -222,13 +244,13 @@ const TreasurerStudents = () => {
                                         </div>
                                     )}
                                 {/* ADD NEW STUDENT AND IMPORT EXCEL BUTTON */}
-                                <div className="d-flex justify-content-between mb-3">
-                                    <div className="d-flex">
+                                <div className="d-flex justify-content-between mb-3 align-items-center">
+                                    <div className="d-flex me-auto"> {/* Added me-auto to push the rest to the right */}
                                         <Link to="/treasurer/students/add-new" className="add-button btn btn-sm me-2">
                                             <i className="fas fa-plus me-2"></i>
                                             Add New Student
                                         </Link>
-                                        <button onClick={handleImportClick} className="add-button btn btn-sm">
+                                        <button onClick={handleImportClick} className="add-button btn btn-sm me-2">
                                             <i className="fas fa-file-excel me-2"></i>
                                             Import Excel
                                         </button>
@@ -240,9 +262,19 @@ const TreasurerStudents = () => {
                                             onChange={handleFileChange}
                                         />
                                     </div>
-                                    <form method="get" className="search-bar ">
-                                        <input type="text" placeholder="Search student" className="search-input" />
-                                        <button type="submit" className="search">
+                                    <div className="d-flex align-items-center me-3"> 
+                                        <label className="me-2 mb-0">Student Category</label>
+                                        <div style={{ width: 'auto' }}>
+                                            <select className="form-control" defaultValue="">
+                                                <option value="" disabled>Select status</option>
+                                                <option value="Active">Active</option>
+                                                <option value="Archived">Archived</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <form method="get" className="d-flex search-bar">
+                                        <input type="text" placeholder="Search student" className="search-input me-2" />
+                                        <button type="submit" className="search btn btn-sm">
                                             <i className="fas fa-search"></i>
                                         </button>
                                     </form>
@@ -257,6 +289,7 @@ const TreasurerStudents = () => {
                                             <th>Student Name</th>
                                             <th>Year Level</th>
                                             <th>Program</th>
+                                            <th>Status</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -268,20 +301,32 @@ const TreasurerStudents = () => {
                                                 <td>{student.name}</td>
                                                 <td>{student.year_level}</td>
                                                 <td>{student.program}</td>
+                                                <td>{student.status}</td>
                                                 <td>
-                                                    <Link to={`/treasurer/students/edit/${student.id_no}`} className="btn btn-edit btn-sm">
-                                                        <i className="fas fa-edit"></i>
-                                                    </Link>
-                                                    <button 
-                                                    className="btn btn-notes btn-sm" 
-                                                    onClick={() => handleOpenGoogleNotes(student.id_no)}
-                                                >
-                                                    <i className="fas fa-sticky-note"></i> 
-                                                </button>
-                                                    <button className="btn btn-archive btn-sm" onClick={() => handleArchive(student.name)}>
-                                                            <i className="fas fa-archive"></i>
-                                                    </button>
-                                                </td>
+    <Link to={`/treasurer/students/edit/${student.id_no}`} className="btn btn-edit btn-sm">
+        <i className="fas fa-edit"></i>
+    </Link>
+    <button 
+        className="btn btn-notes btn-sm" 
+        onClick={() => handleOpenGoogleNotes(student.id_no)}
+    >
+        <i className="fas fa-sticky-note"></i> 
+    </button>
+    <button 
+        className={`btn btn-archive btn-sm ${student.status === 'Archived' ? 'btn-open' : ''}`} 
+        onClick={() => {
+            if (student.status === 'Active') {
+                handleArchive(student.name);
+            } else {
+                // Handle unarchive action
+                console.log(`${student.name} has been unarchived.`);
+                // Update student status logic here
+            }
+        }}
+    >
+        <i className={`fas fa-${student.status === 'Active' ? 'archive' : 'box-open'}`}></i>
+    </button>
+</td>
                                             </tr>
                                         ))}
                                     </tbody>
