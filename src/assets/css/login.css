@@ -92,6 +92,6 @@ h2 .btn {
 .g-signin2 { display: flex; justify-content: center; }
 .g-recaptcha { margin: 1rem 0; display: flex; justify-content: center; }
 
-.btn:disabled {
+.login-container .btn:disabled {
   background-color: #FFB74D; 
 }
