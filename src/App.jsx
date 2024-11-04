@@ -2,15 +2,17 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
 
-// IMPORT BOOTSTRAP
+// IMPORT BOOTSTRAP AND FONT AWESOME
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'; 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'font-awesome/css/font-awesome.min.css';
 
 // IMPORT CSS
 import './assets/css/nav-sidebar.css';
 import './assets/css/button.css';
 import './assets/css/table.css';
 import './assets/css/dashboard.css';
+
 
 // IMPORT COMPONENTS
 import EventList from './components/EventList'; 
@@ -21,6 +23,12 @@ import LandingPage from './pages/LandingPage';
 
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminStudents from './pages/admin/AdminStudents';
+import AdminAddStud from './pages/admin/AdminAddStud';
+import AdminEditStud from './pages/admin/AdminEditStud';
+
+import AdminProfile from './pages/admin/AdminProfile';
+
 
 import GovernorLogin from './pages/governor/GovernorLogin';
 
@@ -57,6 +65,12 @@ const App = () => {
                 {/* ADMIN ROUTES */}
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/students" element={<AdminStudents/>} />
+                <Route path="/admin/students/add-new" element={<AdminAddStud/>} />
+                <Route path="/admin/students/edit/:id" element={<AdminEditStud/>} />
+
+                
+                <Route path="/admin/profile" element={<AdminProfile/>} />
 
                 {/* GOVERNOR ROUTES */}
                 <Route path="/governor/login" element={<GovernorLogin />} />

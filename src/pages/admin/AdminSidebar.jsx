@@ -12,17 +12,17 @@ const AdminSidebar = ({ isCollapsed }) => {
                             <NavLink className={({ isActive }) => `nav-link mt-4 ${isActive ? 'active' : ''}`} to="/admin/dashboard" end>
                                 <i className="fas fa-home icon-space"></i>{!isCollapsed && <span> Dashboard</span>}
                             </NavLink>
-                            <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/admin/manage-fee" end>
-                                <i className="fas fa-hand-holding-usd icon-space"></i>{!isCollapsed && <span> Manage Fee</span>}
-                            </NavLink>
                             <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/admin/students" end>
                                 <i className="far fa-user icon-space"></i>{!isCollapsed && <span> Students</span>}
                             </NavLink>
-                            <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/admin/reports" end>
-                                <i className="far fa-file-alt icon-space"></i>{!isCollapsed && <span> Reports</span>}
+                            <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/admin/officers" end>
+                                <i className="fa fa-users icon-space"></i>{!isCollapsed && <span> Officers</span>}
                             </NavLink>
-                            <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/admin/daily-dues" end>
-                                <i className="fas fa-coins icon-space"></i>{!isCollapsed && <span> Daily Dues</span>}
+                            <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/admin/manage-admin" end>
+                                <i className="fa fa-user-cog icon-space"></i>{!isCollapsed && <span> Admin</span>}
+                            </NavLink>
+                            <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/admin/school-year" end>
+                                <i className="fa fa-school icon-space"></i>{!isCollapsed && <span> School Year</span>}
                             </NavLink>
                         </div>
                         <NavLink className={({ isActive }) => `nav-link logout-link ${isActive ? 'active' : ''}`} to="/sbo-fee-collection" end>
