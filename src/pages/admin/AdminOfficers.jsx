@@ -19,140 +19,160 @@ const AdminOfficers = () => {
             name: 'Mary Joy Alonzo',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'Treasurer'
+            position: 'Treasurer',
+            status: 'Active'
         },
         {
             id_no: '2101102924',
             name: 'Jonathan Cruz',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'Governor'
+            position: 'Governor',
+            status: 'Active'
         },
         {
             id_no: '1901102046',
             name: 'Reena Dela Cruz',
             year_level: '3rd Year',
             program: 'BSIT',
-            position: 'P.I.O'
+            position: 'P.I.O',
+            status: 'Archived'
         },
         {
             id_no: '2101101354',
             name: 'Peter John Garcia',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'Secretary'
+            position: 'Secretary',
+            status: 'Active'
         },
         {
             id_no: '1901103113',
             name: 'Jessa Mae Javier',
             year_level: '2nd Year',
             program: 'BSIT',
-            position: '2nd Year Representative'
+            position: '2nd Year Representative',
+            status: 'Active'
         },
         {
             id_no: '2101101979',
             name: 'Mark Anton Lim',
             year_level: '1st Year',
             program: 'BSIT',
-            position: '1st Year Representative'
+            position: '1st Year Representative',
+            status: 'Archived'
         },
         {
             id_no: '2101103848',
             name: 'Anna Marie Mendoza',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'Treasurer'
+            position: 'Treasurer',
+            status: 'Active'
         },            
         {
             id_no: '1901104713',
             name: 'Liza Reyes',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'Governor'
+            position: 'Governor',
+            status: 'Archived'
         },            
         {
             id_no: '1901104188',
             name: 'Samuel Santos',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'P.I.O'
+            position: 'P.I.O',
+            status: 'Active'
         },
         {
             id_no: '1901104235',
             name: 'Mary Joy Alonzo',
             year_level: '3rd Year',
             program: 'BSIT',
-            position: '3rd Year Representative'
+            position: '3rd Year Representative',
+            status: 'Active'
         },
         {
             id_no: '1901104188',
             name: 'I AM',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'Secretary'
+            position: 'Secretary',
+            status: 'Archived'
         },
         {
             id_no: '2101102924',
             name: 'ONLY TESTING',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'Governor'
+            position: 'Governor',
+            status: 'Active'
         },
         {
             id_no: '1901102046',
             name: 'IF THE PAGINATION',
             year_level: '3rd Year',
             program: 'BSIT',
-            position: '3rd Year Representative'
+            position: '3rd Year Representative',
+            status: 'Archived'
         },
         {
             id_no: '2101101354',
             name: 'IS WORKING',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'P.I.O'
+            position: 'P.I.O',
+            status: 'Active'
         },
         {
             id_no: '1901103113',
             name: 'BLAH BLAH BLAH',
             year_level: '2nd Year',
             program: 'BSIT',
-            position: '2nd Year Representative'
+            position: '2nd Year Representative',
+            status: 'Archived'
         },
         {
             id_no: '2101101979',
             name: 'PROPER NAME',
             year_level: '1st Year',
             program: 'BSIT',
-            position: '1st Year Representative'
+            position: '1st Year Representative',
+            status: 'Active'
         },
         {
             id_no: '2101103848',
             name: 'PLACE NAME',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'Secretary'
+            position: 'Secretary',
+            status: 'Archived'
         },            
         {
             id_no: '1901104713',
             name: 'BACKSTORY STUFF',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'Governor'
+            position: 'Governor',
+            status: 'Active'
         },            
         {
             id_no: '1901104188',
             name: 'Samuel Santos',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'P.I.O'
+            position: 'P.I.O',
+            status: 'Active'
         },
         {
             id_no: '1901104235',
             name: 'Mary Joy Alonzo',
             year_level: '3rd Year',
             program: 'BSIT',
-            position: '3rd Year Representative'
+            position: '3rd Year Representative',
+            status: 'Archived'
         }
     ];
 
@@ -170,6 +190,21 @@ const AdminOfficers = () => {
             }, 2500);
         }
     };
+
+    // HANDLE UNARCHIVE
+    const handleUnarchive = (studentName) => {
+        const confirmUnarchive = window.confirm(`Are you sure you want to unarchive ${studentName}?`);
+        if (confirmUnarchive) {
+            // Perform the unarchive action, e.g., make an API call
+            console.log(`${studentName} has been unarchived.`);
+            setSuccessMessage(`${studentName} has been successfully unarchived!`);
+            
+            setTimeout(() => {
+                setSuccessMessage("");
+            }, 2500);
+        }
+    };
+    
 
     // IMPORT EXCEL
     const fileInputRef = useRef(null);
@@ -241,13 +276,23 @@ const AdminOfficers = () => {
                                             {successMessage}
                                         </div>
                                     )}
-                                {/* ADD NEW STUDENT AND IMPORT EXCEL BUTTON */}
-                                <div className="d-flex justify-content-between mb-3">
-                                    <div className="d-flex">
+                                {/* ADD NEW OFFICER*/}
+                                <div className="d-flex justify-content-between mb-3 align-items-center">
+                                    <div className="d-flex me-auto">
                                         <Link to="/admin/officers/add-new" className="add-button btn btn-sm me-2">
                                             <i className="fas fa-plus me-2"></i>
                                             Add New Officer
                                         </Link>
+                                    </div>
+                                    <div className="d-flex align-items-center me-3"> 
+                                        <label className="me-2 mb-0">Officer Status</label>
+                                        <div className="dashboard-select" style={{ width: 'auto' }}>
+                                            <select className="form-control" defaultValue="">
+                                                <option value="" disabled>Select status</option>
+                                                <option value="Active">Active</option>
+                                                <option value="Archived">Archived</option>
+                                            </select>
+                                        </div>
                                     </div>
                                     <form method="get" className="search-bar ">
                                         <input type="text" placeholder="Search officer" className="search-input" />
@@ -265,6 +310,7 @@ const AdminOfficers = () => {
                                             <th>Officer ID</th>
                                             <th>Officer Name</th>
                                             <th>Position</th>
+                                            <th>Status</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -275,12 +321,24 @@ const AdminOfficers = () => {
                                                 <td>{student.id_no}</td>
                                                 <td>{student.name}</td>
                                                 <td>{student.position}</td>
+                                                <td>{student.status}</td>
                                                 <td>
                                                     <Link to={`/admin/officers/edit/${student.id_no}`} className="btn btn-edit btn-sm">
                                                         <i className="fas fa-edit"></i>
                                                     </Link>
-                                                    <button className="btn btn-archive btn-sm" onClick={() => handleArchive(student.name)}>
-                                                            <i className="fas fa-archive"></i>
+                                                    <button 
+                                                        className={`btn btn-archive btn-sm ${student.status === 'Archived' ? 'btn-open' : ''}`} 
+                                                        onClick={() => {
+                                                            if (student.status === 'Active') {
+                                                                handleArchive(student.name);
+                                                            } else {
+                                                                // Handle unarchive action
+                                                                handleUnarchive(student.name);
+                                                                // Update student status logic here if necessary
+                                                            }
+                                                        }}
+                                                    >
+                                                        <i className={`fas fa-${student.status === 'Active' ? 'archive' : 'box-open'}`}></i>
                                                     </button>
                                                 </td>
                                             </tr>

@@ -172,6 +172,18 @@ const TreasurerStudents = () => {
     };
 
     // HANDLE UNARCHIVE
+    const handleUnarchive = (studentName) => {
+        const confirmUnarchive = window.confirm(`Are you sure you want to unarchive ${studentName}?`);
+        if (confirmUnarchive) {
+            // Perform the unarchive action, e.g., make an API call
+            console.log(`${studentName} has been unarchived.`);
+            setSuccessMessage(`${studentName} has been successfully unarchived!`);
+            
+            setTimeout(() => {
+                setSuccessMessage("");
+            }, 2500);
+        }
+    };
 
     // IMPORT EXCEL
     const fileInputRef = useRef(null);
@@ -263,8 +275,8 @@ const TreasurerStudents = () => {
                                         />
                                     </div>
                                     <div className="d-flex align-items-center me-3"> 
-                                        <label className="me-2 mb-0">Student Category</label>
-                                        <div style={{ width: 'auto' }}>
+                                        <label className="me-2 mb-0">Student Status</label>
+                                        <div className="dashboard-select" style={{ width: 'auto' }}>
                                             <select className="form-control" defaultValue="">
                                                 <option value="" disabled>Select status</option>
                                                 <option value="Active">Active</option>
@@ -303,30 +315,30 @@ const TreasurerStudents = () => {
                                                 <td>{student.program}</td>
                                                 <td>{student.status}</td>
                                                 <td>
-    <Link to={`/treasurer/students/edit/${student.id_no}`} className="btn btn-edit btn-sm">
-        <i className="fas fa-edit"></i>
-    </Link>
-    <button 
-        className="btn btn-notes btn-sm" 
-        onClick={() => handleOpenGoogleNotes(student.id_no)}
-    >
-        <i className="fas fa-sticky-note"></i> 
-    </button>
-    <button 
-        className={`btn btn-archive btn-sm ${student.status === 'Archived' ? 'btn-open' : ''}`} 
-        onClick={() => {
-            if (student.status === 'Active') {
-                handleArchive(student.name);
-            } else {
-                // Handle unarchive action
-                console.log(`${student.name} has been unarchived.`);
-                // Update student status logic here
-            }
-        }}
-    >
-        <i className={`fas fa-${student.status === 'Active' ? 'archive' : 'box-open'}`}></i>
-    </button>
-</td>
+                                                    <Link to={`/treasurer/students/edit/${student.id_no}`} className="btn btn-edit btn-sm">
+                                                        <i className="fas fa-edit"></i>
+                                                    </Link>
+                                                    <button 
+                                                        className="btn btn-notes btn-sm" 
+                                                        onClick={() => handleOpenGoogleNotes(student.id_no)}
+                                                    >
+                                                        <i className="fas fa-sticky-note"></i> 
+                                                    </button>
+                                                    <button 
+                                                        className={`btn btn-archive btn-sm ${student.status === 'Archived' ? 'btn-open' : ''}`} 
+                                                        onClick={() => {
+                                                            if (student.status === 'Active') {
+                                                                handleArchive(student.name);
+                                                            } else {
+                                                                // Handle unarchive action
+                                                                handleUnarchive(student.name);
+                                                                // Update student status logic here if necessary
+                                                            }
+                                                        }}
+                                                    >
+                                                        <i className={`fas fa-${student.status === 'Active' ? 'archive' : 'box-open'}`}></i>
+                                                    </button>
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>

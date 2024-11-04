@@ -43,6 +43,30 @@
   color: #EAEAEA; 
 }
 
+.dashboard-select{
+  position: relative;
+  display: inline-block;
+}
+
+.dashboard-select select {
+  display: inline-block;
+  width: auto; 
+  padding: 0.375rem 2rem 0.375rem 0.75rem; 
+  appearance: none; 
+}
+
+.dashboard-select::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 0.75rem; 
+  transform: translateY(-50%);
+  border: solid transparent; 
+  border-width: 5px 4px 0 4px; 
+  border-top-color: #000; 
+  pointer-events: none;
+}
+
 /* FORMS */
 .d-flex label {
   margin-right: 10px; 
@@ -69,8 +93,6 @@
 .form-top{
   margin-top: 1.75rem;
 }
-
-
 
 /* SEARCH BAR */
 .search-bar {
