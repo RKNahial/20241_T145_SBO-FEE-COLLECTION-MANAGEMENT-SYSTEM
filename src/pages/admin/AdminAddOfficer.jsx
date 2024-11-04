@@ -15,7 +15,7 @@ const AdminAddOfficer = () => {
     return (
         <div className="sb-nav-fixed">
             <Helmet>
-                <title>Admin | Add Student</title>
+                <title>Admin | Add Officer</title>
             </Helmet>
             {/* NAVBAR AND SIDEBAR */}
             <AdminNavbar toggleSidebar={toggleSidebar} />
@@ -68,9 +68,23 @@ const AdminAddOfficer = () => {
                                                 <label className="mb-1">Choose Position</label>
                                                 <select className="form-control form-select" defaultValue="">
                                                     <option value="" disabled>Select a position</option>
+                                                    <option value="Media Documentation">Media Documentation</option>
+                                                    <option value="Media Designer">Media Designer</option>
+                                                    <option value="Technical Officer">Technical Officer</option>
+                                                    <option value="EMC Representative">EMC Representative</option>
+                                                    <option value="IT Representative">IT Representative</option>
+                                                    <option value="FT Representative">FT Representative</option>
+                                                    <option value="AT Representative">AT Representative</option>
+                                                    <option value="ET Representative">ET Representative</option>
+                                                    <option value="4th Year Representative">4th Year Representative</option>
+                                                    <option value="3rd Year Representative">3rd Year Representative</option>
+                                                    <option value="2nd Year Representative">2nd Year Representative</option>
+                                                    <option value="1st Year Representative">1st Year Representative</option>
+                                                    <option value="Relations Officer">Relations Officer</option>
+                                                    <option value="Auditor">Auditor</option>
+                                                    <option value="Treasurer">Treasurer</option>
+                                                    <option value="Vice Governor">Vice Governor</option>
                                                     <option value="Governor">Governor</option>
-                                                    <option value="Governor">Governor</option>
-                                                    
                                                 </select>
                                             </div>
                                             <div className="mb-0">
