@@ -22,7 +22,7 @@ const AdminSidebar = ({ isCollapsed }) => {
                                 <i className="fa fa-user-cog icon-space"></i>{!isCollapsed && <span> Admin</span>}
                             </NavLink>
                             <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/admin/school-year" end>
-                                <i className="fa fa-school icon-space"></i>{!isCollapsed && <span> School Year</span>}
+                                <i className="fa-regular fa-calendar-days icon-space"></i>{!isCollapsed && <span> School Year</span>}
                             </NavLink>
                         </div>
                         <NavLink className={({ isActive }) => `nav-link logout-link ${isActive ? 'active' : ''}`} to="/sbo-fee-collection" end>

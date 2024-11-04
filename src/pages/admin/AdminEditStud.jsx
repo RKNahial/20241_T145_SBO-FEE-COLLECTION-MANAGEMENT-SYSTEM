@@ -9,7 +9,7 @@ const AdminEditStud = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const toggleSidebar = () => {
-        setIsCollapsed(prev => !prev);
+        setIsCollapsed(prev => !prev)
     };
 
     return (
