@@ -21,17 +21,10 @@ const LandingPage = () => {
                     <li className="landing-page__link">
                         <Link to="#services" onClick={() => window.scrollTo(0, document.getElementById('services').offsetTop)}>Services</Link>
                     </li>
-                    <li className="landing-page__link dropdown">
-                        <a href="#" className="landing-page__nav__btn dropdown-toggle no-arrow" 
-                           data-bs-toggle="dropdown" aria-expanded="false">
+                    <li className="landing-page__link">
+                        <a href="/sbo-fee-collection/login" className="landing-page__nav__btn no-arrow">
                             Login
                         </a>
-                        <ul className="dropdown-menu">
-                            <li><Link className="dropdown-item" to="/admin/login">Admin</Link></li>
-                            <li><Link className="dropdown-item" to="/governor/login">Governor</Link></li>
-                            <li><Link className="dropdown-item" to="/treasurer/login">Treasurer</Link></li>
-                            <li><Link className="dropdown-item" to="/officer/login">Officer</Link></li>
-                        </ul>
                     </li>
                 </ul>
             </nav>
@@ -131,14 +124,14 @@ const LandingPage = () => {
             </section>
 
             <section id="footer" className='footer' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '2rem 0', marginTop: '2rem', backgroundColor: '#f8f9fa' }}>
-    <div className="container">
-        <div className="row align-items-center text-center">
-            <div className="col-md-12">
-                <p style={{ margin: '0', fontSize: '1rem', color: '#333' }}>© 2024 College of Technology Student Body Organization. Developed by LANAng Lakas.</p>
-            </div>
-        </div>
-    </div>
-</section>
+                <div className="container">
+                    <div className="row align-items-center text-center">
+                        <div className="col-md-12">
+                            <p style={{ margin: '0', fontSize: '1rem', color: '#333' }}>© 2024 College of Technology Student Body Organization. Developed by LANAng Lakas.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     );
 };

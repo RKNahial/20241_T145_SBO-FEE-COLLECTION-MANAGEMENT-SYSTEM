@@ -12,6 +12,50 @@ const AdminDashboard = () => {
         setIsCollapsed(prev => !prev);
     };
 
+     // Sample data for demonstration only
+     const students = [
+        {
+            id: 1,
+            date: 'October 10, 2024',
+            ref_no: 'PAY20241010-001',
+            id_no: '2101101369',
+            name: 'Jessler Hilario',
+            paid_amount: '200.00',
+        },
+        {
+            id: 2,
+            date: 'October 10, 2024',
+            ref_no: 'PAY20241010-001',
+            id_no: '2101105798',
+            name: 'Vince Andrew Escoto',
+            paid_amount: '200.00',
+        },
+        {
+            id: 3,
+            date: 'October 7, 2024',
+            ref_no: 'PAY2024107-001',
+            id_no: '2101105721',
+            name: 'Kirk John Tado',
+            paid_amount: '200.00',
+        },
+        {
+            id: 4,
+            date: 'October 7, 2024',
+            ref_no: 'PAY2024107-001',
+            id_no: '2101103332',
+            name: 'Melany Gunayan',
+            paid_amount: '200.00',
+        },
+        {
+            id: 5,
+            date: 'October 5, 2024',
+            ref_no: 'PAY2024105-001',
+            id_no: '2101103307',
+            name: 'Leanne Mae Reyes',
+            paid_amount: '200.00',
+        }
+    ];
+
     return (
         <div className="sb-nav-fixed">
             <Helmet>
@@ -85,38 +129,35 @@ const AdminDashboard = () => {
                             </div>
                         </div>
 
-                        {/* REPORTS AND CALENDAR */}
+                        {/* TABLE */}
                         <div className="card-body">
-                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                {/* REPORTS */}
-                                <div style={{ flex: 1, marginRight: '1.25rem' }}>
-                                    <div className="card" style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', paddingTop: '1.25rem', border: 'none' }}>
-                                        <p>REPORTS HERE (Dili siya ga-work huhu)</p>
-                                        <p>Bar Graph daw ni</p>
-                                        {/* {loading ? (
-                                            <p>Loading reports...</p>
-                                        ) : error ? (
-                                            <p className="text-danger">{error}</p>
-                                        ) : reports.length === 0 ? (
-                                            <p>No reports available.</p>
-                                        ) : (
-                                            <Bar data={chartData} options={{ responsive: true }} />
-                                        )} */}
-                                    </div>
-                                </div>
-
-                                {/* CALENDAR */}
-                                <div style={{ flex: 1 }}>
-                                    <div className="card" style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', paddingTop: '1.25rem', border: 'none' }}>
-                                        {/* <CalendarView /> */}
-                                        <p>INSERT CALENDAR VIEW HERE</p>
-                                    </div>
-                                </div>
-
-                            </div>
+                            <h5 className="mb-4 header">Recent Payments</h5>
+                            <table className="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Date</th>
+                                        <th>Ref. No</th>
+                                        <th>Student ID</th>
+                                        <th>Student Name</th>
+                                        <th>Paid Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {students.map((student, index) => (
+                                        <tr key={student.id}>
+                                            <td>{index + 1}</td>
+                                            <td>{student.date}</td>
+                                            <td>{student.ref_no}</td>
+                                            <td>{student.id_no}</td>
+                                            <td>{student.name}</td>
+                                            <td>{student.paid_amount}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
-                        {/* REPORTS AND CALENDAR END */}
-
+                        {/* TABLE ENDS */}
                         
                     </div>
                 </div>

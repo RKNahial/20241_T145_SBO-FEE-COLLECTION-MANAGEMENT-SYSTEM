@@ -18,7 +18,7 @@ const AdminSidebar = ({ isCollapsed }) => {
                             <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/admin/officers" end>
                                 <i className="fa fa-users icon-space"></i>{!isCollapsed && <span> Officers</span>}
                             </NavLink>
-                            <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/admin/manage-admin" end>
+                            <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/admin/admins" end>
                                 <i className="fa fa-user-cog icon-space"></i>{!isCollapsed && <span> Admin</span>}
                             </NavLink>
                             <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/admin/school-year" end>

@@ -265,7 +265,7 @@ const AdminOfficers = () => {
                             <div className="card-header">
                                 <div className="row">
                                     <div className="col col-md-6">
-                                        <i className="far fa-user me-2"></i> <strong>Officers</strong>
+                                        <i className="fa fa-users me-2"></i> <strong>Officers</strong>
                                     </div>
                                 </div>
                             </div>

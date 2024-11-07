@@ -65,14 +65,6 @@ const AdminProfile = () => {
                                                 />
                                             </div>
                                             <div className="mb-4">
-                                                <label className="mb-1">Position</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder="Enter your position"
-                                                />
-                                            </div>
-                                            <div className="mb-4">
                                                 <label className="mb-1">Password</label>
                                                 <input
                                                     type="password"

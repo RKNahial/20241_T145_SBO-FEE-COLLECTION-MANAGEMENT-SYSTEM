@@ -1,11 +1,11 @@
-// src/pages/officer/OfficerLogin.jsx
+// src/pages/Login.jsx
 import { Helmet } from 'react-helmet';
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; 
-import '../../assets/css/login.css';
+import '../assets/css/login.css';
 
-const OfficerLogin = () => {
+const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
@@ -41,13 +41,13 @@ const OfficerLogin = () => {
     return (
         <div className="login-body">
             <Helmet>
-                <title>Login as Officer</title>
+                <title>SBO Fee Collection | Login</title>
             </Helmet>
             <div className="login-container">
                 <div className="text-center">
                     <img src="../images/COT-Logo.jpg" alt="COT Logo" className="logo" />
                 </div>
-                <h2>LOGIN AS OFFICER</h2>
+                <h2>LOGIN</h2>
 
                 {message && (
                     <div className="alert alert-danger" role="alert">
@@ -105,4 +105,4 @@ const OfficerLogin = () => {
     );
 };
 
-export default OfficerLogin;
+export default Login;

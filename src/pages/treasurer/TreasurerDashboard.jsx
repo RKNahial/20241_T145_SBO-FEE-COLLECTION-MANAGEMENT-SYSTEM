@@ -207,8 +207,8 @@ const TreasurerDashboard = () => {
                                 {/* REPORTS */}
                                 <div style={{ flex: 1, marginRight: '1.25rem' }}>
                                     <div className="card" style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', paddingTop: '1.25rem', border: 'none' }}>
-                                        <p>REPORTS HERE (Dili siya ga-work huhu)</p>
-                                        <p>Bar Graph daw ni</p>
+                                        {/* REPORTS HERE */}
+
                                         {/* {loading ? (
                                             <p>Loading reports...</p>
                                         ) : error ? (
@@ -224,8 +224,7 @@ const TreasurerDashboard = () => {
                                 {/* CALENDAR */}
                                 <div style={{ flex: 1 }}>
                                     <div className="card" style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', paddingTop: '1.25rem', border: 'none' }}>
-                                        {/* <CalendarView /> */}
-                                        <p>INSERT CALENDAR VIEW HERE</p>
+                                        {/*CALENDAR VIEW HERE */}
                                     </div>
                                 </div>
 

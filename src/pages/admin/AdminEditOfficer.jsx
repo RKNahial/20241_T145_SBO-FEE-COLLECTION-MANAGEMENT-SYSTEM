@@ -49,11 +49,11 @@ const AdminEditOfficer = () => {
                                                 />
                                             </div>
                                             <div className="mb-3">
-                                                <label className="mb-1">Student ID</label>
+                                                <label className="mb-1">Officer ID</label>
                                                 <input
                                                     type="text"
                                                     className="form-control system"
-                                                    placeholder="Enter student ID"
+                                                    placeholder="Enter officer ID"
                                                 />
                                             </div>
                                             <div className="mb-4">
