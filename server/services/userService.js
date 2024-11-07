@@ -10,7 +10,7 @@ const getModelByPosition = (position) => {
         case 'admin':
             return Admin;
         case 'treasurer':
-            return Treasurer;
+            return Treasurer;//hasdghsgew
         case 'officer':
             return Officer;
         case 'governor':

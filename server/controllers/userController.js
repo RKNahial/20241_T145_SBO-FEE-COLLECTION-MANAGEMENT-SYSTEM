@@ -49,7 +49,7 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        // Login successful, return the user's position and message
+   
         res.status(200).json({ message: 'Login successful', position });
     } catch (error) {
         console.error('Login error:', error);

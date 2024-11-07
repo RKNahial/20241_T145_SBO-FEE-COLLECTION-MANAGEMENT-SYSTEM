@@ -12,3 +12,4 @@ governorSchema.methods.comparePassword = function (password) {
 };
 
 module.exports = mongoose.model('Governor', governorSchema, 'Governor');
+//Governor

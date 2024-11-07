@@ -13,3 +13,4 @@ treasurerSchema.methods.comparePassword = function (password) {
 };
 
 module.exports = mongoose.model('Treasurer', treasurerSchema, 'Treasurer');
+//treasurer
