@@ -24,24 +24,34 @@ const AdminLogin = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await axios.post('http://localhost:8000/admin/login', {
+            const response = await axios.post('http://localhost:8000/api/login', {
                 email,
                 password,
                 recaptchaToken
             });
-            console.log('Login successful:', response.data);
-            navigate('/sbofeecollection');
+
+            // Check the position and navigate accordingly
+            const { position } = response.data;
+
+            if (position === 'admin') {
+                navigate('/admin-dashboard');
+            } else if (position === 'officer') {
+                navigate('/officer-dashboard');
+            } else if (position === 'treasurer') {
+                navigate('/treasurer-dashboard');
+            } else if (position === 'governor') {
+                navigate('/governor-dashboard');
+            } else {
+                setMessage('Unauthorized position.');
+            }
         } catch (error) {
             console.error('Login error:', error);
-            setMessage('Invalid email or password, Admin Only!');
-
-            setTimeout(() => {
-                setMessage('');
-            }, 3000);
+            setMessage('Invalid email or password.');
         } finally {
             setLoading(false);
         }
     };
+
 
     const handleGoogle = async () => {
         // Sign out any existing user to prevent auto-login
@@ -97,13 +107,13 @@ const AdminLogin = () => {
     return (
         <div className="login-body">
             <Helmet>
-                <title>Login as Admin</title>
+                <title></title>
             </Helmet>
             <div className="login-container">
                 <div className="text-center">
                     <img src="../images/COT-Logo.jpg" alt="COT Logo" className="logo" />
                 </div>
-                <h2>LOGIN AS ADMIN</h2>
+                <h2></h2>
 
                 {message && (
                     <div className="alert alert-danger" role="alert">
