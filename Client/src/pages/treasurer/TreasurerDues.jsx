@@ -226,9 +226,6 @@ const TreasurerDues = () => {
 
     return (
         <div className="sb-nav-fixed">
-            <Helmet>
-                <title>Treasurer | Daily Dues</title>
-            </Helmet>
             <TreasurerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
                 <TreasurerSidebar isCollapsed={isCollapsed} />

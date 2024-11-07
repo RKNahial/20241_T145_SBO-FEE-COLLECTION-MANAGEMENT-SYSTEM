@@ -56,14 +56,6 @@ const TreasurerAddStud = () => {
                                                     placeholder="Enter student ID"
                                                 />
                                             </div>
-                                            <div className="mb-3">
-                                                <label className="mb-1">Address</label>
-                                                <input
-                                                    type="email"
-                                                    className="form-control"
-                                                    placeholder="Enter address"
-                                                />
-                                            </div>
                                             <div className="mb-4">
                                                 <label className="mb-1">Institutional Email</label>
                                                 <input
@@ -82,7 +74,7 @@ const TreasurerAddStud = () => {
                                             </div>
                                             <div className="mb-4">
                                                 <label className="mb-1">Choose Program</label>
-                                                <select className="form-control" defaultValue="">
+                                                <select className="form-control form-select" defaultValue="">
                                                     <option value="" disabled>Select a program</option>
                                                     <option value="BSIT">BSIT</option>
                                                     <option value="BSEMC">BSEMC</option>
