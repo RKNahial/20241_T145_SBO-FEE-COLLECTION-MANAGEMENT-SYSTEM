@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
 
-const adminSchema = new mongoose.Schema({
+const treasurerSchema = new mongoose.Schema({
     ID: { type: String, required: true },
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
@@ -9,8 +8,8 @@ const adminSchema = new mongoose.Schema({
     position: { type: String, required: true }
 });
 
-adminSchema.methods.comparePassword = function (password) {
+treasurerSchema.methods.comparePassword = function (password) {
     return bcrypt.compare(password, this.password);
 };
 
-module.exports = mongoose.model('Admin', adminSchema, 'admins');
+module.exports = mongoose.model('Treasurer', treasurerSchema, 'Treasurer');

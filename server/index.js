@@ -19,6 +19,8 @@ const registerOfficerRoutes = require('./routes/registerOfficer');
 const treasurerRoutes = require('./routes/TreasurerRoutes');
 const treasurerGoogle = require('./routes/TreasurerGoogle'); // Add the officer routes
 const GoogleOfficerCheck = require('./routes/OfficerCheckgoogleAccountRoutes');
+const userRoutes = require('./routes/userRoutes');
+const loginRoutes = require('./routes/loginRoutes');
 
 // Importing database connection
 const connectDB = require('./config/DbConnections');
@@ -42,6 +44,9 @@ app.use("/officers", officerRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/treasurer', treasurerRoutes);
 app.use('/treasurer/google', treasurerGoogle);
+app.use('/api/users', userRoutes);  // User routes (e.g., registration)
+app.use('/api/login', loginRoutes); // Login route, can be separated if needed
+
 
 
 const port = 8000;
