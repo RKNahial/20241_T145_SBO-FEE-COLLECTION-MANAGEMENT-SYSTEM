@@ -17,6 +17,33 @@ import './assets/css/dashboard.css';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 
+import OfficerDashboard from './pages/officer/OfficerDashboard';
+import OfficerFee from './pages/officer/OfficerFee';
+import OfficerStudents from './pages/officer/OfficerStudents';
+import OfficerAddStud from './pages/officer/OfficerAddStud';
+import OfficerEditStud from './pages/officer/OfficerEditStud';
+import OfficerReports from './pages/officer/OfficerReports';
+import OfficerProfile from './pages/officer/OfficerProfile';
+
+import TreasurerDashboard from './pages/treasurer/TreasurerDashboard';
+import TreasurerFee from './pages/treasurer/TreasurerFee';
+import TreasurerFeeAmount from './pages/treasurer/TreasurerFeeAmount';
+import TreasurerStudents from './pages/treasurer/TreasurerStudents';
+import TreasurerAddStud from './pages/treasurer/TreasurerAddStud';
+import TreasurerEditStud from './pages/treasurer/TreasurerEditStud';
+import TreasurerReports from './pages/treasurer/TreasurerReports';
+import TreasurerDues from './pages/treasurer/TreasurerDues';
+import TreasurerProfile from './pages/treasurer/TreasurerProfile';
+
+import GovDashboard from './pages/governor/GovDashboard';
+import GovStudents from './pages/governor/GovStudents';
+import GovAddStud from './pages/governor/GovAddStud';
+import GovEditStud from './pages/governor/GovEditStud';
+import GovOfficers from './pages/governor/GovOfficers';
+import GovAddOfficer from './pages/governor/GovAddOfficer';
+import GovEditOfficer from './pages/governor/GovEditOfficer';
+import GovProfile from './pages/governor/GovProfile';
+
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminStudents from './pages/admin/AdminStudents';
 import AdminAddStud from './pages/admin/AdminAddStud';
@@ -29,27 +56,6 @@ import AdminAddAdmin from './pages/admin/AdminAddAdmin';
 import AdminEditAdmin from './pages/admin/AdminEditAdmin';
 import AdminSchoolYear from './pages/admin/AdminSchoolYear';
 import AdminProfile from './pages/admin/AdminProfile';
-
-
-
-import OfficerDashboard from './pages/officer/OfficerDashboard';
-import OfficerFee from './pages/officer/OfficerFee';
-import OfficerStudents from './pages/officer/OfficerStudents';
-import OfficerAddStud from './pages/officer/OfficerAddStud';
-import OfficerEditStud from './pages/officer/OfficerEditStud';
-import OfficerReports from './pages/officer/OfficerReports';
-import OfficerProfile from './pages/officer/OfficerProfile';
-
-
-import TreasurerDashboard from './pages/treasurer/TreasurerDashboard';
-import TreasurerFee from './pages/treasurer/TreasurerFee';
-import TreasurerFeeAmount from './pages/treasurer/TreasurerFeeAmount';
-import TreasurerStudents from './pages/treasurer/TreasurerStudents';
-import TreasurerAddStud from './pages/treasurer/TreasurerAddStud';
-import TreasurerEditStud from './pages/treasurer/TreasurerEditStud';
-import TreasurerReports from './pages/treasurer/TreasurerReports';
-import TreasurerDues from './pages/treasurer/TreasurerDues';
-import TreasurerProfile from './pages/treasurer/TreasurerProfile';
 
 // FOR CUSTOMIZED DOCUMENT TITLE
 const App = () => {
@@ -85,7 +91,14 @@ const App = () => {
                 <Route path="/treasurer/profile" element={<TreasurerProfile/>} />
 
                 {/* GOVERNOR ROUTES */}
-
+                <Route path="/governor/dashboard" element={<GovDashboard />} />
+                <Route path="/governor/students" element={<GovStudents/>} />
+                <Route path="/governor/students/add-new" element={<GovAddStud/>} />
+                <Route path="/governor/students/edit/:id" element={<GovEditStud/>} />
+                <Route path="/governor/officers" element={<GovOfficers/>} />
+                <Route path="/governor/officers/add-new" element={<GovAddOfficer/>} />
+                <Route path="/governor/officers/edit/:id" element={<GovEditOfficer/>} />
+                <Route path="/governor/profile" element={<GovProfile/>} />
 
                 {/* ADMIN ROUTES */}
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
@@ -99,8 +112,6 @@ const App = () => {
                 <Route path="/admin/admins/add-new" element={<AdminAddAdmin/>} />
                 <Route path="/admin/admins/edit/:id" element={<AdminEditAdmin/>} />
                 <Route path="/admin/school-year" element={<AdminSchoolYear/>} />
-
-                
                 <Route path="/admin/profile" element={<AdminProfile/>} />
                 
 

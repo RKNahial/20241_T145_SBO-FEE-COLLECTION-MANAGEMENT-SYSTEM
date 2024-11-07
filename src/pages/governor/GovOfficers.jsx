@@ -1,11 +1,11 @@
-// src/pages/admin/AdminOfficers.jsx
+// src/pages/Gov/GovOfficers.jsx
 import { Helmet } from 'react-helmet';
 import React, { useState, useRef } from "react";
 import { Link } from 'react-router-dom';
-import AdminSidebar from "./AdminSidebar"; 
-import AdminNavbar from "./AdminNavbar";
+import GovSidebar from "./GovSidebar"; 
+import GovNavbar from "./GovNavbar";
 
-const AdminOfficers = () => {
+const GovOfficers = () => {
     // NAV AND SIDEBAR
     const [isCollapsed, setIsCollapsed] = useState(false);
     const toggleSidebar = () => {
@@ -244,12 +244,12 @@ const AdminOfficers = () => {
     return (
         <div className="sb-nav-fixed">
             <Helmet>
-                <title>Admin | Officers</title>
+                <title>Governor | Officers</title>
             </Helmet>
             {/* NAVBAR AND SIDEBAR */}
-            <AdminNavbar toggleSidebar={toggleSidebar} />
+            <GovNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
-                <AdminSidebar isCollapsed={isCollapsed} />
+                <GovSidebar isCollapsed={isCollapsed} />
                 <div 
                     id="layoutSidenav_content" 
                     style={{ 
@@ -323,7 +323,7 @@ const AdminOfficers = () => {
                                                 <td>{student.position}</td>
                                                 <td>{student.status}</td>
                                                 <td>
-                                                    <Link to={`/admin/officers/edit/${student.id_no}`} className="btn btn-edit btn-sm">
+                                                    <Link to={`/governor/officers/edit/${student.id_no}`} className="btn btn-edit btn-sm">
                                                         <i className="fas fa-edit"></i>
                                                     </Link>
                                                     <button 
@@ -395,4 +395,4 @@ const AdminOfficers = () => {
     );
 };
 
-export default AdminOfficers;
+export default GovOfficers;

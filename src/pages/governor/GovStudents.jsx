@@ -1,11 +1,11 @@
-// src/pages/admin/AdminOfficers.jsx
+// src/pages/governor/GovStudents.jsx
 import { Helmet } from 'react-helmet';
 import React, { useState, useRef } from "react";
 import { Link } from 'react-router-dom';
-import AdminSidebar from "./AdminSidebar"; 
-import AdminNavbar from "./AdminNavbar";
+import GovSidebar from "./GovSidebar"; 
+import GovNavbar from "./GovNavbar";
 
-const AdminOfficers = () => {
+const GovStudents = () => {
     // NAV AND SIDEBAR
     const [isCollapsed, setIsCollapsed] = useState(false);
     const toggleSidebar = () => {
@@ -19,7 +19,6 @@ const AdminOfficers = () => {
             name: 'Mary Joy Alonzo',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'Treasurer',
             status: 'Active'
         },
         {
@@ -27,7 +26,6 @@ const AdminOfficers = () => {
             name: 'Jonathan Cruz',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'Governor',
             status: 'Active'
         },
         {
@@ -35,7 +33,6 @@ const AdminOfficers = () => {
             name: 'Reena Dela Cruz',
             year_level: '3rd Year',
             program: 'BSIT',
-            position: 'P.I.O',
             status: 'Archived'
         },
         {
@@ -43,7 +40,6 @@ const AdminOfficers = () => {
             name: 'Peter John Garcia',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'Secretary',
             status: 'Active'
         },
         {
@@ -51,7 +47,6 @@ const AdminOfficers = () => {
             name: 'Jessa Mae Javier',
             year_level: '2nd Year',
             program: 'BSIT',
-            position: '2nd Year Representative',
             status: 'Active'
         },
         {
@@ -59,7 +54,6 @@ const AdminOfficers = () => {
             name: 'Mark Anton Lim',
             year_level: '1st Year',
             program: 'BSIT',
-            position: '1st Year Representative',
             status: 'Archived'
         },
         {
@@ -67,23 +61,20 @@ const AdminOfficers = () => {
             name: 'Anna Marie Mendoza',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'Treasurer',
             status: 'Active'
-        },            
+        },
         {
             id_no: '1901104713',
             name: 'Liza Reyes',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'Governor',
             status: 'Archived'
-        },            
+        },
         {
             id_no: '1901104188',
             name: 'Samuel Santos',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'P.I.O',
             status: 'Active'
         },
         {
@@ -91,7 +82,6 @@ const AdminOfficers = () => {
             name: 'Mary Joy Alonzo',
             year_level: '3rd Year',
             program: 'BSIT',
-            position: '3rd Year Representative',
             status: 'Active'
         },
         {
@@ -99,7 +89,6 @@ const AdminOfficers = () => {
             name: 'I AM',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'Secretary',
             status: 'Archived'
         },
         {
@@ -107,7 +96,6 @@ const AdminOfficers = () => {
             name: 'ONLY TESTING',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'Governor',
             status: 'Active'
         },
         {
@@ -115,15 +103,13 @@ const AdminOfficers = () => {
             name: 'IF THE PAGINATION',
             year_level: '3rd Year',
             program: 'BSIT',
-            position: '3rd Year Representative',
-            status: 'Archived'
+            status: 'Active'
         },
         {
             id_no: '2101101354',
             name: 'IS WORKING',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'P.I.O',
             status: 'Active'
         },
         {
@@ -131,7 +117,6 @@ const AdminOfficers = () => {
             name: 'BLAH BLAH BLAH',
             year_level: '2nd Year',
             program: 'BSIT',
-            position: '2nd Year Representative',
             status: 'Archived'
         },
         {
@@ -139,7 +124,6 @@ const AdminOfficers = () => {
             name: 'PROPER NAME',
             year_level: '1st Year',
             program: 'BSIT',
-            position: '1st Year Representative',
             status: 'Active'
         },
         {
@@ -147,23 +131,20 @@ const AdminOfficers = () => {
             name: 'PLACE NAME',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'Secretary',
-            status: 'Archived'
-        },            
+            status: 'Active'
+        },
         {
             id_no: '1901104713',
             name: 'BACKSTORY STUFF',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'Governor',
-            status: 'Active'
-        },            
+            status: 'Archived'
+        },
         {
             id_no: '1901104188',
             name: 'Samuel Santos',
             year_level: '4th Year',
             program: 'BSIT',
-            position: 'P.I.O',
             status: 'Active'
         },
         {
@@ -171,8 +152,7 @@ const AdminOfficers = () => {
             name: 'Mary Joy Alonzo',
             year_level: '3rd Year',
             program: 'BSIT',
-            position: '3rd Year Representative',
-            status: 'Archived'
+            status: 'Active'
         }
     ];
 
@@ -204,7 +184,6 @@ const AdminOfficers = () => {
             }, 2500);
         }
     };
-    
 
     // IMPORT EXCEL
     const fileInputRef = useRef(null);
@@ -244,12 +223,12 @@ const AdminOfficers = () => {
     return (
         <div className="sb-nav-fixed">
             <Helmet>
-                <title>Admin | Officers</title>
+                <title>Treasurer | Students</title>
             </Helmet>
             {/* NAVBAR AND SIDEBAR */}
-            <AdminNavbar toggleSidebar={toggleSidebar} />
+            <GovNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
-                <AdminSidebar isCollapsed={isCollapsed} />
+                <GovSidebar isCollapsed={isCollapsed} />
                 <div 
                     id="layoutSidenav_content" 
                     style={{ 
@@ -265,7 +244,7 @@ const AdminOfficers = () => {
                             <div className="card-header">
                                 <div className="row">
                                     <div className="col col-md-6">
-                                        <i className="fa fa-users me-2"></i> <strong>Officers</strong>
+                                        <i className="far fa-user me-2"></i> <strong>Students</strong>
                                     </div>
                                 </div>
                             </div>
@@ -276,16 +255,27 @@ const AdminOfficers = () => {
                                             {successMessage}
                                         </div>
                                     )}
-                                {/* ADD NEW OFFICER*/}
+                                {/* ADD NEW STUDENT AND IMPORT EXCEL BUTTON */}
                                 <div className="d-flex justify-content-between mb-3 align-items-center">
-                                    <div className="d-flex me-auto">
-                                        <Link to="/governor/officers/add-new" className="add-button btn btn-sm me-2">
+                                    <div className="d-flex me-auto"> 
+                                        <Link to="/governor/students/add-new" className="add-button btn btn-sm me-2">
                                             <i className="fas fa-plus me-2"></i>
-                                            Add New Officer
+                                            Add New Student
                                         </Link>
+                                        <button onClick={handleImportClick} className="add-button btn btn-sm me-2">
+                                            <i className="fas fa-file-excel me-2"></i>
+                                            Import Excel
+                                        </button>
+                                        <input
+                                            type="file"
+                                            accept=".xls,.xlsx"
+                                            ref={fileInputRef}
+                                            style={{ display: 'none' }}
+                                            onChange={handleFileChange}
+                                        />
                                     </div>
                                     <div className="d-flex align-items-center me-3"> 
-                                        <label className="me-2 mb-0">Officer Status</label>
+                                        <label className="me-2 mb-0">Student Status</label>
                                         <div className="dashboard-select" style={{ width: 'auto' }}>
                                             <select className="form-control" defaultValue="">
                                                 <option value="" disabled>Select status</option>
@@ -294,22 +284,23 @@ const AdminOfficers = () => {
                                             </select>
                                         </div>
                                     </div>
-                                    <form method="get" className="search-bar ">
-                                        <input type="text" placeholder="Search officer" className="search-input" />
-                                        <button type="submit" className="search">
+                                    <form method="get" className="d-flex search-bar">
+                                        <input type="text" placeholder="Search student" className="search-input me-2" />
+                                        <button type="submit" className="search btn btn-sm">
                                             <i className="fas fa-search"></i>
                                         </button>
                                     </form>
                                 </div>
 
-                                {/* TABLE OFFICERS*/}
+                                {/* TABLE STUDENTS*/}
                                 <table className="table table-bordered table-hover">
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Officer ID</th>
-                                            <th>Officer Name</th>
-                                            <th>Position</th>
+                                            <th>Student ID</th>
+                                            <th>Student Name</th>
+                                            <th>Year Level</th>
+                                            <th>Program</th>
                                             <th>Status</th>
                                             <th>Actions</th>
                                         </tr>
@@ -320,12 +311,19 @@ const AdminOfficers = () => {
                                                 <td>{index + indexOfFirstItem + 1}</td> 
                                                 <td>{student.id_no}</td>
                                                 <td>{student.name}</td>
-                                                <td>{student.position}</td>
+                                                <td>{student.year_level}</td>
+                                                <td>{student.program}</td>
                                                 <td>{student.status}</td>
                                                 <td>
-                                                    <Link to={`/admin/officers/edit/${student.id_no}`} className="btn btn-edit btn-sm">
+                                                    <Link to={`/governor/students/edit/${student.id_no}`} className="btn btn-edit btn-sm">
                                                         <i className="fas fa-edit"></i>
                                                     </Link>
+                                                    <button 
+                                                        className="btn btn-notes btn-sm" 
+                                                        onClick={() => handleOpenGoogleNotes(student.id_no)}
+                                                    >
+                                                        <i className="fas fa-sticky-note"></i> 
+                                                    </button>
                                                     <button 
                                                         className={`btn btn-archive btn-sm ${student.status === 'Archived' ? 'btn-open' : ''}`} 
                                                         onClick={() => {
@@ -395,4 +393,4 @@ const AdminOfficers = () => {
     );
 };
 
-export default AdminOfficers;
+export default GovStudents;

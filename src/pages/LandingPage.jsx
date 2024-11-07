@@ -8,7 +8,7 @@ const LandingPage = () => {
     return (
         <div className="landing-page">
             <Helmet>
-                <title>SBO Fee Collection Management System</title>
+                <title>SBO Fee Collection</title>
             </Helmet>
             <nav className="landing-page__nav">
                 <div className="landing-page__nav__logo">
