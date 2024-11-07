@@ -279,7 +279,7 @@ const AdminOfficers = () => {
                                 {/* ADD NEW OFFICER*/}
                                 <div className="d-flex justify-content-between mb-3 align-items-center">
                                     <div className="d-flex me-auto">
-                                        <Link to="/governor/officers/add-new" className="add-button btn btn-sm me-2">
+                                        <Link to="/admin/officers/add-new" className="add-button btn btn-sm me-2">
                                             <i className="fas fa-plus me-2"></i>
                                             Add New Officer
                                         </Link>
