@@ -73,8 +73,8 @@ const OfficerReports = () => {
                                 {/* SELECT REPORT CATEGORY */}
                                 <div className="d-flex justify-content-between mb-3">
                                     <div className="d-flex align-items-center">
-                                        <label className="me-2 mb-0">Select Category</label>
-                                        <div style={{ width: 'auto' }}>
+                                        <label className="me-2 mb-0">Select Reports</label>
+                                        <div className="dashboard-select" style={{ width: 'auto' }}>
                                             <select className="form-control" defaultValue="">
                                                 <option value="" disabled>Select a category</option>
                                                 <option value="College Shirt">Monthly Report</option>
