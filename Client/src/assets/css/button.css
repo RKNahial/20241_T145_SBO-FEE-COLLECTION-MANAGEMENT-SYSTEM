@@ -238,6 +238,10 @@
     padding-bottom: 0;
 }
 
+.btn-open {
+    color: #990000 
+}
+
 .btn-archive:hover {
     color: rgb(165, 19, 19);
     text-decoration: underline; 
