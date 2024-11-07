@@ -8,7 +8,7 @@ const LandingPage = () => {
     return (
         <div className="landing-page">
             <Helmet>
-                <title>SBO Fee Collection Management System</title>
+                <title>SBO Fee Collection</title>
             </Helmet>
             <nav className="landing-page__nav">
                 <div className="landing-page__nav__logo">
@@ -21,17 +21,10 @@ const LandingPage = () => {
                     <li className="landing-page__link">
                         <Link to="#services" onClick={() => window.scrollTo(0, document.getElementById('services').offsetTop)}>Services</Link>
                     </li>
-                    <li className="landing-page__link dropdown">
-                        <a href="#" className="landing-page__nav__btn dropdown-toggle no-arrow" 
-                           data-bs-toggle="dropdown" aria-expanded="false">
+                    <li className="landing-page__link">
+                        <a href="/sbo-fee-collection/login" className="landing-page__nav__btn no-arrow">
                             Login
                         </a>
-                        <ul className="dropdown-menu">
-                            <li><Link className="dropdown-item" to="/admin/login">Admin</Link></li>
-                            <li><Link className="dropdown-item" to="/governor/login">Governor</Link></li>
-                            <li><Link className="dropdown-item" to="/treasurer/login">Treasurer</Link></li>
-                            <li><Link className="dropdown-item" to="/officer/login">Officer</Link></li>
-                        </ul>
                     </li>
                 </ul>
             </nav>
