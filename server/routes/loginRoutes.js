@@ -1,10 +1,11 @@
-// server/routes/authRoutes.js
 const express = require('express');
-const { login } = require('../controllers/userController');
 const router = express.Router();
+const userController = require('../controllers/userController');
 
-// Login route
-router.post('/', login);
+
+
+
+// Route for user login
+router.post('/', userController.login);
 
 module.exports = router;
-//exprts

@@ -2,27 +2,105 @@
 import { Helmet } from 'react-helmet';
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; 
+import axios from 'axios';
 import '../assets/css/login.css';
+import ReCAPTCHA from 'react-google-recaptcha';
+import GoogleSignInButton from '../pages/googlelogin';
+import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { auth } from '../pages/firebase/firebaseConfig';
+
 
 const Login = () => {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [recaptchaToken, setRecaptchaToken] = useState(null);
     const navigate = useNavigate();
-    
+
+
+
+
     const handleLogin = async (e) => {
         e.preventDefault();
+        setLoading(true);
         try {
-            const response = await axios.post('/api/login', { username, password }); // Update with your API endpoint
-            // Handle the response, redirect to dashboard
-            console.log('Login successful:', response.data);
-            navigate('/treasurer/dashboard');
+            const response = await axios.post('http://localhost:8000/api/login', {
+                email,
+                password,
+                recaptchaToken
+            });
+
+            // Check the position and navigate accordingly
+            const { position } = response.data;
+
+            if (position === 'admin') {
+                navigate('/admin-dashboard');
+            } else if (position === 'officer') {
+                navigate('/officer/dashboard');
+            } else if (position === 'Treasurer') {
+                navigate('/treasurer/dashboard');
+            } else if (position === 'governor') {
+                navigate('/governor-dashboard');
+            } else {
+                setMessage('Unauthorized position.');
+            }
         } catch (error) {
             console.error('Login error:', error);
-            setMessage('Invalid username or password.');
+            setMessage('Invalid email or password.');
+        } finally {
+            setLoading(false);
         }
     };
+
+
+
+
+
+    const handleGoogle = async () => {
+        await signOut(auth);
+
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+
+            if (user && user.email) {
+                console.log('Email sent to backend:', user.email); // Log the email sent
+
+                const response = await axios.post('http://localhost:8000/api/auth/verify-google-users', {
+                    email: user.email
+                });
+
+                console.log('Backend response:', response.data); // Log the response data
+
+                if (response.data.authorized) {
+                    const { position } = response.data;
+                    if (position === 'admin') {
+                        navigate('/admin-dashboard');
+                    } else if (position === 'treasurer') {
+                        navigate('/treasurer/dashboard');
+                    } else if (position === 'officer') {
+                        navigate('/officer-dashboard');
+                    } else if (position === 'Governor') {
+                        navigate('/governor-dashboard');
+                    } else {
+                        setMessage('User position not recognized.');
+                    }
+                } else {
+                    setMessage('Access denied. Only authorized users can log in.');
+                }
+            } else {
+                setMessage('Google sign-in failed. No user email found.');
+            }
+        } catch (error) {
+            console.error('Google sign-in error:', error);
+            setMessage('Google sign-in failed. Please try again.');
+        }
+    };
+
 
     const togglePassword = () => {
         const passwordInput = document.getElementById('password');
@@ -38,10 +116,14 @@ const Login = () => {
         }
     };
 
+    const onRecaptchaChange = (token) => {
+        setRecaptchaToken(token);
+    };
+
     return (
         <div className="login-body">
             <Helmet>
-                <title>SBO Fee Collection | Login</title>
+                <title></title>
             </Helmet>
             <div className="login-container">
                 <div className="text-center">
@@ -55,18 +137,18 @@ const Login = () => {
                     </div>
                 )}
 
-                <form>
+                <form onSubmit={handleLogin}>
                     <div className="form-group">
                         <div className="input-icon-wrapper">
                             <input
-                                type="text"
+                                type="email"
                                 className="form-control login-form"
-                                id="username"
-                                name="username"
-                                placeholder="Username"
+                                id="email"
+                                name="email"
+                                placeholder="Email"
                                 required
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                             />
                             <i className="input-icon fas fa-user"></i>
                         </div>
@@ -89,20 +171,26 @@ const Login = () => {
                             </button>
                         </div>
                     </div>
-                    <div className="g-recaptcha" data-sitekey="6LeZHWkqAAAAACelXEagXWJuTnWLn-1vjv41y6lx"></div>
-                    <button type="submit" className="btn btn-primary">
-                        <i className="fas fa-sign-in-alt mr-2"></i> LOGIN
+
+                    <ReCAPTCHA
+                        sitekey="6LcfaG0qAAAAAFTykOtXdpsqkS9ZUeALt2CgFmId"
+                        onChange={onRecaptchaChange}
+                    />
+
+                    <button type="submit" className="btn btn-primary" disabled={loading || !recaptchaToken}>
+                        <i className="fas fa-sign-in-alt mr-2"></i> {loading ? 'Logging in...' : 'LOGIN'}
                     </button>
                 </form>
 
                 <div className="divider">
                     <span>or continue with</span>
                 </div>
-
-                <div className="g-signin2" data-onsuccess="onSignIn"></div>
+                <GoogleSignInButton
+                    onClick={handleGoogle}
+                    disabled={loading}
+                />
             </div>
         </div>
     );
 };
-
 export default Login;

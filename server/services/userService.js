@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const { hashPassword, comparePassword } = require('../helpers/authOfficer');
 const Admin = require('../models/AdminSchema');
 const Treasurer = require('../models/TreasurerSchema');
 const Officer = require('../models/OfficerSchema');
@@ -10,7 +10,7 @@ const getModelByPosition = (position) => {
         case 'admin':
             return Admin;
         case 'treasurer':
-            return Treasurer;//hasdghsgew
+            return Treasurer;
         case 'officer':
             return Officer;
         case 'governor':
@@ -27,8 +27,8 @@ const addUser = async (userData) => {
     // Determine the model based on position
     const Model = getModelByPosition(position);
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Hash the password using hashUtils
+    const hashedPassword = await hashPassword(password);
 
     // Create a new user with hashed password
     const newUser = new Model({
@@ -46,7 +46,7 @@ const addUser = async (userData) => {
 // Add comparePassword method to the schema for each model
 const addComparePasswordMethod = (schema) => {
     schema.methods.comparePassword = async function(password) {
-        return await bcrypt.compare(password, this.password);
+        return await comparePassword(password, this.password);
     };
 };
 

@@ -1,9 +1,8 @@
-// src/pages/treasurer/TreasurerStudents.jsx
-import { Helmet } from 'react-helmet';
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import TreasurerSidebar from "./TreasurerSidebar"; 
-import TreasurerNavbar from "./TreasurerNavbar";
+import { Helmet } from 'react-helmet';
+import TreasurerSidebar from './TreasurerSidebar';
+import TreasurerNavbar from './TreasurerNavbar';
 
 const TreasurerStudents = () => {
     // NAV AND SIDEBAR
@@ -12,159 +11,48 @@ const TreasurerStudents = () => {
         setIsCollapsed(prev => !prev);
     };
 
-    // Sample data for demonstration only
-    const sampleStud = [
-        {
-            id_no: '1901104188',
-            name: 'Mary Joy Alonzo',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '2101102924',
-            name: 'Jonathan Cruz',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '1901102046',
-            name: 'Reena Dela Cruz',
-            year_level: '3rd Year',
-            program: 'BSIT',
-            status: 'Archived'
-        },
-        {
-            id_no: '2101101354',
-            name: 'Peter John Garcia',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '1901103113',
-            name: 'Jessa Mae Javier',
-            year_level: '2nd Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '2101101979',
-            name: 'Mark Anton Lim',
-            year_level: '1st Year',
-            program: 'BSIT',
-            status: 'Archived'
-        },
-        {
-            id_no: '2101103848',
-            name: 'Anna Marie Mendoza',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '1901104713',
-            name: 'Liza Reyes',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Archived'
-        },
-        {
-            id_no: '1901104188',
-            name: 'Samuel Santos',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '1901104235',
-            name: 'Mary Joy Alonzo',
-            year_level: '3rd Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '1901104188',
-            name: 'I AM',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Archived'
-        },
-        {
-            id_no: '2101102924',
-            name: 'ONLY TESTING',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '1901102046',
-            name: 'IF THE PAGINATION',
-            year_level: '3rd Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '2101101354',
-            name: 'IS WORKING',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '1901103113',
-            name: 'BLAH BLAH BLAH',
-            year_level: '2nd Year',
-            program: 'BSIT',
-            status: 'Archived'
-        },
-        {
-            id_no: '2101101979',
-            name: 'PROPER NAME',
-            year_level: '1st Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '2101103848',
-            name: 'PLACE NAME',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '1901104713',
-            name: 'BACKSTORY STUFF',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Archived'
-        },
-        {
-            id_no: '1901104188',
-            name: 'Samuel Santos',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '1901104235',
-            name: 'Mary Joy Alonzo',
-            year_level: '3rd Year',
-            program: 'BSIT',
-            status: 'Active'
-        }
-    ];
+    // State for students
+    const [students, setStudents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState("");
+    const [searchTerm, setSearchTerm] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
+
+    // Fetch students from backend
+    useEffect(() => {
+        const fetchStudents = async () => {
+            try {
+                const response = await fetch('http://localhost:8000/api/getAll/students');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch students');
+                }
+                const data = await response.json();
+                setStudents(data);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchStudents();
+    }, []);
+
+    // Filter students based on search and status
+    const filteredStudents = students.filter(student => {
+        const matchesSearch = student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            student.id_no?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus = !statusFilter || student.status === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
 
     // HANDLE ARCHIVE
-    const [successMessage, setSuccessMessage] = useState("");
-    const handleArchive = (studentName) => {
+    const handleArchive = async (studentName) => {
         const confirmArchive = window.confirm(`Are you sure you want to archive ${studentName}?`);
         if (confirmArchive) {
-            // Perform the archive action, e.g., make an API call
-            console.log(`${studentName} has been archived.`);
+            // Add your API call here to update the student status
             setSuccessMessage(`${studentName} has been successfully archived!`);
-            
             setTimeout(() => {
                 setSuccessMessage("");
             }, 2500);
@@ -172,74 +60,61 @@ const TreasurerStudents = () => {
     };
 
     // HANDLE UNARCHIVE
-    const handleUnarchive = (studentName) => {
+    const handleUnarchive = async (studentName) => {
         const confirmUnarchive = window.confirm(`Are you sure you want to unarchive ${studentName}?`);
         if (confirmUnarchive) {
-            // Perform the unarchive action, e.g., make an API call
-            console.log(`${studentName} has been unarchived.`);
+            // Add your API call here to update the student status
             setSuccessMessage(`${studentName} has been successfully unarchived!`);
-            
             setTimeout(() => {
                 setSuccessMessage("");
             }, 2500);
         }
     };
 
-    // IMPORT EXCEL
-    const fileInputRef = useRef(null);
-    const handleImportClick = () => {
-        fileInputRef.current.click();
-    };
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        // Handle the file upload logic here
-        console.log(file);
-    };
-
     // HANDLE GOOGLE NOTES
     const handleOpenGoogleNotes = (studentId) => {
         const noteTitle = `Notes for ${studentId}`;
         const noteContent = `Add your notes for student ${studentId} here.`;
-        
-        // Construct the Google Keep URL
         const googleKeepUrl = `https://keep.google.com/#NOTE&title=${encodeURIComponent(noteTitle)}&text=${encodeURIComponent(noteContent)}`;
-    
-        // Open in a new tab
         window.open(googleKeepUrl, '_blank');
     };
 
-    // PAGINATION
+    // HANDLE SEARCH
+    const handleSearch = (e) => {
+        e.preventDefault();
+        // Search is already handled by the filteredStudents
+    };
+
+    // Pagination with filtered students
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10; 
+    const itemsPerPage = 10;
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = sampleStud.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(sampleStud.length / itemsPerPage);
+    const currentItems = filteredStudents.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
     const showingStart = indexOfFirstItem + 1;
-    const showingEnd = Math.min(indexOfLastItem, sampleStud.length);
-    const totalEntries = sampleStud.length;
+    const showingEnd = Math.min(indexOfLastItem, filteredStudents.length);
+    const totalEntries = filteredStudents.length;
 
     return (
         <div className="sb-nav-fixed">
             <Helmet>
                 <title>Treasurer | Students</title>
             </Helmet>
-            {/* NAVBAR AND SIDEBAR */}
             <TreasurerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
                 <TreasurerSidebar isCollapsed={isCollapsed} />
-                <div 
-                    id="layoutSidenav_content" 
-                    style={{ 
-                        marginLeft: isCollapsed ? '5rem' : '15.625rem', 
-                        transition: 'margin-left 0.3s', 
+                <div
+                    id="layoutSidenav_content"
+                    style={{
+                        marginLeft: isCollapsed ? '5rem' : '15.625rem',
+                        transition: 'margin-left 0.3s',
                         flexGrow: 1,
-                        marginTop: '3.5rem' 
+                        marginTop: '3.5rem',
                     }}
                 >
-                     {/* CONTENT */}
-                     <div className="container-fluid px-4 mb-5 form-top">
+                    <div className="container-fluid px-4 mb-5 form-top">
                         <div className="card mb-4">
                             <div className="card-header">
                                 <div className="row">
@@ -250,143 +125,154 @@ const TreasurerStudents = () => {
                             </div>
 
                             <div className="card-body">
-                                {successMessage && (  
-                                        <div className="alert alert-success" role="alert">
-                                            {successMessage}
-                                        </div>
-                                    )}
-                                {/* ADD NEW STUDENT AND IMPORT EXCEL BUTTON */}
-                                <div className="d-flex justify-content-between mb-3 align-items-center">
-                                    <div className="d-flex me-auto"> {/* Added me-auto to push the rest to the right */}
-                                        <Link to="/treasurer/students/add-new" className="add-button btn btn-sm me-2">
-                                            <i className="fas fa-plus me-2"></i>
-                                            Add New Student
-                                        </Link>
-                                        <button onClick={handleImportClick} className="add-button btn btn-sm me-2">
-                                            <i className="fas fa-file-excel me-2"></i>
-                                            Import Excel
-                                        </button>
-                                        <input
-                                            type="file"
-                                            accept=".xls,.xlsx"
-                                            ref={fileInputRef}
-                                            style={{ display: 'none' }}
-                                            onChange={handleFileChange}
-                                        />
+                                {error && (
+                                    <div className="alert alert-danger" role="alert">
+                                        {error}
                                     </div>
-                                    <div className="d-flex align-items-center me-3"> 
-                                        <label className="me-2 mb-0">Student Status</label>
-                                        <div className="dashboard-select" style={{ width: 'auto' }}>
-                                            <select className="form-control" defaultValue="">
-                                                <option value="" disabled>Select status</option>
-                                                <option value="Active">Active</option>
-                                                <option value="Archived">Archived</option>
-                                            </select>
-                                        </div>
+                                )}
+                                {successMessage && (
+                                    <div className="alert alert-success" role="alert">
+                                        {successMessage}
                                     </div>
-                                    <form method="get" className="d-flex search-bar">
-                                        <input type="text" placeholder="Search student" className="search-input me-2" />
-                                        <button type="submit" className="search btn btn-sm">
-                                            <i className="fas fa-search"></i>
-                                        </button>
-                                    </form>
-                                </div>
-
-                                {/* TABLE STUDENTS*/}
-                                <table className="table table-bordered table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Student ID</th>
-                                            <th>Student Name</th>
-                                            <th>Year Level</th>
-                                            <th>Program</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {currentItems.map((student, index) => (
-                                            <tr key={student.id_no}>
-                                                <td>{index + indexOfFirstItem + 1}</td> 
-                                                <td>{student.id_no}</td>
-                                                <td>{student.name}</td>
-                                                <td>{student.year_level}</td>
-                                                <td>{student.program}</td>
-                                                <td>{student.status}</td>
-                                                <td>
-                                                    <Link to={`/treasurer/students/edit/${student.id_no}`} className="btn btn-edit btn-sm">
-                                                        <i className="fas fa-edit"></i>
-                                                    </Link>
-                                                    <button 
-                                                        className="btn btn-notes btn-sm" 
-                                                        onClick={() => handleOpenGoogleNotes(student.id_no)}
-                                                    >
-                                                        <i className="fas fa-sticky-note"></i> 
-                                                    </button>
-                                                    <button 
-                                                        className={`btn btn-archive btn-sm ${student.status === 'Archived' ? 'btn-open' : ''}`} 
-                                                        onClick={() => {
-                                                            if (student.status === 'Active') {
-                                                                handleArchive(student.name);
-                                                            } else {
-                                                                // Handle unarchive action
-                                                                handleUnarchive(student.name);
-                                                                // Update student status logic here if necessary
-                                                            }
-                                                        }}
-                                                    >
-                                                        <i className={`fas fa-${student.status === 'Active' ? 'archive' : 'box-open'}`}></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-
-                                {/* SHOWING OF ENTRIES AND PAGINATION */}
-                                <div className="d-flex justify-content-between align-items-center mb-2" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
-                                    <div>
-                                        Showing {showingStart} to {showingEnd} of {totalEntries} entries
-                                    </div>
-                                    <nav>
-                                        <ul className="pagination mb-0">
-                                            <li className="page-item">
-                                                <button 
-                                                    className="page-link" 
-                                                    onClick={() => paginate(currentPage - 1)} 
-                                                    disabled={currentPage === 1}
-                                                >
-                                                    Previous
+                                )}
+                                {loading ? (
+                                    <div>Loading students...</div>
+                                ) : (
+                                    <>
+                                        {/* ADD NEW STUDENT, IMPORT EXCEL, STATUS FILTER, AND SEARCH */}
+                                        <div className="d-flex justify-content-between mb-3 align-items-center">
+                                            <div className="d-flex me-auto">
+                                                <Link to="/treasurer/students/add-new" className="add-button btn btn-sm me-2">
+                                                    <i className="fas fa-plus me-2"></i>
+                                                    Add New Student
+                                                </Link>
+                                                <button onClick={() => { }} className="add-button btn btn-sm me-2">
+                                                    <i className="fas fa-file-excel me-2"></i>
+                                                    Import Excel
                                                 </button>
-                                            </li>
-                                            {Array.from({ length: totalPages }, (_, index) => (
-                                                <li key={index + 1} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
-                                                    <button 
-                                                        className="page-link" 
-                                                        onClick={() => paginate(index + 1)}
+                                            </div>
+                                            <div className="d-flex align-items-center me-3">
+                                                <label className="me-2 mb-0">Student Status</label>
+                                                <div className="dashboard-select" style={{ width: 'auto' }}>
+                                                    <select
+                                                        className="form-control"
+                                                        value={statusFilter}
+                                                        onChange={(e) => setStatusFilter(e.target.value)}
                                                     >
-                                                        {index + 1}
+                                                        <option value="">All</option>
+                                                        <option value="Active">Active</option>
+                                                        <option value="Archived">Archived</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <form onSubmit={handleSearch} className="d-flex search-bar">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search student"
+                                                    className="search-input me-2"
+                                                    value={searchTerm}
+                                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                                />
+                                                <button type="submit" className="search btn btn-sm">
+                                                    <i className="fas fa-search"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+
+                                        {/* TABLE STUDENTS */}
+                                        <table className="table table-bordered table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Student ID</th>
+                                                    <th>Student Name</th>
+                                                    <th>Year Level</th>
+                                                    <th>Program</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {currentItems.map((student, index) => (
+                                                    <tr key={student._id}>
+                                                        <td>{index + indexOfFirstItem + 1}</td>
+                                                        <td>{student.studentId}</td> {/* Ensure this matches your schema */}
+                                                        <td>{student.name}</td>
+                                                        <td>{student.yearLevel}</td> {/* Ensure this matches your schema */}
+                                                        <td>{student.program}</td>
+                                                        <td>{student.status || 'Active'}</td>
+                                                        <td>
+                                                            <Link to={`/treasurer/students/edit/${student._id}`} className="btn btn-edit btn-sm">
+                                                                <i className="fas fa-edit"></i>
+                                                            </Link>
+                                                            <button
+                                                                className="btn btn-notes btn-sm"
+                                                                onClick={() => handleOpenGoogleNotes(student.studentId)}
+                                                            >
+                                                                <i className="fas fa-sticky-note"></i>
+                                                            </button>
+                                                            <button
+                                                                className={`btn btn-archive btn-sm ${student.status === 'Archived' ? 'btn-open' : ''}`}
+                                                                onClick={() => {
+                                                                    if (student.status === 'Active') {
+                                                                        handleArchive(student.name);
+                                                                    } else {
+                                                                        handleUnarchive(student.name);
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <i className={`fas fa-${student.status === 'Active' ? 'archive' : 'box-open'}`}></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+
+                                            </tbody>
+                                        </table>
+
+                                        {/* PAGINATION */}
+                                        <nav>
+                                            <ul className="pagination justify-content-center">
+                                                <li className="page-item disabled">
+                                                    <span className="page-link">
+                                                        Showing {showingStart} to {showingEnd} of {totalEntries} entries
+                                                    </span>
+                                                </li>
+                                                <li className="page-item">
+                                                    <button
+                                                        onClick={() => paginate(currentPage - 1)}
+                                                        className="page-link"
+                                                        disabled={currentPage === 1}
+                                                    >
+                                                        Previous
                                                     </button>
                                                 </li>
-                                            ))}
-                                            <li className="page-item">
-                                                <button 
-                                                    className="page-link page-label" 
-                                                    onClick={() => paginate(currentPage + 1)} 
-                                                    disabled={currentPage === totalPages}
-                                                >
-                                                    Next
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    </nav>
-                                </div>
-
+                                                {[...Array(totalPages)].map((_, index) => (
+                                                    <li key={index} className="page-item">
+                                                        <button
+                                                            onClick={() => paginate(index + 1)}
+                                                            className={`page-link ${index + 1 === currentPage ? 'active' : ''}`}
+                                                        >
+                                                            {index + 1}
+                                                        </button>
+                                                    </li>
+                                                ))}
+                                                <li className="page-item">
+                                                    <button
+                                                        onClick={() => paginate(currentPage + 1)}
+                                                        className="page-link"
+                                                        disabled={currentPage === totalPages}
+                                                    >
+                                                        Next
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
-                    
                 </div>
             </div>
         </div>

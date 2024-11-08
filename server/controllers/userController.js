@@ -1,11 +1,10 @@
 // controllers/userController.js
-const Admin = require('../models/AdminSchema'); // Import the Admin model
-const Treasurer = require('../models/TreasurerSchema'); // Import the Treasurer model
-const Officer = require('../models/OfficerSchema'); // Import the Officer model
-const Governor = require('../models/GovernorSchema'); // Import the Governor model
-const { getModelByPosition } = require('../services/userService'); // Import the function
-
+const Admin = require('../models/AdminSchema');
+const Treasurer = require('../models/TreasurerSchema');
+const Officer = require('../models/OfficerSchema');
+const Governor = require('../models/GovernorSchema');
 const { addUser } = require('../services/userService');
+const axios = require('axios');
 
 // Register a new user
 exports.registerUser = async (req, res) => {
@@ -16,12 +15,29 @@ exports.registerUser = async (req, res) => {
         console.error('Error adding user:', error);
         res.status(500).json({ message: 'Failed to add user', error: error.message });
     }
-};
+};  
 
 exports.login = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, recaptchaToken } = req.body;
+
+    // Check if reCAPTCHA token is provided
+    if (!recaptchaToken) {
+        return res.status(400).json({ message: 'reCAPTCHA verification failed. Please complete the reCAPTCHA.' });
+    }
 
     try {
+        // Verify reCAPTCHA token with Google
+        const recaptchaResponse = await axios.post(`https://www.google.com/recaptcha/api/siteverify`, null, {
+            params: {
+                secret: process.env.RECAPTCHA_SECRET_KEY, // Access secret key from .env
+                response: recaptchaToken,
+            },
+        });
+
+        if (!recaptchaResponse.data.success) {
+            return res.status(400).json({ message: 'reCAPTCHA verification failed. Please try again.' });
+        }
+
         // List of all models to check (Admin, Treasurer, Officer, Governor)
         const models = [Admin, Treasurer, Officer, Governor];
 
@@ -49,7 +65,6 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-   
         res.status(200).json({ message: 'Login successful', position });
     } catch (error) {
         console.error('Login error:', error);

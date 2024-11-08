@@ -1,15 +1,38 @@
-// src/pages/treasurer/TreasurerAddStud.jsx
 import { Helmet } from 'react-helmet';
 import React, { useState } from "react";
-import TreasurerSidebar from "./TreasurerSidebar"; 
+import axios from 'axios';
+import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
 
 const TreasurerAddStud = () => {
-    // NAV AND SIDEBAR
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    // State to handle form data
+    const [formData, setFormData] = useState({
+        name: '',
+        studentId: '',
+        institutionalEmail: '',
+        yearLevel: '',
+        program: ''
+    });
 
-    const toggleSidebar = () => {
-        setIsCollapsed(prev => !prev);
+    // Handle sidebar collapse
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    const toggleSidebar = () => setIsCollapsed(prev => !prev);
+
+    // Form data change handler
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    // Form submission handler
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.post('http://localhost:8000/api/add/students', formData);
+            alert(response.data.message || 'Student added successfully');
+        } catch (error) {
+            console.error('Error adding student:', error);
+            alert('Failed to add student. Please try again.');
+        }
     };
 
     return (
@@ -17,17 +40,16 @@ const TreasurerAddStud = () => {
             <Helmet>
                 <title>Treasurer | Add Student</title>
             </Helmet>
-            {/* NAVBAR AND SIDEBAR */}
             <TreasurerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
                 <TreasurerSidebar isCollapsed={isCollapsed} />
-                <div 
-                    id="layoutSidenav_content" 
-                    style={{ 
-                        marginLeft: isCollapsed ? '5rem' : '15.625rem', 
-                        transition: 'margin-left 0.3s', 
+                <div
+                    id="layoutSidenav_content"
+                    style={{
+                        marginLeft: isCollapsed ? '5rem' : '15.625rem',
+                        transition: 'margin-left 0.3s',
                         flexGrow: 1,
-                        marginTop: '3.5rem' 
+                        marginTop: '3.5rem'
                     }}
                 >
                     {/* CONTENT */}
@@ -39,42 +61,64 @@ const TreasurerAddStud = () => {
                                         <i className="far fa-plus me-2"></i> <strong>Add New Student</strong>
                                     </div>
                                     <div className="card-body">
-                                        <form>
+                                        <form onSubmit={handleSubmit}>
                                             <div className="mb-3">
                                                 <label className="mb-1">Student Name</label>
                                                 <input
                                                     type="text"
+                                                    name="name"
+                                                    value={formData.name}
+                                                    onChange={handleChange}
                                                     className="form-control system"
                                                     placeholder="Enter student name"
+                                                    required
                                                 />
                                             </div>
                                             <div className="mb-3">
                                                 <label className="mb-1">Student ID</label>
                                                 <input
                                                     type="text"
+                                                    name="studentId"
+                                                    value={formData.studentId}
+                                                    onChange={handleChange}
                                                     className="form-control system"
                                                     placeholder="Enter student ID"
+                                                    required
                                                 />
                                             </div>
                                             <div className="mb-4">
                                                 <label className="mb-1">Institutional Email</label>
                                                 <input
-                                                    type="password"
+                                                    type="email"
+                                                    name="institutionalEmail"
+                                                    value={formData.institutionalEmail}
+                                                    onChange={handleChange}
                                                     className="form-control"
                                                     placeholder="Enter institutional email"
+                                                    required
                                                 />
                                             </div>
                                             <div className="mb-4">
                                                 <label className="mb-1">Year Level</label>
                                                 <input
-                                                    type="password"
+                                                    type="text"
+                                                    name="yearLevel"
+                                                    value={formData.yearLevel}
+                                                    onChange={handleChange}
                                                     className="form-control"
                                                     placeholder="Enter year level"
+                                                    required
                                                 />
                                             </div>
                                             <div className="mb-4">
                                                 <label className="mb-1">Choose Program</label>
-                                                <select className="form-control form-select" defaultValue="">
+                                                <select
+                                                    className="form-control form-select"
+                                                    name="program"
+                                                    value={formData.program}
+                                                    onChange={handleChange}
+                                                    required
+                                                >
                                                     <option value="" disabled>Select a program</option>
                                                     <option value="BSIT">BSIT</option>
                                                     <option value="BSEMC">BSEMC</option>
@@ -84,7 +128,9 @@ const TreasurerAddStud = () => {
                                                 </select>
                                             </div>
                                             <div className="mb-0">
-                                                <button type="submit" className="btn system-button"> <i className="far fa-plus me-1"></i> Add</button>
+                                                <button type="submit" className="btn system-button">
+                                                    <i className="far fa-plus me-1"></i> Add
+                                                </button>
                                             </div>
                                         </form>
                                     </div>
