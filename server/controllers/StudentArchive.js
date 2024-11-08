@@ -1,32 +1,42 @@
 const Student = require('../models/studentSchema');
+const mongoose = require('mongoose');
 
-// Archive a student
-exports.archiveStudent = async (req, res) => {
+// Helper function to update archive status
+const updateArchiveStatus = async (id, archiveStatus, res) => {
     try {
-        const { id } = req.params;
-        const student = await Student.findByIdAndUpdate(id, { isArchived: true }, { new: true });
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: 'Invalid student ID' });
+        }
+
+        const student = await Student.findByIdAndUpdate(id, { isArchived: archiveStatus }, { new: true });
         if (!student) {
             return res.status(404).json({ message: 'Student not found' });
         }
-        res.json({ message: `${student.name} has been archived`, student });
+
+        res.status(200).json({ message: `Student ${archiveStatus ? 'archived' : 'unarchived'} successfully`, student });
     } catch (error) {
-        res.status(500).json({ message: 'Error archiving student', error });
+        res.status(500).json({ message: 'Server error', error });
+    }
+};
+
+// Archive a student
+exports.archiveStudent = async (req, res) => {
+    const { id } = req.params;
+    const student = await updateArchiveStatus(id, true, res);
+    if (student) {
+        res.json({ message: `${student.name} has been archived`, student });
     }
 };
 
 // Unarchive a student
 exports.unarchiveStudent = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const student = await Student.findByIdAndUpdate(id, { isArchived: false }, { new: true });
-        if (!student) {
-            return res.status(404).json({ message: 'Student not found' });
-        }
+    const { id } = req.params;
+    const student = await updateArchiveStatus(id, false, res);
+    if (student) {
         res.json({ message: `${student.name} has been unarchived`, student });
-    } catch (error) {
-        res.status(500).json({ message: 'Error unarchiving student', error });
     }
 };
+
 
 exports.importFromExcel = async (req, res) => {
     try {

@@ -1,7 +1,7 @@
 // src/pages/treasurer/TreasurerAddStud.jsx
 import { Helmet } from 'react-helmet';
 import React, { useState } from "react";
-import TreasurerSidebar from "./TreasurerSidebar"; 
+import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
 
 const TreasurerEditStud = () => {
@@ -21,13 +21,13 @@ const TreasurerEditStud = () => {
             <TreasurerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
                 <TreasurerSidebar isCollapsed={isCollapsed} />
-                <div 
-                    id="layoutSidenav_content" 
-                    style={{ 
-                        marginLeft: isCollapsed ? '5rem' : '15.625rem', 
-                        transition: 'margin-left 0.3s', 
+                <div
+                    id="layoutSidenav_content"
+                    style={{
+                        marginLeft: isCollapsed ? '5rem' : '15.625rem',
+                        transition: 'margin-left 0.3s',
                         flexGrow: 1,
-                        marginTop: '3.5rem' 
+                        marginTop: '3.5rem'
                     }}
                 >
                     {/* CONTENT */}

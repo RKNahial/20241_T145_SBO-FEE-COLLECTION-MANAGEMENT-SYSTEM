@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import TreasurerSidebar from './TreasurerSidebar';
@@ -23,6 +23,9 @@ const TreasurerStudents = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
+    // File input reference
+    const fileInputRef = useRef(null);
+
     // Fetch students from backend
     useEffect(() => {
         const fetchStudents = async () => {
@@ -32,8 +35,8 @@ const TreasurerStudents = () => {
                     throw new Error('Failed to fetch students');
                 }
                 const data = await response.json();
-                console.log('Fetched Data:', data); // Check data structure here
-                setStudents(data);
+                console.log('Fetched Data:', data);
+                setStudents(data); // Directly set the fetched data
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -52,12 +55,13 @@ const TreasurerStudents = () => {
     const filteredStudents = students.filter(student => {
         const matchesSearch = student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             student.studentId?.toLowerCase().includes(searchTerm.toLowerCase());
-        let matchesStatus = true;
 
+        // Include all students if no filter is selected, otherwise check the status
+        let matchesStatus = true;
         if (statusFilter === 'Active') {
-            matchesStatus = student.status === 'Active';
+            matchesStatus = student.isArchived === false; // Adjusted based on your field name
         } else if (statusFilter === 'Archived') {
-            matchesStatus = student.status === 'Archived';
+            matchesStatus = student.isArchived === true; // Adjusted based on your field name
         }
 
         return matchesSearch && matchesStatus;
@@ -71,8 +75,7 @@ const TreasurerStudents = () => {
                 const response = await fetch(`http://localhost:8000/api/archive/${studentId}`, { method: 'PUT' });
                 if (response.ok) {
                     setSuccessMessage(`${studentName} has been successfully archived!`);
-                    // Update students state to reflect the archived status
-                    setStudents(prev => prev.map(s => s._id === studentId ? { ...s, status: 'Archived' } : s));
+                    setStudents(prev => prev.map(s => s._id === studentId ? { ...s, isArchived: true } : s)); // Adjusted based on your field name
                 } else {
                     const errorData = await response.json();
                     setError(errorData.error);
@@ -92,8 +95,7 @@ const TreasurerStudents = () => {
                 const response = await fetch(`http://localhost:8000/api/unarchive/${studentId}`, { method: 'PUT' });
                 if (response.ok) {
                     setSuccessMessage(`${studentName} has been successfully unarchived!`);
-                    // Update students state to reflect the active status
-                    setStudents(prev => prev.map(s => s._id === studentId ? { ...s, status: 'Active' } : s));
+                    setStudents(prev => prev.map(s => s._id === studentId ? { ...s, isArchived: false } : s)); // Adjusted based on your field name
                 } else {
                     const errorData = await response.json();
                     setError(errorData.error);
@@ -106,19 +108,33 @@ const TreasurerStudents = () => {
         }
     };
 
-    const handleExportToExcel = async () => {
-        try {
-            const response = await fetch('http://localhost:8000/api/export-to-excel');
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'students.xlsx');
-            document.body.appendChild(link);
-            link.click();
-            link.parentNode.removeChild(link);
-        } catch (error) {
-            setError('Error exporting to Excel');
+    const handleImportFromExcel = async (event) => {
+        const fileInput = fileInputRef.current;
+        if (fileInput.files.length > 0) {
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch('http://localhost:8000/api/import-from-excel', {
+                    method: 'POST',
+                    body: formData,
+                });
+                if (response.ok) {
+                    const result = await response.json();
+                    setSuccessMessage('Students imported successfully!');
+                    // You might want to trigger a refetch here
+                } else {
+                    const errorData = await response.json();
+                    setError(errorData.error);
+                }
+            } catch (error) {
+                setError('Error importing from Excel');
+            } finally {
+                setTimeout(() => setSuccessMessage(""), 2500);
+                fileInput.value = ''; // Reset file input
+            }
+        } else {
+            setError('Please select a file to import.');
         }
     };
 
@@ -127,6 +143,10 @@ const TreasurerStudents = () => {
         const noteContent = `Add your notes for student ${studentId} here.`;
         const googleKeepUrl = `https://keep.google.com/#NOTE&title=${encodeURIComponent(noteTitle)}&text=${encodeURIComponent(noteContent)}`;
         window.open(googleKeepUrl, '_blank');
+    };
+
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
     };
 
     // Pagination calculations
@@ -186,10 +206,20 @@ const TreasurerStudents = () => {
                                                     <i className="fas fa-plus me-2"></i>
                                                     Add New Student
                                                 </Link>
-                                                <button onClick={handleExportToExcel} className="add-button btn btn-sm me-2">
-                                                    <i className="fas fa-file-excel me-2"></i>
-                                                    Export to Excel
+                                                <button
+                                                    className="add-button btn btn-sm me-2"
+                                                    onClick={() => fileInputRef.current.click()} // Trigger file input
+                                                >
+                                                    <i className="fas fa-file-import me-2"></i>
+                                                    Import from Excel
                                                 </button>
+                                                <input
+                                                    type="file"
+                                                    ref={fileInputRef}
+                                                    accept=".xlsx, .xls"
+                                                    style={{ display: 'none' }}
+                                                    onChange={handleImportFromExcel} // Handle file selection
+                                                />
                                             </div>
                                             <div className="d-flex align-items-center me-3">
                                                 <label className="me-2 mb-0">Student Status</label>
@@ -205,7 +235,7 @@ const TreasurerStudents = () => {
                                                     </select>
                                                 </div>
                                             </div>
-                                            <form className="d-flex search-bar">
+                                            <form className="d-flex search-bar" onSubmit={handleSearchSubmit}>
                                                 <input
                                                     type="text"
                                                     placeholder="Search student"
@@ -240,7 +270,7 @@ const TreasurerStudents = () => {
                                                         <td>{student.name}</td>
                                                         <td>{student.yearLevel}</td>
                                                         <td>{student.program}</td>
-                                                        <td>{student.status || 'Active'}</td>
+                                                        <td>{student.isArchived ? 'Archived' : 'Active'}</td> {/* Update based on isArchived */}
                                                         <td>
                                                             <Link to={`/treasurer/students/edit/${student._id}`} className="btn btn-edit btn-sm">
                                                                 <i className="fas fa-edit"></i>
@@ -252,16 +282,16 @@ const TreasurerStudents = () => {
                                                                 <i className="fas fa-sticky-note"></i>
                                                             </button>
                                                             <button
-                                                                className={`btn btn-archive btn-sm ${student.status === 'Archived' ? 'btn-open' : ''}`}
+                                                                className={`btn btn-archive btn-sm ${student.isArchived ? 'btn-open' : ''}`} // Update based on isArchived
                                                                 onClick={() => {
-                                                                    if (student.status === 'Active') {
-                                                                        handleArchive(student._id, student.name);
-                                                                    } else {
+                                                                    if (student.isArchived) {
                                                                         handleUnarchive(student._id, student.name);
+                                                                    } else {
+                                                                        handleArchive(student._id, student.name);
                                                                     }
                                                                 }}
                                                             >
-                                                                <i className={`fas fa-${student.status === 'Active' ? 'archive' : 'box-open'}`}></i>
+                                                                <i className={`fas fa-${student.isArchived ? 'box-open' : 'archive'}`}></i>
                                                             </button>
                                                         </td>
                                                     </tr>

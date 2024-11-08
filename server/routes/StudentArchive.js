@@ -9,4 +9,5 @@ router.put('/archive/:id', archiveStudent);
 router.put('/unarchive/:id', unarchiveStudent);
 
 router.post('/import-excel', importFromExcel);
+
 module.exports = router;
