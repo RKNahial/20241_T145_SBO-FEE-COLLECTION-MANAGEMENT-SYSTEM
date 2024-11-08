@@ -16,12 +16,16 @@ const loginRoutes = require('./routes/loginRoutes');
 const googleroutes = require('./routes/Googleroutes');
 const studentRoutes = require('./routes/Addstudent');
 const GetAllstudentsRoutes = require('./routes/GetAllStudent');
+const ArchiveStud = require('./routes/StudentArchive'); // Import student routes
+const fileUpload = require('express-fileupload');
+
 // Importing database connection
 const connectDB = require('./config/DbConnections');
 
 // Use middlewares
 app.use(corsMiddleware);
 app.use(jsonMiddleware);
+app.use(fileUpload());
 
 // Connect to MongoDB
 connectDB();
@@ -36,6 +40,8 @@ app.use('/api/login', loginRoutes); // Login route, can be separated if needed
 app.use('/api/auth', googleroutes);
 app.use('/api/add/students', studentRoutes);
 app.use('/api/getAll/students', GetAllstudentsRoutes);
+app.use('/api', ArchiveStud); // Mount the student routes under /api
+
 
 
 

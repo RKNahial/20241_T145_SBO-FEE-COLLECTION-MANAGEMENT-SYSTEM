@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import TreasurerSidebar from './TreasurerSidebar';
@@ -19,6 +19,10 @@ const TreasurerStudents = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
 
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
     // Fetch students from backend
     useEffect(() => {
         const fetchStudents = async () => {
@@ -28,6 +32,7 @@ const TreasurerStudents = () => {
                     throw new Error('Failed to fetch students');
                 }
                 const data = await response.json();
+                console.log('Fetched Data:', data); // Check data structure here
                 setStudents(data);
             } catch (err) {
                 setError(err.message);
@@ -35,43 +40,88 @@ const TreasurerStudents = () => {
                 setLoading(false);
             }
         };
-
         fetchStudents();
     }, []);
+
+    // Reset to first page when students or filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [students, searchTerm, statusFilter]);
 
     // Filter students based on search and status
     const filteredStudents = students.filter(student => {
         const matchesSearch = student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            student.id_no?.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = !statusFilter || student.status === statusFilter;
+            student.studentId?.toLowerCase().includes(searchTerm.toLowerCase());
+        let matchesStatus = true;
+
+        if (statusFilter === 'Active') {
+            matchesStatus = student.status === 'Active';
+        } else if (statusFilter === 'Archived') {
+            matchesStatus = student.status === 'Archived';
+        }
+
         return matchesSearch && matchesStatus;
     });
 
-    // HANDLE ARCHIVE
-    const handleArchive = async (studentName) => {
+    // Handle archive and unarchive actions
+    const handleArchive = async (studentId, studentName) => {
         const confirmArchive = window.confirm(`Are you sure you want to archive ${studentName}?`);
         if (confirmArchive) {
-            // Add your API call here to update the student status
-            setSuccessMessage(`${studentName} has been successfully archived!`);
-            setTimeout(() => {
-                setSuccessMessage("");
-            }, 2500);
+            try {
+                const response = await fetch(`http://localhost:8000/api/archive/${studentId}`, { method: 'PUT' });
+                if (response.ok) {
+                    setSuccessMessage(`${studentName} has been successfully archived!`);
+                    // Update students state to reflect the archived status
+                    setStudents(prev => prev.map(s => s._id === studentId ? { ...s, status: 'Archived' } : s));
+                } else {
+                    const errorData = await response.json();
+                    setError(errorData.error);
+                }
+            } catch (error) {
+                setError('Failed to archive student');
+            } finally {
+                setTimeout(() => setSuccessMessage(""), 2500);
+            }
         }
     };
 
-    // HANDLE UNARCHIVE
-    const handleUnarchive = async (studentName) => {
+    const handleUnarchive = async (studentId, studentName) => {
         const confirmUnarchive = window.confirm(`Are you sure you want to unarchive ${studentName}?`);
         if (confirmUnarchive) {
-            // Add your API call here to update the student status
-            setSuccessMessage(`${studentName} has been successfully unarchived!`);
-            setTimeout(() => {
-                setSuccessMessage("");
-            }, 2500);
+            try {
+                const response = await fetch(`http://localhost:8000/api/unarchive/${studentId}`, { method: 'PUT' });
+                if (response.ok) {
+                    setSuccessMessage(`${studentName} has been successfully unarchived!`);
+                    // Update students state to reflect the active status
+                    setStudents(prev => prev.map(s => s._id === studentId ? { ...s, status: 'Active' } : s));
+                } else {
+                    const errorData = await response.json();
+                    setError(errorData.error);
+                }
+            } catch (error) {
+                setError('Failed to unarchive student');
+            } finally {
+                setTimeout(() => setSuccessMessage(""), 2500);
+            }
         }
     };
 
-    // HANDLE GOOGLE NOTES
+    const handleExportToExcel = async () => {
+        try {
+            const response = await fetch('http://localhost:8000/api/export-to-excel');
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'students.xlsx');
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+        } catch (error) {
+            setError('Error exporting to Excel');
+        }
+    };
+
     const handleOpenGoogleNotes = (studentId) => {
         const noteTitle = `Notes for ${studentId}`;
         const noteContent = `Add your notes for student ${studentId} here.`;
@@ -79,23 +129,13 @@ const TreasurerStudents = () => {
         window.open(googleKeepUrl, '_blank');
     };
 
-    // HANDLE SEARCH
-    const handleSearch = (e) => {
-        e.preventDefault();
-        // Search is already handled by the filteredStudents
-    };
-
-    // Pagination with filtered students
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+    // Pagination calculations
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = filteredStudents.slice(indexOfFirstItem, indexOfLastItem);
     const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
-    const showingStart = indexOfFirstItem + 1;
-    const showingEnd = Math.min(indexOfLastItem, filteredStudents.length);
-    const totalEntries = filteredStudents.length;
 
     return (
         <div className="sb-nav-fixed">
@@ -139,16 +179,16 @@ const TreasurerStudents = () => {
                                     <div>Loading students...</div>
                                 ) : (
                                     <>
-                                        {/* ADD NEW STUDENT, IMPORT EXCEL, STATUS FILTER, AND SEARCH */}
+                                        {/* Actions and Filters */}
                                         <div className="d-flex justify-content-between mb-3 align-items-center">
                                             <div className="d-flex me-auto">
                                                 <Link to="/treasurer/students/add-new" className="add-button btn btn-sm me-2">
                                                     <i className="fas fa-plus me-2"></i>
                                                     Add New Student
                                                 </Link>
-                                                <button onClick={() => { }} className="add-button btn btn-sm me-2">
+                                                <button onClick={handleExportToExcel} className="add-button btn btn-sm me-2">
                                                     <i className="fas fa-file-excel me-2"></i>
-                                                    Import Excel
+                                                    Export to Excel
                                                 </button>
                                             </div>
                                             <div className="d-flex align-items-center me-3">
@@ -165,7 +205,7 @@ const TreasurerStudents = () => {
                                                     </select>
                                                 </div>
                                             </div>
-                                            <form onSubmit={handleSearch} className="d-flex search-bar">
+                                            <form className="d-flex search-bar">
                                                 <input
                                                     type="text"
                                                     placeholder="Search student"
@@ -179,7 +219,7 @@ const TreasurerStudents = () => {
                                             </form>
                                         </div>
 
-                                        {/* TABLE STUDENTS */}
+                                        {/* Table of Students */}
                                         <table className="table table-bordered table-hover">
                                             <thead>
                                                 <tr>
@@ -196,9 +236,9 @@ const TreasurerStudents = () => {
                                                 {currentItems.map((student, index) => (
                                                     <tr key={student._id}>
                                                         <td>{index + indexOfFirstItem + 1}</td>
-                                                        <td>{student.studentId}</td> {/* Ensure this matches your schema */}
+                                                        <td>{student.studentId}</td>
                                                         <td>{student.name}</td>
-                                                        <td>{student.yearLevel}</td> {/* Ensure this matches your schema */}
+                                                        <td>{student.yearLevel}</td>
                                                         <td>{student.program}</td>
                                                         <td>{student.status || 'Active'}</td>
                                                         <td>
@@ -215,9 +255,9 @@ const TreasurerStudents = () => {
                                                                 className={`btn btn-archive btn-sm ${student.status === 'Archived' ? 'btn-open' : ''}`}
                                                                 onClick={() => {
                                                                     if (student.status === 'Active') {
-                                                                        handleArchive(student.name);
+                                                                        handleArchive(student._id, student.name);
                                                                     } else {
-                                                                        handleUnarchive(student.name);
+                                                                        handleUnarchive(student._id, student.name);
                                                                     }
                                                                 }}
                                                             >
@@ -226,18 +266,12 @@ const TreasurerStudents = () => {
                                                         </td>
                                                     </tr>
                                                 ))}
-
                                             </tbody>
                                         </table>
 
-                                        {/* PAGINATION */}
+                                        {/* Pagination */}
                                         <nav>
                                             <ul className="pagination justify-content-center">
-                                                <li className="page-item disabled">
-                                                    <span className="page-link">
-                                                        Showing {showingStart} to {showingEnd} of {totalEntries} entries
-                                                    </span>
-                                                </li>
                                                 <li className="page-item">
                                                     <button
                                                         onClick={() => paginate(currentPage - 1)}

@@ -1,30 +1,12 @@
 const mongoose = require('mongoose');
-
 const studentSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    studentId: {
-        type: String, // or Number, based on your preference
-        required: true
-    },
-    institutionalEmail: {
-        type: String,
-        required: true
-    },
-    yearLevel: {
-        type: String, // or Number, depending on the format of the year level (e.g., Freshman, Sophomore)
-        required: true
-    },
-    program: {
-        type: String,
-        required: true
-    },
-    status: {
-        type: String,
-        default: 'Active' // Default status
-    }
+    name: { type: String, required: true },
+    studentId: { type: String, required: true, unique: true },
+    institutionalEmail: { type: String, required: true, unique: true },
+    yearLevel: { type: String, required: true },
+    program: { type: String, required: true },
+    status: { type: String, default: 'Active' },
+    isArchived: { type: Boolean, default: false }  // Add this field
 });
 
 module.exports = mongoose.model('Student', studentSchema);
