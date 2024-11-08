@@ -99,16 +99,20 @@ const TreasurerAddStud = () => {
                                                 />
                                             </div>
                                             <div className="mb-4">
-                                                <label className="mb-1">Year Level</label>
-                                                <input
-                                                    type="text"
+                                                <label className="mb-1">Choose Year Level</label>
+                                                <select 
                                                     name="yearLevel"
                                                     value={formData.yearLevel}
                                                     onChange={handleChange}
-                                                    className="form-control"
-                                                    placeholder="Enter year level"
+                                                    className="form-control form-select" 
                                                     required
-                                                />
+                                                >
+                                                    <option value="" disabled>Select a year level</option>
+                                                    <option value="1st Year">1st Year</option>
+                                                    <option value="2nd Year">2nd Year</option>
+                                                    <option value="3rd Year">3rd Year</option>
+                                                    <option value="4th Year">4th Year</option>
+                                                </select>
                                             </div>
                                             <div className="mb-4">
                                                 <label className="mb-1">Choose Program</label>
