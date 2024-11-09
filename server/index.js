@@ -10,6 +10,7 @@ const corsMiddleware = require('./middleware/corsMiddleware');
 const jsonMiddleware = require('./middleware/josnMiddlware');
 
 // Importing route files
+const paymentCategoryRoutes = require('./routes/paymentCategoryRoutes');
 const userRoutes = require('./routes/userRoutes');
 const loginRoutes = require('./routes/loginRoutes');
 const googleroutes = require('./routes/Googleroutes');
@@ -32,7 +33,7 @@ connectDB();
 
 // Correct route prefixes
 
-
+app.use('/api/payment-categories', paymentCategoryRoutes);
 app.use('/api/users', userRoutes);  // User routes (e.g., registration)
 app.use('/api/login', loginRoutes); // Login route, can be separated if needed
 app.use('/api/auth', googleroutes);
