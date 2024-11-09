@@ -327,38 +327,43 @@ const TreasurerStudents = () => {
                                         </table>
 
                                         {/* Pagination */}
-                                        <nav>
-                                            <ul className="pagination justify-content-center">
-                                                <li className="page-item">
-                                                    <button
-                                                        onClick={() => paginate(currentPage - 1)}
-                                                        className="page-link"
-                                                        disabled={currentPage === 1}
-                                                    >
-                                                        Previous
-                                                    </button>
-                                                </li>
-                                                {[...Array(totalPages)].map((_, index) => (
-                                                    <li key={index} className="page-item">
+                                        <div className="d-flex justify-content-between align-items-center mb-2" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
+                                            <div>
+                                                Showing {indexOfFirstItem + 1} to {indexOfLastItem} of {filteredStudents.length} entries
+                                            </div>
+                                            <nav>
+                                                <ul className="pagination justify-content-center">
+                                                    <li className="page-item">
                                                         <button
-                                                            onClick={() => paginate(index + 1)}
-                                                            className={`page-link ${index + 1 === currentPage ? 'active' : ''}`}
+                                                            onClick={() => paginate(currentPage - 1)}
+                                                            className="page-link"
+                                                            disabled={currentPage === 1}
                                                         >
-                                                            {index + 1}
+                                                            Previous
                                                         </button>
                                                     </li>
-                                                ))}
-                                                <li className="page-item">
-                                                    <button
-                                                        onClick={() => paginate(currentPage + 1)}
-                                                        className="page-link"
-                                                        disabled={currentPage === totalPages}
-                                                    >
-                                                        Next
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </nav>
+                                                    {[...Array(totalPages)].map((_, index) => (
+                                                        <li key={index} className="page-item">
+                                                            <button
+                                                                onClick={() => paginate(index + 1)}
+                                                                className={`page-link ${index + 1 === currentPage ? 'active' : ''}`}
+                                                            >
+                                                                {index + 1}
+                                                            </button>
+                                                        </li>
+                                                    ))}
+                                                    <li className="page-item">
+                                                        <button
+                                                            onClick={() => paginate(currentPage + 1)}
+                                                            className="page-link"
+                                                            disabled={currentPage === totalPages}
+                                                        >
+                                                            Next
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+                                        </div>
                                     </>
                                 )}
                             </div>
