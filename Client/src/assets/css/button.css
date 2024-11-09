@@ -252,3 +252,35 @@ button:focus {
     outline: none !important;
     box-shadow: none !important;
 }
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.badge.upcoming {
+    background-color: #FFB84D;
+    color: #EAEAEA;
+}
+
+.badge.completed {
+    background-color: #FF8C00;
+    color: #EAEAEA;
+}
+
+.badge.unknown {
+    background-color: #6c757d;
+    color: #EAEAEA;
+}
+
+.badge.active-status {
+    background-color: #FF8C00;  
+    color: #EAEAEA;
+}
+
+.badge.archived-status {
+    background-color: #FFB84D;  
+    color: #EAEAEA;
+}

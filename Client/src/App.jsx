@@ -22,6 +22,9 @@ import OfficerFee from './pages/officer/OfficerFee';
 import OfficerStudents from './pages/officer/OfficerStudents';
 import OfficerAddStud from './pages/officer/OfficerAddStud';
 import OfficerEditStud from './pages/officer/OfficerEditStud';
+import OfficerEvents from './pages/officer/OfficerEvents';
+import OfficerAddEvent from './pages/officer/OfficerAddEvent';
+import OfficerEditEvent from './pages/officer/OfficerEditEvent';
 import OfficerReports from './pages/officer/OfficerReports';
 import OfficerProfile from './pages/officer/OfficerProfile';
 
@@ -79,6 +82,9 @@ const App = () => {
                 <Route path="/officer/students" element={<OfficerStudents/>} />
                 <Route path="/officer/students/add-new" element={<OfficerAddStud/>} />
                 <Route path="/officer/students/edit/:id" element={<OfficerEditStud/>} />
+                <Route path="/officer/events" element={<OfficerEvents/>} />
+                <Route path="/officer/events/add-new" element={<OfficerAddEvent/>} />
+                <Route path="/officer/events/edit/:id" element={<OfficerEditEvent/>} />s
                 <Route path="/officer/reports" element={<OfficerReports/>} />
                 <Route path="/officer/profile" element={<OfficerProfile/>} />
 
