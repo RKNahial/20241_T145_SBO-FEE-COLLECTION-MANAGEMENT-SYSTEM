@@ -124,7 +124,7 @@ const TreasurerEditStud = () => {
                                             <div className="mb-3">
                                                 <label className="mb-1">Student ID</label>
                                                 <input
-                                                    type="text"
+                                                    type="number"
                                                     name="studentId"
                                                     value={formData.studentId}
                                                     onChange={handleChange}
