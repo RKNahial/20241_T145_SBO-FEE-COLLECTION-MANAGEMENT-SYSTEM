@@ -19,6 +19,9 @@ const GetAllstudentsRoutes = require('./routes/GetAllStudent');
 const ArchiveStud = require('./routes/StudentArchive'); // Import student routes
 const fileUpload = require('express-fileupload');
 const UpdateStudentRoutes = require('./routes/UpdateStudent');
+const duesPaymentRoutes = require('./routes/duesPaymentRoutes');
+const dailyDuesRoutes = require('./routes/dailyDuesRoutes');
+
 // Importing database connection
 const connectDB = require('./config/DbConnections');
 
@@ -41,6 +44,8 @@ app.use('/api/add/students', studentRoutes);
 app.use('/api/getAll/students', GetAllstudentsRoutes);
 app.use('/api', ArchiveStud); // Mount the student routes under /api
 app.use('/api', UpdateStudentRoutes);
+app.use('/api/dues', duesPaymentRoutes);
+app.use('/api/daily-dues', dailyDuesRoutes);
 
 
 
