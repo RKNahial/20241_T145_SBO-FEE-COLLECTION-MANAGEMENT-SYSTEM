@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import OfficerSidebar from "./OfficerSidebar"; 
 import OfficerNavbar from "./OfficerNavbar";
 
-const OfficerStudents = () => {
+const OfficerEvents = () => {
     // NAV AND SIDEBAR
     const [isCollapsed, setIsCollapsed] = useState(false);
     const toggleSidebar = () => {
@@ -13,148 +13,61 @@ const OfficerStudents = () => {
     };
 
     // Sample data for demonstration only
-    const sampleStud = [
+    const sampleEvents = [
         {
-            id_no: '1901104188',
-            name: 'Mary Joy Alonzo',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Active'
+            id: 1,
+            eventName: 'College Week',
+            startDate: '2024-02-15',
+            endDate: '2024-02-20',
+            status: 'Upcoming'
         },
         {
-            id_no: '2101102924',
-            name: 'Jonathan Cruz',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Active'
+            id: 2,
+            eventName: 'Foundation Day',
+            startDate: '2024-03-01',
+            endDate: '2024-03-02',
+            status: 'Upcoming'
         },
         {
-            id_no: '1901102046',
-            name: 'Reena Dela Cruz',
-            year_level: '3rd Year',
-            program: 'BSIT',
-            status: 'Archived'
+            id: 3,
+            eventName: 'Sports Fest',
+            startDate: '2024-01-10',
+            endDate: '2024-01-15',
+            status: 'Completed'
         },
         {
-            id_no: '2101101354',
-            name: 'Peter John Garcia',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Active'
+            id: 4,
+            eventName: 'Cultural Night',
+            startDate: '2024-04-05',
+            endDate: '2024-04-05',
+            status: 'Upcoming'
         },
         {
-            id_no: '1901103113',
-            name: 'Jessa Mae Javier',
-            year_level: '2nd Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '2101101979',
-            name: 'Mark Anton Lim',
-            year_level: '1st Year',
-            program: 'BSIT',
-            status: 'Archived'
-        },
-        {
-            id_no: '2101103848',
-            name: 'Anna Marie Mendoza',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '1901104713',
-            name: 'Liza Reyes',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Archived'
-        },
-        {
-            id_no: '1901104188',
-            name: 'Samuel Santos',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '1901104235',
-            name: 'Mary Joy Alonzo',
-            year_level: '3rd Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '1901104188',
-            name: 'I AM',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Archived'
-        },
-        {
-            id_no: '2101102924',
-            name: 'ONLY TESTING',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '1901102046',
-            name: 'IF THE PAGINATION',
-            year_level: '3rd Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '2101101354',
-            name: 'IS WORKING',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '1901103113',
-            name: 'BLAH BLAH BLAH',
-            year_level: '2nd Year',
-            program: 'BSIT',
-            status: 'Archived'
-        },
-        {
-            id_no: '2101101979',
-            name: 'PROPER NAME',
-            year_level: '1st Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '2101103848',
-            name: 'PLACE NAME',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '1901104713',
-            name: 'BACKSTORY STUFF',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Archived'
-        },
-        {
-            id_no: '1901104188',
-            name: 'Samuel Santos',
-            year_level: '4th Year',
-            program: 'BSIT',
-            status: 'Active'
-        },
-        {
-            id_no: '1901104235',
-            name: 'Mary Joy Alonzo',
-            year_level: '3rd Year',
-            program: 'BSIT',
-            status: 'Active'
+            id: 5,
+            eventName: 'Academic Week',
+            startDate: '2023-12-01',
+            endDate: '2023-12-05',
+            status: 'Completed'
         }
     ];
+
+    // EVENT TAG
+    const EventStatusTag = ({ status, onClick }) => {
+        let className;
+
+        switch (status) {
+            case 'Upcoming':
+                className = 'badge upcoming';
+                break;
+            case 'Completed':
+                className = 'badge completed';
+                break;
+            default:
+                className = 'badge unknown';
+        }
+
+        return <span className={className} onClick={onClick} style={{ cursor: 'pointer' }}>{status}</span>;
+    };
 
     // HANDLE ARCHIVE
     const [successMessage, setSuccessMessage] = useState("");
@@ -169,24 +82,6 @@ const OfficerStudents = () => {
                 setSuccessMessage("");
             }, 2500);
         }
-    };
-
-    // STUDENT STATUS TAG
-    const StudentStatusTag = ({ status, onClick }) => {
-        let className;
-
-        switch (status) {
-            case 'Active':
-                className = 'badge active-status';
-                break;
-            case 'Archived':
-                className = 'badge archived-status';
-                break;
-            default:
-                className = 'badge unknown-status';
-        }
-
-        return <span className={className} onClick={onClick} style={{ cursor: 'pointer' }}>{status}</span>;
     };
 
     // HANDLE UNARCHIVE
@@ -226,22 +121,23 @@ const OfficerStudents = () => {
         window.open(googleKeepUrl, '_blank');
     };
 
-    // PAGINATION
+    // PAGINATION - Fixed to use sampleEvents instead of sampleStud
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10; 
+    const itemsPerPage = 10;
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = sampleStud.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(sampleStud.length / itemsPerPage);
+    const currentItems = sampleEvents.slice(indexOfFirstItem, indexOfLastItem);  // Changed here
+    const totalPages = Math.ceil(sampleEvents.length / itemsPerPage);  // Changed here
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
     const showingStart = indexOfFirstItem + 1;
-    const showingEnd = Math.min(indexOfLastItem, sampleStud.length);
-    const totalEntries = sampleStud.length;
+    const showingEnd = Math.min(indexOfLastItem, sampleEvents.length);  // Changed here
+    const totalEntries = sampleEvents.length;  // Changed here
+
 
     return (
         <div className="sb-nav-fixed">
             <Helmet>
-                <title>Officer | Students</title>
+                <title>Officer | Events</title>
             </Helmet>
             {/* NAVBAR AND SIDEBAR */}
             <OfficerNavbar toggleSidebar={toggleSidebar} />
@@ -262,7 +158,7 @@ const OfficerStudents = () => {
                             <div className="card-header">
                                 <div className="row">
                                     <div className="col col-md-6">
-                                        <i className="far fa-user me-2"></i> <strong>Students</strong>
+                                        <i className="fa fa-calendar me-2"></i> <strong>Events</strong>
                                     </div>
                                 </div>
                             </div>
@@ -275,92 +171,62 @@ const OfficerStudents = () => {
                                     )}
                                 {/* ADD NEW STUDENT AND IMPORT EXCEL BUTTON */}
                                 <div className="d-flex justify-content-between mb-3 align-items-center">
-                                    <div className="d-flex me-auto"> {/* Added me-auto to push the rest to the right */}
-                                        <Link to="/officer/students/add-new" className="add-button btn btn-sm me-2">
+                                    <div className="d-flex me-auto"> 
+                                        <Link to="/officer/events/add-new" className="add-button btn btn-sm me-2">
                                             <i className="fas fa-plus me-2"></i>
-                                            Add New Student
+                                            Add New Event
                                         </Link>
-                                        <button onClick={handleImportClick} className="add-button btn btn-sm me-2">
-                                            <i className="fas fa-file-excel me-2"></i>
-                                            Import Excel
-                                        </button>
-                                        <input
-                                            type="file"
-                                            accept=".xls,.xlsx"
-                                            ref={fileInputRef}
-                                            style={{ display: 'none' }}
-                                            onChange={handleFileChange}
-                                        />
                                     </div>
                                     <div className="d-flex align-items-center me-3"> 
-                                        <label className="me-2 mb-0">Student Status</label>
+                                        <label className="me-2 mb-0">Event Status</label>
                                         <div className="dashboard-select" style={{ width: 'auto' }}>
                                             <select className="form-control" defaultValue="">
-                                                <option value="" disabled>Select status</option>
-                                                <option value="Active">Active</option>
-                                                <option value="Archived">Archived</option>
+                                                <option value="All">All</option>
+                                                <option value="Upcoming">Upcoming</option>
+                                                <option value="Completed">Completed</option>
                                             </select>
                                         </div>
                                     </div>
                                     <form method="get" className="d-flex search-bar">
-                                        <input type="text" placeholder="Search student" className="search-input me-2" />
+                                        <input type="text" placeholder="Search events" className="search-input me-2" />
                                         <button type="submit" className="search btn btn-sm">
                                             <i className="fas fa-search"></i>
                                         </button>
                                     </form>
                                 </div>
 
-                                {/* TABLE STUDENTS*/}
+                                {/* TABLE EVENTS */}
                                 <table className="table table-bordered table-hover">
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Student ID</th>
-                                            <th>Student Name</th>
-                                            <th>Year Level</th>
-                                            <th>Program</th>
+                                            <th>Event</th>
+                                            <th>Start Date</th>
+                                            <th>End Date</th>
                                             <th>Status</th>
-                                            <th>Actions</th>
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {currentItems.map((student, index) => (
-                                            <tr key={student.id_no}>
+                                        {currentItems.map((event, index) => (
+                                            <tr key={event.id}>
                                                 <td>{index + indexOfFirstItem + 1}</td> 
-                                                <td>{student.id_no}</td>
-                                                <td>{student.name}</td>
-                                                <td>{student.year_level}</td>
-                                                <td>{student.program}</td>
+                                                <td>{event.eventName}</td>
+                                                <td>{new Date(event.startDate).toLocaleDateString()}</td>
+                                                <td>{new Date(event.endDate).toLocaleDateString()}</td>
                                                 <td>
-                                                    <StudentStatusTag 
-                                                        status={student.status}
-                                                        onClick={() => {}}
+                                                    <EventStatusTag 
+                                                        status={event.status} 
+                                                        onClick={() => {}} 
                                                     />
                                                 </td>
                                                 <td>
-                                                    <Link to={`/officer/students/edit/${student.id_no}`} className="btn btn-edit btn-sm">
+                                                    <Link 
+                                                        to={`/officer/events/edit/${event.id}`} 
+                                                        className="btn btn-edit btn-sm"
+                                                    >
                                                         <i className="fas fa-edit"></i>
                                                     </Link>
-                                                    <button 
-                                                        className="btn btn-notes btn-sm" 
-                                                        onClick={() => handleOpenGoogleNotes(student.id_no)}
-                                                    >
-                                                        <i className="fas fa-sticky-note"></i> 
-                                                    </button>
-                                                    <button 
-                                                        className={`btn btn-archive btn-sm ${student.status === 'Archived' ? 'btn-open' : ''}`} 
-                                                        onClick={() => {
-                                                            if (student.status === 'Active') {
-                                                                handleArchive(student.name);
-                                                            } else {
-                                                                // Handle unarchive action
-                                                                handleUnarchive(student.name);
-                                                                // Update student status logic here if necessary
-                                                            }
-                                                        }}
-                                                    >
-                                                        <i className={`fas fa-${student.status === 'Active' ? 'archive' : 'box-open'}`}></i>
-                                                    </button>
                                                 </td>
                                             </tr>
                                         ))}
@@ -416,4 +282,4 @@ const OfficerStudents = () => {
     );
 };
 
-export default OfficerStudents;
+export default OfficerEvents;
