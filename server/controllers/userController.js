@@ -59,6 +59,11 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
+        // Check email domain for specific positions
+        if (['Governor', 'Treasurer', 'Officer'].includes(position) && !email.endsWith('@student.buksu.edu.ph')) {
+            return res.status(403).json({ message: 'Access denied. Invalid email domain.' });
+        }
+
         // Compare the password (assuming password is hashed)
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {

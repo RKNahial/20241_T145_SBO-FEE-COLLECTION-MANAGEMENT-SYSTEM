@@ -35,7 +35,7 @@ const Login = () => {
             const { position } = response.data;
 
             if (position === 'admin') {
-                navigate('/admin-dashboard');
+                navigate('/admin/dashboard');
             } else if (position === 'officer') {
                 navigate('/officer/dashboard');
             } else if (position === 'Treasurer') {

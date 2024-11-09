@@ -6,7 +6,8 @@ const studentSchema = new mongoose.Schema({
     yearLevel: { type: String, required: true },
     program: { type: String, required: true },
     status: { type: String, default: 'Active' },
-    isArchived: { type: Boolean, default: false }  // Add this field
+    isArchived: { type: Boolean, default: false } ,
+    paymentstatus: { type: String, default: 'Not Paid' } // Add this field
 });
 
 module.exports = mongoose.model('Student', studentSchema);
