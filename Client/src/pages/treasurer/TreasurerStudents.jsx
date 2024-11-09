@@ -107,6 +107,29 @@ const TreasurerStudents = () => {
             }
         }
     };
+    const handleUpdateStudent = async (studentId, updatedData) => {
+        try {
+            const response = await fetch(`http://localhost:8000/api/update/students/${studentId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update student');
+            }
+
+            // Update the local state with the new data
+            setStudents(prev => prev.map(student =>
+                student._id === studentId ? { ...student, ...updatedData } : student
+            ));
+            setSuccessMessage('Student updated successfully!');
+        } catch (error) {
+            setError('Failed to update student');
+        }
+    };
 
     const handleImportFromExcel = async (event) => {
         const fileInput = fileInputRef.current;
@@ -272,7 +295,11 @@ const TreasurerStudents = () => {
                                                         <td>{student.program}</td>
                                                         <td>{student.isArchived ? 'Archived' : 'Active'}</td> {/* Update based on isArchived */}
                                                         <td>
-                                                            <Link to={`/treasurer/students/edit/${student._id}`} className="btn btn-edit btn-sm">
+                                                            <Link
+                                                                to={`/treasurer/students/edit/${student._id}`}
+                                                                state={{ studentData: student }}  // Pass the entire student object
+                                                                className="btn btn-edit btn-sm"
+                                                            >
                                                                 <i className="fas fa-edit"></i>
                                                             </Link>
                                                             <button

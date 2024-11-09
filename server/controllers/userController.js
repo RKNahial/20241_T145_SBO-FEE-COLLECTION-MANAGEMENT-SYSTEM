@@ -3,7 +3,7 @@ const Admin = require('../models/AdminSchema');
 const Treasurer = require('../models/TreasurerSchema');
 const Officer = require('../models/OfficerSchema');
 const Governor = require('../models/GovernorSchema');
-const { addUser } = require('../services/userService');
+const { addUser } = require('../services/userServices');
 const axios = require('axios');
 
 // Register a new user
