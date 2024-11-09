@@ -28,6 +28,9 @@ import OfficerProfile from './pages/officer/OfficerProfile';
 import TreasurerDashboard from './pages/treasurer/TreasurerDashboard';
 import TreasurerFee from './pages/treasurer/TreasurerFee';
 import TreasurerFeeAmount from './pages/treasurer/TreasurerFeeAmount';
+import TreasurerFeeCategory from './pages/treasurer/TreasurerFeeCategory';
+import TreasurerAddCategory from './pages/treasurer/TreasurerAddCategory';
+import TreasurerEditCategory from './pages/treasurer/TreasurerEditCategory';
 import TreasurerStudents from './pages/treasurer/TreasurerStudents';
 import TreasurerAddStud from './pages/treasurer/TreasurerAddStud';
 import TreasurerEditStud from './pages/treasurer/TreasurerEditStud';
@@ -83,6 +86,9 @@ const App = () => {
                 <Route path="/treasurer/dashboard" element={<TreasurerDashboard />} />
                 <Route path="/treasurer/manage-fee" element={<TreasurerFee />} />
                 <Route path="/treasurer/manage-fee/amount/:id" element={<TreasurerFeeAmount />} />
+                <Route path="/treasurer/manage-fee/payment-category" element={<TreasurerFeeCategory />} />
+                <Route path="/treasurer/manage-fee/payment-category/add-new" element={<TreasurerAddCategory />} />
+                <Route path="/treasurer/manage-fee/payment-category/edit/:id" element={<TreasurerEditCategory />} />
                 <Route path="/treasurer/students" element={<TreasurerStudents/>} />
                 <Route path="/treasurer/students/add-new" element={<TreasurerAddStud/>} />
                 <Route path="/treasurer/students/edit/:id" element={<TreasurerEditStud/>} />

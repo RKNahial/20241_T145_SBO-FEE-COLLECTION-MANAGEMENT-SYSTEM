@@ -1,6 +1,7 @@
 // src/pages/treasurer/TreasurerFee.jsx
 import { Helmet } from 'react-helmet';
 import React, { useState, useEffect } from "react";
+import { Link } from 'react-router-dom';
 import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
 import ManageFeeModal from '../../components/ManageFeeModal';
@@ -151,26 +152,38 @@ const TreasurerFee = () => {
                                         {emailSuccessMessage}
                                     </div>
                                 )}
-                                {/* SELECT CATEGORY AND SEARCH STUDENT */}
-                                <div className="d-flex justify-content-between mb-3">
-                                    <div className="d-flex align-items-center">
-                                        <label className="me-2 mb-0">Payment Category</label>
-                                        <div className="dashboard-select" style={{ width: 'auto' }}>
-                                            <select className="form-control" defaultValue="">
-                                                <option value="" disabled>Select a category</option>
-                                                <option value="College Shirt">College Shirt</option>
-                                                <option value="Events">Events</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <form method="get" className="search-bar">
-                                        <input type="text" placeholder="Search student" className="search-input" />
-                                        <button type="submit" className="search">
-                                            <i className="fas fa-search"></i>
-                                        </button>
-                                    </form>
+                              {/* SELECT CATEGORY AND SEARCH STUDENT */}
+                            <div className="d-flex justify-content-between mb-3 align-items-center">
+                                <div className="d-flex me-auto">
+                                <Link 
+                                    to="/treasurer/manage-fee/payment-category" 
+                                    className="add-button btn btn-sm me-2"
+                                >
+                                    <i className="fas fa-cog me-2"></i>
+                                    Manage Payment Category
+                                </Link>
                                 </div>
-
+                                <div className="d-flex align-items-center me-3">
+                                    <label className="me-2 mb-0">Payment Category</label>
+                                    <div className="dashboard-select" style={{ width: 'auto' }}>
+                                        <select className="form-control" defaultValue="">
+                                            <option value="" disabled>Select a category</option>
+                                            <option value="College Shirt">College Shirt</option>
+                                            <option value="Events">Events</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <form className="d-flex search-bar">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Search student" 
+                                        className="search-input me-2"
+                                    />
+                                    <button type="submit" className="search btn btn-sm">
+                                        <i className="fas fa-search"></i>
+                                    </button>
+                                </form>
+                            </div>
                                 {/* TABLE STUDENTS */}
                                 {loading ? (
                                     <div>Loading students...</div>

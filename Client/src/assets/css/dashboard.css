@@ -340,6 +340,12 @@
   transition: background-color 0.3s, color 0.3s;
 }
 
+.pagination .page-link.active {
+  background-color: #ff8c00;
+  border-color: #FF8C00 ;
+  color: #fff;
+}
+
 .pagination .page-link:hover {
   background-color: rgba(108, 117, 125, 0.1); 
   color: #6C757D; 
