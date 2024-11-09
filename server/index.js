@@ -10,7 +10,6 @@ const corsMiddleware = require('./middleware/corsMiddleware');
 const jsonMiddleware = require('./middleware/josnMiddlware');
 
 // Importing route files
-const paymentCategoryRoutes = require('./routes/paymentCategoryRoutes');
 const userRoutes = require('./routes/userRoutes');
 const loginRoutes = require('./routes/loginRoutes');
 const googleroutes = require('./routes/Googleroutes');
@@ -19,8 +18,9 @@ const GetAllstudentsRoutes = require('./routes/GetAllStudent');
 const ArchiveStud = require('./routes/StudentArchive'); // Import student routes
 const fileUpload = require('express-fileupload');
 const UpdateStudentRoutes = require('./routes/UpdateStudent');
-const duesPaymentRoutes = require('./routes/duesPaymentRoutes');
-const dailyDuesRoutes = require('./routes/dailyDuesRoutes');
+
+// Import the payment category routes
+const paymentCategoryRoutes = require('./routes/paymentCategoryRoutes');
 
 // Importing database connection
 const connectDB = require('./config/DbConnections');
@@ -36,7 +36,6 @@ connectDB();
 
 // Correct route prefixes
 
-app.use('/api/payment-categories', paymentCategoryRoutes);
 app.use('/api/users', userRoutes);  // User routes (e.g., registration)
 app.use('/api/login', loginRoutes); // Login route, can be separated if needed
 app.use('/api/auth', googleroutes);
@@ -44,8 +43,9 @@ app.use('/api/add/students', studentRoutes);
 app.use('/api/getAll/students', GetAllstudentsRoutes);
 app.use('/api', ArchiveStud); // Mount the student routes under /api
 app.use('/api', UpdateStudentRoutes);
-app.use('/api/dues', duesPaymentRoutes);
-app.use('/api/daily-dues', dailyDuesRoutes);
+
+// Use the payment category routes
+app.use('/api', paymentCategoryRoutes);
 
 
 

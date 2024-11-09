@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const paymentCategoryController = require('../controllers/paymentCategoryController');
+const { createCategory, getAllCategories, getCategoryById } = require('../controllers/paymentCategoryController');
 
-router.post('/', paymentCategoryController.create);
-router.get('/', paymentCategoryController.getAll);
-router.get('/:id', paymentCategoryController.getById);
-router.put('/:id', paymentCategoryController.update);
+router.post('/payment-categories', createCategory);
+router.get('/payment-categories', getAllCategories);
+router.get('/payment-categories/:id', getCategoryById);
 
-module.exports = router; 
+module.exports = router;

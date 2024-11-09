@@ -1,23 +1,41 @@
-const PaymentCategory = require('../models/PayementCategory');
+// services/paymentCategoryService.js
+const PaymentCategory = require('../models/PaymentCategory');
 
 class PaymentCategoryService {
-    async create(data) {
-        return await PaymentCategory.create(data);
+    async createCategory(categoryData) {
+        try {
+            // Check if category with same ID already exists
+            const existingCategory = await PaymentCategory.findOne({ 
+                categoryId: categoryData.categoryId 
+            });
+            
+            if (existingCategory) {
+                throw new Error('Category ID already exists');
+            }
+
+            const category = new PaymentCategory(categoryData);
+            await category.save();
+            return category;
+        } catch (error) {
+            throw error;
+        }
     }
 
-    async getAll() {
-        return await PaymentCategory.find({ status: 'notArchive' });
+    async getAllCategories() {
+        try {
+            return await PaymentCategory.find({}).sort({ createdAt: -1 });
+        } catch (error) {
+            throw error;
+        }
     }
 
-    async getById(id) {
-        return await PaymentCategory.findById(id);
+    async getCategoryById(id) {
+        try {
+            return await PaymentCategory.findById(id);
+        } catch (error) {
+            throw error;
+        }
     }
-
-    async update(id, data) {
-        return await PaymentCategory.findByIdAndUpdate(id, data, { new: true });
-    }
-
-   
 }
 
-module.exports = new PaymentCategoryService(); 
+module.exports = new PaymentCategoryService();

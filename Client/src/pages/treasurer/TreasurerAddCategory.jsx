@@ -1,79 +1,46 @@
 import { Helmet } from 'react-helmet';
-import React, { useState, useEffect } from "react";
-import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
+import axios from 'axios';
 
 const TreasurerAddCategory = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const { id } = useParams();
-    const location = useLocation();
     const navigate = useNavigate();
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState("");
+    const [categoryId, setCategoryId] = useState(null);
 
-    // Get the student data passed from the previous page
-    const studentData = location.state?.studentData;
-
-    // Initialize form data with student data
     const [formData, setFormData] = useState({
-        studentId: '',
+        categoryId: '',
         name: '',
-        institutionalEmail: '',
-        yearLevel: '',
-        program: ''
+        totalPrice: ''
     });
-
-    // Set initial form data when component mounts
-    useEffect(() => {
-        if (studentData) {
-            setFormData({
-                studentId: studentData.studentId || '',
-                name: studentData.name || '',
-                institutionalEmail: studentData.institutionalEmail || '',
-                yearLevel: studentData.yearLevel || '',
-                program: studentData.program || ''
-            });
-        }
-    }, [studentData]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            if (!formData.studentId || !formData.name || !formData.yearLevel || !formData.program) {
-                setError('All fields are required');
-                return;
-            }
-
-            const response = await fetch(`http://localhost:8000/api/students/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
+            const response = await axios.post('http://localhost:8000/api/payment-categories', {
+                categoryId: formData.categoryId,
+                name: formData.name,
+                totalPrice: Number(formData.totalPrice)
             });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to update payment category');
-            }
-
-            const data = await response.json();
-            if (data.success) {
-                setSuccessMessage(data.message || 'Payment category updated successfully!');
-                setTimeout(() => {
-                    navigate('/treasurer/manage-fee/payment-category');
-                }, 2000);
-            } else {
-                throw new Error(data.message || 'Failed to update payment category');
-            }
+            setSuccessMessage('Category added successfully!');
+            setCategoryId(response.data.category._id);
+            setTimeout(() => {
+                navigate('/treasurer/manage-fee/payment-category');
+            }, 2000);
         } catch (err) {
-            setError(err.message || 'Failed to update payment category. Please try again.');
+            setError(err.response?.data?.message || 'Failed to add category');
         }
     };
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
     };
 
     return (
@@ -106,9 +73,22 @@ const TreasurerAddCategory = () => {
                                         {successMessage && (
                                             <div className="alert alert-success" role="alert">
                                                 {successMessage}
+                                                {categoryId && <div>Category ID: {categoryId}</div>}
                                             </div>
                                         )}
                                         <form onSubmit={handleSubmit}>
+                                            <div className="mb-3">
+                                                <label className="mb-1">Category ID</label>
+                                                <input
+                                                    type="text"
+                                                    name="categoryId"
+                                                    value={formData.categoryId}
+                                                    onChange={handleChange}
+                                                    className="form-control system"
+                                                    placeholder="Enter category ID"
+                                                    required
+                                                />
+                                            </div>
                                             <div className="mb-3">
                                                 <label className="mb-1">Payment Category</label>
                                                 <input
@@ -125,8 +105,8 @@ const TreasurerAddCategory = () => {
                                                 <label className="mb-1">Total Price</label>
                                                 <input
                                                     type="number"
-                                                    name="studentId"
-                                                    value={formData.studentId}
+                                                    name="totalPrice"
+                                                    value={formData.totalPrice}
                                                     onChange={handleChange}
                                                     className="form-control system"
                                                     placeholder="Enter total price"
@@ -135,7 +115,7 @@ const TreasurerAddCategory = () => {
                                             </div>
                                             <div className="mb-0">
                                                 <button type="submit" className="btn system-button">
-                                                    <i className="fa-solid fa-pen me-1"></i> Edit
+                                                    <i className="fa-solid fa-pen me-1"></i> Add
                                                 </button>
                                             </div>
                                         </form>

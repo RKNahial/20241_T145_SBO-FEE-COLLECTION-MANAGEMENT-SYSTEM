@@ -1,43 +1,73 @@
-const PaymentCategoryService = require('../services/paymentCategoryService');
+// controllers/paymentCategoryController.js
+const PaymentCategory = require('../models/PaymentCategory');
 
-class PaymentCategoryController {
-    async create(req, res) {
-        try {
-            const result = await PaymentCategoryService.create(req.body);
-            res.status(201).json(result);
-        } catch (error) {
-            res.status(400).json({ message: error.message });
+exports.createCategory = async (req, res) => {
+    try {
+        const { categoryId, name, totalPrice } = req.body;
+
+        if (!categoryId) {
+            return res.status(400).json({ message: 'Category ID is required' });
         }
-    }
 
-    async getAll(req, res) {
-        try {
-            const categories = await PaymentCategoryService.getAll();
-            res.status(200).json(categories);
-        } catch (error) {
-            res.status(400).json({ message: error.message });
+        const newCategory = new PaymentCategory({
+            categoryId,
+            name,
+            totalPrice
+        });
+
+        const savedCategory = await newCategory.save();
+        res.status(201).json({ 
+            success: true,
+            category: savedCategory,
+            message: 'Category added successfully!'
+        });
+    } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({ 
+                success: false,
+                message: 'Category ID already exists' 
+            });
         }
+        console.error('Error adding payment category:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Failed to add category'
+        });
     }
+};
 
-    async getById(req, res) {
-        try {
-            const category = await PaymentCategoryService.getById(req.params.id);
-            res.status(200).json(category);
-        } catch (error) {
-            res.status(400).json({ message: error.message });
+exports.getAllCategories = async (req, res) => {
+    try {
+        const categories = await PaymentCategory.find().sort({ createdAt: -1 });
+        res.status(200).json({
+            success: true,
+            categories
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+exports.getCategoryById = async (req, res) => {
+    try {
+        const category = await PaymentCategory.findById(req.params.id);
+        if (!category) {
+            return res.status(404).json({
+                success: false,
+                message: 'Payment category not found'
+            });
         }
+        res.status(200).json({
+            success: true,
+            category
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
     }
-
-    async update(req, res) {
-        try {
-            const updated = await PaymentCategoryService.update(req.params.id, req.body);
-            res.status(200).json(updated);
-        } catch (error) {
-            res.status(400).json({ message: error.message });
-        }
-    }
-
-    
-}
-
-module.exports = new PaymentCategoryController(); 
+};
