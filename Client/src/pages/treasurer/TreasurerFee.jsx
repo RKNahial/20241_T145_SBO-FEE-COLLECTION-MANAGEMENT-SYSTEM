@@ -76,17 +76,44 @@ const TreasurerFee = () => {
         setIsModalOpen(true);
     };
 
-    const handleSubmit = (formData) => {
+    const handleSubmit = async (formData) => {
         const confirmSave = window.confirm("Do you want to save changes?");
         if (confirmSave) {
-            console.log('Submitted:', formData);
-            setSuccessMessage("Payment updated successfully!");
+            try {
+                // Update local state first
+                setStudents(prevStudents =>
+                    prevStudents.map(student =>
+                        student._id === selectedStudent._id
+                            ? { ...student, paymentstatus: formData.status }
+                            : student
+                    )
+                );
 
-            setTimeout(() => {
-                setSuccessMessage('');
-            }, 2500);
+                // Show success message
+                setSuccessMessage("Payment updated successfully!");
+                setTimeout(() => {
+                    setSuccessMessage('');
+                }, 2500);
 
-            setIsModalOpen(false);
+                // Close modal
+                setIsModalOpen(false);
+
+                // Refresh student list after a short delay
+                setTimeout(async () => {
+                    const response = await fetch('http://localhost:8000/api/getAll/students');
+                    if (!response.ok) {
+                        throw new Error('Failed to refresh student data');
+                    }
+                    const data = await response.json();
+                    const activeStudents = data.filter(student => !student.isArchived);
+                    setStudents(activeStudents);
+                }, 500);
+
+            } catch (error) {
+                console.error('Error updating payment status:', error);
+                setError('Failed to update payment status');
+                setTimeout(() => setError(null), 2500);
+            }
         }
     };
 
@@ -324,6 +351,7 @@ const TreasurerFee = () => {
                     isOpen={isModalOpen}
                     onClose={handleModalToggle}
                     studentName={selectedStudent.name}
+                    selectedStudent={selectedStudent}
                     onSave={handleSubmit}
                 />
             )}

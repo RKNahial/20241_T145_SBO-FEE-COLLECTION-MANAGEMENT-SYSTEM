@@ -5,13 +5,7 @@ const PaymentCategory = require('../models/PaymentCategory');
 exports.updatePaymentStatus = async (req, res) => {
     try {
         const { studentId } = req.params;
-        const { 
-            status, 
-            amountPaid, 
-            paymentCategory,
-            paymentDate,
-            totalPrice 
-        } = req.body;
+        const { status, amountPaid, paymentCategory, paymentDate, totalPrice } = req.body;
 
         // Find the payment category
         const category = await PaymentCategory.findOne({ name: paymentCategory });
@@ -33,15 +27,28 @@ exports.updatePaymentStatus = async (req, res) => {
                 studentId,
                 categoryId: category._id,
                 paymentCategory,
-                totalPrice
+                totalPrice,
+                transactions: []
             });
         }
 
+        // Record the transaction
+        const previousStatus = paymentFee.status;
+        const transactionAmount = status === 'Not Paid' ? 0 : parseFloat(amountPaid);
+
+        paymentFee.transactions.push({
+            amount: transactionAmount,
+            date: new Date(paymentDate),
+            type: 'Payment',
+            previousStatus,
+            newStatus: status
+        });
+
         // Update payment details
         paymentFee.status = status;
-        paymentFee.amountPaid = status === 'Not Paid' ? 0 : amountPaid;
+        paymentFee.amountPaid = transactionAmount;
         paymentFee.paymentDate = status !== 'Not Paid' ? new Date(paymentDate) : null;
-        paymentFee.totalPrice = totalPrice;
+        paymentFee.totalPrice = parseFloat(totalPrice);
 
         await paymentFee.save();
 
@@ -50,17 +57,16 @@ exports.updatePaymentStatus = async (req, res) => {
             paymentstatus: status
         });
 
-        res.status(200).json({
+        res.json({
             success: true,
-            message: 'Payment status updated successfully',
-            data: paymentFee
+            message: 'Payment updated successfully',
+            paymentFee
         });
-
     } catch (error) {
-        console.error('Payment update error:', error);
+        console.error('Error updating payment:', error);
         res.status(500).json({
             success: false,
-            message: 'Failed to update payment status',
+            message: 'Error updating payment',
             error: error.message
         });
     }
@@ -81,6 +87,57 @@ exports.getStudentPayments = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Failed to fetch payment history',
+            error: error.message
+        });
+    }
+};
+
+exports.getPaymentDetails = async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        
+        // Find all payment records for the student
+        const paymentFee = await PaymentFee.findOne({ studentId })
+            .populate('categoryId')
+            .sort({ 'paymentDate': -1 });
+
+        if (!paymentFee) {
+            return res.json({
+                success: true,
+                paymentFee: {
+                    paymentCategory: 'N/A',
+                    totalPrice: 0,
+                    amountPaid: 0,
+                    status: 'Not Paid',
+                    transactions: []
+                }
+            });
+        }
+
+        res.json({
+            success: true,
+            paymentFee: {
+                paymentCategory: paymentFee.paymentCategory,
+                totalPrice: paymentFee.totalPrice,
+                amountPaid: paymentFee.amountPaid,
+                status: paymentFee.status,
+                transactions: paymentFee.transactions.map(t => ({
+                    ...t.toObject(),
+                    formattedDate: new Date(t.date).toLocaleString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })
+                })).sort((a, b) => b.date - a.date)
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching payment details:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching payment details',
             error: error.message
         });
     }

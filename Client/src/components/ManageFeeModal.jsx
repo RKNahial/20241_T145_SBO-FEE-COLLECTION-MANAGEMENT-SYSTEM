@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const ManageFeeModal = ({ isOpen, onClose, onSave, studentName }) => {
+const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent }) => {
     const [paymentCategories, setPaymentCategories] = useState([]);
     const [amountPaid, setAmountPaid] = useState('');
     const [status, setStatus] = useState('Not Paid');
@@ -43,16 +43,36 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName }) => {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onSave({
-            amountPaid: status === 'Not Paid' ? null : amountPaid,
-            status,
-            date,
-            paymentCategory
-        });
-        resetForm();
-        onClose();
+        const selectedCategory = paymentCategories.find(cat => cat.name === paymentCategory);
+
+        try {
+            const response = await axios.put(`http://localhost:8000/api/payment-fee/update/${selectedStudent._id}`, {
+                studentId: selectedStudent._id,
+                status,
+                amountPaid: status === 'Not Paid' ? 0 : parseFloat(amountPaid),
+                paymentCategory,
+                paymentDate: `${date}T${time}`,
+                totalPrice: selectedCategory?.totalPrice || 0
+            });
+
+            if (response.data.success) {
+                onSave({
+                    status,
+                    amountPaid: status === 'Not Paid' ? 0 : parseFloat(amountPaid),
+                    paymentCategory,
+                    date,
+                    totalPrice: selectedCategory?.totalPrice || 0
+                });
+                onClose();
+            } else {
+                throw new Error(response.data.message || 'Failed to update payment');
+            }
+        } catch (error) {
+            console.error('Error updating payment:', error);
+            alert(error.response?.data?.message || 'Failed to update payment');
+        }
     };
 
     const resetForm = () => {
