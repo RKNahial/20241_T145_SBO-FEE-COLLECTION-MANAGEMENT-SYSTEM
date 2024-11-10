@@ -1,4 +1,3 @@
-// src/pages/treasurer/TreasurerFee.jsx
 import { Helmet } from 'react-helmet';
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -41,11 +40,23 @@ const TreasurerDues = () => {
     // Generate dates for the selected week
     const dates = ['Monday', 'Tuesday', 'Thursday', 'Friday'];
 
-    const PaymentStatusTag = ({ status }) => (
-        <span className={`badge ${status === 'Paid' ? 'bg-success' : 'bg-danger'}`}>
-            {status}
-        </span>
-    );
+    // PAYMENT STATUS TAG
+    const PaymentStatusTag = ({ status }) => {
+        let className;
+
+        switch (status) {
+            case 'Paid':
+                className = 'badge active-status';
+                break;
+            case 'Not Paid':
+                className = 'badge archived-status';
+                break;
+            default:
+                className = 'badge unknown-status';
+        }
+
+        return <span className={className}>{status}</span>;
+    };
 
     useEffect(() => {
         const fetchDues = async () => {
