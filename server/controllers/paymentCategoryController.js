@@ -55,19 +55,71 @@ exports.getCategoryById = async (req, res) => {
     try {
         const category = await PaymentCategory.findById(req.params.id);
         if (!category) {
-            return res.status(404).json({
+            return res.status(404).json({ message: 'Category not found' });
+        }
+        res.json(category);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching category', error: error.message });
+    }
+};
+
+exports.updateCategory = async (req, res) => {
+    try {
+        const { name, totalPrice } = req.body;
+        const updatedCategory = await PaymentCategory.findByIdAndUpdate(
+            req.params.id,
+            { 
+                name, 
+                totalPrice,
+                updatedAt: new Date()
+            },
+            { new: true }
+        );
+
+        if (!updatedCategory) {
+            return res.status(404).json({ 
                 success: false,
-                message: 'Payment category not found'
+                message: 'Category not found' 
             });
         }
-        res.status(200).json({
+
+        res.json({
             success: true,
+            message: 'Category updated successfully',
+            category: updatedCategory
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            success: false,
+            message: 'Error updating category', 
+            error: error.message 
+        });
+    }
+};
+
+exports.toggleArchiveStatus = async (req, res) => {
+    try {
+        const category = await PaymentCategory.findById(req.params.id);
+        if (!category) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Category not found' 
+            });
+        }
+
+        category.isArchived = !category.isArchived;
+        await category.save();
+
+        res.json({
+            success: true,
+            message: `Category ${category.isArchived ? 'archived' : 'unarchived'} successfully`,
             category
         });
     } catch (error) {
-        res.status(500).json({
+        res.status(500).json({ 
             success: false,
-            message: error.message
+            message: 'Error toggling archive status', 
+            error: error.message 
         });
     }
 };

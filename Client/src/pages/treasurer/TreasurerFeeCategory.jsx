@@ -21,22 +21,22 @@ const TreasurerFeeCategory = () => {
     const [statusFilter, setStatusFilter] = useState("");
 
     // CATEGORY STATUS TAG
-const CategoryStatusTag = ({ status }) => {
-    let className;
+    const CategoryStatusTag = ({ status }) => {
+        let className;
 
-    switch (status) {
-        case 'Active':
-            className = 'badge active-status';
-            break;
-        case 'Archived':
-            className = 'badge archived-status';
-            break;
-        default:
-            className = 'badge unknown-status';
-    }
+        switch (status) {
+            case 'Active':
+                className = 'badge active-status';
+                break;
+            case 'Archived':
+                className = 'badge archived-status';
+                break;
+            default:
+                className = 'badge unknown-status';
+        }
 
-    return <span className={className}>{status}</span>;
-};
+        return <span className={className}>{status}</span>;
+    };
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -78,14 +78,9 @@ const CategoryStatusTag = ({ status }) => {
 
     const handleArchiveToggle = async (id) => {
         try {
-            const category = categories.find(c => c._id === id);
-            await axios.put(`http://localhost:8000/api/payment-categories/${id}`, {
-                ...category,
-                isArchived: !category.isArchived
-            });
-
+            const response = await axios.put(`http://localhost:8000/api/payment-categories/${id}/toggle-archive`);
             setCategories(prev => prev.map(c =>
-                c._id === id ? { ...c, isArchived: !c.isArchived } : c
+                c._id === id ? response.data.category : c
             ));
             setSuccessMessage('Category status updated successfully!');
             setTimeout(() => setSuccessMessage(''), 3000);
@@ -135,8 +130,8 @@ const CategoryStatusTag = ({ status }) => {
                                         {/* Actions and Filters */}
                                         <div className="d-flex justify-content-between mb-3 align-items-center">
                                             <div className="d-flex me-auto">
-                                                <Link 
-                                                    to="/treasurer/manage-fee/payment-category/add-new" 
+                                                <Link
+                                                    to="/treasurer/manage-fee/payment-category/add-new"
                                                     className="add-button btn btn-sm me-2"
                                                 >
                                                     <i className="fa fa-plus me-2"></i>

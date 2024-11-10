@@ -41,9 +41,11 @@ const TreasurerDues = () => {
     const dates = ['Monday', 'Tuesday', 'Thursday', 'Friday'];
 
     const PaymentStatusTag = React.memo(({ status }) => {
-        const badgeClass = status === 'Paid' ? 'bg-success' : 'bg-danger';
         return (
-            <span className={`badge ${badgeClass}`}>
+            <span className={`badge ${status === 'Paid' ? 'paid' : 'not-paid'}`} style={{
+                backgroundColor: status === 'Paid' ? '#FF8C00' : '#FFB84D',
+                color: '#EAEAEA'
+            }}>
                 {status}
             </span>
         );
