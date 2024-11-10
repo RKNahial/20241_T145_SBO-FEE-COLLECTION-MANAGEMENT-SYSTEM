@@ -3,37 +3,34 @@ const DailyDues = require('../models/DailyDues');
 exports.processDuesPayment = async (req, res) => {
     try {
         const { userId } = req.params;
-        const { amount, userType, month, week } = req.body;
+        const { amount, userType, month, week, daysCount } = req.body;
         
-        if (!userId || !amount || !userType || !month || !week) {
-            return res.status(400).json({
-                success: false,
-                message: 'Missing required fields'
-            });
-        }
-
-        // Find existing dues record
+        // Find or create dues record
         let duesRecord = await DailyDues.findOne({
             userId,
             userType,
             month,
             week
-        });
+        }).populate('userId', 'name ID');
 
         if (!duesRecord) {
-            return res.status(404).json({
-                success: false,
-                message: 'Dues record not found'
+            duesRecord = new DailyDues({
+                userId,
+                userType,
+                month,
+                week,
+                dues: [
+                    { day: 'Monday', status: 'Unpaid', amount: 0 },
+                    { day: 'Tuesday', status: 'Unpaid', amount: 0 },
+                    { day: 'Thursday', status: 'Unpaid', amount: 0 },
+                    { day: 'Friday', status: 'Unpaid', amount: 0 }
+                ]
             });
         }
 
-        // Calculate number of days that can be paid with the amount
-        const daysCanBePaid = Math.floor(amount / 5);
         let daysUpdated = 0;
-
-        // Update dues status
         const updatedDues = duesRecord.dues.map(due => {
-            if (due.status === 'Unpaid' && daysUpdated < daysCanBePaid) {
+            if (due.status === 'Unpaid' && daysUpdated < daysCount) {
                 daysUpdated++;
                 return {
                     ...due,
@@ -48,12 +45,15 @@ exports.processDuesPayment = async (req, res) => {
         duesRecord.dues = updatedDues;
         await duesRecord.save();
 
+        // Fetch fresh data to ensure we have the latest state
+        const updatedRecord = await DailyDues.findById(duesRecord._id)
+            .populate('userId', 'name ID');
+
         res.status(200).json({
             success: true,
             message: `Successfully paid ${daysUpdated} days`,
-            data: duesRecord
+            data: updatedRecord
         });
-
     } catch (error) {
         console.error('Payment processing error:', error);
         res.status(500).json({

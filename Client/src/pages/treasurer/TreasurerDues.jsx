@@ -41,62 +41,93 @@ const TreasurerDues = () => {
     // Generate dates for the selected week
     const dates = ['Monday', 'Tuesday', 'Thursday', 'Friday'];
 
-    const PaymentStatusTag = ({ status }) => (
-        <span className={`badge ${status === 'Paid' ? 'bg-success' : 'bg-danger'}`}>
-            {status}
-        </span>
-    );
+    const PaymentStatusTag = React.memo(({ status }) => {
+        const badgeClass = status === 'Paid' ? 'bg-success' : 'bg-danger';
+        return (
+            <span className={`badge ${badgeClass}`}>
+                {status}
+            </span>
+        );
+    });
+
+    const refreshData = async () => {
+        try {
+            setLoading(true);
+            const response = await fetch(`http://localhost:8000/api/daily-dues?month=${selectedMonth}&week=${selectedWeek}`, {
+                method: 'GET',
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache',
+                    'If-None-Match': ''
+                }
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch dues');
+            const data = await response.json();
+
+            // Force update of officers state
+            setOfficers([...data]);
+            setError(null);
+        } catch (err) {
+            setError(err.message);
+            console.error('Error fetching dues:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
+        let isMounted = true;
         const fetchDues = async () => {
             try {
                 setLoading(true);
-                const response = await fetch(`http://localhost:8000/api/daily-dues?month=${selectedMonth}&week=${selectedWeek}`);
+                const response = await fetch(`http://localhost:8000/api/daily-dues?month=${selectedMonth}&week=${selectedWeek}`, {
+                    method: 'GET',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+
                 if (!response.ok) throw new Error('Failed to fetch dues');
                 const data = await response.json();
-                setOfficers(data);
-                setError(null);
+
+                if (isMounted) {
+                    setOfficers(data);
+                    setError(null);
+                }
             } catch (err) {
-                setError(err.message);
-                console.error('Error fetching dues:', err);
+                if (isMounted) {
+                    setError(err.message);
+                    console.error('Error fetching dues:', err);
+                }
             } finally {
-                setLoading(false);
+                if (isMounted) {
+                    setLoading(false);
+                }
             }
         };
 
         fetchDues();
-    }, [selectedMonth, selectedWeek, location.state?.refresh]);
 
-    // Add this function to handle payments
-    const handlePayment = async (userId, userType, officerName) => {
-        try {
-            const response = await fetch(`http://localhost:8000/api/dues-payment/${userId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    amount: paymentAmount,
-                    userType,
-                    month: selectedMonth,
-                    week: selectedWeek
-                })
-            });
+        return () => {
+            isMounted = false;
+        };
+    }, [selectedMonth, selectedWeek, location.state?.timestamp]);
 
-            const data = await response.json();
-
-            if (data.success) {
-                // Show success message and refresh the dues data
-                setSuccessMessage(`Payment processed successfully for ${officerName}`);
-                fetchDailyDues(); // Function to refresh the dues data
-            } else {
-                setError(data.message);
+    // Add this effect to handle refresh from location state
+    useEffect(() => {
+        if (location.state?.refresh) {
+            // Update selected month and week if provided
+            if (location.state.month) {
+                setSelectedMonth(location.state.month);
             }
-        } catch (error) {
-            setError('Failed to process payment');
-            console.error('Payment error:', error);
+            if (location.state.week) {
+                setSelectedWeek(location.state.week);
+            }
+            refreshData();
         }
-    };
+    }, [location.state]);
 
     if (loading) {
         return <div>Loading...</div>;
@@ -172,11 +203,11 @@ const TreasurerDues = () => {
                                     </thead>
                                     <tbody>
                                         {currentOfficers.map((officer, index) => (
-                                            <tr key={officer.userId}>
+                                            <tr key={`${officer.userId}-${selectedMonth}-${selectedWeek}`}>
                                                 <td>{indexOfFirstOfficer + index + 1}</td>
                                                 <td>{officer.officerName || 'Name not available'}</td>
                                                 {officer.dues.map((due, dueIndex) => (
-                                                    <td key={dueIndex}>
+                                                    <td key={`${officer.userId}-${due.day}-${due.status}`}>
                                                         <PaymentStatusTag status={due.status} />
                                                     </td>
                                                 ))}

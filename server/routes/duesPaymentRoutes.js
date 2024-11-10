@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { updateDailyDues } = require('../controllers/dailyDuesController');
+const { updateDailyDues, getDailyDues } = require('../controllers/dailyDuesController');
 
-// Route for updating daily dues
+router.get('/daily-dues', getDailyDues);
 router.put('/daily-dues/:userId', updateDailyDues);
 
 module.exports = router; 

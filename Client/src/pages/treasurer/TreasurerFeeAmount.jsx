@@ -91,30 +91,50 @@ const TreasurerFeeAmount = () => {
                             amount: coverage.days * 5,
                             userType,
                             month: coverage.month,
-                            week: coverage.week.toString()
+                            week: coverage.week.toString(),
+                            daysCount: coverage.days
                         }),
                     });
 
                     const data = await response.json();
 
-                    if (response.ok && data.success) {
+                    if (data.success) {
                         successCount++;
                     } else {
                         errorMessages.push(`${coverage.month} Week ${coverage.week}: ${data.message}`);
                     }
                 } catch (err) {
+                    console.error('Payment error:', err);
                     errorMessages.push(`${coverage.month} Week ${coverage.week}: Failed to process`);
                 }
             }
 
             if (successCount > 0) {
-                alert(`Successfully processed payments for ${successCount} periods.${errorMessages.length > 0 ? '\n\nErrors:\n' + errorMessages.join('\n') : ''}`);
-                navigate("/treasurer/daily-dues", { state: { refresh: true } });
+                alert(`Successfully processed payments for ${successCount} periods.`);
+
+                // Force refresh before navigation
+                await fetch(`http://localhost:8000/api/daily-dues?month=${weeksAndMonthsCovered[0].month}&week=${weeksAndMonthsCovered[0].week}`, {
+                    method: 'GET',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+
+                navigate("/treasurer/daily-dues", {
+                    state: {
+                        timestamp: Date.now(),
+                        month: weeksAndMonthsCovered[0].month,
+                        week: weeksAndMonthsCovered[0].week.toString(),
+                        refresh: true
+                    },
+                    replace: true
+                });
             } else {
                 alert(`Failed to process payments:\n${errorMessages.join('\n')}`);
             }
         } catch (error) {
-            console.error('Error updating dues:', error);
+            console.error('Error:', error);
             alert("Failed to process payment. Please try again.");
         } finally {
             setLoading(false);
