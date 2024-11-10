@@ -19,6 +19,24 @@ const TreasurerStudents = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
 
+    // STUDENT STATUS TAG
+    const StudentStatusTag = ({ status, onClick }) => {
+        let className;
+
+        switch (status) {
+            case 'Active':
+                className = 'badge active-status';
+                break;
+            case 'Archived':
+                className = 'badge archived-status';
+                break;
+            default:
+                className = 'badge unknown-status';
+        }
+
+        return <span className={className} onClick={onClick} style={{ cursor: 'pointer' }}>{status}</span>;
+    };
+
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
@@ -107,6 +125,7 @@ const TreasurerStudents = () => {
             }
         }
     };
+
     const handleUpdateStudent = async (studentId, updatedData) => {
         try {
             const response = await fetch(`http://localhost:8000/api/update/students/${studentId}`, {
@@ -202,7 +221,7 @@ const TreasurerStudents = () => {
                             <div className="card-header">
                                 <div className="row">
                                     <div className="col col-md-6">
-                                        <i className="far fa-user me-2"></i> <strong>Students</strong>
+                                        <i className="fa fa-cog me-2"></i> <strong>Students</strong>
                                     </div>
                                 </div>
                             </div>
@@ -225,7 +244,10 @@ const TreasurerStudents = () => {
                                         {/* Actions and Filters */}
                                         <div className="d-flex justify-content-between mb-3 align-items-center">
                                             <div className="d-flex me-auto">
-                                                <Link to="/treasurer/students/add-new" className="add-button btn btn-sm me-2">
+                                                <Link 
+                                                    to="/treasurer/students/add-new" 
+                                                    className="add-button btn btn-sm me-2"
+                                                >
                                                     <i className="fas fa-plus me-2"></i>
                                                     Add New Student
                                                 </Link>
@@ -293,7 +315,18 @@ const TreasurerStudents = () => {
                                                         <td>{student.name}</td>
                                                         <td>{student.yearLevel}</td>
                                                         <td>{student.program}</td>
-                                                        <td>{student.isArchived ? 'Archived' : 'Active'}</td> {/* Update based on isArchived */}
+                                                        <td>
+                                                            <StudentStatusTag
+                                                                status={student.isArchived ? 'Archived' : 'Active'}
+                                                                onClick={() => {
+                                                                    if (student.isArchived) {
+                                                                        handleUnarchive(student._id, student.name);
+                                                                    } else {
+                                                                        handleArchive(student._id, student.name);
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </td>
                                                         <td>
                                                             <Link
                                                                 to={`/treasurer/students/edit/${student._id}`}

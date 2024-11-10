@@ -1,6 +1,7 @@
 import { Helmet } from 'react-helmet';
 import React, { useState } from "react";
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Ensure this is imported
 import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
 
@@ -14,6 +15,9 @@ const TreasurerAddStud = () => {
         program: ''
     });
 
+    // State to handle messages
+    const [message, setMessage] = useState(null);
+
     // Handle sidebar collapse
     const [isCollapsed, setIsCollapsed] = useState(false);
     const toggleSidebar = () => setIsCollapsed(prev => !prev);
@@ -23,15 +27,27 @@ const TreasurerAddStud = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    // Initialize navigate
+    const navigate = useNavigate();
+
     // Form submission handler
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log('Form submitted');
         try {
             const response = await axios.post('http://localhost:8000/api/add/students', formData);
-            alert(response.data.message || 'Student added successfully');
+            console.log('API response:', response);
+            setMessage({ type: 'success', text: 'Student added successfully!' });
+            console.log('About to navigate');
+            
+            setTimeout(() => {
+                navigate('/treasurer/students');
+                console.log('Navigation called');
+            }, 2000);
+ 
         } catch (error) {
             console.error('Error adding student:', error);
-            alert('Failed to add student. Please try again.');
+            setMessage({ type: 'error', text: 'Failed to add student. Please try again.' });
         }
     };
 
@@ -61,6 +77,11 @@ const TreasurerAddStud = () => {
                                         <i className="far fa-plus me-2"></i> <strong>Add New Student</strong>
                                     </div>
                                     <div className="card-body">
+                                    {message && (
+                                            <div className={`alert ${message.type === 'success' ? 'alert-success' : 'alert-danger'} mb-3`}>
+                                                {message.text}
+                                            </div>
+                                        )}
                                         <form onSubmit={handleSubmit}>
                                             <div className="mb-3">
                                                 <label className="mb-1">Student Name</label>
@@ -113,8 +134,6 @@ const TreasurerAddStud = () => {
                                                     <option value="3rd Year">3rd Year</option>
                                                     <option value="4th Year">4th Year</option>
                                                 </select>
-
-
                                             </div>
                                             <div className="mb-4">
                                                 <label className="mb-1">Choose Program</label>
@@ -134,7 +153,10 @@ const TreasurerAddStud = () => {
                                                 </select>
                                             </div>
                                             <div className="mb-0">
-                                                <button type="submit" className="btn system-button">
+                                                <button 
+                                                    type="submit" 
+                                                    className="btn system-button"
+                                                >
                                                     <i className="far fa-plus me-1"></i> Add
                                                 </button>
                                             </div>
