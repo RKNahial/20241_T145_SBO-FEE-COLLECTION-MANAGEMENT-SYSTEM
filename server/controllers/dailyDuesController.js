@@ -2,7 +2,7 @@ const DailyDues = require('../models/DailyDues');
 const Officer = require('../models/OfficerSchema');
 const Treasurer = require('../models/TreasurerSchema');
 const Governor = require('../models/GovernorSchema');
-const axios = require('axios');
+
 exports.getDailyDues = async (req, res) => {
     try {
         const { month, week } = req.query;
@@ -70,6 +70,14 @@ exports.updateDailyDues = async (req, res) => {
     try {
         const { userId } = req.params;
         const { amount, userType, month, week } = req.body;
+        
+        if (!userId || !amount || !userType || !month || !week) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required fields'
+            });
+        }
+
         const daysCount = Math.floor(amount / 5);
 
         // Find or create dues record
@@ -80,8 +88,8 @@ exports.updateDailyDues = async (req, res) => {
             week
         });
 
-        // If no dues record exists for this period, create one
         if (!dues) {
+            // Get user details based on userType
             let user;
             switch (userType) {
                 case 'Officer':
@@ -95,68 +103,25 @@ exports.updateDailyDues = async (req, res) => {
                     break;
             }
 
-            dues = await DailyDues.create({
-                userId,
-                userType,
-                name: user?.name || user?.ID || userType,
-                month,
-                week,
-                dues: [
-                    { date: 1, status: 'Unpaid' },
-                    { date: 2, status: 'Unpaid' },
-                    { date: 4, status: 'Unpaid' },
-                    { date: 5, status: 'Unpaid' }
-                ]
-            });
-        }
-
-        // Find the next available week if current week is fully paid
-        let currentWeek = parseInt(week);
-        let currentMonth = month;
-        let unpaidDues = dues.dues.filter(due => due.status === 'Unpaid');
-        
-        while (unpaidDues.length === 0 && daysCount > 0) {
-            currentWeek++;
-            if (currentWeek > 4) {
-                currentWeek = 1;
-                // Get next month
-                const months = ['January', 'February', 'March', 'April', 'May', 'June', 
-                              'July', 'August', 'September', 'October', 'November', 'December'];
-                const currentMonthIndex = months.indexOf(currentMonth);
-                currentMonth = months[(currentMonthIndex + 1) % 12];
-            }
-
-            // Look for or create dues for the next period
-            dues = await DailyDues.findOne({
-                userId,
-                userType,
-                month: currentMonth,
-                week: currentWeek.toString()
-            });
-
-            if (!dues) {
-                dues = await DailyDues.create({
-                    userId,
-                    userType,
-                    name: user?.name || user?.ID || userType,
-                    month: currentMonth,
-                    week: currentWeek.toString(),
-                    dues: [
-                        { date: 1, status: 'Unpaid' },
-                        { date: 2, status: 'Unpaid' },
-                        { date: 4, status: 'Unpaid' },
-                        { date: 5, status: 'Unpaid' }
-                    ]
+            if (!user) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'User not found'
                 });
             }
 
-            unpaidDues = dues.dues.filter(due => due.status === 'Unpaid');
-        }
-
-        if (unpaidDues.length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'No unpaid dues found for the specified period and future periods'
+            // Create new dues record
+            dues = new DailyDues({
+                userId,
+                userType,
+                month,
+                week,
+                dues: [
+                    { day: 'Monday', status: 'Unpaid', amount: 0 },
+                    { day: 'Tuesday', status: 'Unpaid', amount: 0 },
+                    { day: 'Thursday', status: 'Unpaid', amount: 0 },
+                    { day: 'Friday', status: 'Unpaid', amount: 0 }
+                ]
             });
         }
 
@@ -175,11 +140,11 @@ exports.updateDailyDues = async (req, res) => {
 
         res.json({ 
             success: true,
-            message: `Successfully paid ${updatedCount} days for ${currentMonth} Week ${currentWeek}`,
+            message: `Successfully paid ${updatedCount} days for ${month} Week ${week}`,
             dues,
             daysUpdated: updatedCount,
-            month: currentMonth,
-            week: currentWeek
+            month,
+            week
         });
     } catch (error) {
         console.error('Error updating dues:', error);

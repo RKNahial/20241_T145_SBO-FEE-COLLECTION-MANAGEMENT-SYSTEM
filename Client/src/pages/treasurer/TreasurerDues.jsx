@@ -67,6 +67,37 @@ const TreasurerDues = () => {
         fetchDues();
     }, [selectedMonth, selectedWeek, location.state?.refresh]);
 
+    // Add this function to handle payments
+    const handlePayment = async (userId, userType, officerName) => {
+        try {
+            const response = await fetch(`http://localhost:8000/api/dues-payment/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    amount: paymentAmount,
+                    userType,
+                    month: selectedMonth,
+                    week: selectedWeek
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Show success message and refresh the dues data
+                setSuccessMessage(`Payment processed successfully for ${officerName}`);
+                fetchDailyDues(); // Function to refresh the dues data
+            } else {
+                setError(data.message);
+            }
+        } catch (error) {
+            setError('Failed to process payment');
+            console.error('Payment error:', error);
+        }
+    };
+
     if (loading) {
         return <div>Loading...</div>;
     }

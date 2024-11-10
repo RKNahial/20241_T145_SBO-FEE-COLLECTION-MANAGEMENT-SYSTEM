@@ -4,57 +4,61 @@ exports.processDuesPayment = async (req, res) => {
     try {
         const { userId } = req.params;
         const { amount, userType, month, week } = req.body;
-        const daysCovered = Math.floor(amount / 5);
+        
+        if (!userId || !amount || !userType || !month || !week) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required fields'
+            });
+        }
 
-        // Find the dues record
-        let dues = await DailyDues.findOne({
+        // Find existing dues record
+        let duesRecord = await DailyDues.findOne({
             userId,
             userType,
             month,
             week
         });
 
-        if (!dues) {
+        if (!duesRecord) {
             return res.status(404).json({
                 success: false,
                 message: 'Dues record not found'
             });
         }
 
-        // Count unpaid dues
-        let unpaidDues = dues.dues.filter(due => due.status === 'Unpaid');
-        
-        if (unpaidDues.length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'No unpaid dues found for this period'
-            });
-        }
+        // Calculate number of days that can be paid with the amount
+        const daysCanBePaid = Math.floor(amount / 5);
+        let daysUpdated = 0;
 
-        // Update dues status based on amount paid
-        let updatedCount = 0;
-        for (let i = 0; i < dues.dues.length && updatedCount < daysCovered; i++) {
-            if (dues.dues[i].status === 'Unpaid') {
-                dues.dues[i].status = 'Paid';
-                dues.dues[i].amount = 5;
-                dues.dues[i].paymentDate = new Date();
-                updatedCount++;
+        // Update dues status
+        const updatedDues = duesRecord.dues.map(due => {
+            if (due.status === 'Unpaid' && daysUpdated < daysCanBePaid) {
+                daysUpdated++;
+                return {
+                    ...due,
+                    status: 'Paid',
+                    amount: 5,
+                    paymentDate: new Date()
+                };
             }
-        }
+            return due;
+        });
 
-        await dues.save();
+        duesRecord.dues = updatedDues;
+        await duesRecord.save();
 
         res.status(200).json({
             success: true,
-            message: `Successfully paid ${updatedCount} days for ${month} Week ${week}`,
-            dues,
-            daysUpdated: updatedCount
+            message: `Successfully paid ${daysUpdated} days`,
+            data: duesRecord
         });
+
     } catch (error) {
-        console.error('Error processing payment:', error);
+        console.error('Payment processing error:', error);
         res.status(500).json({
             success: false,
-            message: 'Error processing payment',
+            message: 'Failed to process payment',
             error: error.message
         });
     }
