@@ -18,7 +18,8 @@ const GetAllstudentsRoutes = require('./routes/GetAllStudent');
 const ArchiveStud = require('./routes/StudentArchive'); // Import student routes
 const fileUpload = require('express-fileupload');
 const UpdateStudentRoutes = require('./routes/UpdateStudent');
-
+const duesPaymentRoutes = require('./routes/duesPaymentRoutes');
+const dailyDuesRoutes = require('./routes/dailyDuesRoutes');
 // Import the payment category routes
 const paymentCategoryRoutes = require('./routes/paymentCategoryRoutes');
 
@@ -43,10 +44,9 @@ app.use('/api/add/students', studentRoutes);
 app.use('/api/getAll/students', GetAllstudentsRoutes);
 app.use('/api', ArchiveStud); // Mount the student routes under /api
 app.use('/api', UpdateStudentRoutes);
-
-// Use the payment category routes
+app.use('/api', duesPaymentRoutes);
 app.use('/api', paymentCategoryRoutes);
-
+app.use('/api', dailyDuesRoutes);
 
 
 

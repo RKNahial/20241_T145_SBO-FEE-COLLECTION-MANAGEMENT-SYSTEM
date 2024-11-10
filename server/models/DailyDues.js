@@ -1,18 +1,15 @@
 const mongoose = require('mongoose');
 
-const duesSchema = new mongoose.Schema({
+const dailyDuesSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
+        refPath: 'userType',
         required: true
     },
     userType: {
         type: String,
-        enum: ['Officer', 'Treasurer', 'Governor'],
-        required: true
-    },
-    name: {
-        type: String,
-        required: true
+        required: true,
+        enum: ['Officer', 'Treasurer', 'Governor']
     },
     month: {
         type: String,
@@ -23,20 +20,19 @@ const duesSchema = new mongoose.Schema({
         required: true
     },
     dues: [{
-        date: {
-            type: Number,
-            required: true
-        },
+        day: String,
         status: {
             type: String,
-            enum: ['Paid', 'Not Paid'],
-            default: 'Not Paid'
+            enum: ['Paid', 'Unpaid', 'Not Paid'],
+            default: 'Unpaid'
         },
         amount: {
             type: Number,
             default: 0
         }
     }]
-}, { timestamps: true });
+}, {
+    timestamps: true
+});
 
-module.exports = mongoose.model('DailyDues', duesSchema); 
+module.exports = mongoose.model('DailyDues', dailyDuesSchema); 

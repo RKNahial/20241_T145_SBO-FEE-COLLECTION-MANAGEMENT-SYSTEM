@@ -2,7 +2,7 @@ const DailyDues = require('../models/DailyDues');
 const Officer = require('../models/OfficerSchema');
 const Treasurer = require('../models/TreasurerSchema');
 const Governor = require('../models/GovernorSchema');
-
+const axios = require('axios');
 exports.getDailyDues = async (req, res) => {
     try {
         const { month, week } = req.query;
@@ -41,10 +41,10 @@ exports.getDailyDues = async (req, res) => {
                     month,
                     week,
                     dues: [
-                        { date: 1, status: 'Not Paid' },
-                        { date: 2, status: 'Not Paid' },
-                        { date: 4, status: 'Not Paid' },
-                        { date: 5, status: 'Not Paid' }
+                        { date: 1, status: 'Unpaid' },
+                        { date: 2, status: 'Unpaid' },
+                        { date: 4, status: 'Unpaid' },
+                        { date: 5, status: 'Unpaid' }
                     ]
                 });
             }
@@ -102,10 +102,10 @@ exports.updateDailyDues = async (req, res) => {
                 month,
                 week,
                 dues: [
-                    { date: 1, status: 'Not Paid' },
-                    { date: 2, status: 'Not Paid' },
-                    { date: 4, status: 'Not Paid' },
-                    { date: 5, status: 'Not Paid' }
+                    { date: 1, status: 'Unpaid' },
+                    { date: 2, status: 'Unpaid' },
+                    { date: 4, status: 'Unpaid' },
+                    { date: 5, status: 'Unpaid' }
                 ]
             });
         }
@@ -113,7 +113,7 @@ exports.updateDailyDues = async (req, res) => {
         // Find the next available week if current week is fully paid
         let currentWeek = parseInt(week);
         let currentMonth = month;
-        let unpaidDues = dues.dues.filter(due => due.status === 'Not Paid');
+        let unpaidDues = dues.dues.filter(due => due.status === 'Unpaid');
         
         while (unpaidDues.length === 0 && daysCount > 0) {
             currentWeek++;
@@ -142,15 +142,15 @@ exports.updateDailyDues = async (req, res) => {
                     month: currentMonth,
                     week: currentWeek.toString(),
                     dues: [
-                        { date: 1, status: 'Not Paid' },
-                        { date: 2, status: 'Not Paid' },
-                        { date: 4, status: 'Not Paid' },
-                        { date: 5, status: 'Not Paid' }
+                        { date: 1, status: 'Unpaid' },
+                        { date: 2, status: 'Unpaid' },
+                        { date: 4, status: 'Unpaid' },
+                        { date: 5, status: 'Unpaid' }
                     ]
                 });
             }
 
-            unpaidDues = dues.dues.filter(due => due.status === 'Not Paid');
+            unpaidDues = dues.dues.filter(due => due.status === 'Unpaid');
         }
 
         if (unpaidDues.length === 0) {
@@ -163,7 +163,7 @@ exports.updateDailyDues = async (req, res) => {
         // Update dues status based on amount paid
         let updatedCount = 0;
         for (let i = 0; i < dues.dues.length && updatedCount < daysCount; i++) {
-            if (dues.dues[i].status === 'Not Paid') {
+            if (dues.dues[i].status === 'Unpaid') {
                 dues.dues[i].status = 'Paid';
                 dues.dues[i].amount = 5;
                 dues.dues[i].paymentDate = new Date();
