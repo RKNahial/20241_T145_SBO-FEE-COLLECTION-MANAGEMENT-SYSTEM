@@ -6,6 +6,7 @@ import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
 import ManageFeeModal from '../../components/ManageFeeModal';
 import ViewFeeModal from '../../components/ViewFeeModal';
+import axios from 'axios';
 
 const TreasurerFee = () => {
     // NAV AND SIDEBAR
@@ -101,14 +102,40 @@ const TreasurerFee = () => {
     // PAGINATION
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredStudents = students.filter(student =>
+        student.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.program.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = students.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(students.length / itemsPerPage);
+    const currentItems = filteredStudents.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
     const showingStart = indexOfFirstItem + 1;
-    const showingEnd = Math.min(indexOfLastItem, students.length);
-    const totalEntries = students.length;
+    const showingEnd = Math.min(indexOfLastItem, filteredStudents.length);
+    const totalEntries = filteredStudents.length;
+
+    // Add new state for payment categories
+    const [paymentCategories, setPaymentCategories] = useState([]);
+
+    // Add this useEffect to fetch payment categories
+    useEffect(() => {
+        const fetchPaymentCategories = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/api/payment-categories');
+                // Filter only active categories
+                const activeCategories = response.data.categories.filter(category => !category.isArchived);
+                setPaymentCategories(activeCategories);
+            } catch (err) {
+                console.error('Failed to fetch payment categories:', err);
+            }
+        };
+        fetchPaymentCategories();
+    }, []);
 
     return (
         <div className="sb-nav-fixed">
@@ -152,38 +179,43 @@ const TreasurerFee = () => {
                                         {emailSuccessMessage}
                                     </div>
                                 )}
-                              {/* SELECT CATEGORY AND SEARCH STUDENT */}
-                            <div className="d-flex justify-content-between mb-3 align-items-center">
-                                <div className="d-flex me-auto">
-                                <Link 
-                                    to="/treasurer/manage-fee/payment-category" 
-                                    className="add-button btn btn-sm me-2"
-                                >
-                                    <i className="fas fa-cog me-2"></i>
-                                    Manage Payment Category
-                                </Link>
-                                </div>
-                                <div className="d-flex align-items-center me-3">
-                                    <label className="me-2 mb-0">Payment Category</label>
-                                    <div className="dashboard-select" style={{ width: 'auto' }}>
-                                        <select className="form-control" defaultValue="">
-                                            <option value="" disabled>Select a category</option>
-                                            <option value="College Shirt">College Shirt</option>
-                                            <option value="Events">Events</option>
-                                        </select>
+                                {/* SELECT CATEGORY AND SEARCH STUDENT */}
+                                <div className="d-flex justify-content-between mb-3 align-items-center">
+                                    <div className="d-flex me-auto">
+                                        <Link
+                                            to="/treasurer/manage-fee/payment-category"
+                                            className="add-button btn btn-sm me-2"
+                                        >
+                                            <i className="fas fa-cog me-2"></i>
+                                            Manage Payment Category
+                                        </Link>
                                     </div>
+                                    <div className="d-flex align-items-center me-3">
+                                        <label className="me-2 mb-0">Payment Category</label>
+                                        <div className="dashboard-select" style={{ width: 'auto' }}>
+                                            <select className="form-control" defaultValue="">
+                                                <option value="" disabled>Select a category</option>
+                                                {paymentCategories.map(category => (
+                                                    <option key={category._id} value={category._id}>
+                                                        {category.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <form className="d-flex search-bar" onSubmit={(e) => e.preventDefault()}>
+                                        <input
+                                            type="text"
+                                            placeholder="Search student"
+                                            className="search-input me-2"
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                        />
+                                        <button type="submit" className="search btn btn-sm">
+                                            <i className="fas fa-search"></i>
+                                        </button>
+                                    </form>
                                 </div>
-                                <form className="d-flex search-bar">
-                                    <input 
-                                        type="text" 
-                                        placeholder="Search student" 
-                                        className="search-input me-2"
-                                    />
-                                    <button type="submit" className="search btn btn-sm">
-                                        <i className="fas fa-search"></i>
-                                    </button>
-                                </form>
-                            </div>
                                 {/* TABLE STUDENTS */}
                                 {loading ? (
                                     <div>Loading students...</div>

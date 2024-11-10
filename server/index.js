@@ -22,6 +22,8 @@ const duesPaymentRoutes = require('./routes/duesPaymentRoutes');
 const dailyDuesRoutes = require('./routes/dailyDuesRoutes');
 // Import the payment category routes
 const paymentCategoryRoutes = require('./routes/paymentCategoryRoutes');
+const paymentFeeRoutes = require('./routes/paymentFeeRoutes');
+
 
 // Importing database connection
 const connectDB = require('./config/DbConnections');
@@ -47,6 +49,7 @@ app.use('/api', UpdateStudentRoutes);
 app.use('/api', duesPaymentRoutes);
 app.use('/api', paymentCategoryRoutes);
 app.use('/api', dailyDuesRoutes);
+app.use('/api', paymentFeeRoutes);
 
 
 

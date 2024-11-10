@@ -123,3 +123,20 @@ exports.toggleArchiveStatus = async (req, res) => {
         });
     }
 };
+
+exports.getActiveCategories = async (req, res) => {
+    try {
+        const activeCategories = await PaymentCategory.find({ isArchived: false })
+            .sort({ createdAt: -1 });
+        
+        res.status(200).json({
+            success: true,
+            categories: activeCategories
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};

@@ -1,15 +1,12 @@
 // src/components/ManageFeeModal.jsx
 import React, { useState, useEffect } from 'react';
-
-const paymentPrices = {
-    "College Shirt": 400.00,
-    "Event": 75.00,
-};
+import axios from 'axios';
 
 const ManageFeeModal = ({ isOpen, onClose, onSave, studentName }) => {
+    const [paymentCategories, setPaymentCategories] = useState([]);
     const [amountPaid, setAmountPaid] = useState('');
     const [status, setStatus] = useState('Not Paid');
-    const [paymentCategory, setPaymentCategory] = useState('College Shirt');
+    const [paymentCategory, setPaymentCategory] = useState('');
     const [date, setDate] = useState('');
     const [time, setTime] = useState('');
 
@@ -17,7 +14,21 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName }) => {
     const [hoverCancel, setHoverCancel] = useState(false);
 
     useEffect(() => {
+        const fetchPaymentCategories = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/api/payment-categories');
+                const activeCategories = response.data.categories.filter(category => !category.isArchived);
+                setPaymentCategories(activeCategories);
+                if (activeCategories.length > 0) {
+                    setPaymentCategory(activeCategories[0].name);
+                }
+            } catch (err) {
+                console.error('Failed to fetch payment categories:', err);
+            }
+        };
+
         if (isOpen) {
+            fetchPaymentCategories();
             const now = new Date();
             setDate(now.toISOString().split('T')[0]);
             setTime(now.toTimeString().split(' ')[0]);
@@ -34,11 +45,11 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave({ 
+        onSave({
             amountPaid: status === 'Not Paid' ? null : amountPaid,
             status,
             date,
-            paymentCategory 
+            paymentCategory
         });
         resetForm();
         onClose();
@@ -47,13 +58,13 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName }) => {
     const resetForm = () => {
         setAmountPaid('');
         setStatus('Not Paid');
-        setPaymentCategory('College Shirt');
+        setPaymentCategory('');
         setDate('');
         setTime('');
     };
 
-    const totalPrice = paymentPrices[paymentCategory] || 0;
-    
+    const totalPrice = paymentCategories.find(cat => cat.name === paymentCategory)?.totalPrice || 0;
+
     return (
         <div id="modal" onClick={handleClose} style={modalStyles.overlay}>
             <div style={modalStyles.modal}>
@@ -91,8 +102,10 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName }) => {
                                 onChange={(e) => setPaymentCategory(e.target.value)}
                                 style={modalStyles.select}
                             >
-                                {Object.keys(paymentPrices).map(category => (
-                                    <option key={category} value={category}>{category}</option>
+                                {paymentCategories.map(category => (
+                                    <option key={category._id} value={category.name}>
+                                        {category.name}
+                                    </option>
                                 ))}
                             </select>
                         </div>
@@ -101,7 +114,7 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName }) => {
                                 Total Price:
                             </div>
                             <div style={modalStyles.nonEditable}>
-                                {totalPrice.toFixed(2)}
+                                ₱{totalPrice.toFixed(2)}
                             </div>
                         </div>
                     </div>
@@ -123,17 +136,17 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName }) => {
                         </div>
                     </div>
                     <div style={modalStyles.buttonContainerRight}>
-                        <button 
-                            type="submit" 
+                        <button
+                            type="submit"
                             style={{ ...modalStyles.buttonStyles, backgroundColor: hoverSave ? '#E67E22' : '#FF8C00', marginLeft: '10px' }}
                             onMouseEnter={() => setHoverSave(true)}
                             onMouseLeave={() => setHoverSave(false)}
                         >
                             Save
                         </button>
-                        <button 
-                            type="button" 
-                            onClick={onClose} 
+                        <button
+                            type="button"
+                            onClick={onClose}
                             style={{ ...modalStyles.buttonStyles, backgroundColor: hoverCancel ? '#cc0000' : 'red', marginLeft: '10px' }}
                             onMouseEnter={() => setHoverCancel(true)}
                             onMouseLeave={() => setHoverCancel(false)}
@@ -162,57 +175,57 @@ const modalStyles = {
     },
     modal: {
         background: 'white',
-        padding: '1.25rem', 
-        borderRadius: '1rem', 
-        width: '25rem', 
-        boxShadow: '0 0.125rem 0.625rem rgba(0, 0, 0, 0.1)', 
+        padding: '1.25rem',
+        borderRadius: '1rem',
+        width: '25rem',
+        boxShadow: '0 0.125rem 0.625rem rgba(0, 0, 0, 0.1)',
         zIndex: 1060,
     },
     nonEditable: {
         background: '#f0f0f0',
-        padding: '0.5rem',      
+        padding: '0.5rem',
         borderRadius: '0.25rem',
-        textAlign: 'left', 
-        minWidth: '5.50rem', 
+        textAlign: 'left',
+        minWidth: '5.50rem',
     },
     input: {
         width: '100%',
-        padding: '0.5rem', 
-        marginBottom: '0.625rem', 
-        borderRadius: '0.25rem', 
+        padding: '0.5rem',
+        marginBottom: '0.625rem',
+        borderRadius: '0.25rem',
         border: '1px solid #ccc',
     },
     select: {
         width: '100%',
-        padding: '0.5rem', 
-        marginBottom: '0.625rem', 
-        borderRadius: '0.25rem', 
+        padding: '0.5rem',
+        marginBottom: '0.625rem',
+        borderRadius: '0.25rem',
         border: '1px solid #ccc',
     },
     row: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '0.625rem', 
+        marginBottom: '0.625rem',
     },
     totalPriceLabel: {
         marginTop: '0.60rem',
-        marginBottom: '0.30rem', 
+        marginBottom: '0.30rem',
     },
     totalPriceContainer: {
         display: 'flex',
-        flexDirection: 'column', 
-        marginBottom: '1rem', 
+        flexDirection: 'column',
+        marginBottom: '1rem',
     },
     amountPaidContainer: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '0.625rem', 
+        marginBottom: '0.625rem',
     },
     amountPaidInput: {
         flexGrow: 1,
-        marginRight: '0.625rem', 
+        marginRight: '0.625rem',
         width: '3rem',
     },
     buttonContainerRight: {

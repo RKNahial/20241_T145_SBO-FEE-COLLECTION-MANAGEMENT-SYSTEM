@@ -46,7 +46,11 @@ const TreasurerFeeCategory = () => {
         const fetchCategories = async () => {
             try {
                 const response = await axios.get('http://localhost:8000/api/payment-categories');
-                setCategories(Array.isArray(response.data.categories) ? response.data.categories : []);
+                if (response.data && response.data.categories) {
+                    setCategories(response.data.categories);
+                } else {
+                    setCategories([]);
+                }
                 setLoading(false);
             } catch (err) {
                 setError('Failed to fetch categories');
@@ -79,11 +83,13 @@ const TreasurerFeeCategory = () => {
     const handleArchiveToggle = async (id) => {
         try {
             const response = await axios.put(`http://localhost:8000/api/payment-categories/${id}/toggle-archive`);
-            setCategories(prev => prev.map(c =>
-                c._id === id ? response.data.category : c
-            ));
-            setSuccessMessage('Category status updated successfully!');
-            setTimeout(() => setSuccessMessage(''), 3000);
+            if (response.data && response.data.category) {
+                setCategories(prev => prev.map(c =>
+                    c._id === id ? response.data.category : c
+                ));
+                setSuccessMessage('Category status updated successfully!');
+                setTimeout(() => setSuccessMessage(''), 3000);
+            }
         } catch (err) {
             setError('Failed to update category status');
         }
@@ -92,7 +98,7 @@ const TreasurerFeeCategory = () => {
     return (
         <div className="sb-nav-fixed">
             <Helmet>
-                <title>Treasurer | Payment Categories</title>
+                <title>Treasurers | Payment Categories</title>
             </Helmet>
             <TreasurerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>

@@ -11,9 +11,17 @@ const paymentFeeSchema = new mongoose.Schema({
         ref: 'PaymentCategory', 
         required: true 
     },
-    amount: { 
-        type: Number, 
-        required: true 
+    paymentCategory: {
+        type: String,
+        required: true
+    },
+    totalPrice: {
+        type: Number,
+        required: true
+    },
+    amountPaid: { 
+        type: Number,
+        default: 0
     },
     status: { 
         type: String, 
@@ -22,9 +30,6 @@ const paymentFeeSchema = new mongoose.Schema({
     },
     paymentDate: { 
         type: Date 
-    },
-    transactionDetails: { 
-        type: String 
     }
 }, { timestamps: true });
 
