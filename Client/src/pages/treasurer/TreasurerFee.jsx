@@ -164,6 +164,31 @@ const TreasurerFee = () => {
         fetchPaymentCategories();
     }, []);
 
+    // Add this function after other state declarations
+    const handleEmailClick = async (student) => {
+        try {
+            const response = await axios.get(`http://localhost:8000/api/payment-fee/details/${student._id}`);
+            if (response.data.success) {
+                const paymentDetails = response.data.paymentFee;
+
+                const emailResponse = await axios.post('http://localhost:8000/api/email/send-payment-details', {
+                    studentEmail: student.institutionalEmail,
+                    paymentDetails,
+                    studentName: student.name
+                });
+
+                if (emailResponse.data.success) {
+                    setEmailSuccessMessage('Payment details sent successfully!');
+                    setTimeout(() => setEmailSuccessMessage(''), 3000);
+                }
+            }
+        } catch (error) {
+            console.error('Error sending email:', error);
+            setError('Failed to send email');
+            setTimeout(() => setError(null), 3000);
+        }
+    };
+
     return (
         <div className="sb-nav-fixed">
             <Helmet>

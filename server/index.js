@@ -23,6 +23,8 @@ const dailyDuesRoutes = require('./routes/dailyDuesRoutes');
 // Import the payment category routes
 const paymentCategoryRoutes = require('./routes/paymentCategoryRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const emailRoutes = require('./routes/emailRoutes');
+
 
 
 // Importing database connection
@@ -50,6 +52,7 @@ app.use('/api', duesPaymentRoutes);
 app.use('/api', paymentCategoryRoutes);
 app.use('/api', dailyDuesRoutes);
 app.use('/api/payment-fee', paymentRoutes);
+app.use('/api/email', emailRoutes);
 
 
 

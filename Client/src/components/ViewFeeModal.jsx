@@ -39,6 +39,25 @@ const ViewFeeModal = ({ isOpen, onClose, student }) => {
         }
     };
 
+    const handleSendEmail = async () => {
+        if (!student.institutionalEmail || !paymentDetails) return;
+
+        try {
+            const response = await axios.post('http://localhost:8000/api/email/send-payment-details', {
+                studentEmail: student.institutionalEmail,
+                paymentDetails,
+                studentName: student.name
+            });
+
+            if (response.data.success) {
+                alert('Payment details sent successfully to student\'s email');
+            }
+        } catch (error) {
+            console.error('Error sending email:', error);
+            alert('Failed to send email');
+        }
+    };
+
     return (
         <div id="modal" onClick={handleClose} style={modalStyles.overlay}>
             <div style={modalStyles.modal}>
@@ -91,6 +110,17 @@ const ViewFeeModal = ({ isOpen, onClose, student }) => {
                         </div>
 
                         <div style={modalStyles.buttonContainerRight}>
+                            <button
+                                type="button"
+                                onClick={handleSendEmail}
+                                style={{
+                                    ...modalStyles.buttonStyles,
+                                    backgroundColor: '#28a745',
+                                    marginRight: '0.5rem'
+                                }}
+                            >
+                                Send Email
+                            </button>
                             <button
                                 type="button"
                                 onClick={onClose}
