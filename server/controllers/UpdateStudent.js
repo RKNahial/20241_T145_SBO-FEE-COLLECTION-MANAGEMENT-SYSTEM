@@ -3,27 +3,28 @@ const Student = require('../models/studentSchema');
 const updateStudent = async (req, res) => {
     try {
         const { id } = req.params;
-        const { studentId, name, yearLevel, program } = req.body;
+        const { studentId, name, yearLevel, program, institutionalEmail } = req.body;
 
         console.log('Updating student with ID:', id);
         console.log('Update data:', req.body);
 
         // Validate input
-        if (!studentId || !name || !yearLevel || !program) {
+        if (!studentId || !name || !yearLevel || !program || !institutionalEmail) {
             return res.status(400).json({
                 success: false,
                 message: 'All fields are required'
             });
         }
 
-        // Find student and update
+        // Find student and update with all fields
         const updatedStudent = await Student.findByIdAndUpdate(
             id,
             {
                 studentId,
                 name,
                 yearLevel,
-                program
+                program,
+                institutionalEmail
             },
             { new: true, runValidators: true }
         );

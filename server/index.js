@@ -1,5 +1,7 @@
 // server/index.js
 
+
+
 const express = require('express');
 const dotenv = require('dotenv').config();
 const cors = require('cors');
@@ -23,10 +25,8 @@ const dailyDuesRoutes = require('./routes/dailyDuesRoutes');
 // Import the payment category routes
 const paymentCategoryRoutes = require('./routes/paymentCategoryRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
-const emailRoutes = require('./routes/emailRoutes');
 
-
-
+process.removeAllListeners('warning');
 // Importing database connection
 const connectDB = require('./config/DbConnections');
 
@@ -41,8 +41,8 @@ connectDB();
 
 // Correct route prefixes
 
-app.use('/api/users', userRoutes);  // User routes (e.g., registration)
-app.use('/api/login', loginRoutes); // Login route, can be separated if needed
+app.use('/api/users', userRoutes);
+app.use('/api', loginRoutes);
 app.use('/api/auth', googleroutes);
 app.use('/api/add/students', studentRoutes);
 app.use('/api/getAll/students', GetAllstudentsRoutes);
@@ -52,8 +52,6 @@ app.use('/api', duesPaymentRoutes);
 app.use('/api', paymentCategoryRoutes);
 app.use('/api', dailyDuesRoutes);
 app.use('/api/payment-fee', paymentRoutes);
-app.use('/api/email', emailRoutes);
-
 
 
 const port = 8000;

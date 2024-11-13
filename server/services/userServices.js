@@ -3,6 +3,7 @@ const Admin = require('../models/AdminSchema');
 const Treasurer = require('../models/TreasurerSchema');
 const Officer = require('../models/OfficerSchema');
 const Governor = require('../models/GovernorSchema');
+const generatePassword = require('../utils/passwordGenerator');
 
 // Utility function to map position to corresponding model
 const getModelByPosition = (position) => {
@@ -22,7 +23,9 @@ const getModelByPosition = (position) => {
 
 // Add a new user
 const addUser = async (userData) => {
-    const { ID, name, email, password, position } = userData;
+    const { ID, name, email, position } = userData;
+    const password = generatePassword(); // Generate a secure password
+    console.log(`Generated password for user ${name}: ${password}`);
 
     // Determine the model based on position
     const Model = getModelByPosition(position);
@@ -39,8 +42,15 @@ const addUser = async (userData) => {
         position
     });
 
-    // Save the user to the correct collection
-    return await newUser.save();
+    try {
+        // Save the user to the correct collection
+        return await newUser.save();
+    } catch (error) {
+        if (error.code === 11000) {
+            throw new Error('Email already exists');
+        }
+        throw error;
+    }
 };
 
 // Add comparePassword method to the schema for each model

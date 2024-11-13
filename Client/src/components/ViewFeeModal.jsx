@@ -1,6 +1,7 @@
 // src/components/ViewFeeModal.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import emailjs from '@emailjs/browser';
 
 const ViewFeeModal = ({ isOpen, onClose, student }) => {
     const [paymentDetails, setPaymentDetails] = useState(null);
@@ -12,8 +13,10 @@ const ViewFeeModal = ({ isOpen, onClose, student }) => {
             if (isOpen && student) {
                 try {
                     const response = await axios.get(`http://localhost:8000/api/payment-fee/details/${student._id}`);
+                    console.log('API Response:', response.data);
                     if (response.data.success) {
                         setPaymentDetails(response.data.paymentFee);
+                        console.log('Set Payment Details:', response.data.paymentFee);
                     } else {
                         throw new Error(response.data.message);
                     }
@@ -42,14 +45,32 @@ const ViewFeeModal = ({ isOpen, onClose, student }) => {
     const handleSendEmail = async () => {
         if (!student.institutionalEmail || !paymentDetails) return;
 
-        try {
-            const response = await axios.post('http://localhost:8000/api/email/send-payment-details', {
-                studentEmail: student.institutionalEmail,
-                paymentDetails,
-                studentName: student.name
-            });
+        console.log('Payment Details before email:', paymentDetails);
 
-            if (response.data.success) {
+        const templateParams = {
+            from_name: "COT-SBO COLLECTION FEE MANAGEMENT SYSTEM",
+            to_name: student.name,
+            to_email: student.institutionalEmail,
+            payment_category: paymentDetails.paymentCategory || 'N/A',
+            total_price: paymentDetails.totalPrice?.toString() || '0.00',
+            amount_paid: paymentDetails.amountPaid?.toString() || '0.00',
+            payment_status: student.paymentstatus,
+            transaction_history: paymentDetails.transactions?.map(t =>
+                `• Amount: ₱${t.amount.toFixed(2)}\n  Date: ${t.formattedDate}\n  Status: ${t.previousStatus || 'New'} → ${t.newStatus}`
+            ).join('\n\n') || 'No transaction history'
+        };
+
+        console.log('Template Params:', templateParams);
+
+        try {
+            const response = await emailjs.send(
+                "service_bni941i",
+                "template_x5s32eh",
+                templateParams,
+                "Nqbgnjhv9ss88DOrk"
+            );
+
+            if (response.status === 200) {
                 alert('Payment details sent successfully to student\'s email');
             }
         } catch (error) {

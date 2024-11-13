@@ -8,9 +8,11 @@ import ReCAPTCHA from 'react-google-recaptcha';
 import GoogleSignInButton from '../pages/googlelogin';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { auth } from '../pages/firebase/firebaseConfig';
+import { useAuth } from '../context/AuthContext';
 
 
 const Login = () => {
+    const { setUser } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
@@ -31,9 +33,18 @@ const Login = () => {
                 recaptchaToken
             });
 
-            // Check the position and navigate accordingly
-            const { position } = response.data;
+            const userDetails = {
+                _id: response.data.userId,
+                email: response.data.email,
+                position: response.data.position,
+                loginLogId: response.data.loginLogId,
+                sessionExpiry: new Date().getTime() + (60 * 60 * 1000) // 1 hour from now
+            };
 
+            localStorage.setItem('userDetails', JSON.stringify(userDetails));
+            setUser(userDetails); // Update the auth context
+
+            const { position } = response.data;
             if (position === 'admin') {
                 navigate('/admin/dashboard');
             } else if (position === 'officer') {
@@ -42,8 +53,6 @@ const Login = () => {
                 navigate('/treasurer/dashboard');
             } else if (position === 'governor') {
                 navigate('/governor-dashboard');
-            } else {
-                setMessage('Unauthorized position.');
             }
         } catch (error) {
             console.error('Login error:', error);
@@ -77,18 +86,15 @@ const Login = () => {
                 console.log('Backend response:', response.data); // Log the response data
 
                 if (response.data.authorized) {
-                    const { position } = response.data;
-                    if (position === 'admin') {
-                        navigate('/admin-dashboard');
-                    } else if (position === 'treasurer') {
+                    const { position, userDetails } = response.data;
+                    // Store user details in localStorage
+                    localStorage.setItem('userDetails', JSON.stringify(userDetails));
+
+                    // Navigate based on position
+                    if (position === 'treasurer') {
                         navigate('/treasurer/dashboard');
-                    } else if (position === 'officer') {
-                        navigate('/officer-dashboard');
-                    } else if (position === 'Governor') {
-                        navigate('/governor-dashboard');
-                    } else {
-                        setMessage('User position not recognized.');
                     }
+                    // ... rest of your navigation logic
                 } else {
                     setMessage('Access denied. Only authorized users can log in.');
                 }
@@ -118,6 +124,45 @@ const Login = () => {
 
     const onRecaptchaChange = (token) => {
         setRecaptchaToken(token);
+    };
+
+    const handleLogout = async () => {
+        try {
+            // Assuming you have the userId and userModel stored in your client
+            const response = await axios.post('http://localhost:8000/api/logout', {
+                userId: storedUserId,
+                userModel: storedUserModel
+            });
+            console.log(response.data.message); // Should log "Logout successful"
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    };
+
+    const handleLoginSuccess = (response) => {
+        const userDetails = {
+            _id: response.data._id,
+            email: response.data.email,
+            position: response.data.position,
+            loginLogId: response.data.loginLogId
+        };
+        localStorage.setItem('userDetails', JSON.stringify(userDetails));
+        if (!response.data || !response.data.userDetails) {
+            console.error('Invalid login response:', response);
+            return;
+        }
+
+        // Store the complete userDetails object
+        localStorage.setItem('userDetails', JSON.stringify({
+            _id: response.data.userDetails._id,
+            email: response.data.userDetails.email,
+            position: response.data.userDetails.position,
+            loginLogId: response.data.userDetails.loginLogId
+        }));
+
+        // Log the stored details for debugging
+        const storedDetails = localStorage.getItem('userDetails');
+        console.log('Stored user details:', storedDetails);
     };
 
     return (

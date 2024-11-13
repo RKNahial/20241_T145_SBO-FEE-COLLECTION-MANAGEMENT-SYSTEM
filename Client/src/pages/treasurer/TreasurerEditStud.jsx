@@ -40,8 +40,16 @@ const TreasurerEditStud = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            if (!formData.studentId || !formData.name || !formData.yearLevel || !formData.program) {
+            // Validate all fields
+            if (!formData.studentId || !formData.name || !formData.yearLevel ||
+                !formData.program || !formData.institutionalEmail) {
                 setError('All fields are required');
+                return;
+            }
+
+            // Validate email format
+            if (!formData.institutionalEmail.endsWith('@student.buksu.edu.ph')) {
+                setError('Email must be a valid BukSU student email');
                 return;
             }
 
@@ -53,16 +61,19 @@ const TreasurerEditStud = () => {
                 body: JSON.stringify(formData)
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to update student');
+                throw new Error(data.message || 'Failed to update student');
             }
 
-            const data = await response.json();
             if (data.success) {
-                setSuccessMessage(data.message || 'Student updated successfully!');
+                setSuccessMessage('Student updated successfully!');
+                // Add a slight delay before navigation to show the success message
                 setTimeout(() => {
-                    navigate('/treasurer/students');
+                    navigate('/treasurer/students', {
+                        state: { updateSuccess: true }
+                    });
                 }, 2000);
             } else {
                 throw new Error(data.message || 'Failed to update student');
@@ -147,11 +158,11 @@ const TreasurerEditStud = () => {
                                             </div>
                                             <div className="mb-4">
                                                 <label className="mb-1">Choose Year Level</label>
-                                                <select 
+                                                <select
                                                     name="yearLevel"
                                                     value={formData.yearLevel}
                                                     onChange={handleChange}
-                                                    className="form-control form-select" 
+                                                    className="form-control form-select"
                                                     required
                                                 >
                                                     <option value="" disabled>Select a year level</option>

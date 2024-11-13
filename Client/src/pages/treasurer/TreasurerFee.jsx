@@ -7,6 +7,7 @@ import TreasurerNavbar from "./TreasurerNavbar";
 import ManageFeeModal from '../../components/ManageFeeModal';
 import ViewFeeModal from '../../components/ViewFeeModal';
 import axios from 'axios';
+import emailjs from '@emailjs/browser';
 
 const TreasurerFee = () => {
     // NAV AND SIDEBAR
@@ -164,20 +165,34 @@ const TreasurerFee = () => {
         fetchPaymentCategories();
     }, []);
 
-    // Add this function after other state declarations
+    // Update the handleEmailClick function
     const handleEmailClick = async (student) => {
         try {
             const response = await axios.get(`http://localhost:8000/api/payment-fee/details/${student._id}`);
             if (response.data.success) {
                 const paymentDetails = response.data.paymentFee;
 
-                const emailResponse = await axios.post('http://localhost:8000/api/email/send-payment-details', {
-                    studentEmail: student.institutionalEmail,
-                    paymentDetails,
-                    studentName: student.name
-                });
+                const templateParams = {
+                    from_name: "COT-SBO COLLECTION FEE MANAGEMENT SYSTEM",
+                    to_name: student.name,
+                    to_email: student.institutionalEmail,
+                    payment_category: paymentDetails.paymentCategory || 'N/A',
+                    total_price: paymentDetails.totalPrice?.toString() || '0.00',
+                    amount_paid: paymentDetails.amountPaid?.toString() || '0.00',
+                    payment_status: student.paymentstatus,
+                    transaction_history: paymentDetails.transactions?.map(t =>
+                        `• Amount: ₱${t.amount.toFixed(2)}\n  Date: ${t.formattedDate}\n  Status: ${t.previousStatus || 'New'} → ${t.newStatus}`
+                    ).join('\n\n') || 'No transaction history'
+                };
 
-                if (emailResponse.data.success) {
+                const emailResponse = await emailjs.send(
+                    "service_bni941i",
+                    "template_x5s32eh",
+                    templateParams,
+                    "Nqbgnjhv9ss88DOrk"
+                );
+
+                if (emailResponse.status === 200) {
                     setEmailSuccessMessage('Payment details sent successfully!');
                     setTimeout(() => setEmailSuccessMessage(''), 3000);
                 }
