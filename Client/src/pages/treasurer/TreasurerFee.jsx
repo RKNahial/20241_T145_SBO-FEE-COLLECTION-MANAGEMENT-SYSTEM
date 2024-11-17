@@ -8,6 +8,8 @@ import ManageFeeModal from '../../components/ManageFeeModal';
 import ViewFeeModal from '../../components/ViewFeeModal';
 import axios from 'axios';
 import emailjs from '@emailjs/browser';
+import '../../styles/PaymentTabs.css';
+import { usePayment } from '../../context/PaymentContext';
 
 const TreasurerFee = () => {
     // NAV AND SIDEBAR
@@ -77,11 +79,12 @@ const TreasurerFee = () => {
         setIsModalOpen(true);
     };
 
+    const { triggerPaymentUpdate } = usePayment();
+
     const handleSubmit = async (formData) => {
         const confirmSave = window.confirm("Do you want to save changes?");
         if (confirmSave) {
             try {
-                // Update local state first
                 setStudents(prevStudents =>
                     prevStudents.map(student =>
                         student._id === selectedStudent._id
@@ -90,16 +93,16 @@ const TreasurerFee = () => {
                     )
                 );
 
-                // Show success message
+                // Trigger payment update to refresh dashboards
+                triggerPaymentUpdate();
+
                 setSuccessMessage("Payment updated successfully!");
                 setTimeout(() => {
                     setSuccessMessage('');
                 }, 2500);
 
-                // Close modal
                 setIsModalOpen(false);
 
-                // Refresh student list after a short delay
                 setTimeout(async () => {
                     const response = await fetch('http://localhost:8000/api/getAll/students');
                     if (!response.ok) {
@@ -204,6 +207,73 @@ const TreasurerFee = () => {
         }
     };
 
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [categoryPayments, setCategoryPayments] = useState({});
+
+    // Modify the useEffect to fetch payments when category changes
+    useEffect(() => {
+        const fetchCategoryPayments = async () => {
+            if (!selectedCategory) {
+                setCategoryPayments({});
+                return;
+            }
+
+            try {
+                setLoading(true);
+                const response = await axios.get(`http://localhost:8000/api/payment-fee/by-category/${selectedCategory}`);
+
+                // Check if response.data.payments exists and is an array
+                if (response.data.success && Array.isArray(response.data.payments)) {
+                    const paymentData = {};
+                    response.data.payments.forEach(payment => {
+                        if (payment.studentId) {
+                            paymentData[payment.studentId._id] = {
+                                status: payment.status || 'Not Paid',
+                                amountPaid: payment.amountPaid || 0,
+                                totalPrice: payment.totalPrice || 0
+                            };
+                        }
+                    });
+                    setCategoryPayments(paymentData);
+                } else {
+                    console.error('Invalid response format:', response.data);
+                    setError('Invalid response format from server');
+                }
+            } catch (err) {
+                console.error('Error fetching payment data:', err);
+                setError('Failed to fetch payment data');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCategoryPayments();
+    }, [selectedCategory]);
+
+    // Update the category select handler
+    const handleCategoryChange = (e) => {
+        setSelectedCategory(e.target.value);
+    };
+
+    const getStudentPaymentStatus = (studentId) => {
+        if (!selectedCategory) return 'Not Paid';
+        const payment = categoryPayments[studentId];
+        return payment ? payment.status : 'Not Paid';
+    };
+
+    // Add these new states after other state declarations
+    const [activeTab, setActiveTab] = useState('All');
+
+    // Add this function to get the count of students in each status
+    const getStatusCounts = (students) => {
+        const counts = students.reduce((acc, student) => {
+            const status = getStudentPaymentStatus(student._id) || 'Not Paid';
+            acc[status] = (acc[status] || 0) + 1;
+            return acc;
+        }, { All: students.length });
+        return counts;
+    };
+
     return (
         <div className="sb-nav-fixed">
             <Helmet>
@@ -260,8 +330,12 @@ const TreasurerFee = () => {
                                     <div className="d-flex align-items-center me-3">
                                         <label className="me-2 mb-0">Payment Category</label>
                                         <div className="dashboard-select" style={{ width: 'auto' }}>
-                                            <select className="form-control" defaultValue="">
-                                                <option value="" disabled>Select a category</option>
+                                            <select
+                                                className="form-control"
+                                                value={selectedCategory}
+                                                onChange={(e) => setSelectedCategory(e.target.value)}
+                                            >
+                                                <option value="">Select Category</option>
                                                 {paymentCategories.map(category => (
                                                     <option key={category._id} value={category._id}>
                                                         {category.name}
@@ -283,62 +357,91 @@ const TreasurerFee = () => {
                                         </button>
                                     </form>
                                 </div>
-                                {/* TABLE STUDENTS */}
+                                {/* New Tab Navigation */}
+                                <div className="payment-status-tabs">
+                                    <ul className="nav nav-tabs">
+                                        {['All', 'Fully Paid', 'Partially Paid', 'Not Paid', 'Refunded'].map(status => {
+                                            const count = getStatusCounts(filteredStudents)[status] || 0;
+                                            return (
+                                                <li className="nav-item" key={status}>
+                                                    <button
+                                                        className={`nav-link ${activeTab === status ? 'active' : ''}`}
+                                                        onClick={() => setActiveTab(status)}
+                                                    >
+                                                        {status}
+                                                        <span className="badge bg-secondary ms-2">{count}</span>
+                                                    </button>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </div>
+
+                                {/* Table Content */}
                                 {loading ? (
                                     <div>Loading students...</div>
                                 ) : error ? (
                                     <div className="alert alert-danger">{error}</div>
                                 ) : (
-                                    <table className="table table-bordered table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Student ID</th>
-                                                <th>Student Name</th>
-                                                <th>Year Level</th>
-                                                <th>Program</th>
-                                                <th>Payment Status</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {currentItems.map((student, index) => (
-                                                <tr key={student._id}>
-                                                    <td>{index + indexOfFirstItem + 1}</td>
-                                                    <td>{student.studentId}</td>
-                                                    <td>{student.name}</td>
-                                                    <td>{student.yearLevel}</td>
-                                                    <td>{student.program}</td>
-                                                    <td>
-                                                        <PaymentStatusTag
-                                                            status={student.paymentstatus || 'Not Paid'}
-                                                        />
-                                                    </td>
-                                                    <td>
-                                                        <button
-                                                            className="btn btn-edit btn-sm"
-                                                            onClick={() => handleEditClick(student)}
-                                                        >
-                                                            <i className="fas fa-edit btn-edit-mx"></i>
-                                                        </button>
-                                                        <button
-                                                            className="btn btn-view mx-2"
-                                                            onClick={() => handleViewClick(student)}
-                                                        >
-                                                            <i className="fas fa-eye"></i>
-                                                        </button>
-                                                        <button
-                                                            className="btn btn-email"
-                                                            onClick={() => handleEmailClick(student)}
-                                                            disabled={student.paymentstatus === 'Refunded' || student.paymentstatus === 'Not Paid'}
-                                                        >
-                                                            <i className="fa-regular fa-envelope fa-md"></i>
-                                                        </button>
-                                                    </td>
+                                    <div className="table-responsive mt-3">
+                                        <table className="table table-bordered table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Student ID</th>
+                                                    <th>Student Name</th>
+                                                    <th>Year Level</th>
+                                                    <th>Program</th>
+                                                    <th>Payment Status</th>
+                                                    <th>Actions</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                {currentItems
+                                                    .filter(student => {
+                                                        if (activeTab === 'All') return true;
+                                                        return getStudentPaymentStatus(student._id) === activeTab;
+                                                    })
+                                                    .map((student, index) => (
+                                                        <tr key={student._id}>
+                                                            <td>{indexOfFirstItem + index + 1}</td>
+                                                            <td>{student.studentId}</td>
+                                                            <td>{student.name}</td>
+                                                            <td>{student.yearLevel}</td>
+                                                            <td>{student.program}</td>
+                                                            <td>
+                                                                <PaymentStatusTag
+                                                                    status={getStudentPaymentStatus(student._id) || 'Not Paid'}
+                                                                />
+                                                            </td>
+                                                            <td>
+                                                                <button
+                                                                    className="btn btn-edit btn-sm"
+                                                                    onClick={() => handleEditClick(student)}
+                                                                    disabled={!selectedCategory}
+                                                                >
+                                                                    <i className="fas fa-edit btn-edit-mx"></i>
+                                                                </button>
+                                                                <button
+                                                                    className="btn btn-view mx-2"
+                                                                    onClick={() => handleViewClick(student)}
+                                                                    disabled={!selectedCategory}
+                                                                >
+                                                                    <i className="fas fa-eye"></i>
+                                                                </button>
+                                                                <button
+                                                                    className="btn btn-email"
+                                                                    onClick={() => handleEmailClick(student)}
+                                                                    disabled={!selectedCategory || getStudentPaymentStatus(student._id) === 'Not Paid'}
+                                                                >
+                                                                    <i className="fa-regular fa-envelope fa-md"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 )}
 
                                 {/* SHOWING OF ENTRIES AND PAGINATION */}

@@ -1,14 +1,107 @@
 // src/pages/treasurer/TreasurerReports.jsx
 import { Helmet } from 'react-helmet';
-import React, { useState } from "react";
-import TreasurerSidebar from "./TreasurerSidebar"; 
+import React, { useState, useEffect } from "react";
+import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
+import { Bar } from 'react-chartjs-2';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+} from 'chart.js';
+import axios from 'axios';
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
 const TreasurerReports = () => {
     // NAV AND SIDEBAR
     const [isCollapsed, setIsCollapsed] = useState(false);
     const toggleSidebar = () => {
+        z
         setIsCollapsed(prev => !prev);
+    };
+
+    const [reportType, setReportType] = useState('monthly');
+    const [reportData, setReportData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchReportData = async () => {
+            setLoading(true);
+            try {
+                let endpoint = '';
+                switch (reportType) {
+                    case 'monthly':
+                        endpoint = 'reports';
+                        break;
+                    case 'program':
+                        endpoint = 'reports/by-program';
+                        break;
+                    default:
+                        endpoint = 'reports';
+                }
+
+                const response = await axios.get(`http://localhost:8000/api/payment-fee/${endpoint}`);
+                if (response.data.success) {
+                    setReportData(response.data.data);
+                }
+            } catch (err) {
+                setError('Failed to fetch report data');
+                console.error('Error:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchReportData();
+    }, [reportType]);
+
+    const chartData = {
+        labels: reportData.map(item => reportType === 'monthly' ? item.period : item.category),
+        datasets: [
+            {
+                label: 'Payment Received',
+                data: reportData.map(item => item.total),
+                backgroundColor: 'rgba(255, 159, 64, 0.8)',
+                borderColor: 'rgba(255, 159, 64, 1)',
+                borderWidth: 1,
+            },
+        ],
+    };
+
+    const options = {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+            title: {
+                display: true,
+                text: 'Payment Reports',
+            },
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function (value) {
+                        return '₱' + value.toLocaleString();
+                    }
+                }
+            }
+        }
     };
 
     // -------------------------------------------------------------------------------------------//
@@ -49,13 +142,13 @@ const TreasurerReports = () => {
             <TreasurerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
                 <TreasurerSidebar isCollapsed={isCollapsed} />
-                <div 
-                    id="layoutSidenav_content" 
-                    style={{ 
-                        marginLeft: isCollapsed ? '5rem' : '15.625rem', 
-                        transition: 'margin-left 0.3s', 
+                <div
+                    id="layoutSidenav_content"
+                    style={{
+                        marginLeft: isCollapsed ? '5rem' : '15.625rem',
+                        transition: 'margin-left 0.3s',
                         flexGrow: 1,
-                        marginTop: '3.5rem' 
+                        marginTop: '3.5rem'
                     }}
                 >
                     {/* CONTENT */}
@@ -75,17 +168,19 @@ const TreasurerReports = () => {
                                     <div className="d-flex align-items-center">
                                         <label className="me-2 mb-0">Select Reports</label>
                                         <div className="dashboard-select" style={{ width: 'auto' }}>
-                                            <select className="form-control" defaultValue="">
-                                                <option value="" disabled>Select a category</option>
-                                                <option value="College Shirt">Monthly Report</option>
-                                                <option value="Events">Report by Program</option>
-                                                <option value="Events">Report by Payment</option>
+                                            <select
+                                                className="form-control"
+                                                value={reportType}
+                                                onChange={(e) => setReportType(e.target.value)}
+                                            >
+                                                <option value="monthly">Monthly Report</option>
+                                                <option value="program">Report by Program</option>
                                             </select>
                                         </div>
                                     </div>
                                     <div>
-                                        <button 
-                                            className="add-button btn btn-sm" 
+                                        <button
+                                            className="add-button btn btn-sm"
                                             onClick={handleDownloadReport}
                                         >
                                             <i className="fas fa-download me-2"></i>
@@ -94,14 +189,22 @@ const TreasurerReports = () => {
                                     </div>
                                 </div>
 
-                                <p>BAR GRAPH HERE</p>
+                                {loading ? (
+                                    <div className="text-center">Loading...</div>
+                                ) : error ? (
+                                    <div className="alert alert-danger">{error}</div>
+                                ) : (
+                                    <div style={{ height: '400px' }}>
+                                        <Bar data={chartData} options={options} />
+                                    </div>
+                                )}
 
                             </div>
                         </div>
                     </div>
 
-                    
-                </div> 
+
+                </div>
             </div>
         </div>
     );

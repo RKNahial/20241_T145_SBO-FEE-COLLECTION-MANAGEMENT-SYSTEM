@@ -21,10 +21,10 @@ const ArchiveStud = require('./routes/StudentArchive'); // Import student routes
 const fileUpload = require('express-fileupload');
 const UpdateStudentRoutes = require('./routes/UpdateStudent');
 const duesPaymentRoutes = require('./routes/duesPaymentRoutes');
-const dailyDuesRoutes = require('./routes/dailyDuesRoutes');
 // Import the payment category routes
 const paymentCategoryRoutes = require('./routes/paymentCategoryRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const profileRoutes = require('./routes/profileRoutes');
 
 process.removeAllListeners('warning');
 // Importing database connection
@@ -40,7 +40,6 @@ connectDB();
 
 
 // Correct route prefixes
-
 app.use('/api/users', userRoutes);
 app.use('/api', loginRoutes);
 app.use('/api/auth', googleroutes);
@@ -50,8 +49,9 @@ app.use('/api', ArchiveStud); // Mount the student routes under /api
 app.use('/api', UpdateStudentRoutes);
 app.use('/api', duesPaymentRoutes);
 app.use('/api', paymentCategoryRoutes);
-app.use('/api', dailyDuesRoutes);
 app.use('/api/payment-fee', paymentRoutes);
+app.use('/api/profile', profileRoutes);
+
 
 
 const port = 8000;

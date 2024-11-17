@@ -1,19 +1,41 @@
 // src/pages/admin/AdminDashboard.jsx
 import { Helmet } from 'react-helmet';
-import React, { useState } from "react";
-import AdminSidebar from "./AdminSidebar"; 
+import React, { useState, useEffect } from "react";
+import AdminSidebar from "./AdminSidebar";
 import AdminNavbar from "./AdminNavbar";
+import axios from 'axios';
 
 const AdminDashboard = () => {
     // NAV AND SIDEBAR
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [recentPayments, setRecentPayments] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchRecentPayments = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/api/payment/recent-payments');
+                if (response.data.success) {
+                    setRecentPayments(response.data.payments);
+                }
+            } catch (err) {
+                setError('Failed to fetch recent payments');
+                console.error('Error fetching recent payments:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchRecentPayments();
+    }, []);
 
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
     };
 
-     // Sample data for demonstration only
-     const students = [
+    // Sample data for demonstration only
+    const students = [
         {
             id: 1,
             date: 'October 10, 2024',
@@ -65,23 +87,23 @@ const AdminDashboard = () => {
             <AdminNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
                 <AdminSidebar isCollapsed={isCollapsed} />
-                <div 
-                    id="layoutSidenav_content" 
-                    style={{ 
+                <div
+                    id="layoutSidenav_content"
+                    style={{
                         marginLeft: isCollapsed ? '5rem' : '15.625rem',
                         marginRight: '0rem',
                         transition: 'margin-left 0.3s',
                         flexGrow: 1,
-                        marginTop: '3.5rem' 
+                        marginTop: '3.5rem'
                     }}
                 >
                     {/* CONTENT */}
                     <div className="container-fluid px-5 mb-5">
                         <p className="system-gray mt-4 welcome-text">Welcome back, admin!</p>
-                        
+
                         {/* ORANGE CARDS */}
                         <div className="row">
-                            <div className="col-xl-3 col-md-6"> 
+                            <div className="col-xl-3 col-md-6">
                                 <div className="card orange-card mb-4">
                                     <div className="card-body d-flex justify-content-between align-items-center">
                                         <div>
@@ -137,28 +159,42 @@ const AdminDashboard = () => {
                                     <tr>
                                         <th>#</th>
                                         <th>Date</th>
-                                        <th>Ref. No</th>
+                                        <th>Category ID</th>
                                         <th>Student ID</th>
                                         <th>Student Name</th>
                                         <th>Paid Amount</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {students.map((student, index) => (
-                                        <tr key={student.id}>
-                                            <td>{index + 1}</td>
-                                            <td>{student.date}</td>
-                                            <td>{student.ref_no}</td>
-                                            <td>{student.id_no}</td>
-                                            <td>{student.name}</td>
-                                            <td>{student.paid_amount}</td>
+                                    {loading ? (
+                                        <tr>
+                                            <td colSpan="6" className="text-center">Loading...</td>
                                         </tr>
-                                    ))}
+                                    ) : error ? (
+                                        <tr>
+                                            <td colSpan="6" className="text-center text-danger">{error}</td>
+                                        </tr>
+                                    ) : recentPayments.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="6" className="text-center">No recent payments found</td>
+                                        </tr>
+                                    ) : (
+                                        recentPayments.map((payment, index) => (
+                                            <tr key={payment.id}>
+                                                <td>{index + 1}</td>
+                                                <td>{new Date(payment.date).toLocaleDateString()}</td>
+                                                <td>{payment.categoryId}</td>
+                                                <td>{payment.studentId}</td>
+                                                <td>{payment.studentName}</td>
+                                                <td>₱{payment.paidAmount.toFixed(2)}</td>
+                                            </tr>
+                                        ))
+                                    )}
                                 </tbody>
                             </table>
                         </div>
                         {/* TABLE ENDS */}
-                        
+
                     </div>
                 </div>
             </div>

@@ -9,6 +9,7 @@ import GoogleSignInButton from '../pages/googlelogin';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { auth } from '../pages/firebase/firebaseConfig';
 import { useAuth } from '../context/AuthContext';
+import ConsentModal from '../components/ConsentModal';
 
 
 const Login = () => {
@@ -19,6 +20,9 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const [recaptchaToken, setRecaptchaToken] = useState(null);
     const navigate = useNavigate();
+
+    const [showConsentModal, setShowConsentModal] = useState(false);
+    const [pendingGoogleUser, setPendingGoogleUser] = useState(null);
 
 
 
@@ -67,43 +71,73 @@ const Login = () => {
 
 
     const handleGoogle = async () => {
-        await signOut(auth);
-
-        const provider = new GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: 'select_account' });
-
         try {
+            // Always sign out first to force account selection
+            await signOut(auth);
+
+            // Configure Google provider to always prompt for account selection
+            const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({
+                prompt: 'select_account',
+                access_type: 'offline'
+            });
+
             const result = await signInWithPopup(auth, provider);
             const user = result.user;
 
             if (user && user.email) {
-                console.log('Email sent to backend:', user.email); // Log the email sent
+                // Check for existing valid session for this specific email
+                const sessionPreference = localStorage.getItem(`session_preference_${user.email}`);
+                const existingSession = localStorage.getItem('userDetails');
+
+                if (existingSession) {
+                    const sessionData = JSON.parse(existingSession);
+                    if (sessionData.email === user.email &&
+                        sessionData.sessionExpiry &&
+                        new Date().getTime() < sessionData.sessionExpiry) {
+                        // Valid session exists for this email
+                        setUser(sessionData);
+                        navigate(`/${sessionData.position.toLowerCase()}/dashboard`);
+                        return;
+                    }
+                }
 
                 const response = await axios.post('http://localhost:8000/api/auth/verify-google-users', {
                     email: user.email
                 });
 
-                console.log('Backend response:', response.data); // Log the response data
-
                 if (response.data.authorized) {
-                    const { position, userDetails } = response.data;
-                    // Store user details in localStorage
-                    localStorage.setItem('userDetails', JSON.stringify(userDetails));
-
-                    // Navigate based on position
-                    if (position === 'treasurer') {
-                        navigate('/treasurer/dashboard');
+                    if (sessionPreference) {
+                        // Use existing preference without showing modal
+                        const duration = parseInt(sessionPreference);
+                        const userDetails = {
+                            _id: user.uid,
+                            email: user.email,
+                            position: response.data.position,
+                            loginLogId: response.data.loginLogId,
+                            sessionExpiry: new Date().getTime() + duration
+                        };
+                        completeLogin(userDetails);
+                    } else {
+                        // Show consent modal for first-time login
+                        setPendingGoogleUser({
+                            user,
+                            position: response.data.position,
+                            sessionDuration: response.data.sessionDuration
+                        });
+                        setShowConsentModal(true);
                     }
-                    // ... rest of your navigation logic
                 } else {
                     setMessage('Access denied. Only authorized users can log in.');
                 }
-            } else {
-                setMessage('Google sign-in failed. No user email found.');
             }
         } catch (error) {
             console.error('Google sign-in error:', error);
-            setMessage('Google sign-in failed. Please try again.');
+            if (error.code === 'auth/popup-closed-by-user') {
+                setMessage('Sign-in cancelled. Please try again.');
+            } else {
+                setMessage('Google sign-in failed. Please try again.');
+            }
         }
     };
 
@@ -163,6 +197,50 @@ const Login = () => {
         // Log the stored details for debugging
         const storedDetails = localStorage.getItem('userDetails');
         console.log('Stored user details:', storedDetails);
+    };
+
+    const handleConsentAccept = () => {
+        if (pendingGoogleUser) {
+            const duration = 24 * 60 * 60 * 1000; // 24 hours
+            const userDetails = {
+                _id: pendingGoogleUser.user.uid,
+                email: pendingGoogleUser.user.email,
+                position: pendingGoogleUser.position,
+                loginLogId: null,
+                sessionExpiry: new Date().getTime() + duration
+            };
+            // Save preference
+            localStorage.setItem(`session_preference_${pendingGoogleUser.user.email}`, duration.toString());
+            completeLogin(userDetails);
+        }
+        setShowConsentModal(false);
+    };
+
+    const handleConsentDecline = () => {
+        if (pendingGoogleUser) {
+            const duration = 60 * 60 * 1000; // 1 hour
+            const userDetails = {
+                _id: pendingGoogleUser.user.uid,
+                email: pendingGoogleUser.user.email,
+                position: pendingGoogleUser.position,
+                loginLogId: null,
+                sessionExpiry: new Date().getTime() + duration
+            };
+            // Save preference
+            localStorage.setItem(`session_preference_${pendingGoogleUser.user.email}`, duration.toString());
+            completeLogin(userDetails);
+        }
+        setShowConsentModal(false);
+    };
+
+    const completeLogin = (userDetails) => {
+        localStorage.setItem('userDetails', JSON.stringify(userDetails));
+        setUser(userDetails);
+
+        if (userDetails.position.toLowerCase() === 'treasurer') {
+            navigate('/treasurer/dashboard');
+        }
+        // Add other position checks as needed
     };
 
     return (
@@ -235,6 +313,12 @@ const Login = () => {
                     disabled={loading}
                 />
             </div>
+            <ConsentModal
+                isOpen={showConsentModal}
+                onClose={() => setShowConsentModal(false)}
+                onAccept={handleConsentAccept}
+                onDecline={handleConsentDecline}
+            />
         </div>
     );
 };

@@ -284,3 +284,11 @@ button:focus {
     background-color: #FFB84D;  
     color: #EAEAEA;
 }
+.paid, .not-paid {
+    transition: all 0.3s ease;
+}
+
+.paid:hover, .not-paid:hover {
+    opacity: 0.8;
+    cursor: pointer;
+}

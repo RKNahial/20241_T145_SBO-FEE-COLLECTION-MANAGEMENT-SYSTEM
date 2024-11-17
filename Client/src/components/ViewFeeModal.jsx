@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import emailjs from '@emailjs/browser';
 
-const ViewFeeModal = ({ isOpen, onClose, student }) => {
+const ViewFeeModal = ({ isOpen, onClose, student, categoryId }) => {
     const [paymentDetails, setPaymentDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -12,7 +12,10 @@ const ViewFeeModal = ({ isOpen, onClose, student }) => {
         const fetchPaymentDetails = async () => {
             if (isOpen && student) {
                 try {
-                    const response = await axios.get(`http://localhost:8000/api/payment-fee/details/${student._id}`);
+                    const url = categoryId
+                        ? `http://localhost:8000/api/payment-fee/details/${student._id}?category=${categoryId}`
+                        : `http://localhost:8000/api/payment-fee/details/${student._id}`;
+                    const response = await axios.get(url);
                     console.log('API Response:', response.data);
                     if (response.data.success) {
                         setPaymentDetails(response.data.paymentFee);
@@ -32,7 +35,7 @@ const ViewFeeModal = ({ isOpen, onClose, student }) => {
         if (isOpen) {
             fetchPaymentDetails();
         }
-    }, [isOpen, student]);
+    }, [isOpen, student, categoryId]);
 
     if (!isOpen) return null;
 

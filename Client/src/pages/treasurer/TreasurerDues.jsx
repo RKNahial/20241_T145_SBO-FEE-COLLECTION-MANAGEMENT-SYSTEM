@@ -40,14 +40,21 @@ const TreasurerDues = () => {
     // Generate dates for the selected week
     const dates = ['Monday', 'Tuesday', 'Thursday', 'Friday'];
 
-    const PaymentStatusTag = React.memo(({ status }) => {
+    const PaymentStatusTag = React.memo(({ status, onToggle }) => {
         return (
-            <span className={`badge ${status === 'Paid' ? 'paid' : 'not-paid'}`} style={{
-                backgroundColor: status === 'Paid' ? '#FF8C00' : '#FFB84D',
-                color: '#EAEAEA'
-            }}>
+            <button
+                onClick={onToggle}
+                className={`btn btn-sm ${status === 'Paid' ? 'paid' : 'not-paid'}`}
+                style={{
+                    backgroundColor: status === 'Paid' ? '#FF8C00' : '#FFB84D',
+                    color: '#EAEAEA',
+                    border: 'none',
+                    padding: '0.25rem 0.5rem',
+                    borderRadius: '0.25rem'
+                }}
+            >
                 {status}
-            </span>
+            </button>
         );
     });
 
@@ -130,6 +137,32 @@ const TreasurerDues = () => {
         }
     }, [location.state]);
 
+    const handleStatusToggle = async (officerId, day, currentStatus) => {
+        try {
+            const response = await fetch(`http://localhost:8000/api/daily-dues/${officerId}/toggle-status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    day,
+                    month: selectedMonth,
+                    week: selectedWeek,
+                    currentStatus,
+                    daysCount: 1
+                })
+            });
+
+            if (!response.ok) throw new Error('Failed to update status');
+
+            // Refresh the data after successful update
+            refreshData();
+        } catch (error) {
+            console.error('Error toggling status:', error);
+            // Handle error (show notification, etc.)
+        }
+    };
+
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -209,7 +242,14 @@ const TreasurerDues = () => {
                                                 <td>{officer.officerName || 'Name not available'}</td>
                                                 {officer.dues.map((due, dueIndex) => (
                                                     <td key={`${officer.userId}-${due.day}-${due.status}`}>
-                                                        <PaymentStatusTag status={due.status} />
+                                                        <PaymentStatusTag
+                                                            status={due.status}
+                                                            onToggle={() => handleStatusToggle(
+                                                                officer.userId,
+                                                                due.day,
+                                                                due.status
+                                                            )}
+                                                        />
                                                     </td>
                                                 ))}
                                                 <td className="text-center">

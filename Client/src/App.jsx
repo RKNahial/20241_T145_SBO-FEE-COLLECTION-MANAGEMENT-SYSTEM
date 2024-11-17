@@ -65,63 +65,67 @@ import AdminProfile from './pages/admin/AdminProfile';
 
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import { PaymentProvider } from './context/PaymentContext';
 
 // FOR CUSTOMIZED DOCUMENT TITLE
 const App = () => {
     return (
-        <AuthProvider>
-            <Router>
-                <Routes>
-                    {/* Public Routes */}
-                    <Route path="/sbo-fee-collection" element={<LandingPage />} />
-                    <Route path="/sbo-fee-collection/login" element={<Login />} />
+        <Router>
+            <AuthProvider>
+                <PaymentProvider>
+                    <Routes>
+                        {/* Public Routes */}
+                        <Route path="/sbo-fee-collection" element={<LandingPage />} />
+                        <Route path="/sbo-fee-collection/login" element={<Login />} />
 
-                    {/* Admin Routes */}
-                    <Route path="/admin/*" element={
-                        <ProtectedRoute allowedRoles={['admin']}>
-                            <Routes>
-                                <Route path="dashboard" element={<AdminDashboard />} />
-                                <Route path="students" element={<AdminStudents />} />
-                                <Route path="students/add-new" element={<AdminAddStud />} />
-                                <Route path="students/edit/:id" element={<AdminEditStud />} />
-                                <Route path="officers" element={<AdminOfficers />} />
-                                <Route path="officers/add-new" element={<AdminAddOfficer />} />
-                                <Route path="officers/edit/:id" element={<AdminEditOfficer />} />
-                                <Route path="admins" element={<AdminAdmins />} />
-                                <Route path="admins/add-new" element={<AdminAddAdmin />} />
-                                <Route path="admins/edit/:id" element={<AdminEditAdmin />} />
-                                <Route path="school-year" element={<AdminSchoolYear />} />
-                                <Route path="profile" element={<AdminProfile />} />
-                            </Routes>
-                        </ProtectedRoute>
-                    } />
+                        {/* Protected Routes */}
+                        {/* Admin Routes */}
+                        <Route path="/admin/*" element={
+                            <ProtectedRoute allowedRoles={['admin']}>
+                                <Routes>
+                                    <Route path="dashboard" element={<AdminDashboard />} />
+                                    <Route path="students" element={<AdminStudents />} />
+                                    <Route path="students/add-new" element={<AdminAddStud />} />
+                                    <Route path="students/edit/:id" element={<AdminEditStud />} />
+                                    <Route path="officers" element={<AdminOfficers />} />
+                                    <Route path="officers/add-new" element={<AdminAddOfficer />} />
+                                    <Route path="officers/edit/:id" element={<AdminEditOfficer />} />
+                                    <Route path="admins" element={<AdminAdmins />} />
+                                    <Route path="admins/add-new" element={<AdminAddAdmin />} />
+                                    <Route path="admins/edit/:id" element={<AdminEditAdmin />} />
+                                    <Route path="school-year" element={<AdminSchoolYear />} />
+                                    <Route path="profile" element={<AdminProfile />} />
+                                </Routes>
+                            </ProtectedRoute>
+                        } />
 
-                    {/* Treasurer Routes */}
-                    <Route path="/treasurer/*" element={
-                        <ProtectedRoute allowedRoles={['Treasurer']}>
-                            <Routes>
-                                <Route path="dashboard" element={<TreasurerDashboard />} />
-                                <Route path="manage-fee" element={<TreasurerFee />} />
-                                <Route path="manage-fee/amount/:id" element={<TreasurerFeeAmount />} />
-                                <Route path="manage-fee/payment-category" element={<TreasurerFeeCategory />} />
-                                <Route path="manage-fee/payment-category/add-new" element={<TreasurerAddCategory />} />
-                                <Route path="manage-fee/payment-category/edit/:id" element={<TreasurerEditCategory />} />
-                                <Route path="students" element={<TreasurerStudents />} />
-                                <Route path="students/add-new" element={<TreasurerAddStud />} />
-                                <Route path="students/edit/:id" element={<TreasurerEditStud />} />
-                                <Route path="reports" element={<TreasurerReports />} />
-                                <Route path="daily-dues" element={<TreasurerDues />} />
-                                <Route path="profile" element={<TreasurerProfile />} />
-                            </Routes>
-                        </ProtectedRoute>
-                    } />
+                        {/* Treasurer Routes */}
+                        <Route path="/treasurer/*" element={
+                            <ProtectedRoute allowedRoles={['treasurer']}>
+                                <Routes>
+                                    <Route path="dashboard" element={<TreasurerDashboard />} />
+                                    <Route path="manage-fee" element={<TreasurerFee />} />
+                                    <Route path="manage-fee/amount/:id" element={<TreasurerFeeAmount />} />
+                                    <Route path="manage-fee/payment-category" element={<TreasurerFeeCategory />} />
+                                    <Route path="manage-fee/payment-category/add-new" element={<TreasurerAddCategory />} />
+                                    <Route path="manage-fee/payment-category/edit/:id" element={<TreasurerEditCategory />} />
+                                    <Route path="students" element={<TreasurerStudents />} />
+                                    <Route path="students/add-new" element={<TreasurerAddStud />} />
+                                    <Route path="students/edit/:id" element={<TreasurerEditStud />} />
+                                    <Route path="reports" element={<TreasurerReports />} />
+                                    <Route path="daily-dues" element={<TreasurerDues />} />
+                                    <Route path="profile" element={<TreasurerProfile />} />
+                                </Routes>
+                            </ProtectedRoute>
+                        } />
 
-                    {/* Similar structure for officer and governor routes */}
+                        {/* Similar structure for officer and governor routes */}
 
-                    <Route path="*" element={<Navigate to="/sbo-fee-collection" replace />} />
-                </Routes>
-            </Router>
-        </AuthProvider>
+                        <Route path="*" element={<Navigate to="/sbo-fee-collection" replace />} />
+                    </Routes>
+                </PaymentProvider>
+            </AuthProvider>
+        </Router>
     );
 };
 

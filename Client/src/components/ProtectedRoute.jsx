@@ -1,10 +1,10 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
     const { user } = useAuth();
+    const navigate = useNavigate();
 
-    // Debug logs
     console.log('Current user:', user);
     console.log('Allowed roles:', allowedRoles);
 
@@ -13,12 +13,14 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
         return <Navigate to="/sbo-fee-collection/login" replace />;
     }
 
-    if (!allowedRoles.includes(user.position)) {
-        console.log('User role not allowed:', user.position);
+    const userRole = user.position.toLowerCase();
+    const normalizedAllowedRoles = allowedRoles.map(role => role.toLowerCase());
+
+    if (!normalizedAllowedRoles.includes(userRole)) {
+        console.log(`User role not allowed: ${userRole}`);
         return <Navigate to="/sbo-fee-collection/login" replace />;
     }
 
-    console.log('Access granted for role:', user.position);
     return children;
 };
 

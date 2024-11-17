@@ -1,61 +1,98 @@
 // src/pages/treasurer/TreasurerDashboard.jsx
 import { Helmet } from 'react-helmet';
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from 'axios';
 // import { Bar } from 'react-chartjs-2';
-import TreasurerSidebar from "./TreasurerSidebar"; 
+import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
+import { usePayment } from '../../context/PaymentContext';
 
 const TreasurerDashboard = () => {
     // NAV AND SIDEBAR
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [recentPayments, setRecentPayments] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const { paymentUpdate } = usePayment();
+    const [totalFees, setTotalFees] = useState(0);
+    const [showFullAmount, setShowFullAmount] = useState(false);
+    const [activeCategories, setActiveCategories] = useState(0);
+    const [totalActiveStudents, setTotalActiveStudents] = useState(0);
 
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
     };
 
-     // Sample data for demonstration only
-     const students = [
-        {
-            id: 1,
-            date: 'October 10, 2024',
-            ref_no: 'PAY20241010-001',
-            id_no: '2101101369',
-            name: 'Jessler Hilario',
-            paid_amount: '200.00',
-        },
-        {
-            id: 2,
-            date: 'October 10, 2024',
-            ref_no: 'PAY20241010-001',
-            id_no: '2101105798',
-            name: 'Vince Andrew Escoto',
-            paid_amount: '200.00',
-        },
-        {
-            id: 3,
-            date: 'October 7, 2024',
-            ref_no: 'PAY2024107-001',
-            id_no: '2101105721',
-            name: 'Kirk John Tado',
-            paid_amount: '200.00',
-        },
-        {
-            id: 4,
-            date: 'October 7, 2024',
-            ref_no: 'PAY2024107-001',
-            id_no: '2101103332',
-            name: 'Melany Gunayan',
-            paid_amount: '200.00',
-        },
-        {
-            id: 5,
-            date: 'October 5, 2024',
-            ref_no: 'PAY2024105-001',
-            id_no: '2101103307',
-            name: 'Leanne Mae Reyes',
-            paid_amount: '200.00',
-        }
-    ];
+    useEffect(() => {
+        const fetchRecentPayments = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/api/payment-fee/recent-payments');
+                if (response.data.success) {
+                    setRecentPayments(response.data.payments);
+                } else {
+                    setError('No payments data received');
+                }
+            } catch (err) {
+                setError('Failed to fetch recent payments');
+                console.error('Error fetching recent payments:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchRecentPayments();
+    }, [paymentUpdate]);
+
+    useEffect(() => {
+        const fetchTotalFees = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/api/payment-fee/total-fees');
+                if (response.data.success) {
+                    setTotalFees(response.data.totalFees);
+                } else {
+                    console.error('Failed to fetch total fees:', response.data.error);
+                    setTotalFees(0);
+                }
+            } catch (err) {
+                console.error('Error fetching total fees:', err);
+                setTotalFees(0);
+            }
+        };
+
+        fetchTotalFees();
+    }, [paymentUpdate]);
+
+    useEffect(() => {
+        const fetchActiveCategories = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/api/payment-categories');
+                if (response.data && response.data.categories) {
+                    const activeCount = response.data.categories.filter(category => !category.isArchived).length;
+                    setActiveCategories(activeCount);
+                }
+            } catch (err) {
+                console.error('Error fetching active categories:', err);
+            }
+        };
+
+        fetchActiveCategories();
+    }, []);
+
+    useEffect(() => {
+        const fetchTotalActiveStudents = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/api/getAll/students');
+                if (response.data) {
+                    const activeStudents = response.data.filter(student => !student.isArchived).length;
+                    setTotalActiveStudents(activeStudents);
+                }
+            } catch (err) {
+                console.error('Error fetching total active students:', err);
+            }
+        };
+
+        fetchTotalActiveStudents();
+    }, []);
 
     // REPORTS -- only shows white screen
     // const [reports, setReports] = useState([]);
@@ -80,7 +117,7 @@ const TreasurerDashboard = () => {
     //             setLoading(false);
     //         }
     //     };
-    
+
     //     fetchReports();
     // }, []);
 
@@ -97,6 +134,35 @@ const TreasurerDashboard = () => {
     //     ],
     // };
 
+    const formatAmount = (amount) => {
+        if (typeof amount !== 'number' || isNaN(amount)) {
+            return '₱0.00';
+        }
+
+        // Show full amount if showFullAmount is true
+        if (showFullAmount) {
+            return `₱${amount.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })}`;
+        }
+
+        // Format for millions
+        if (amount >= 1000000) {
+            return `₱${(amount / 1000000).toFixed(1)}m`;
+        }
+
+        // Format for thousands
+        if (amount >= 1000) {
+            return `₱${(amount / 1000).toFixed(1)}K`;
+        }
+
+        // Format regular numbers
+        return `₱${amount.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })}`;
+    };
 
     return (
         <div className="sb-nav-fixed">
@@ -107,27 +173,27 @@ const TreasurerDashboard = () => {
             <TreasurerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
                 <TreasurerSidebar isCollapsed={isCollapsed} />
-                <div 
-                    id="layoutSidenav_content" 
-                    style={{ 
+                <div
+                    id="layoutSidenav_content"
+                    style={{
                         marginLeft: isCollapsed ? '5rem' : '15.625rem',
                         marginRight: '0rem',
                         transition: 'margin-left 0.3s',
                         flexGrow: 1,
-                        marginTop: '3.5rem' 
+                        marginTop: '3.5rem'
                     }}
                 >
                     {/* CONTENT */}
                     <div className="container-fluid px-5 mb-5">
                         <p className="system-gray mt-4 welcome-text">Welcome back, treasurer!</p>
-                        
+
                         {/* ORANGE CARDS */}
                         <div className="row">
-                            <div className="col-xl-3 col-md-6"> 
+                            <div className="col-xl-3 col-md-6">
                                 <div className="card orange-card mb-4">
                                     <div className="card-body d-flex justify-content-between align-items-center">
                                         <div>
-                                            <h2 className="big-text">2378</h2>
+                                            <h2 className="big-text">{totalActiveStudents}</h2>
                                             <h5 className="small-text">Total Students</h5>
                                         </div>
                                         <i className="fas fa-user-graduate big-icon text-white"></i>
@@ -149,8 +215,8 @@ const TreasurerDashboard = () => {
                                 <div className="card orange-card mb-4">
                                     <div className="card-body d-flex justify-content-between align-items-center">
                                         <div>
-                                            <h2 className="big-text">3</h2>
-                                            <h5 className="small-text">Total Events</h5>
+                                            <h2 className="big-text">{activeCategories}</h2>
+                                            <h5 className="small-text">Active Categories</h5>
                                         </div>
                                         <i className="fas fa-calendar-alt big-icon text-white"></i>
                                     </div>
@@ -160,8 +226,13 @@ const TreasurerDashboard = () => {
                                 <div className="card orange-card mb-4">
                                     <div className="card-body d-flex justify-content-between align-items-center">
                                         <div>
-                                            <h2 className="big-text">
-                                                <span style={{ fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>&#8369;</span>5674
+                                            <h2 className="big-text"
+                                                onClick={() => setShowFullAmount(!showFullAmount)}
+                                                style={{ cursor: 'pointer' }}>
+                                                <span style={{
+                                                    fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif'
+                                                }}></span>
+                                                {formatAmount(totalFees)}
                                             </h2>
                                             <h5 className="small-text">Total Fees Received</h5>
                                         </div>
@@ -179,23 +250,37 @@ const TreasurerDashboard = () => {
                                     <tr>
                                         <th>#</th>
                                         <th>Date</th>
-                                        <th>Ref. No</th>
+                                        <th>Category ID</th>
                                         <th>Student ID</th>
                                         <th>Student Name</th>
                                         <th>Paid Amount</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {students.map((student, index) => (
-                                        <tr key={student.id}>
-                                            <td>{index + 1}</td>
-                                            <td>{student.date}</td>
-                                            <td>{student.ref_no}</td>
-                                            <td>{student.id_no}</td>
-                                            <td>{student.name}</td>
-                                            <td>{student.paid_amount}</td>
+                                    {loading ? (
+                                        <tr>
+                                            <td colSpan="6" className="text-center">Loading...</td>
                                         </tr>
-                                    ))}
+                                    ) : error ? (
+                                        <tr>
+                                            <td colSpan="6" className="text-center text-danger">{error}</td>
+                                        </tr>
+                                    ) : recentPayments.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="6" className="text-center">No recent payments found</td>
+                                        </tr>
+                                    ) : (
+                                        recentPayments.map((payment, index) => (
+                                            <tr key={payment.id}>
+                                                <td>{index + 1}</td>
+                                                <td>{new Date(payment.date).toLocaleDateString()}</td>
+                                                <td>{payment.categoryId}</td>
+                                                <td>{payment.studentId}</td>
+                                                <td>{payment.studentName}</td>
+                                                <td>₱{payment.paidAmount.toFixed(2)}</td>
+                                            </tr>
+                                        ))
+                                    )}
                                 </tbody>
                             </table>
                         </div>
@@ -232,7 +317,7 @@ const TreasurerDashboard = () => {
                         </div>
                         {/* REPORTS AND CALENDAR END */}
 
-                        
+
                     </div>
                 </div>
             </div>
