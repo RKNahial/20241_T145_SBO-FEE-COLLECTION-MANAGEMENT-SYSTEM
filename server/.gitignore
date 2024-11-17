@@ -1,4 +1,5 @@
 # Logs
+
 logs
 *.log
 npm-debug.log*
@@ -24,3 +25,6 @@ package-lock.json
 *.njsproj
 *.sln
 *.sw?
+
+# Environment variables
+.env
