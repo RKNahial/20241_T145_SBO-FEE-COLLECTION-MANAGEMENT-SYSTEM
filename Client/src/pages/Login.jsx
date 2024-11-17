@@ -72,10 +72,7 @@ const Login = () => {
 
     const handleGoogle = async () => {
         try {
-            // Always sign out first to force account selection
             await signOut(auth);
-
-            // Configure Google provider to always prompt for account selection
             const provider = new GoogleAuthProvider();
             provider.setCustomParameters({
                 prompt: 'select_account',
@@ -86,58 +83,28 @@ const Login = () => {
             const user = result.user;
 
             if (user && user.email) {
-                // Check for existing valid session for this specific email
-                const sessionPreference = localStorage.getItem(`session_preference_${user.email}`);
-                const existingSession = localStorage.getItem('userDetails');
-
-                if (existingSession) {
-                    const sessionData = JSON.parse(existingSession);
-                    if (sessionData.email === user.email &&
-                        sessionData.sessionExpiry &&
-                        new Date().getTime() < sessionData.sessionExpiry) {
-                        // Valid session exists for this email
-                        setUser(sessionData);
-                        navigate(`/${sessionData.position.toLowerCase()}/dashboard`);
-                        return;
-                    }
-                }
-
                 const response = await axios.post('http://localhost:8000/api/auth/verify-google-users', {
                     email: user.email
                 });
 
                 if (response.data.authorized) {
-                    if (sessionPreference) {
-                        // Use existing preference without showing modal
-                        const duration = parseInt(sessionPreference);
-                        const userDetails = {
-                            _id: user.uid,
-                            email: user.email,
-                            position: response.data.position,
-                            loginLogId: response.data.loginLogId,
-                            sessionExpiry: new Date().getTime() + duration
-                        };
-                        completeLogin(userDetails);
-                    } else {
-                        // Show consent modal for first-time login
-                        setPendingGoogleUser({
-                            user,
-                            position: response.data.position,
-                            sessionDuration: response.data.sessionDuration
-                        });
-                        setShowConsentModal(true);
-                    }
+                    const userDetails = {
+                        _id: user.uid,
+                        email: user.email,
+                        position: response.data.position,
+                        loginLogId: response.data.loginLogId,
+                        sessionExpiry: new Date().getTime() + (24 * 60 * 60 * 1000),
+                        picture: user.photoURL,  // Add Google profile picture URL
+                        imageUrl: user.photoURL  // Backup storage
+                    };
+                    completeLogin(userDetails);
                 } else {
                     setMessage('Access denied. Only authorized users can log in.');
                 }
             }
         } catch (error) {
-            console.error('Google sign-in error:', error);
-            if (error.code === 'auth/popup-closed-by-user') {
-                setMessage('Sign-in cancelled. Please try again.');
-            } else {
-                setMessage('Google sign-in failed. Please try again.');
-            }
+            console.error('Google login error:', error);
+            setMessage('Failed to login with Google');
         }
     };
 
@@ -234,6 +201,12 @@ const Login = () => {
     };
 
     const completeLogin = (userDetails) => {
+        // Ensure we have the profile picture
+        if (!userDetails.picture && !userDetails.imageUrl) {
+            userDetails.picture = userDetails.photoURL || null;
+            userDetails.imageUrl = userDetails.photoURL || null;
+        }
+
         localStorage.setItem('userDetails', JSON.stringify(userDetails));
         setUser(userDetails);
 
@@ -241,6 +214,45 @@ const Login = () => {
             navigate('/treasurer/dashboard');
         }
         // Add other position checks as needed
+    };
+
+    const handleGoogleSuccess = async (response) => {
+        try {
+            const userDetails = {
+                ...response.profileObj,
+                imageUrl: response.profileObj.imageUrl, // Store Google profile image URL
+                picture: response.profileObj.imageUrl,  // Store as both imageUrl and picture
+                email: response.profileObj.email,
+                name: response.profileObj.name,
+                // ... other user details
+            };
+            localStorage.setItem('userDetails', JSON.stringify(userDetails));
+            // ... rest of your login logic
+        } catch (error) {
+            console.error('Error during Google login:', error);
+        }
+    };
+
+    const handleGoogleLogin = async (googleData) => {
+        try {
+            const response = await axios.post('http://localhost:8000/api/auth/google', {
+                token: googleData.credential
+            });
+
+            if (response.data.success) {
+                const userDetails = {
+                    ...response.data.user,
+                    imageUrl: googleData.picture, // Store Google profile picture URL
+                    picture: googleData.picture,  // Backup storage
+                    loginLogId: response.data.loginLogId
+                };
+
+                localStorage.setItem('userDetails', JSON.stringify(userDetails));
+                // Rest of your login logic
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+        }
     };
 
     return (

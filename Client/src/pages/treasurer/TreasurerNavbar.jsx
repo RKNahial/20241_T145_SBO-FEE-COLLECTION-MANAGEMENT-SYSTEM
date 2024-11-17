@@ -1,60 +1,72 @@
 // src//pages/treasurer/TreasurerNavbar.jsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { auth } from '../firebase/firebaseConfig';
+import { signOut } from 'firebase/auth';
+import { useAuth } from '../../context/AuthContext';
 
 const TreasurerNavbar = ({ toggleSidebar }) => {
     const navigate = useNavigate();
+    const { setUser } = useAuth();
+    const [userImage, setUserImage] = useState("/public/images/COT-logo.png");
+
+    useEffect(() => {
+        try {
+            const userDetails = JSON.parse(localStorage.getItem('userDetails') || '{}');
+            console.log('UserDetails in navbar:', userDetails);
+
+            const profileImage =
+                userDetails.picture ||
+                userDetails.imageUrl ||
+                userDetails.image ||
+                (userDetails.google && userDetails.google.picture);
+
+            if (profileImage) {
+                console.log('Found profile image:', profileImage);
+                setUserImage(profileImage);
+            }
+        } catch (error) {
+            console.error('Error loading user image:', error);
+        }
+    }, []);
 
     const handleLogout = async (e) => {
         e.preventDefault();
 
         try {
-            console.log('1. Starting logout process');
             const userDetailsString = localStorage.getItem('userDetails');
-            console.log('2. UserDetails from storage:', userDetailsString);
+            if (userDetailsString) {
+                const userDetails = JSON.parse(userDetailsString);
 
-            if (!userDetailsString) {
-                console.log('3a. No user details found - redirecting');
-                localStorage.clear();
-                navigate('/sbo-fee-collection', { replace: true });
-                return;
+                // Call backend logout
+                await axios.post('http://localhost:8000/api/logout', {
+                    userId: userDetails._id,
+                    userModel: userDetails.position,
+                    email: userDetails.email,
+                    loginLogId: userDetails.loginLogId
+                });
             }
 
-            const userDetails = JSON.parse(userDetailsString);
-            console.log('3b. Parsed user details:', userDetails);
-
-            const response = await axios.post('http://localhost:8000/api/logout', {
-                userId: userDetails._id,
-                userModel: userDetails.position,
-                email: userDetails.email,
-                loginLogId: userDetails.loginLogId
-            }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            console.log('5. Server response:', response.data);
-
-            if (response.data.success) {
-                localStorage.clear();
-                sessionStorage.clear();
-                navigate('/sbo-fee-collection', { replace: true });
-            } else {
-                console.error('Logout failed:', response.data.message);
-                localStorage.clear();
-                sessionStorage.clear();
-                navigate('/sbo-fee-collection', { replace: true });
+            // Sign out from Firebase/Google
+            if (auth.currentUser) {
+                await signOut(auth);
             }
-        } catch (error) {
-            console.error('Logout error:', error);
-            if (error.response) {
-                console.error('Server error response:', error.response.data);
-            }
+
+            // Clear all local data
             localStorage.clear();
             sessionStorage.clear();
-            navigate('/sbo-fee-collection', { replace: true });
+            setUser(null);
+
+            // Force redirect to login
+            window.location.href = '/sbo-fee-collection';
+        } catch (error) {
+            console.error('Logout error:', error);
+            // Force logout even if there's an error
+            localStorage.clear();
+            sessionStorage.clear();
+            setUser(null);
+            window.location.href = '/sbo-fee-collection';
         }
     };
 
@@ -81,7 +93,16 @@ const TreasurerNavbar = ({ toggleSidebar }) => {
                         data-bs-toggle="dropdown"
                         aria-expanded="false"
                     >
-                        <img src="/public/images/COT-logo.png" alt="COT Logo" style={{ width: '1.857rem', height: '1.857rem' }} />
+                        <img
+                            src={userImage}
+                            alt="User Profile"
+                            style={{
+                                width: '1.857rem',
+                                height: '1.857rem',
+                                borderRadius: '50%',
+                                objectFit: 'cover'
+                            }}
+                        />
                         <span style={{ paddingLeft: '0.5rem', paddingRight: '0.5rem' }}> Treasurer</span>
                     </Link>
                     <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">

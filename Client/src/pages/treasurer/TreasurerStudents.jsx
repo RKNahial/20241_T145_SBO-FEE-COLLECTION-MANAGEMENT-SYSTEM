@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import TreasurerSidebar from './TreasurerSidebar';
 import TreasurerNavbar from './TreasurerNavbar';
+import axios from 'axios';
 
 const TreasurerStudents = () => {
     // NAV AND SIDEBAR
@@ -44,23 +45,23 @@ const TreasurerStudents = () => {
     // File input reference
     const fileInputRef = useRef(null);
 
-    // Fetch students from backend
-    useEffect(() => {
-        const fetchStudents = async () => {
-            try {
-                const response = await fetch('http://localhost:8000/api/getAll/students');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch students');
-                }
-                const data = await response.json();
-                console.log('Fetched Data:', data);
-                setStudents(data); // Directly set the fetched data
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
+    const fetchStudents = async () => {
+        try {
+            const response = await fetch('http://localhost:8000/api/getAll/students');
+            if (!response.ok) {
+                throw new Error('Failed to fetch students');
             }
-        };
+            const data = await response.json();
+            setStudents(data);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Use fetchStudents in useEffect
+    useEffect(() => {
         fetchStudents();
     }, []);
 
@@ -151,32 +152,46 @@ const TreasurerStudents = () => {
     };
 
     const handleImportFromExcel = async (event) => {
-        const fileInput = fileInputRef.current;
-        if (fileInput.files.length > 0) {
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-
-            try {
-                const response = await fetch('http://localhost:8000/api/import-from-excel', {
-                    method: 'POST',
-                    body: formData,
-                });
-                if (response.ok) {
-                    const result = await response.json();
-                    setSuccessMessage('Students imported successfully!');
-                    // You might want to trigger a refetch here
-                } else {
-                    const errorData = await response.json();
-                    setError(errorData.error);
-                }
-            } catch (error) {
-                setError('Error importing from Excel');
-            } finally {
-                setTimeout(() => setSuccessMessage(""), 2500);
-                fileInput.value = ''; // Reset file input
-            }
-        } else {
+        const file = event.target.files[0];
+        if (!file) {
             setError('Please select a file to import.');
+            return;
+        }
+
+        const fileType = file.name.split('.').pop().toLowerCase();
+        if (!['xlsx', 'xls'].includes(fileType)) {
+            setError('Please upload only Excel files (.xlsx or .xls)');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('excel-file', file);
+
+        try {
+            setLoading(true);
+            const response = await axios.post('http://localhost:8000/api/import-excel', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            });
+
+            if (response.data) {
+                setSuccessMessage(response.data.message);
+                if (response.data.errors) {
+                    console.warn('Import warnings:', response.data.errors);
+                }
+                await fetchStudents(); // Refresh the list after import
+            }
+        } catch (error) {
+            console.error('Import error:', error);
+            setError(error.response?.data?.error || 'Error importing from Excel');
+        } finally {
+            setLoading(false);
+            event.target.value = '';
+            setTimeout(() => {
+                setSuccessMessage("");
+                setError(null);
+            }, 2500);
         }
     };
 
@@ -244,8 +259,8 @@ const TreasurerStudents = () => {
                                         {/* Actions and Filters */}
                                         <div className="d-flex justify-content-between mb-3 align-items-center">
                                             <div className="d-flex me-auto">
-                                                <Link 
-                                                    to="/treasurer/students/add-new" 
+                                                <Link
+                                                    to="/treasurer/students/add-new"
                                                     className="add-button btn btn-sm me-2"
                                                 >
                                                     <i className="fas fa-plus me-2"></i>
@@ -263,7 +278,7 @@ const TreasurerStudents = () => {
                                                     ref={fileInputRef}
                                                     accept=".xlsx, .xls"
                                                     style={{ display: 'none' }}
-                                                    onChange={handleImportFromExcel} // Handle file selection
+                                                    onChange={handleImportFromExcel}
                                                 />
                                             </div>
                                             <div className="d-flex align-items-center me-3">

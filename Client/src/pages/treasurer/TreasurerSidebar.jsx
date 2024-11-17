@@ -1,10 +1,13 @@
 // src//pages/treasurer/TreasurerSidebar.jsx
 import React from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import axios from "axios";
+import { auth } from '../firebase/firebaseConfig';
+import { signOut } from 'firebase/auth';
+import { useAuth } from '../../context/AuthContext';
 
 const TreasurerSidebar = ({ isCollapsed }) => {
-    const navigate = useNavigate();
+    const { setUser } = useAuth();
 
     const handleLogout = async () => {
         if (handleLogout.isLoggingOut) return;
@@ -12,45 +15,36 @@ const TreasurerSidebar = ({ isCollapsed }) => {
 
         try {
             const userDetailsString = localStorage.getItem('userDetails');
-            if (!userDetailsString) {
-                console.error('No user details found in localStorage');
-                localStorage.clear();
-                console.log('Navigating to /sbo-fee-collection');
-                window.location.href = '/sbo-fee-collection';
-                return;
+            if (userDetailsString) {
+                const userDetails = JSON.parse(userDetailsString);
+
+                // Call backend logout
+                await axios.post('http://localhost:8000/api/logout', {
+                    userId: userDetails._id,
+                    userModel: userDetails.position,
+                    email: userDetails.email,
+                    loginLogId: userDetails.loginLogId
+                });
             }
 
-            const userDetails = JSON.parse(userDetailsString);
-
-            if (!userDetails._id || !userDetails.position || !userDetails.email || !userDetails.loginLogId) {
-                console.error('Missing required user details');
-                localStorage.clear();
-                console.log('Navigating to /sbo-fee-collection');
-                window.location.href = '/sbo-fee-collection';
-                return;
+            // Sign out from Firebase/Google
+            if (auth.currentUser) {
+                await signOut(auth);
             }
 
-            const response = await axios.post('http://localhost:8000/api/logout', {
-                userId: userDetails._id,
-                userModel: userDetails.position,
-                email: userDetails.email,
-                loginLogId: userDetails.loginLogId
-            });
+            // Clear all local data
+            localStorage.clear();
+            sessionStorage.clear();
+            setUser(null);
 
-            console.log('Logout response:', response.data);
-
-            if (response.data.success) {
-                localStorage.clear();
-                console.log('Navigating to /sbo-fee-collection');
-                window.location.href = '/sbo-fee-collection';
-            } else {
-                console.error('Logout failed:', response.data.message);
-            }
-
+            // Force redirect to login
+            window.location.href = '/sbo-fee-collection';
         } catch (error) {
             console.error('Logout error:', error);
+            // Force logout even if there's an error
             localStorage.clear();
-            console.log('Navigating to /sbo-fee-collection');
+            sessionStorage.clear();
+            setUser(null);
             window.location.href = '/sbo-fee-collection';
         } finally {
             handleLogout.isLoggingOut = false;

@@ -1,5 +1,6 @@
 const Student = require('../models/studentSchema');
 const mongoose = require('mongoose');
+const xlsx = require('xlsx');
 
 // Helper function to update archive status
 const updateArchiveStatus = async (id, archiveStatus, res) => {
@@ -37,11 +38,10 @@ exports.unarchiveStudent = async (req, res) => {
     }
 };
 
-
 exports.importFromExcel = async (req, res) => {
     try {
-        if (!req.files || Object.keys(req.files).length === 0) {
-            return res.status(400).json({ error: 'No file uploaded' });
+        if (!req.files || !req.files['excel-file']) {
+            return res.status(400).json({ error: 'No Excel file uploaded' });
         }
 
         const excelFile = req.files['excel-file'];
@@ -49,20 +49,62 @@ exports.importFromExcel = async (req, res) => {
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         const data = xlsx.utils.sheet_to_json(worksheet);
 
-        // Process the data and create/update students
-        for (const student of data) {
-            const { name, studentId, institutionalEmail, yearLevel, program } = student;
-            const existingStudent = await Student.findOne({ studentId });
+        if (data.length === 0) {
+            return res.status(400).json({ error: 'Excel file is empty' });
+        }
 
-            if (existingStudent) {
-                await Student.findByIdAndUpdate(existingStudent._id, { name, institutionalEmail, yearLevel, program });
-            } else {
-                await Student.create({ name, studentId, institutionalEmail, yearLevel, program });
+        let successCount = 0;
+        let errors = [];
+
+        for (const row of data) {
+            try {
+                // Format student ID and create institutional email
+                const studentId = row['Student ID']?.toString().trim();
+                if (!studentId) {
+                    errors.push(`Missing Student ID in row: ${JSON.stringify(row)}`);
+                    continue;
+                }
+
+                const studentData = {
+                    studentId: studentId,
+                    name: row['Student Name']?.trim(),
+                    yearLevel: row['Year Level']?.trim(),
+                    program: row['Program']?.trim(),
+                    institutionalEmail: `${studentId}@student.buksu.edu.ph`.toLowerCase(),
+                    status: 'Active',
+                    isArchived: false,
+                    paymentstatus: 'Not Paid'
+                };
+
+                // Validate required fields
+                const missingFields = [];
+                if (!studentData.name) missingFields.push('Student Name');
+                if (!studentData.yearLevel) missingFields.push('Year Level');
+                if (!studentData.program) missingFields.push('Program');
+
+                if (missingFields.length > 0) {
+                    errors.push(`Missing fields for student ${studentId}: ${missingFields.join(', ')}`);
+                    continue;
+                }
+
+                const existingStudent = await Student.findOne({ studentId: studentData.studentId });
+                if (existingStudent) {
+                    await Student.findByIdAndUpdate(existingStudent._id, studentData);
+                } else {
+                    await Student.create(studentData);
+                }
+                successCount++;
+            } catch (err) {
+                errors.push(`Error processing student: ${row['Student ID']} - ${err.message}`);
             }
         }
 
-        res.json({ message: `${data.length} students imported successfully` });
+        res.json({
+            message: `Successfully imported ${successCount} students${errors.length > 0 ? ` with ${errors.length} errors` : ''}`,
+            errors: errors.length > 0 ? errors : undefined
+        });
     } catch (error) {
-        res.status(500).json({ error: 'Error importing students from Excel' });
+        console.error('Import error:', error);
+        res.status(500).json({ error: 'Error importing students from Excel. Please check your file format.' });
     }
 };

@@ -129,28 +129,60 @@ exports.getPaymentDetails = async (req, res) => {
 
 exports.getRecentPayments = async (req, res) => {
     try {
-        const recentPayments = await PaymentFee.find({
-            status: { $in: ['Partially Paid', 'Fully Paid'] }
-        })
-        .populate('studentId', 'studentId name')
-        .populate('categoryId', 'categoryId')
-        .sort({ paymentDate: -1 })
-        .limit(5);
-
-        const formattedPayments = recentPayments.map(payment => ({
-            id: payment._id,
-            date: payment.paymentDate,
-            categoryId: payment.categoryId.categoryId,
-            studentId: payment.studentId.studentId,
-            studentName: payment.studentId.name,
-            paidAmount: payment.amountPaid
-        }));
+        const recentPayments = await PaymentFee.aggregate([
+            {
+                $match: {
+                    status: { $in: ['Partially Paid', 'Fully Paid'] }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'students',
+                    localField: 'studentId',
+                    foreignField: '_id',
+                    as: 'studentInfo'
+                }
+            },
+            {
+                $unwind: '$studentInfo'
+            },
+            {
+                $lookup: {
+                    from: 'paymentcategories',
+                    localField: 'categoryId',
+                    foreignField: '_id',
+                    as: 'categoryInfo'
+                }
+            },
+            {
+                $unwind: '$categoryInfo'
+            },
+            {
+                $sort: { 
+                    paymentDate: -1 
+                }
+            },
+            {
+                $limit: 5
+            },
+            {
+                $project: {
+                    id: '$_id',
+                    date: '$paymentDate',
+                    categoryId: '$categoryInfo.categoryId',
+                    studentId: '$studentInfo.studentId',
+                    studentName: '$studentInfo.name',
+                    paidAmount: '$amountPaid'
+                }
+            }
+        ]);
 
         res.json({
             success: true,
-            payments: formattedPayments
+            payments: recentPayments
         });
     } catch (error) {
+        console.error('Error fetching recent payments:', error);
         res.status(500).json({
             success: false,
             message: 'Error fetching recent payments',
@@ -161,12 +193,16 @@ exports.getRecentPayments = async (req, res) => {
 
 exports.getTotalFees = async (req, res) => {
     try {
-        // Aggregate all payments to get total
         const totalFeesResult = await PaymentFee.aggregate([
+            {
+                $match: {
+                    status: { $in: ['Partially Paid', 'Fully Paid'] }
+                }
+            },
             {
                 $group: {
                     _id: null,
-                    total: { $sum: "$amountPaid" }
+                    total: { $sum: '$amountPaid' }
                 }
             }
         ]);

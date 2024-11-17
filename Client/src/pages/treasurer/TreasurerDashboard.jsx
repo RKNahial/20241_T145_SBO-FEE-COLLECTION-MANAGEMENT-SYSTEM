@@ -2,10 +2,29 @@
 import { Helmet } from 'react-helmet';
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
-// import { Bar } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+} from 'chart.js';
 import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
 import { usePayment } from '../../context/PaymentContext';
+import '../../assets/css/calendar.css';
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
 const TreasurerDashboard = () => {
     // NAV AND SIDEBAR
@@ -18,6 +37,10 @@ const TreasurerDashboard = () => {
     const [showFullAmount, setShowFullAmount] = useState(false);
     const [activeCategories, setActiveCategories] = useState(0);
     const [totalActiveStudents, setTotalActiveStudents] = useState(0);
+    const [reportType, setReportType] = useState('program');
+    const [reportData, setReportData] = useState([]);
+    const [reportLoading, setReportLoading] = useState(true);
+    const [reportError, setReportError] = useState(null);
 
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
@@ -94,45 +117,25 @@ const TreasurerDashboard = () => {
         fetchTotalActiveStudents();
     }, []);
 
-    // REPORTS -- only shows white screen
-    // const [reports, setReports] = useState([]);
-    // const [loading, setLoading] = useState(true);
-    // const [error, setError] = useState(null); 
+    useEffect(() => {
+        const fetchReportData = async () => {
+            setReportLoading(true);
+            try {
+                const currentYear = new Date().getFullYear();
+                const response = await axios.get(`http://localhost:8000/api/payment-fee/reports/by-program?year=${currentYear}`);
+                if (response.data.success) {
+                    setReportData(response.data.data);
+                }
+            } catch (err) {
+                setReportError('Failed to fetch report data');
+                console.error('Error:', err);
+            } finally {
+                setReportLoading(false);
+            }
+        };
 
-    // useEffect(() => {
-    //     const fetchReports = async () => {
-    //         setLoading(true);
-    //         try {
-    //             const response = await axios.get('/api/reports');
-    //             console.log("Response Data:", response.data);
-    //             if (response.data && response.data.length > 0) {
-    //                 setReports(response.data);
-    //             } else {
-    //                 setError("No reports found.");
-    //             }
-    //         } catch (error) {
-    //             console.error("Error fetching reports data:", error);
-    //             setError("Failed to fetch reports. Please try again later.");
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     };
-
-    //     fetchReports();
-    // }, []);
-
-    // const chartData = {
-    //     labels: reports.length > 0 ? reports.map(report => report.title || "Untitled") : ["No Data"],
-    //     datasets: [
-    //         {
-    //             label: 'Report Data',
-    //             data: reports.length > 0 ? reports.map(report => report.value || 0) : [0],
-    //             backgroundColor: 'rgba(255, 99, 132, 0.2)',
-    //             borderColor: 'rgba(255, 99, 132, 1)',
-    //             borderWidth: 1,
-    //         },
-    //     ],
-    // };
+        fetchReportData();
+    }, []);
 
     const formatAmount = (amount) => {
         if (typeof amount !== 'number' || isNaN(amount)) {
@@ -162,6 +165,11 @@ const TreasurerDashboard = () => {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         })}`;
+    };
+
+    const handleAddToCalendar = () => {
+        const calendarUrl = 'https://calendar.google.com/calendar/u/0/r/eventedit?cid=c_24e4973e704b983a944d5bc4cd1a7e0437d3eb519a1935d01706fb81909b68d3@group.calendar.google.com';
+        window.open(calendarUrl, '_blank');
     };
 
     return (
@@ -291,25 +299,78 @@ const TreasurerDashboard = () => {
                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                 {/* REPORTS */}
                                 <div style={{ flex: 1, marginRight: '1.25rem' }}>
-                                    <div className="card" style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', paddingTop: '1.25rem', border: 'none' }}>
-                                        {/* REPORTS HERE */}
-
-                                        {/* {loading ? (
-                                            <p>Loading reports...</p>
-                                        ) : error ? (
-                                            <p className="text-danger">{error}</p>
-                                        ) : reports.length === 0 ? (
-                                            <p>No reports available.</p>
-                                        ) : (
-                                            <Bar data={chartData} options={{ responsive: true }} />
-                                        )} */}
+                                    <div className="card" style={{
+                                        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                                        paddingTop: '1.25rem',
+                                        border: 'none',
+                                        height: '500px'
+                                    }}>
+                                        <div className="d-flex justify-content-between align-items-center px-3 mb-3">
+                                            <h5 className="mb-0">Payment Reports by Program</h5>
+                                        </div>
+                                        <div style={{ padding: '0 1rem', height: '400px' }}>
+                                            {reportLoading ? (
+                                                <div className="text-center">Loading...</div>
+                                            ) : reportError ? (
+                                                <div className="alert alert-danger">{reportError}</div>
+                                            ) : (
+                                                <Bar
+                                                    data={{
+                                                        labels: reportData.map(item => item.category),
+                                                        datasets: [{
+                                                            label: 'Payment Received',
+                                                            data: reportData.map(item => item.total),
+                                                            backgroundColor: 'rgba(255, 159, 64, 0.8)',
+                                                            borderColor: 'rgba(255, 159, 64, 1)',
+                                                            borderWidth: 1,
+                                                        }]
+                                                    }}
+                                                    options={{
+                                                        responsive: true,
+                                                        maintainAspectRatio: false,
+                                                        plugins: {
+                                                            legend: {
+                                                                position: 'top',
+                                                            }
+                                                        },
+                                                        scales: {
+                                                            y: {
+                                                                beginAtZero: true,
+                                                                ticks: {
+                                                                    callback: function (value) {
+                                                                        return '₱' + value.toLocaleString();
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }}
+                                                />
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 
                                 {/* CALENDAR */}
                                 <div style={{ flex: 1 }}>
-                                    <div className="card" style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', paddingTop: '1.25rem', border: 'none' }}>
-                                        {/*CALENDAR VIEW HERE */}
+                                    <div className="calendar-card">
+                                        <div className="calendar-header">
+                                            <h5 className="calendar-title">Calendar</h5>
+                                            <button
+                                                className="calendar-add-button"
+                                                onClick={handleAddToCalendar}
+                                            >
+                                                <i className="fas fa-plus me-2"></i>
+                                                Add Event
+                                            </button>
+                                        </div>
+                                        <div className="calendar-container">
+                                            <iframe
+                                                src="https://calendar.google.com/calendar/embed?src=c_24e4973e704b983a944d5bc4cd1a7e0437d3eb519a1935d01706fb81909b68d3%40group.calendar.google.com&ctz=UTC"
+                                                className="calendar-iframe"
+
+                                                title="Treasurer Calendar"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
 
