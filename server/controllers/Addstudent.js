@@ -3,7 +3,12 @@ const Student = require('../models/studentSchema');
 // Function to add a new student
 exports.addStudent = async (req, res) => {
     try {
-        const { name, studentId,institutionalEmail, yearLevel, program } = req.body;
+        // Check if user is authenticated (req.user will be set by auth middleware)
+        if (!req.user) {
+            return res.status(401).json({ message: 'Unauthorized access' });
+        }
+
+        const { name, studentId, institutionalEmail, yearLevel, program } = req.body;
 
         // Create a new student document
         const student = new Student({

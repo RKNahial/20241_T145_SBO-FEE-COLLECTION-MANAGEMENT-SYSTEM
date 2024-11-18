@@ -37,35 +37,40 @@ const Login = () => {
                 recaptchaToken
             });
 
-            const userDetails = {
-                _id: response.data.userId,
-                email: response.data.email,
-                position: response.data.position,
-                loginLogId: response.data.loginLogId,
-                sessionExpiry: new Date().getTime() + (60 * 60 * 1000) // 1 hour from now
-            };
+            // Debug log the response
+            console.log('Login response:', response.data);
 
-            localStorage.setItem('userDetails', JSON.stringify(userDetails));
-            setUser(userDetails); // Update the auth context
+            if (response.data.token) {
+                // Store the token
+                localStorage.setItem('token', response.data.token);
+                console.log('Token stored successfully:', response.data.token);
 
-            const { position } = response.data;
-            if (position === 'admin') {
-                navigate('/admin/dashboard');
-            } else if (position === 'officer') {
-                navigate('/officer/dashboard');
-            } else if (position === 'Treasurer') {
-                navigate('/treasurer/dashboard');
-            } else if (position === 'governor') {
-                navigate('/governor-dashboard');
+                // Store user details
+                const userDetails = {
+                    _id: response.data.userId,
+                    email: response.data.email,
+                    position: response.data.position,
+                    loginLogId: response.data.loginLogId,
+                    sessionExpiry: new Date().getTime() + (60 * 60 * 1000)
+                };
+                localStorage.setItem('userDetails', JSON.stringify(userDetails));
+                setUser(userDetails);
+
+                // Navigate based on position
+                if (response.data.position === 'Treasurer') {
+                    navigate('/treasurer/dashboard');
+                }
+            } else {
+                console.error('No token received in login response');
+                setMessage('Login failed: No authentication token received');
             }
         } catch (error) {
             console.error('Login error:', error);
-            setMessage('Invalid email or password.');
+            setMessage(error.response?.data?.message || 'Invalid email or password.');
         } finally {
             setLoading(false);
         }
     };
-
 
 
 
@@ -84,20 +89,32 @@ const Login = () => {
 
             if (user && user.email) {
                 const response = await axios.post('http://localhost:8000/api/auth/verify-google-users', {
-                    email: user.email
+                    email: user.email,
+                    uid: user.uid,
+                    displayName: user.displayName,
+                    photoURL: user.photoURL
                 });
 
                 if (response.data.authorized) {
+                    // Store the token from the server response
+                    localStorage.setItem('token', response.data.token);
+                    console.log('Google auth token stored:', response.data.token);
+
                     const userDetails = {
                         _id: user.uid,
                         email: user.email,
                         position: response.data.position,
                         loginLogId: response.data.loginLogId,
                         sessionExpiry: new Date().getTime() + (24 * 60 * 60 * 1000),
-                        picture: user.photoURL,  // Add Google profile picture URL
-                        imageUrl: user.photoURL  // Backup storage
+                        picture: user.photoURL,
+                        imageUrl: user.photoURL
                     };
-                    completeLogin(userDetails);
+                    localStorage.setItem('userDetails', JSON.stringify(userDetails));
+                    setUser(userDetails);
+
+                    if (response.data.position === 'Treasurer') {
+                        navigate('/treasurer/dashboard');
+                    }
                 } else {
                     setMessage('Access denied. Only authorized users can log in.');
                 }

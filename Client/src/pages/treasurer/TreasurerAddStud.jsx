@@ -33,21 +33,65 @@ const TreasurerAddStud = () => {
     // Form submission handler
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Form submitted');
         try {
-            const response = await axios.post('http://localhost:8000/api/add/students', formData);
+            const token = localStorage.getItem('token');
+            console.log('Current token:', token); // Debug token value
+
+            if (!token) {
+                console.log('No token found in localStorage');
+                setMessage({
+                    type: 'error',
+                    text: 'No authentication token found. Please login again.'
+                });
+                navigate('/login');
+                return;
+            }
+
+            // Create config object for better debugging
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+            console.log('Request config:', config); // Debug request configuration
+
+            const response = await axios.post(
+                'http://localhost:8000/api/add/students',
+                formData,
+                config
+            );
+
             console.log('API response:', response);
             setMessage({ type: 'success', text: 'Student added successfully!' });
-            console.log('About to navigate');
 
             setTimeout(() => {
                 navigate('/treasurer/students');
-                console.log('Navigation called');
             }, 2000);
 
         } catch (error) {
-            console.error('Error adding student:', error);
-            setMessage({ type: 'error', text: 'Failed to add student. Please try again.' });
+            console.error('Error details:', {
+                status: error.response?.status,
+                statusText: error.response?.statusText,
+                data: error.response?.data,
+                headers: error.response?.headers
+            });
+
+            if (error.response?.status === 401) {
+                const errorMessage = error.response?.data?.message || 'Session expired. Please login again.';
+                console.log('Authentication error:', errorMessage);
+                setMessage({
+                    type: 'error',
+                    text: errorMessage
+                });
+                // Optionally clear token if it's expired
+                localStorage.removeItem('token');
+            } else {
+                setMessage({
+                    type: 'error',
+                    text: error.response?.data?.message || 'Failed to add student. Please try again.'
+                });
+            }
         }
     };
 

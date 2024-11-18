@@ -5,6 +5,16 @@ const Officer = require('../models/OfficerSchema');
 const Governor = require('../models/GovernorSchema');
 const { generatePassword } = require('../utils/passwordGenerator');
 
+// Utility function to validate email domain based on position
+const validateEmailDomain = (email, position) => {
+    if (position.toLowerCase() === 'admin') {
+        return true; // Admin can use any email domain
+    }
+    
+    // For other positions, enforce @student.buksu.edu.ph
+    return email.endsWith('@student.buksu.edu.ph');
+};
+
 // Utility function to map position to corresponding model
 const getModelByPosition = (position) => {
     switch (position.toLowerCase()) {
@@ -24,16 +34,18 @@ const getModelByPosition = (position) => {
 // Add a new user
 const addUser = async (userData) => {
     const { ID, name, email, position } = userData;
-    const password = generatePassword(); // Generate a secure password
+
+    // Validate email domain
+    if (!validateEmailDomain(email, position)) {
+        throw new Error(`${position} must use an email with @student.buksu.edu.ph domain`);
+    }
+
+    const password = generatePassword();
     console.log(`Generated password for user ${name}: ${password}`);
 
-    // Determine the model based on position
     const Model = getModelByPosition(position);
-
-    // Hash the password using hashUtils
     const hashedPassword = await hashPassword(password);
 
-    // Create a new user with hashed password
     const newUser = new Model({
         ID,
         name,

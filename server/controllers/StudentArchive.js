@@ -14,8 +14,21 @@ const updateArchiveStatus = async (id, archiveStatus, res) => {
             return res.status(404).json({ message: 'Student not found' });
         }
 
+        console.log('\n--- Student Archive Status Update ---');
+        console.log('Timestamp:', new Date().toISOString());
+        console.log('Action:', archiveStatus ? 'Archive' : 'Unarchive');
+        console.log('Student ID:', id);
+        console.log('Student Name:', student.name);
+        console.log('Status:', 'Success');
+        console.log('------------------------\n');
+
         res.status(200).json({ message: `Student ${archiveStatus ? 'archived' : 'unarchived'} successfully`, student });
     } catch (error) {
+        console.error('\n--- Student Archive Status Update Error ---');
+        console.error('Timestamp:', new Date().toISOString());
+        console.error('Error:', error);
+        console.error('------------------------\n');
+        
         res.status(500).json({ message: 'Server error', error });
     }
 };
@@ -23,19 +36,13 @@ const updateArchiveStatus = async (id, archiveStatus, res) => {
 // Archive a student
 exports.archiveStudent = async (req, res) => {
     const { id } = req.params;
-    const student = await updateArchiveStatus(id, true, res);
-    if (student) {
-        res.json({ message: `${student.name} has been archived`, student });
-    }
+    await updateArchiveStatus(id, true, res);
 };
 
 // Unarchive a student
 exports.unarchiveStudent = async (req, res) => {
     const { id } = req.params;
-    const student = await updateArchiveStatus(id, false, res);
-    if (student) {
-        res.json({ message: `${student.name} has been unarchived`, student });
-    }
+    await updateArchiveStatus(id, false, res);
 };
 
 exports.importFromExcel = async (req, res) => {

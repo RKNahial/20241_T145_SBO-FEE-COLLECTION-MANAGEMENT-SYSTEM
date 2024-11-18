@@ -25,16 +25,31 @@ const TreasurerFee = () => {
     useEffect(() => {
         const fetchStudents = async () => {
             try {
-                const response = await fetch('http://localhost:8000/api/getAll/students');
+                const token = localStorage.getItem('token');
+                const response = await fetch('http://localhost:8000/api/getAll/students', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
                 if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error('Unauthorized access. Please login again.');
+                    }
                     throw new Error('Failed to fetch students');
                 }
+
                 const data = await response.json();
                 // Filter only active students
                 const activeStudents = data.filter(student => !student.isArchived);
                 setStudents(activeStudents);
             } catch (err) {
                 setError(err.message);
+                if (err.message.includes('Unauthorized')) {
+                    // Handle unauthorized access (e.g., redirect to login)
+                    // You might want to implement a redirect here
+                }
             } finally {
                 setLoading(false);
             }

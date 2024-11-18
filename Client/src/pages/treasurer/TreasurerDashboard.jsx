@@ -104,13 +104,24 @@ const TreasurerDashboard = () => {
     useEffect(() => {
         const fetchTotalActiveStudents = async () => {
             try {
-                const response = await axios.get('http://localhost:8000/api/getAll/students');
+                const token = localStorage.getItem('token');
+                const response = await axios.get('http://localhost:8000/api/getAll/students', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
                 if (response.data) {
                     const activeStudents = response.data.filter(student => !student.isArchived).length;
                     setTotalActiveStudents(activeStudents);
                 }
             } catch (err) {
                 console.error('Error fetching total active students:', err);
+                if (err.response?.status === 401) {
+                    // Handle unauthorized access
+                    console.log('Unauthorized access. Please login again.');
+                }
             }
         };
 

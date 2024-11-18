@@ -47,14 +47,29 @@ const TreasurerStudents = () => {
 
     const fetchStudents = async () => {
         try {
-            const response = await fetch('http://localhost:8000/api/getAll/students');
+            const token = localStorage.getItem('token'); // Get token from localStorage
+            const response = await fetch('http://localhost:8000/api/getAll/students', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
             if (!response.ok) {
+                if (response.status === 401) {
+                    throw new Error('Unauthorized access. Please login again.');
+                }
                 throw new Error('Failed to fetch students');
             }
+
             const data = await response.json();
             setStudents(data);
         } catch (err) {
             setError(err.message);
+            if (err.message.includes('Unauthorized')) {
+                // Handle unauthorized access (e.g., redirect to login)
+                // You might want to implement a redirect here
+            }
         } finally {
             setLoading(false);
         }
@@ -91,10 +106,17 @@ const TreasurerStudents = () => {
         const confirmArchive = window.confirm(`Are you sure you want to archive ${studentName}?`);
         if (confirmArchive) {
             try {
-                const response = await fetch(`http://localhost:8000/api/archive/${studentId}`, { method: 'PUT' });
+                const token = localStorage.getItem('token');
+                const response = await fetch(`http://localhost:8000/api/archive/${studentId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
                 if (response.ok) {
                     setSuccessMessage(`${studentName} has been successfully archived!`);
-                    setStudents(prev => prev.map(s => s._id === studentId ? { ...s, isArchived: true } : s)); // Adjusted based on your field name
+                    setStudents(prev => prev.map(s => s._id === studentId ? { ...s, isArchived: true } : s));
                 } else {
                     const errorData = await response.json();
                     setError(errorData.error);
@@ -111,10 +133,17 @@ const TreasurerStudents = () => {
         const confirmUnarchive = window.confirm(`Are you sure you want to unarchive ${studentName}?`);
         if (confirmUnarchive) {
             try {
-                const response = await fetch(`http://localhost:8000/api/unarchive/${studentId}`, { method: 'PUT' });
+                const token = localStorage.getItem('token');
+                const response = await fetch(`http://localhost:8000/api/unarchive/${studentId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
                 if (response.ok) {
                     setSuccessMessage(`${studentName} has been successfully unarchived!`);
-                    setStudents(prev => prev.map(s => s._id === studentId ? { ...s, isArchived: false } : s)); // Adjusted based on your field name
+                    setStudents(prev => prev.map(s => s._id === studentId ? { ...s, isArchived: false } : s));
                 } else {
                     const errorData = await response.json();
                     setError(errorData.error);
