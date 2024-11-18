@@ -316,7 +316,7 @@ const TreasurerDashboard = () => {
                                         height: '500px'
                                     }}>
                                         <div className="d-flex justify-content-between align-items-center px-3 mb-3">
-                                            <h5 className="mb-0 header">Payment Reports by Program</h5>
+                                            <h5 className="mb-0 header">Reports by Payment Category</h5>
                                         </div>
                                         <div style={{ padding: '0 1rem', height: '400px' }}>
                                             {reportLoading ? (
