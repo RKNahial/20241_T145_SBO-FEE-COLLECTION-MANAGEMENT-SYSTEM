@@ -94,7 +94,7 @@ const TreasurerDashboard = () => {
                     setActiveCategories(activeCount);
                 }
             } catch (err) {
-                console.error('Error fetching active categories:', err);
+                console.error('Error fetching active payment categories:', err);
             }
         };
 
@@ -150,14 +150,24 @@ const TreasurerDashboard = () => {
             })}`;
         }
 
+        // Format for trillions
+        if (amount >= 1_000_000_000_000) {
+            return `₱${(amount / 1_000_000_000_000).toFixed(1)}T`;
+        }
+
+        // Format for billions
+        if (amount >= 1_000_000_000) {
+            return `₱${(amount / 1_000_000_000).toFixed(1)}B`;
+        }
+
         // Format for millions
-        if (amount >= 1000000) {
-            return `₱${(amount / 1000000).toFixed(1)}m`;
+        if (amount >= 1_000_000) {
+            return `₱${(amount / 1_000_000).toFixed(1)}M`;
         }
 
         // Format for thousands
-        if (amount >= 1000) {
-            return `₱${(amount / 1000).toFixed(1)}K`;
+        if (amount >= 1_000) {
+            return `₱${(amount / 1_000).toFixed(1)}K`;
         }
 
         // Format regular numbers
@@ -202,7 +212,7 @@ const TreasurerDashboard = () => {
                                     <div className="card-body d-flex justify-content-between align-items-center">
                                         <div>
                                             <h2 className="big-text">{totalActiveStudents}</h2>
-                                            <h5 className="small-text">Total Students</h5>
+                                            <h5 className="small-text">Active Students</h5>
                                         </div>
                                         <i className="fas fa-user-graduate big-icon text-white"></i>
                                     </div>
@@ -224,9 +234,9 @@ const TreasurerDashboard = () => {
                                     <div className="card-body d-flex justify-content-between align-items-center">
                                         <div>
                                             <h2 className="big-text">{activeCategories}</h2>
-                                            <h5 className="small-text">Active Categories</h5>
+                                            <h5 className="small-text">Payment Categories</h5>
                                         </div>
-                                        <i className="fas fa-calendar-alt big-icon text-white"></i>
+                                        <i className="fas fa-wallet big-icon text-white"></i>
                                     </div>
                                 </div>
                             </div>
@@ -235,7 +245,7 @@ const TreasurerDashboard = () => {
                                     <div className="card-body d-flex justify-content-between align-items-center">
                                         <div>
                                             <h2 className="big-text"
-                                                onClick={() => setShowFullAmount(!showFullAmount)}
+                                                // onClick={() => setShowFullAmount(!showFullAmount)}
                                                 style={{ cursor: 'pointer' }}>
                                                 <span style={{
                                                     fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif'
@@ -306,7 +316,7 @@ const TreasurerDashboard = () => {
                                         height: '500px'
                                     }}>
                                         <div className="d-flex justify-content-between align-items-center px-3 mb-3">
-                                            <h5 className="mb-0">Payment Reports by Program</h5>
+                                            <h5 className="mb-0 header">Payment Reports by Program</h5>
                                         </div>
                                         <div style={{ padding: '0 1rem', height: '400px' }}>
                                             {reportLoading ? (
@@ -351,12 +361,12 @@ const TreasurerDashboard = () => {
                                 </div>
 
                                 {/* CALENDAR */}
-                                <div style={{ flex: 1 }}>
-                                    <div className="calendar-card">
-                                        <div className="calendar-header">
+                                <div style={{ flex: 1}}>
+                                    <div className="calendar-card" style={{ boxShadow: 'none' }}>
+                                        <div className="calendar-header header">
                                             <h5 className="calendar-title">Calendar</h5>
                                             <button
-                                                className="calendar-add-button"
+                                                className="add-button"
                                                 onClick={handleAddToCalendar}
                                             >
                                                 <i className="fas fa-plus me-2"></i>

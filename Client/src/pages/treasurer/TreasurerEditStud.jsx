@@ -190,8 +190,8 @@ const TreasurerEditStud = () => {
                                                 </select>
                                             </div>
                                             <div className="mb-0">
-                                                <button type="submit" className="btn system-button">
-                                                    <i className="fa-solid fa-pen me-1"></i> Edit
+                                                <button type="submit" className="btn system-button update-button">
+                                                    <i className="fa-solid fa-pen me-1"></i> Update
                                                 </button>
                                             </div>
                                         </form>
