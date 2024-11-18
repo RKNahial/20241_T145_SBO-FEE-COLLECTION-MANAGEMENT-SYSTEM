@@ -2,12 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { Modal, Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
 import TreasurerSidebar from './TreasurerSidebar';
 import TreasurerNavbar from './TreasurerNavbar';
 import axios from 'axios';
 
-const TreasurerStudents = () => {
+const TreasurerArchivedStud = () => {
     // NAV AND SIDEBAR
     const [isCollapsed, setIsCollapsed] = useState(false);
     const toggleSidebar = () => {
@@ -22,8 +21,6 @@ const TreasurerStudents = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [showModal, setShowModal] = useState(false);
     const [modalAction, setModalAction] = useState({ type: '', student: null });
-    const navigate = useNavigate();
-    const [statusFilter, setStatusFilter] = useState("Active");
 
     // STUDENT STATUS TAG
     const StudentStatusTag = ({ status, onClick }) => {
@@ -49,60 +46,45 @@ const TreasurerStudents = () => {
 
     const fetchStudents = async () => {
         try {
-            const token = localStorage.getItem('token'); // Get token from localStorage
+            const token = localStorage.getItem('token');
             const response = await fetch('http://localhost:8000/api/getAll/students', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             });
-
+    
             if (!response.ok) {
                 if (response.status === 401) {
                     throw new Error('Unauthorized access. Please login again.');
                 }
                 throw new Error('Failed to fetch students');
             }
-
+    
             const data = await response.json();
-            setStudents(data);
+            // Filter only archived students before setting the state
+            const archivedStudents = data.filter(student => student.isArchived === true);
+            setStudents(archivedStudents);
+            setLoading(false); // Make sure to set loading to false here
         } catch (err) {
             setError(err.message);
-            if (err.message.includes('Unauthorized')) {
-                // Handle unauthorized access (e.g., redirect to login)
-                // You might want to implement a redirect here
-            }
-        } finally {
-            setLoading(false);
+            setLoading(false); // Also set loading to false in case of error
         }
     };
+    
+    const filteredStudents = students.filter(student => {
+        return student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+               student.studentId?.toLowerCase().includes(searchTerm.toLowerCase());
+    });
 
-    // Use fetchStudents in useEffect
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [students, searchTerm]);
+
     useEffect(() => {
         fetchStudents();
     }, []);
-
-    // Reset to first page when students or filters change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [students, searchTerm, statusFilter]);
-
-    const filteredStudents = students.filter(student => {
-        const matchesSearch = student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            student.studentId?.toLowerCase().includes(searchTerm.toLowerCase());
     
-        switch(statusFilter) {
-            case 'Active':
-                return matchesSearch && !student.isArchived;
-            case 'Archived':
-                return matchesSearch && student.isArchived;
-            case 'All':
-                return matchesSearch;
-            default:
-                return matchesSearch && !student.isArchived; // Default to active
-        }
-    });
-
     // Handle archive and unarchive actions
     const handleArchiveAction = (studentId, studentName, isArchived) => {
         setModalAction({
@@ -128,11 +110,17 @@ const TreasurerStudents = () => {
             
             if (response.ok) {
                 setSuccessMessage(`${modalAction.student.name} has been successfully ${modalAction.type}d!`);
-                setStudents(prev => prev.map(s => 
-                    s._id === modalAction.student.id 
-                        ? { ...s, isArchived: isArchiving } 
-                        : s
-                ));
+                
+                // If unarchiving, remove the student from the list
+                if (!isArchiving) {
+                    setStudents(prev => prev.filter(s => s._id !== modalAction.student.id));
+                } else {
+                    setStudents(prev => prev.map(s => 
+                        s._id === modalAction.student.id 
+                            ? { ...s, isArchived: isArchiving } 
+                            : s
+                    ));
+                }
             } else {
                 const errorData = await response.json();
                 setError(errorData.error);
@@ -236,7 +224,7 @@ const TreasurerStudents = () => {
     return (
         <div className="sb-nav-fixed">
             <Helmet>
-                <title>Treasurer | Students</title>
+                <title>Treasurer | Archived Students</title>
             </Helmet>
             <TreasurerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
@@ -255,7 +243,7 @@ const TreasurerStudents = () => {
                             <div className="card-header">
                                 <div className="row">
                                     <div className="col col-md-6">
-                                        <i className="fa fa-cog me-2"></i> <strong>Students</strong>
+                                        <i className="fas fa-archive me-2"></i> <strong>Archived Students</strong>
                                     </div>
                                 </div>
                             </div>
@@ -276,37 +264,7 @@ const TreasurerStudents = () => {
                                 ) : (
                                     <>
                                         {/* Actions and Filters */}
-                                        <div className="d-flex justify-content-between mb-3 align-items-center">
-                                            <div className="d-flex me-auto">
-                                                <Link
-                                                    to="/treasurer/students/add-new"
-                                                    className="add-button btn btn-sm me-2"
-                                                >
-                                                    <i className="fas fa-plus me-2"></i>
-                                                    Add New Student
-                                                </Link>
-                                                <button
-                                                    className="add-button btn btn-sm me-2"
-                                                    onClick={() => navigate('/treasurer/students/archived')}
-                                                >
-                                                    <i className="fas fa-archive me-2"></i>
-                                                    Archived Students
-                                                </button>
-                                            </div>
-                                            <div className="d-flex align-items-center me-3">
-                                                <label className="me-2 mb-0">Student Status</label>
-                                                <div className="dashboard-select" style={{ width: 'auto' }}>
-                                                   <select
-                                                        className="form-control"
-                                                        value={statusFilter}
-                                                        onChange={(e) => setStatusFilter(e.target.value)}
-                                                    >
-                                                        <option value="Active">Active</option>
-                                                        <option value="Archived">Archived</option>
-                                                        <option value="All">All</option>
-                                                    </select>
-                                                </div>
-                                            </div>
+                                        <div className="d-flex justify-content-end mb-3 align-items-center">
                                             <form className="d-flex search-bar" onSubmit={handleSearchSubmit}>
                                                 <input
                                                     type="text"
@@ -323,61 +281,55 @@ const TreasurerStudents = () => {
 
                                         {/* Table of Students */}
                                         <table className="table table-bordered table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Student ID</th>
-                                                    <th>Student Name</th>
-                                                    <th>Year Level</th>
-                                                    <th>Program</th>
-                                                    <th>Status</th>
-                                                    <th>Actions</th>
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Student ID</th>
+                                                <th>Student Name</th>
+                                                <th>Year Level</th>
+                                                <th>Program</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {currentItems.map((student, index) => (
+                                                <tr key={student._id}>
+                                                    <td>{index + indexOfFirstItem + 1}</td>
+                                                    <td>{student.studentId}</td>
+                                                    <td>{student.name}</td>
+                                                    <td>{student.yearLevel}</td>
+                                                    <td>{student.program}</td>
+                                                    <td>
+                                                        <StudentStatusTag
+                                                            status={student.isArchived ? 'Archived' : 'Active'}
+                                                            onClick={() => handleArchiveAction(student._id, student.name, student.isArchived)}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <Link
+                                                            to={`/treasurer/students/edit/${student._id}`}
+                                                            state={{ studentData: student }}
+                                                            className="btn btn-edit btn-sm"
+                                                        >
+                                                            <i className="fas fa-edit"></i>
+                                                        </Link>
+                                                        <button
+                                                            className="btn btn-notes btn-sm"
+                                                            onClick={() => handleOpenGoogleNotes(student.studentId)}
+                                                        >
+                                                            <i className="fas fa-sticky-note"></i>
+                                                        </button>
+                                                        <button
+                                                            className={`btn btn-archive btn-sm ${student.isArchived ? 'btn-open' : ''}`}
+                                                            onClick={() => handleArchiveAction(student._id, student.name, student.isArchived)}
+                                                        >
+                                                            <i className={`fas fa-${student.isArchived ? 'box-open' : 'archive'}`}></i>
+                                                        </button>
+                                                    </td>
                                                 </tr>
-                                            </thead>
-                                            <tbody>
-                                                {currentItems.map((student, index) => (
-                                                    <tr key={student._id}>
-                                                        <td>{index + indexOfFirstItem + 1}</td>
-                                                        <td>{student.studentId}</td>
-                                                        <td>{student.name}</td>
-                                                        <td>{student.yearLevel}</td>
-                                                        <td>{student.program}</td>
-                                                        <td>
-                                                            <StudentStatusTag
-                                                                status={student.isArchived ? 'Archived' : 'Active'}
-                                                                onClick={() => {
-                                                                    if (student.isArchived) {
-                                                                        handleUnarchive(student._id, student.name);
-                                                                    } else {
-                                                                        handleArchive(student._id, student.name);
-                                                                    }
-                                                                }}
-                                                            />
-                                                        </td>
-                                                        <td>
-                                                            <Link
-                                                                to={`/treasurer/students/edit/${student._id}`}
-                                                                state={{ studentData: student }}  // Pass the entire student object
-                                                                className="btn btn-edit btn-sm"
-                                                            >
-                                                                <i className="fas fa-edit"></i>
-                                                            </Link>
-                                                            <button
-                                                                className="btn btn-notes btn-sm"
-                                                                onClick={() => handleOpenGoogleNotes(student.studentId)}
-                                                            >
-                                                                <i className="fas fa-sticky-note"></i>
-                                                            </button>
-                                                            <button
-                                                                className={`btn btn-archive btn-sm ${student.isArchived ? 'btn-open' : ''}`}
-                                                                onClick={() => handleArchiveAction(student._id, student.name, student.isArchived)}
-                                                            >
-                                                                <i className={`fas fa-${student.isArchived ? 'box-open' : 'archive'}`}></i>
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
+                                            ))}
+                                        </tbody>
                                         </table>
 
                                         {/* Pagination */}
@@ -463,4 +415,4 @@ const TreasurerStudents = () => {
     );
 };
 
-export default TreasurerStudents;
+export default TreasurerArchivedStud;

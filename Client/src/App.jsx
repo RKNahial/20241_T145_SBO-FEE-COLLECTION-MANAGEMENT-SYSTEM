@@ -40,6 +40,7 @@ import TreasurerEditStud from './pages/treasurer/TreasurerEditStud';
 import TreasurerReports from './pages/treasurer/TreasurerReports';
 import TreasurerDues from './pages/treasurer/TreasurerDues';
 import TreasurerProfile from './pages/treasurer/TreasurerProfile';
+import TreasurerArchivedStud from './pages/treasurer/TreasurerArchivedStud';
 
 import GovDashboard from './pages/governor/GovDashboard';
 import GovStudents from './pages/governor/GovStudents';
@@ -110,6 +111,7 @@ const App = () => {
                                     <Route path="manage-fee/payment-category/add-new" element={<TreasurerAddCategory />} />
                                     <Route path="manage-fee/payment-category/edit/:id" element={<TreasurerEditCategory />} />
                                     <Route path="students" element={<TreasurerStudents />} />
+                                    <Route path="students/archived" element={<TreasurerArchivedStud />} />
                                     <Route path="students/add-new" element={<TreasurerAddStud />} />
                                     <Route path="students/edit/:id" element={<TreasurerEditStud />} />
                                     <Route path="reports" element={<TreasurerReports />} />

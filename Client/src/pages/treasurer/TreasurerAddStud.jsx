@@ -228,7 +228,7 @@ const TreasurerAddStud = () => {
                     <Modal.Title>Confirm Add Student</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    Do you want to add {formData.name}?
+                    Do you want to add <strong>{formData.name}</strong>?
                 </Modal.Body>
                 <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <Button 

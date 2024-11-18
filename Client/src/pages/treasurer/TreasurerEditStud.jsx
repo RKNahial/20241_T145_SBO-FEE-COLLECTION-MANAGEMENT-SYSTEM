@@ -1,6 +1,7 @@
 import { Helmet } from 'react-helmet';
 import React, { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import { Modal, Button } from 'react-bootstrap';
 import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
 
@@ -11,6 +12,8 @@ const TreasurerEditStud = () => {
     const navigate = useNavigate();
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState("");
+    const [showModal, setShowModal] = useState(false);
+
 
     // Get the student data passed from the previous page
     const studentData = location.state?.studentData;
@@ -37,7 +40,7 @@ const TreasurerEditStud = () => {
         }
     }, [studentData]);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         try {
             // Validate all fields
@@ -46,29 +49,39 @@ const TreasurerEditStud = () => {
                 setError('All fields are required');
                 return;
             }
-
+    
             // Validate email format
             if (!formData.institutionalEmail.endsWith('@student.buksu.edu.ph')) {
                 setError('Email must be a valid BukSU student email');
                 return;
             }
-
-            const response = await fetch(`http://localhost:8000/api/students/${id}`, {
+    
+            // If validation passes, show modal
+            setShowModal(true);
+        } catch (err) {
+            setError(err.message || 'Failed to update student. Please try again.');
+        }
+    };
+    
+    const confirmUpdate = async () => {
+        try {
+            const response = await fetch(`http://localhost:8000/api/students/${id}`, {  // Using the original endpoint
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(formData)
             });
-
+    
             const data = await response.json();
-
+    
             if (!response.ok) {
                 throw new Error(data.message || 'Failed to update student');
             }
-
+    
             if (data.success) {
                 setSuccessMessage('Student updated successfully!');
+                setShowModal(false);
                 // Add a slight delay before navigation to show the success message
                 setTimeout(() => {
                     navigate('/treasurer/students', {
@@ -80,6 +93,7 @@ const TreasurerEditStud = () => {
             }
         } catch (err) {
             setError(err.message || 'Failed to update student. Please try again.');
+            setShowModal(false);
         }
     };
 
@@ -202,6 +216,31 @@ const TreasurerEditStud = () => {
                     </div>
                 </div>
             </div>
+                {/* Update Confirmation Modal */}
+                <Modal show={showModal} onHide={() => setShowModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm Update Student</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Do you want to update <strong>{formData.name}</strong>?
+                </Modal.Body>
+                <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button 
+                        variant="btn btn-confirm" 
+                        onClick={confirmUpdate} 
+                        style={{ flex: 'none' }}
+                    >
+                        Confirm
+                    </Button>
+                    <Button 
+                        variant="btn btn-cancel" 
+                        onClick={() => setShowModal(false)} 
+                        style={{ marginRight: '0.5rem', flex: 'none' }}
+                    >
+                        Cancel
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };
