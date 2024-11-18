@@ -1,7 +1,8 @@
 import { Helmet } from 'react-helmet';
 import React, { useState } from "react";
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Ensure this is imported
+import { useNavigate } from 'react-router-dom';
+import { Modal, Button } from 'react-bootstrap';
 import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
 
@@ -18,6 +19,9 @@ const TreasurerAddStud = () => {
     // State to handle messages
     const [message, setMessage] = useState(null);
 
+    // State to handle modal visibility
+    const [showModal, setShowModal] = useState(false);
+
     // Handle sidebar collapse
     const [isCollapsed, setIsCollapsed] = useState(false);
     const toggleSidebar = () => setIsCollapsed(prev => !prev);
@@ -31,12 +35,17 @@ const TreasurerAddStud = () => {
     const navigate = useNavigate();
 
     // Form submission handler
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
+        setShowModal(true); // Show the confirmation modal
+    };
+    
+    const confirmSubmit = async () => {
+        setShowModal(false); // Hide the modal
         try {
             const token = localStorage.getItem('token');
-            console.log('Current token:', token); // Debug token value
-
+            console.log('Current token:', token);
+    
             if (!token) {
                 console.log('No token found in localStorage');
                 setMessage({
@@ -46,7 +55,7 @@ const TreasurerAddStud = () => {
                 navigate('/login');
                 return;
             }
-
+    
             // Create config object for better debugging
             const config = {
                 headers: {
@@ -55,20 +64,20 @@ const TreasurerAddStud = () => {
                 }
             };
             console.log('Request config:', config); // Debug request configuration
-
+    
             const response = await axios.post(
                 'http://localhost:8000/api/add/students',
                 formData,
                 config
             );
-
+    
             console.log('API response:', response);
             setMessage({ type: 'success', text: 'Student added successfully!' });
-
+    
             setTimeout(() => {
                 navigate('/treasurer/students');
             }, 2000);
-
+    
         } catch (error) {
             console.error('Error details:', {
                 status: error.response?.status,
@@ -76,7 +85,7 @@ const TreasurerAddStud = () => {
                 data: error.response?.data,
                 headers: error.response?.headers
             });
-
+    
             if (error.response?.status === 401) {
                 const errorMessage = error.response?.data?.message || 'Session expired. Please login again.';
                 console.log('Authentication error:', errorMessage);
@@ -94,6 +103,7 @@ const TreasurerAddStud = () => {
             }
         }
     };
+    
 
     return (
         <div className="sb-nav-fixed">
@@ -212,6 +222,31 @@ const TreasurerAddStud = () => {
                     </div>
                 </div>
             </div >
+            {/* Confirmation Modal */}
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm Add Student</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Do you want to add {formData.name}?
+                </Modal.Body>
+                <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button 
+                        variant="btn btn-confirm" 
+                        onClick={confirmSubmit} 
+                        style={{ flex: 'none' }}
+                    >
+                        Confirm
+                    </Button>
+                    <Button 
+                        variant="btn btn-cancel" 
+                        onClick={() => setShowModal(false)} 
+                        style={{ marginRight: '0.5rem', flex: 'none' }}
+                    >
+                        Cancel
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div >
     );
 };

@@ -90,7 +90,7 @@
     justify-content: center; 
 }
 
-.btn-primary {
+.btn-primary .login-button{
     background-color: #FF8C00;
     border: none;
     padding: 0.75rem;
@@ -100,6 +100,34 @@
   }
 
   .btn-primary:hover { background-color: #E67E22; }
+
+  .btn-confirm {
+    background-color: #FF8C00;
+    border: none;
+    cursor: pointer;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.35rem;
+    transition: background-color 0.2s ease;
+}
+
+.btn-confirm:hover {
+    background-color: #E67E22;
+}
+
+.btn-cancel {
+    background-color: #6c757d;
+    border: none;
+    cursor: pointer;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.35rem;
+    transition: background-color 0.2s ease;
+}
+
+.btn-cancel:hover {
+    background-color: #5a6268;
+}
 
   .btn-edit {
     color: green;

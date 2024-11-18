@@ -329,7 +329,7 @@ const Login = () => {
                         onChange={onRecaptchaChange}
                     />
 
-                    <button type="submit" className="btn btn-primary" disabled={loading || !recaptchaToken}>
+                    <button type="submit" className="btn btn-primary login-button" disabled={loading || !recaptchaToken}>
                         <i className="fas fa-sign-in-alt mr-2"></i> {loading ? 'Logging in...' : 'LOGIN'}
                     </button>
                 </form>

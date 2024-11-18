@@ -143,7 +143,7 @@ const TreasurerReports = () => {
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', 'report.csv');
+        link.setAttribute('download', 'COT-SBO Report.csv');
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -182,7 +182,7 @@ const TreasurerReports = () => {
 
                             <div className="card-body">
                                 {/* SELECT REPORT CATEGORY */}
-                                <div className="d-flex justify-content-between mb-3">
+                                <div className="d-flex justify-content-start mb-3">
                                     <div className="d-flex align-items-center">
                                         <label className="me-2 mb-0">Select Reports</label>
                                         <div className="dashboard-select" style={{ width: 'auto' }}>
@@ -197,7 +197,28 @@ const TreasurerReports = () => {
                                             </select>
                                         </div>
                                     </div>
-                                    <div>
+
+                                    {reportType === 'monthly' && (
+                                        <div className="d-flex align-items-center ms-3">
+                                            <label className="me-2 mb-0">Select Month</label>
+                                            <div className="dashboard-select" style={{ width: 'auto' }}>
+                                                <select
+                                                    className="form-control"
+                                                    value={selectedMonth}
+                                                    onChange={(e) => setSelectedMonth(e.target.value)}
+                                                >
+                                                    <option key="all" value="">All Months</option>
+                                                    {reportData.map(item => (
+                                                        <option key={item.month} value={item.month}>
+                                                            {item.month}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="ms-auto">
                                         <button
                                             className="add-button btn btn-sm"
                                             onClick={handleDownloadReport}
@@ -207,26 +228,6 @@ const TreasurerReports = () => {
                                         </button>
                                     </div>
                                 </div>
-
-                                {reportType === 'monthly' && (
-                                    <div className="d-flex align-items-center ms-3">
-                                        <label className="me-2 mb-0">Select Month</label>
-                                        <div className="dashboard-select" style={{ width: 'auto' }}>
-                                            <select
-                                                className="form-control"
-                                                value={selectedMonth}
-                                                onChange={(e) => setSelectedMonth(e.target.value)}
-                                            >
-                                                <option key="all" value="">All Months</option>
-                                                {reportData.map(item => (
-                                                    <option key={item.month} value={item.month}>
-                                                        {item.month}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </div>
-                                )}
 
                                 {loading ? (
                                     <div className="text-center">Loading...</div>
