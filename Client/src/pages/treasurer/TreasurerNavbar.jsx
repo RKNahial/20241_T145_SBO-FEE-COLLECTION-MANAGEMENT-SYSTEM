@@ -53,9 +53,21 @@ const TreasurerNavbar = ({ toggleSidebar }) => {
                 await signOut(auth);
             }
 
-            // Clear all local data
+            // Clear all storage
             localStorage.clear();
             sessionStorage.clear();
+
+            // Clear specific consent-related items
+            localStorage.removeItem('token');
+            localStorage.removeItem('userDetails');
+            localStorage.removeItem('showLoginCelebration');
+            sessionStorage.removeItem('showLoginCelebration');
+
+            // Clear any session cookies
+            document.cookie.split(";").forEach(function (c) {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+
             setUser(null);
 
             // Force redirect to login

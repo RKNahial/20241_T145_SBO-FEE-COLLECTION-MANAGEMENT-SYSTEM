@@ -45,7 +45,13 @@ const TreasurerDashboard = () => {
     const [reportData, setReportData] = useState([]);
     const [reportLoading, setReportLoading] = useState(true);
     const [reportError, setReportError] = useState(null);
-    const [showCelebration, setShowCelebration] = useState(true);
+    const [showCelebration, setShowCelebration] = useState(() => {
+        const shouldShow = localStorage.getItem('showLoginCelebration') === 'true';
+        if (shouldShow) {
+            localStorage.removeItem('showLoginCelebration');
+        }
+        return shouldShow;
+    });
 
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
@@ -378,12 +384,12 @@ const TreasurerDashboard = () => {
                                 </div>
 
                                 {/* CALENDAR */}
-                                <div style={{ flex: 1}}>
-                                    <div className="calendar-card" style={{ boxShadow: 'none' }}>
-                                        <div className="calendar-header header">
+                                <div style={{ flex: 1 }}>
+                                    <div className="calendar-card">
+                                        <div className="calendar-header">
                                             <h5 className="calendar-title">Calendar</h5>
                                             <button
-                                                className="add-button"
+                                                className="calendar-add-button"
                                                 onClick={handleAddToCalendar}
                                             >
                                                 <i className="fas fa-plus me-2"></i>
@@ -397,11 +403,6 @@ const TreasurerDashboard = () => {
                                                 frameBorder="0"
                                                 scrolling="no"
                                                 title="Treasurer Calendar"
-                                                style={{
-                                                    border: 0,
-                                                    width: '100%',
-                                                    height: '400px'
-                                                }}
                                             />
                                         </div>
                                     </div>

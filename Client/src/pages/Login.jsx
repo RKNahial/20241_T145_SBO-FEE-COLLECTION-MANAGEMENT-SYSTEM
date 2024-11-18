@@ -37,32 +37,18 @@ const Login = () => {
                 recaptchaToken
             });
 
-            // Debug log the response
-            console.log('Login response:', response.data);
-
             if (response.data.token) {
-                // Store the token
                 localStorage.setItem('token', response.data.token);
-                console.log('Token stored successfully:', response.data.token);
 
-                // Store user details
                 const userDetails = {
                     _id: response.data.userId,
                     email: response.data.email,
                     position: response.data.position,
-                    loginLogId: response.data.loginLogId,
-                    sessionExpiry: new Date().getTime() + (60 * 60 * 1000)
+                    loginLogId: response.data.loginLogId
                 };
-                localStorage.setItem('userDetails', JSON.stringify(userDetails));
-                setUser(userDetails);
 
-                // Navigate based on position
-                if (response.data.position === 'Treasurer') {
-                    navigate('/treasurer/dashboard');
-                }
-            } else {
-                console.error('No token received in login response');
-                setMessage('Login failed: No authentication token received');
+                setPendingGoogleUser(userDetails);
+                setShowConsentModal(true);
             }
         } catch (error) {
             console.error('Login error:', error);
@@ -96,25 +82,19 @@ const Login = () => {
                 });
 
                 if (response.data.authorized) {
-                    // Store the token from the server response
                     localStorage.setItem('token', response.data.token);
-                    console.log('Google auth token stored:', response.data.token);
 
                     const userDetails = {
                         _id: user.uid,
                         email: user.email,
                         position: response.data.position,
                         loginLogId: response.data.loginLogId,
-                        sessionExpiry: new Date().getTime() + (24 * 60 * 60 * 1000),
                         picture: user.photoURL,
                         imageUrl: user.photoURL
                     };
-                    localStorage.setItem('userDetails', JSON.stringify(userDetails));
-                    setUser(userDetails);
 
-                    if (response.data.position === 'Treasurer') {
-                        navigate('/treasurer/dashboard');
-                    }
+                    setPendingGoogleUser(userDetails);
+                    setShowConsentModal(true);
                 } else {
                     setMessage('Access denied. Only authorized users can log in.');
                 }
@@ -185,16 +165,10 @@ const Login = () => {
 
     const handleConsentAccept = () => {
         if (pendingGoogleUser) {
-            const duration = 24 * 60 * 60 * 1000; // 24 hours
             const userDetails = {
-                _id: pendingGoogleUser.user.uid,
-                email: pendingGoogleUser.user.email,
-                position: pendingGoogleUser.position,
-                loginLogId: null,
-                sessionExpiry: new Date().getTime() + duration
+                ...pendingGoogleUser,
+                sessionExpiry: new Date().getTime() + (24 * 60 * 60 * 1000) // 24 hours
             };
-            // Save preference
-            localStorage.setItem(`session_preference_${pendingGoogleUser.user.email}`, duration.toString());
             completeLogin(userDetails);
         }
         setShowConsentModal(false);
@@ -202,23 +176,16 @@ const Login = () => {
 
     const handleConsentDecline = () => {
         if (pendingGoogleUser) {
-            const duration = 60 * 60 * 1000; // 1 hour
             const userDetails = {
-                _id: pendingGoogleUser.user.uid,
-                email: pendingGoogleUser.user.email,
-                position: pendingGoogleUser.position,
-                loginLogId: null,
-                sessionExpiry: new Date().getTime() + duration
+                ...pendingGoogleUser,
+                sessionExpiry: new Date().getTime() + (60 * 60 * 1000) // 1 hour
             };
-            // Save preference
-            localStorage.setItem(`session_preference_${pendingGoogleUser.user.email}`, duration.toString());
             completeLogin(userDetails);
         }
         setShowConsentModal(false);
     };
 
     const completeLogin = (userDetails) => {
-        // Ensure we have the profile picture
         if (!userDetails.picture && !userDetails.imageUrl) {
             userDetails.picture = userDetails.photoURL || null;
             userDetails.imageUrl = userDetails.photoURL || null;
@@ -230,7 +197,6 @@ const Login = () => {
         if (userDetails.position.toLowerCase() === 'treasurer') {
             navigate('/treasurer/dashboard');
         }
-        // Add other position checks as needed
     };
 
     const handleGoogleSuccess = async (response) => {
