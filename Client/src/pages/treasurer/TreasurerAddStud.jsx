@@ -39,12 +39,12 @@ const TreasurerAddStud = () => {
             console.log('API response:', response);
             setMessage({ type: 'success', text: 'Student added successfully!' });
             console.log('About to navigate');
-            
+
             setTimeout(() => {
                 navigate('/treasurer/students');
                 console.log('Navigation called');
             }, 2000);
- 
+
         } catch (error) {
             console.error('Error adding student:', error);
             setMessage({ type: 'error', text: 'Failed to add student. Please try again.' });
@@ -77,7 +77,7 @@ const TreasurerAddStud = () => {
                                         <i className="far fa-plus me-2"></i> <strong>Add New Student</strong>
                                     </div>
                                     <div className="card-body">
-                                    {message && (
+                                        {message && (
                                             <div className={`alert ${message.type === 'success' ? 'alert-success' : 'alert-danger'} mb-3`}>
                                                 {message.text}
                                             </div>
@@ -153,8 +153,8 @@ const TreasurerAddStud = () => {
                                                 </select>
                                             </div>
                                             <div className="mb-0">
-                                                <button 
-                                                    type="submit" 
+                                                <button
+                                                    type="submit"
                                                     className="btn system-button"
                                                 >
                                                     <i className="far fa-plus me-1"></i> Add

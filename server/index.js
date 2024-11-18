@@ -43,7 +43,7 @@ connectDB();
 app.use('/api/users', userRoutes);
 app.use('/api', loginRoutes);
 app.use('/api/auth', googleroutes);
-app.use('/api/add/students', studentRoutes);
+app.use('/api', studentRoutes);
 app.use('/api/getAll/students', GetAllstudentsRoutes);
 app.use('/api', ArchiveStud); // Mount the student routes under /api
 app.use('/api', UpdateStudentRoutes);

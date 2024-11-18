@@ -1,21 +1,25 @@
-const crypto = require('crypto');
-
-const generatePassword = (length = 12) => {
-    // Define character sets
-    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const numbers = '0123456789';
-    const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+const generatePassword = () => {
+    const length = 12; // Password length
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    let password = "";
     
-    const allChars = lowercase + uppercase + numbers + symbols;
+    // Ensure at least one of each required character type
+    password += getRandomChar("ABCDEFGHIJKLMNOPQRSTUVWXYZ"); // Uppercase
+    password += getRandomChar("abcdefghijklmnopqrstuvwxyz"); // Lowercase
+    password += getRandomChar("0123456789"); // Number
+    password += getRandomChar("!@#$%^&*"); // Special character
     
-    let password = '';
-    for (let i = 0; i < length; i++) {
-        const randomIndex = crypto.randomInt(0, allChars.length);
-        password += allChars[randomIndex];
+    // Fill the rest of the password
+    for (let i = password.length; i < length; i++) {
+        password += charset.charAt(Math.floor(Math.random() * charset.length));
     }
     
-    return password;
-};
+    // Shuffle the password
+    return password.split('').sort(() => Math.random() - 0.5).join('');
+}
+
+function getRandomChar(charset) {
+    return charset.charAt(Math.floor(Math.random() * charset.length));
+}
 
 module.exports = { generatePassword }; 

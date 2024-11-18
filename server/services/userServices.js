@@ -3,7 +3,7 @@ const Admin = require('../models/AdminSchema');
 const Treasurer = require('../models/TreasurerSchema');
 const Officer = require('../models/OfficerSchema');
 const Governor = require('../models/GovernorSchema');
-const generatePassword = require('../utils/passwordGenerator');
+const { generatePassword } = require('../utils/passwordGenerator');
 
 // Utility function to map position to corresponding model
 const getModelByPosition = (position) => {
