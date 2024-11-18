@@ -200,7 +200,11 @@ const TreasurerProfile = () => {
                                                     </small>
                                                 </div>
                                                 <div className="mb-0">
+<<<<<<< HEAD
                                                     <button type="submit" className="btn system-button">
+=======
+                                                    <button type="submit" className="btn system-button update-button">
+>>>>>>> 63ad246a1bd54127636120e41f5fc90a47aaf43c
                                                         <i className="fa-solid fa-pen me-2"></i>Update
                                                     </button>
                                                 </div>

@@ -78,6 +78,17 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
 }
 
+.update-button {
+    padding: 0.5rem 2rem; 
+    background-color: #FF8C00;
+    color: #EAEAEA; 
+    border-radius: 0.35rem; 
+    transition: background-color 0.2s ease, box-shadow 0.2s ease; 
+    min-width: 7rem; 
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+}
 
 .btn-primary {
     background-color: #FF8C00;
