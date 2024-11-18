@@ -201,7 +201,7 @@ const TreasurerProfile = () => {
                                                 </div>
                                                 <div className="mb-0">
                                                     <button type="submit" className="btn system-button">
-                                                        <i className="fa-solid fa-pen me-2"></i>Save
+                                                        <i className="fa-solid fa-pen me-2"></i>Update
                                                     </button>
                                                 </div>
                                             </form>
