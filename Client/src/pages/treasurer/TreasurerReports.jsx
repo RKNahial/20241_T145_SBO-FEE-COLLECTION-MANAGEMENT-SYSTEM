@@ -28,7 +28,6 @@ const TreasurerReports = () => {
     // NAV AND SIDEBAR
     const [isCollapsed, setIsCollapsed] = useState(false);
     const toggleSidebar = () => {
-        z
         setIsCollapsed(prev => !prev);
     };
 
@@ -36,6 +35,7 @@ const TreasurerReports = () => {
     const [reportData, setReportData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [selectedMonth, setSelectedMonth] = useState('');
 
     useEffect(() => {
         const fetchReportData = async () => {
@@ -48,6 +48,9 @@ const TreasurerReports = () => {
                         break;
                     case 'program':
                         endpoint = 'reports/by-program';
+                        break;
+                    case 'programTotal':
+                        endpoint = 'reports/by-program-total';
                         break;
                     default:
                         endpoint = 'reports';
@@ -69,11 +72,26 @@ const TreasurerReports = () => {
     }, [reportType]);
 
     const chartData = {
-        labels: reportData.map(item => reportType === 'monthly' ? item.period : item.category),
+        labels: reportType === 'monthly'
+            ? (selectedMonth
+                ? reportData.find(item => item.month === selectedMonth)?.weeks?.map(w => w.week) || []
+                : reportData.map(item => item.month))
+            : reportType === 'programTotal'
+                ? reportData.map(item => item.program)
+                : reportData.map(item => item.category),
         datasets: [
             {
                 label: 'Payment Received',
-                data: reportData.map(item => item.total),
+                data: reportType === 'monthly'
+                    ? (selectedMonth
+                        ? reportData.find(item => item.month === selectedMonth)?.weeks?.map(w => w.total) || []
+                        : reportData.map(item => {
+                            const weeks = item.weeks || [];
+                            return weeks.reduce((sum, week) => sum + (week.total || 0), 0);
+                        }))
+                    : reportType === 'programTotal'
+                        ? reportData.map(item => item.total)
+                        : reportData.map(item => item.total),
                 backgroundColor: 'rgba(255, 159, 64, 0.8)',
                 borderColor: 'rgba(255, 159, 64, 1)',
                 borderWidth: 1,
@@ -174,7 +192,8 @@ const TreasurerReports = () => {
                                                 onChange={(e) => setReportType(e.target.value)}
                                             >
                                                 <option value="monthly">Monthly Report</option>
-                                                <option value="program">Report by Program</option>
+                                                <option value="program">Report by Categories</option>
+                                                <option value="programTotal">Report by Program</option>
                                             </select>
                                         </div>
                                     </div>
@@ -188,6 +207,26 @@ const TreasurerReports = () => {
                                         </button>
                                     </div>
                                 </div>
+
+                                {reportType === 'monthly' && (
+                                    <div className="d-flex align-items-center ms-3">
+                                        <label className="me-2 mb-0">Select Month</label>
+                                        <div className="dashboard-select" style={{ width: 'auto' }}>
+                                            <select
+                                                className="form-control"
+                                                value={selectedMonth}
+                                                onChange={(e) => setSelectedMonth(e.target.value)}
+                                            >
+                                                <option key="all" value="">All Months</option>
+                                                {reportData.map(item => (
+                                                    <option key={item.month} value={item.month}>
+                                                        {item.month}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {loading ? (
                                     <div className="text-center">Loading...</div>

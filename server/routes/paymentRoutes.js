@@ -9,5 +9,6 @@ router.get('/recent-payments', paymentFeeController.getRecentPayments);
 router.get('/total-fees', paymentFeeController.getTotalFees);
 router.get('/reports', paymentFeeController.getPaymentReports);
 router.get('/reports/by-program', paymentFeeController.getPaymentsByProgram);
+router.get('/reports/by-program-total', paymentFeeController.getPaymentsByProgramTotal);
 
 module.exports = router; 

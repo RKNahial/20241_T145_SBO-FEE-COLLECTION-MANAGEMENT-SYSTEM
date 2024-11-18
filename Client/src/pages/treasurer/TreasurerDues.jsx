@@ -17,6 +17,8 @@ const TreasurerDues = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const [token, setToken] = useState(localStorage.getItem('token'));
+
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
     };
@@ -64,16 +66,21 @@ const TreasurerDues = () => {
             const response = await fetch(`http://localhost:8000/api/daily-dues?month=${selectedMonth}&week=${selectedWeek}`, {
                 method: 'GET',
                 headers: {
+                    'Authorization': `Bearer ${token}`,
                     'Cache-Control': 'no-cache',
                     'Pragma': 'no-cache',
                     'If-None-Match': ''
                 }
             });
 
+            if (response.status === 401) {
+                localStorage.removeItem('token');
+                navigate('/login');
+                return;
+            }
+
             if (!response.ok) throw new Error('Failed to fetch dues');
             const data = await response.json();
-
-            // Force update of officers state
             setOfficers([...data]);
             setError(null);
         } catch (err) {
@@ -92,10 +99,17 @@ const TreasurerDues = () => {
                 const response = await fetch(`http://localhost:8000/api/daily-dues?month=${selectedMonth}&week=${selectedWeek}`, {
                     method: 'GET',
                     headers: {
+                        'Authorization': `Bearer ${token}`,
                         'Cache-Control': 'no-cache',
                         'Pragma': 'no-cache'
                     }
                 });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    navigate('/login');
+                    return;
+                }
 
                 if (!response.ok) throw new Error('Failed to fetch dues');
                 const data = await response.json();
@@ -116,12 +130,16 @@ const TreasurerDues = () => {
             }
         };
 
-        fetchDues();
+        if (token) {
+            fetchDues();
+        } else {
+            navigate('/login');
+        }
 
         return () => {
             isMounted = false;
         };
-    }, [selectedMonth, selectedWeek, location.state?.timestamp]);
+    }, [selectedMonth, selectedWeek, location.state?.timestamp, token, navigate]);
 
     // Add this effect to handle refresh from location state
     useEffect(() => {
@@ -142,6 +160,7 @@ const TreasurerDues = () => {
             const response = await fetch(`http://localhost:8000/api/daily-dues/${officerId}/toggle-status`, {
                 method: 'PUT',
                 headers: {
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
@@ -153,13 +172,19 @@ const TreasurerDues = () => {
                 })
             });
 
+            if (response.status === 401) {
+                localStorage.removeItem('token');
+                navigate('/login');
+                return;
+            }
+
             if (!response.ok) throw new Error('Failed to update status');
 
             // Refresh the data after successful update
             refreshData();
         } catch (error) {
             console.error('Error toggling status:', error);
-            // Handle error (show notification, etc.)
+            setError('Failed to update status');
         }
     };
 

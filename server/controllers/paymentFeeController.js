@@ -247,38 +247,46 @@ exports.getPaymentsByCategory = async (req, res) => {
 
 exports.getPaymentReports = async (req, res) => {
     try {
-        const now = new Date();
-        const oneWeekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
-        const oneMonthAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
-        const sixMonthsAgo = new Date(now - 180 * 24 * 60 * 60 * 1000);
-        const oneYearAgo = new Date(now - 365 * 24 * 60 * 60 * 1000);
-
-        const periods = [
-            { label: '1 Week', startDate: oneWeekAgo },
-            { label: '1 Month', startDate: oneMonthAgo },
-            { label: '6 Months', startDate: sixMonthsAgo },
-            { label: '1 Year', startDate: oneYearAgo }
+        const currentYear = new Date().getFullYear();
+        const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
         ];
 
-        const reports = await Promise.all(periods.map(async period => {
-            const total = await PaymentFee.aggregate([
-                {
-                    $match: {
-                        updatedAt: { $gte: period.startDate },
-                        status: { $in: ['Partially Paid', 'Fully Paid'] }
+        const reports = await Promise.all(months.map(async (month, monthIndex) => {
+            // Get all weeks in the month
+            const weeksInMonth = await Promise.all([1, 2, 3, 4].map(async (week) => {
+                // Calculate start and end dates for each week
+                const startDate = new Date(currentYear, monthIndex, (week - 1) * 7 + 1);
+                const endDate = new Date(currentYear, monthIndex, week * 7);
+
+                const total = await PaymentFee.aggregate([
+                    {
+                        $match: {
+                            updatedAt: { 
+                                $gte: startDate, 
+                                $lte: endDate 
+                            },
+                            status: { $in: ['Partially Paid', 'Fully Paid'] }
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            total: { $sum: '$amountPaid' }
+                        }
                     }
-                },
-                {
-                    $group: {
-                        _id: null,
-                        total: { $sum: '$amountPaid' }
-                    }
-                }
-            ]);
+                ]);
+
+                return {
+                    week: `Week ${week}`,
+                    total: total.length > 0 ? total[0].total : 0
+                };
+            }));
 
             return {
-                period: period.label,
-                total: total.length > 0 ? total[0].total : 0
+                month,
+                weeks: weeksInMonth
             };
         }));
 
@@ -364,6 +372,53 @@ exports.getPaymentsByProgram = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error generating category payment reports',
+            error: error.message
+        });
+    }
+};
+
+exports.getPaymentsByProgramTotal = async (req, res) => {
+    try {
+        const programTotals = await PaymentFee.aggregate([
+            {
+                $lookup: {
+                    from: 'students',
+                    localField: 'studentId',
+                    foreignField: '_id',
+                    as: 'student'
+                }
+            },
+            {
+                $unwind: '$student'
+            },
+            {
+                $match: {
+                    status: { $in: ['Partially Paid', 'Fully Paid'] }
+                }
+            },
+            {
+                $group: {
+                    _id: '$student.program',
+                    total: { $sum: '$amountPaid' }
+                }
+            },
+            {
+                $project: {
+                    program: '$_id',
+                    total: 1,
+                    _id: 0
+                }
+            }
+        ]);
+
+        res.json({
+            success: true,
+            data: programTotals
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error generating program payment reports',
             error: error.message
         });
     }
