@@ -51,8 +51,11 @@ const TreasurerDues = () => {
                     backgroundColor: status === 'Paid' ? '#FF8C00' : '#FFB84D',
                     color: '#EAEAEA',
                     border: 'none',
-                    padding: '0.25rem 0.5rem',
-                    borderRadius: '0.25rem'
+                    padding: '0.25rem 0.75rem',
+                    borderRadius: '0.60rem',
+                    fontSize: '0.75rem',
+                    fontWeight: 500,
+                    display: 'inline-block'
                 }}
             >
                 {status}
@@ -219,8 +222,16 @@ const TreasurerDues = () => {
                                 <div className="d-flex justify-content-start mb-3">
                                     <div className="d-flex align-items-center me-3">
                                         <label className="me-2 mb-0">Select Month</label>
-                                        <div style={{ width: 'auto' }}>
-                                            <select className="form-control" onChange={handleMonthChange} value={selectedMonth}>
+                                        <div className='dashboard-select' style={{ width: 'auto' }}>
+                                            <select
+                                                className="form-control"
+                                                onChange={handleMonthChange}
+                                                value={selectedMonth}
+                                                style={{
+                                                    width: '150px', // Adjust width as needed
+                                                    paddingRight: '1.5rem', // Add padding for arrow
+                                                }}
+                                            >
                                                 <option value="January">January</option>
                                                 <option value="February">February</option>
                                                 <option value="March">March</option>
@@ -236,10 +247,18 @@ const TreasurerDues = () => {
                                             </select>
                                         </div>
                                     </div>
-                                    <div className="d-flex align-items-center">
+                                    <div className="d-flex align-items-center dashboard-select">
                                         <label className="me-2 mb-0">Select Week</label>
                                         <div style={{ width: 'auto' }}>
-                                            <select className="form-control" onChange={handleWeekChange} value={selectedWeek}>
+                                            <select
+                                                className="form-control"
+                                                onChange={handleWeekChange}
+                                                value={selectedWeek}
+                                                style={{
+                                                    width: '100px', // Adjust width as needed
+                                                    paddingRight: '1.5rem', // Add padding for arrow
+                                                }}
+                                            >
                                                 <option value="1">Week 1</option>
                                                 <option value="2">Week 2</option>
                                                 <option value="3">Week 3</option>
