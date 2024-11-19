@@ -39,6 +39,19 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent,
         }
     }, [isOpen, initialPaymentCategory]); 
 
+    // Update the status change handler
+    const handleStatusChange = (e) => {
+        const newStatus = e.target.value;
+        setStatus(newStatus);
+        
+        // If status is "Fully Paid", set amount to total price
+        if (newStatus === 'Fully Paid') {
+            setAmountPaid(totalPrice.toString());
+        } else if (newStatus === 'Not Paid' || newStatus === 'Refunded') {
+            setAmountPaid('');
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setShowConfirmation(true);
@@ -101,7 +114,7 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent,
                         <label className="mb-2">Status:</label>
                         <select 
                             value={status} 
-                            onChange={(e) => setStatus(e.target.value)} 
+                            onChange={handleStatusChange}
                             className="form-select"
                             style={modalStyles.select}
                         >
