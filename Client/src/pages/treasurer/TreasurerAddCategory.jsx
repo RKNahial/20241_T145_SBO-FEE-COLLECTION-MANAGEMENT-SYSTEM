@@ -1,6 +1,7 @@
 import { Helmet } from 'react-helmet';
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import { Modal, Button } from 'react-bootstrap';
 import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
 import axios from 'axios';
@@ -11,6 +12,8 @@ const TreasurerAddCategory = () => {
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState("");
     const [categoryId, setCategoryId] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [pendingFormData, setPendingFormData] = useState(null);
 
     const [formData, setFormData] = useState({
         categoryId: '',
@@ -18,24 +21,31 @@ const TreasurerAddCategory = () => {
         totalPrice: ''
     });
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
+        setPendingFormData({
+            categoryId: formData.categoryId,
+            name: formData.name,
+            totalPrice: Number(formData.totalPrice)
+        });
+        setShowModal(true);
+    };
+
+    const confirmAddCategory = async () => {
         try {
-            const response = await axios.post('http://localhost:8000/api/payment-categories', {
-                categoryId: formData.categoryId,
-                name: formData.name,
-                totalPrice: Number(formData.totalPrice)
-            });
+            const response = await axios.post('http://localhost:8000/api/payment-categories', pendingFormData);
             setSuccessMessage('Category added successfully!');
             setCategoryId(response.data.category._id);
+            setShowModal(false);
             setTimeout(() => {
                 navigate('/treasurer/manage-fee/payment-category');
             }, 2000);
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to add category');
+            setShowModal(false);
         }
     };
-
+    
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -126,6 +136,41 @@ const TreasurerAddCategory = () => {
                     </div>
                 </div>
             </div>
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal.Header closeButton>
+                <Modal.Title>
+                    Add Payment Category
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <p className="mb-1">
+                    Are you sure you want to add this payment category?
+                </p>
+                {pendingFormData && (
+                    <div className="mt-3">
+                        <p className="mb-1"><strong>Category ID:</strong> {pendingFormData.categoryId}</p>
+                        <p className="mb-1"><strong>Name:</strong> {pendingFormData.name}</p>
+                        <p className="mb-1"><strong>Total Price:</strong> ₱{pendingFormData.totalPrice}</p>
+                    </div>
+                )}
+            </Modal.Body>
+            <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button 
+                    variant="btn btn-confirm" 
+                    onClick={confirmAddCategory}
+                    style={{ flex: 'none' }}
+                >
+                    Confirm
+                </Button>
+                <Button 
+                    variant="btn btn-cancel" 
+                    onClick={() => setShowModal(false)}
+                    style={{ marginRight: '0.5rem', flex: 'none' }}
+                >
+                    Cancel
+                </Button>
+            </Modal.Footer>
+        </Modal>
         </div>
     );
 };

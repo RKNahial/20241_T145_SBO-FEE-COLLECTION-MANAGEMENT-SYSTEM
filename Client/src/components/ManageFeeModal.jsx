@@ -1,5 +1,5 @@
-// src/components/ManageFeeModal.jsx
 import React, { useState, useEffect } from 'react';
+import { Modal, Button } from 'react-bootstrap';
 import axios from 'axios';
 
 const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent }) => {
@@ -9,9 +9,9 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
     const [paymentCategory, setPaymentCategory] = useState('');
     const [date, setDate] = useState('');
     const [time, setTime] = useState('');
-
     const [hoverSave, setHoverSave] = useState(false);
     const [hoverCancel, setHoverCancel] = useState(false);
+    const [showConfirmation, setShowConfirmation] = useState(false);
 
     useEffect(() => {
         const fetchPaymentCategories = async () => {
@@ -35,18 +35,15 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
         }
     }, [isOpen]);
 
-    if (!isOpen) return null;
-
-    const handleClose = (e) => {
-        if (e.target.id === 'modal') {
-            onClose();
-        }
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setShowConfirmation(true); // Show confirmation before proceeding
+    };
+    
+    // Add this new function to handle the actual submission
+    const confirmUpdate = async () => {
         const selectedCategory = paymentCategories.find(cat => cat.name === paymentCategory);
-
+    
         try {
             const response = await axios.put(`http://localhost:8000/api/payment-fee/update/${selectedStudent._id}`, {
                 studentId: selectedStudent._id,
@@ -56,7 +53,7 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
                 paymentDate: `${date}T${time}`,
                 totalPrice: selectedCategory?.totalPrice || 0
             });
-
+    
             if (response.data.success) {
                 onSave({
                     status,
@@ -65,6 +62,7 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
                     date,
                     totalPrice: selectedCategory?.totalPrice || 0
                 });
+                setShowConfirmation(false);
                 onClose();
             } else {
                 throw new Error(response.data.message || 'Failed to update payment');
@@ -74,52 +72,59 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
             alert(error.response?.data?.message || 'Failed to update payment');
         }
     };
-
-    const resetForm = () => {
-        setAmountPaid('');
-        setStatus('Not Paid');
-        setPaymentCategory('');
-        setDate('');
-        setTime('');
-    };
-
     const totalPrice = paymentCategories.find(cat => cat.name === paymentCategory)?.totalPrice || 0;
 
     return (
-        <div id="modal" onClick={handleClose} style={modalStyles.overlay}>
-            <div style={modalStyles.modal}>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
+        <>
+        <Modal 
+            show={isOpen} 
+            onHide={onClose}
+            centered
+            backdrop="static"
+            keyboard={false}
+        >
+            <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
+                <Modal.Title style={{ display: 'flex', alignItems: 'center' }}>
                     <i className="fa-solid fa-pen me-2"></i>
-                    <h2 style={{ margin: 0 }}>Update Payment</h2>
-                </div>
+                    Update Payment
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body style={{ padding: '1.25rem' }}>
                 <form onSubmit={handleSubmit}>
-                    <div style={{ marginBottom: '0.60rem' }}>
+                    <div className="mb-3">
                         <span style={{ fontWeight: 'bold' }}>Student:</span> {studentName}
                     </div>
-                    <div>
-                        <label>Status:</label>
-                        <select value={status} onChange={(e) => setStatus(e.target.value)} style={modalStyles.select}>
+                    <div className="mb-3">
+                        <label className="mb-2">Status:</label>
+                        <select 
+                            value={status} 
+                            onChange={(e) => setStatus(e.target.value)} 
+                            className="form-select"
+                            style={modalStyles.select}
+                        >
                             <option value="Not Paid">Not Paid</option>
                             <option value="Partially Paid">Partially Paid</option>
                             <option value="Fully Paid">Fully Paid</option>
                             <option value="Refunded">Refunded</option>
                         </select>
                     </div>
-                    <div>
-                        <label>Date:</label>
+                    <div className="mb-3">
+                        <label className="mb-2">Date:</label>
                         <input
                             type="date"
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
+                            className="form-control"
                             style={modalStyles.input}
                         />
                     </div>
-                    <div style={modalStyles.row}>
-                        <div style={modalStyles.paymentCategoryContainer}>
-                            <label>Payment Category:</label>
+                    <div className="d-flex justify-content-between align-items-start mb-3">
+                        <div style={{ flex: '1', marginRight: '1rem' }}>
+                            <label className="mb-2">Payment Category:</label>
                             <select
                                 value={paymentCategory}
                                 onChange={(e) => setPaymentCategory(e.target.value)}
+                                className="form-select"
                                 style={modalStyles.select}
                             >
                                 {paymentCategories.map(category => (
@@ -129,78 +134,118 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
                                 ))}
                             </select>
                         </div>
-                        <div style={modalStyles.totalPriceContainer}>
-                            <div style={modalStyles.totalPriceLabel}>
-                                Total Price:
-                            </div>
+                        <div style={{ minWidth: '120px' }}>
+                            <label className="mb-2">Total Price:</label>
                             <div style={modalStyles.nonEditable}>
                                 ₱{totalPrice.toFixed(2)}
                             </div>
                         </div>
                     </div>
-                    <div style={modalStyles.amountPaidContainer}>
-                        <div style={modalStyles.amountPaidInput}>
-                            <label>Amount Paid:</label>
-                            <input
-                                type="number"
-                                value={amountPaid}
-                                onChange={(e) => setAmountPaid(e.target.value)}
-                                required={status !== 'Not Paid'}
-                                readOnly={status === 'Not Paid' || status === 'Refunded'}
-                                style={{
-                                    ...modalStyles.input,
-                                    backgroundColor: status === 'Not Paid' || status === 'Refunded' ? '#cccccc' : 'white',
-                                    color: status === 'Not Paid' || status === 'Refunded' ? '#666666' : 'black',
-                                }}
-                            />
-                        </div>
-                    </div>
-                    <div style={modalStyles.buttonContainerRight}>
-                        <button
-                            type="submit"
-                            style={{ ...modalStyles.buttonStyles, backgroundColor: hoverSave ? '#E67E22' : '#FF8C00', marginLeft: '10px' }}
-                            onMouseEnter={() => setHoverSave(true)}
-                            onMouseLeave={() => setHoverSave(false)}
-                        >
-                            Save
-                        </button>
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            style={{ ...modalStyles.buttonStyles, backgroundColor: hoverCancel ? '#cc0000' : 'red', marginLeft: '10px' }}
-                            onMouseEnter={() => setHoverCancel(true)}
-                            onMouseLeave={() => setHoverCancel(false)}
-                        >
-                            Cancel
-                        </button>
+                    <div className="mb-3">
+                        <label className="mb-2">Amount Paid:</label>
+                        <input
+                            type="number"
+                            value={amountPaid}
+                            onChange={(e) => setAmountPaid(e.target.value)}
+                            required={status !== 'Not Paid'}
+                            readOnly={status === 'Not Paid' || status === 'Refunded'}
+                            className="form-control"
+                            style={{
+                                ...modalStyles.input,
+                                backgroundColor: status === 'Not Paid' || status === 'Refunded' ? '#cccccc' : 'white',
+                                color: status === 'Not Paid' || status === 'Refunded' ? '#666666' : 'black',
+                            }}
+                        />
                     </div>
                 </form>
-            </div>
-        </div>
+            </Modal.Body>
+            <Modal.Footer style={{ border: 'none', padding: '0 1.25rem 1.25rem 1.25rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                    <button
+                        type="button"
+                        onClick={handleSubmit}
+                        style={{ 
+                            ...modalStyles.buttonStyles, 
+                            backgroundColor: hoverSave ? '#E67E22' : '#FF8C00'
+                        }}
+                        onMouseEnter={() => setHoverSave(true)}
+                        onMouseLeave={() => setHoverSave(false)}
+                    >
+                        Save
+                    </button>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        style={{ 
+                            ...modalStyles.buttonStyles, 
+                            backgroundColor: hoverCancel ? '#cc0000' : 'red'
+                        }}
+                        onMouseEnter={() => setHoverCancel(true)}
+                        onMouseLeave={() => setHoverCancel(false)}
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </Modal.Footer>
+        </Modal>
+
+         {/* Confirmation */}
+         <Modal
+         show={showConfirmation}
+         onHide={() => setShowConfirmation(false)}
+         centered
+         style={{ zIndex: 1070 }}
+     >
+         <Modal.Header closeButton>
+             <Modal.Title>
+                 <i className="fas fa-exclamation-circle me-2"></i>
+                 Confirm Update
+             </Modal.Title>
+         </Modal.Header>
+         <Modal.Body>
+             <p>Are you sure you want to save these changes?</p>
+             <div className="mb-2">
+                 <strong>Student:</strong> {studentName}
+             </div>
+             <div className="mb-2">
+                 <strong>New Status:</strong> {status}
+             </div>
+             <div className="mb-2">
+                 <strong>Amount Paid:</strong> ₱{amountPaid || '0.00'}
+             </div>
+         </Modal.Body>
+         <Modal.Footer>
+             <button
+                 type="button"
+                 onClick={confirmUpdate}
+                 style={{ 
+                     ...modalStyles.buttonStyles, 
+                     backgroundColor: hoverSave ? '#E67E22' : '#FF8C00'
+                 }}
+                 onMouseEnter={() => setHoverSave(true)}
+                 onMouseLeave={() => setHoverSave(false)}
+             >
+                 Confirm
+             </button>
+             <button
+                 type="button"
+                 onClick={() => setShowConfirmation(false)}
+                 style={{ 
+                     ...modalStyles.buttonStyles, 
+                     backgroundColor: hoverCancel ? '#cc0000' : 'red'
+                 }}
+                 onMouseEnter={() => setHoverCancel(true)}
+                 onMouseLeave={() => setHoverCancel(false)}
+             >
+                 Cancel
+             </button>
+         </Modal.Footer>
+     </Modal>
+      </>
     );
 };
 
 const modalStyles = {
-    overlay: {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1050,
-    },
-    modal: {
-        background: 'white',
-        padding: '1.25rem',
-        borderRadius: '1rem',
-        width: '25rem',
-        boxShadow: '0 0.125rem 0.625rem rgba(0, 0, 0, 0.1)',
-        zIndex: 1060,
-    },
     nonEditable: {
         background: '#f0f0f0',
         padding: '0.5rem',
@@ -211,47 +256,16 @@ const modalStyles = {
     input: {
         width: '100%',
         padding: '0.5rem',
-        marginBottom: '0.625rem',
+        marginBottom: '0',
         borderRadius: '0.25rem',
         border: '1px solid #ccc',
     },
     select: {
         width: '100%',
         padding: '0.5rem',
-        marginBottom: '0.625rem',
+        marginBottom: '0',
         borderRadius: '0.25rem',
         border: '1px solid #ccc',
-    },
-    row: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '0.625rem',
-    },
-    totalPriceLabel: {
-        marginTop: '0.60rem',
-        marginBottom: '0.30rem',
-    },
-    totalPriceContainer: {
-        display: 'flex',
-        flexDirection: 'column',
-        marginBottom: '1rem',
-    },
-    amountPaidContainer: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '0.625rem',
-    },
-    amountPaidInput: {
-        flexGrow: 1,
-        marginRight: '0.625rem',
-        width: '3rem',
-    },
-    buttonContainerRight: {
-        display: 'flex',
-        justifyContent: 'flex-end',
-        marginTop: '1rem',
     },
     buttonStyles: {
         borderRadius: '0.35rem',

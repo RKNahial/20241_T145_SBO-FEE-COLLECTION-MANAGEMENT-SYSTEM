@@ -1,6 +1,7 @@
 import { Helmet } from 'react-helmet';
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from 'react-router-dom';
+import { Modal, Button } from 'react-bootstrap';
 import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
 import axios from 'axios';
@@ -12,6 +13,8 @@ const TreasurerEditCategory = () => {
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState("");
     const [loading, setLoading] = useState(true);
+    const [showModal, setShowModal] = useState(false);
+const [pendingFormData, setPendingFormData] = useState(null);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -38,22 +41,32 @@ const TreasurerEditCategory = () => {
         fetchCategory();
     }, [id]);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
+        setPendingFormData({
+            name: formData.name,
+            totalPrice: Number(formData.totalPrice),
+            categoryId: formData.categoryId
+        });
+        setShowModal(true);
+    };
+    
+    const confirmUpdate = async () => {
         try {
             await axios.put(`http://localhost:8000/api/payment-categories/${id}`, {
-                name: formData.name,
-                totalPrice: Number(formData.totalPrice)
+                name: pendingFormData.name,
+                totalPrice: Number(pendingFormData.totalPrice)
             });
             setSuccessMessage('Category updated successfully!');
+            setShowModal(false);
             setTimeout(() => {
                 navigate('/treasurer/manage-fee/payment-category');
             }, 2000);
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to update category');
+            setShowModal(false);
         }
     };
-
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -137,6 +150,42 @@ const TreasurerEditCategory = () => {
                     </div>
                 </div>
             </div>
+            {/* CONFIRMATION MODAL */}
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal.Header closeButton>
+                <Modal.Title>
+                    Update Payment Category
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <p className="mb-1">
+                    Are you sure you want to update this payment category?
+                </p>
+                {pendingFormData && (
+                    <div className="mt-3">
+                        <p className="mb-1"><strong>Category ID:</strong> {pendingFormData.categoryId}</p>
+                        <p className="mb-1"><strong>Name:</strong> {pendingFormData.name}</p>
+                        <p className="mb-1"><strong>Total Price:</strong> ₱{pendingFormData.totalPrice}</p>
+                    </div>
+                )}
+            </Modal.Body>
+            <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button 
+                    variant="btn btn-confirm" 
+                    onClick={confirmUpdate}
+                    style={{ flex: 'none' }}
+                >
+                    Confirm
+                </Button>
+                <Button 
+                    variant="btn btn-cancel" 
+                    onClick={() => setShowModal(false)}
+                    style={{ marginRight: '0.5rem', flex: 'none' }}
+                >
+                    Cancel
+                </Button>
+            </Modal.Footer>
+        </Modal>
         </div>
     );
 };

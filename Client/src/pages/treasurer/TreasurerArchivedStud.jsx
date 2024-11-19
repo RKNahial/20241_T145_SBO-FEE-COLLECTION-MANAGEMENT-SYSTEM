@@ -86,21 +86,18 @@ const TreasurerArchivedStud = () => {
     }, []);
     
     // Handle archive and unarchive actions
-    const handleArchiveAction = (studentId, studentName, isArchived) => {
+    const handleArchiveAction = (studentId, studentName) => {
         setModalAction({
-            type: isArchived ? 'unarchive' : 'archive',
+            type: 'unarchive',  // Always unarchive
             student: { id: studentId, name: studentName }
         });
         setShowModal(true);
     };
-    
+        
     const confirmAction = async () => {
         try {
             const token = localStorage.getItem('token');
-            const isArchiving = modalAction.type === 'archive';
-            const endpoint = isArchiving ? 'archive' : 'unarchive';
-            
-            const response = await fetch(`http://localhost:8000/api/${endpoint}/${modalAction.student.id}`, {
+            const response = await fetch(`http://localhost:8000/api/unarchive/${modalAction.student.id}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -109,24 +106,15 @@ const TreasurerArchivedStud = () => {
             });
             
             if (response.ok) {
-                setSuccessMessage(`${modalAction.student.name} has been successfully ${modalAction.type}d!`);
-                
-                // If unarchiving, remove the student from the list
-                if (!isArchiving) {
-                    setStudents(prev => prev.filter(s => s._id !== modalAction.student.id));
-                } else {
-                    setStudents(prev => prev.map(s => 
-                        s._id === modalAction.student.id 
-                            ? { ...s, isArchived: isArchiving } 
-                            : s
-                    ));
-                }
+                setSuccessMessage(`${modalAction.student.name} has been successfully unarchived!`);
+                // Remove the unarchived student from the list
+                setStudents(prev => prev.filter(s => s._id !== modalAction.student.id));
             } else {
                 const errorData = await response.json();
                 setError(errorData.error);
             }
         } catch (error) {
-            setError(`Failed to ${modalAction.type} student`);
+            setError('Failed to unarchive student');
         } finally {
             setShowModal(false);
             setModalAction({ type: '', student: null });
@@ -155,50 +143,6 @@ const TreasurerArchivedStud = () => {
             setSuccessMessage('Student updated successfully!');
         } catch (error) {
             setError('Failed to update student');
-        }
-    };
-
-    const handleImportFromExcel = async (event) => {
-        const file = event.target.files[0];
-        if (!file) {
-            setError('Please select a file to import.');
-            return;
-        }
-
-        const fileType = file.name.split('.').pop().toLowerCase();
-        if (!['xlsx', 'xls'].includes(fileType)) {
-            setError('Please upload only Excel files (.xlsx or .xls)');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('excel-file', file);
-
-        try {
-            setLoading(true);
-            const response = await axios.post('http://localhost:8000/api/import-excel', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                }
-            });
-
-            if (response.data) {
-                setSuccessMessage(response.data.message);
-                if (response.data.errors) {
-                    console.warn('Import warnings:', response.data.errors);
-                }
-                await fetchStudents(); // Refresh the list after import
-            }
-        } catch (error) {
-            console.error('Import error:', error);
-            setError(error.response?.data?.error || 'Error importing from Excel');
-        } finally {
-            setLoading(false);
-            event.target.value = '';
-            setTimeout(() => {
-                setSuccessMessage("");
-                setError(null);
-            }, 2500);
         }
     };
 
@@ -321,10 +265,10 @@ const TreasurerArchivedStud = () => {
                                                             <i className="fas fa-sticky-note"></i>
                                                         </button>
                                                         <button
-                                                            className={`btn btn-archive btn-sm ${student.isArchived ? 'btn-open' : ''}`}
-                                                            onClick={() => handleArchiveAction(student._id, student.name, student.isArchived)}
+                                                            className="btn btn-archive btn-open btn-sm"
+                                                            onClick={() => handleArchiveAction(student._id, student.name)}
                                                         >
-                                                            <i className={`fas fa-${student.isArchived ? 'box-open' : 'archive'}`}></i>
+                                                            <i className="fas fa-box-open"></i>
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -381,18 +325,13 @@ const TreasurerArchivedStud = () => {
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>
-                        {modalAction.type === 'archive' ? 'Archive' : 'Unarchive'} Student
+                        Unarchive Student
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <p className="mb-1">
-                        Are you sure you want to {modalAction.type} <strong>{modalAction.student?.name}</strong>?
+                        Are you sure you want to unarchive <strong>{modalAction.student?.name}</strong>?
                     </p>
-                    {modalAction.type === 'archive' && (
-                        <small style={{ color: '#6c757d', fontSize: '0.90rem' }}>
-                            You can still unarchive the student if you change your mind.
-                        </small>
-                    )}
                 </Modal.Body>
                 <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <Button 

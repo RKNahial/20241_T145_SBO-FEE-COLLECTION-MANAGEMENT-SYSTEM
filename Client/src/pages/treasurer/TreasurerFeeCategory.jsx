@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
+import { Modal, Button } from 'react-bootstrap';
 import TreasurerSidebar from './TreasurerSidebar';
 import TreasurerNavbar from './TreasurerNavbar';
 import axios from 'axios';
@@ -19,6 +20,8 @@ const TreasurerFeeCategory = () => {
     const [successMessage, setSuccessMessage] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
+    const [showModal, setShowModal] = useState(false);
+    const [modalAction, setModalAction] = useState({ type: '', category: null });
 
     // CATEGORY STATUS TAG
     const CategoryStatusTag = ({ status }) => {
@@ -80,20 +83,32 @@ const TreasurerFeeCategory = () => {
     const currentItems = filteredCategories.slice(indexOfFirstItem, indexOfLastItem);
     const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
 
-    const handleArchiveToggle = async (id) => {
+    const handleArchiveAction = (category) => {
+        setModalAction({
+            type: category.isArchived ? 'unarchive' : 'archive',
+            category: category
+        });
+        setShowModal(true);
+    };
+    
+    const confirmArchiveAction = async () => {
         try {
-            const response = await axios.put(`http://localhost:8000/api/payment-categories/${id}/toggle-archive`);
+            const response = await axios.put(`http://localhost:8000/api/payment-categories/${modalAction.category._id}/toggle-archive`);
             if (response.data && response.data.category) {
                 setCategories(prev => prev.map(c =>
-                    c._id === id ? response.data.category : c
+                    c._id === modalAction.category._id ? response.data.category : c
                 ));
-                setSuccessMessage('Category status updated successfully!');
+                setSuccessMessage(`Payment category successfully ${modalAction.type}d!`);
                 setTimeout(() => setSuccessMessage(''), 3000);
             }
         } catch (err) {
-            setError('Failed to update category status');
+            setError(`Failed to ${modalAction.type} payment category`);
+        } finally {
+            setShowModal(false);
+            setModalAction({ type: '', category: null });
         }
     };
+    
 
     return (
         <div className="sb-nav-fixed">
@@ -205,8 +220,8 @@ const TreasurerFeeCategory = () => {
                                                                     <i className="fas fa-edit"></i>
                                                                 </Link>
                                                                 <button
-                                                                    onClick={() => handleArchiveToggle(category._id)}
-                                                                    className="btn btn-archive btn-sm "
+                                                                    onClick={() => handleArchiveAction(category)}
+                                                                    className="btn btn-archive btn-sm"
                                                                 >
                                                                     <i className={`fas fa-${!category.isArchived ? 'box-archive' : 'box-open'}`}></i>
                                                                 </button>
@@ -262,6 +277,44 @@ const TreasurerFeeCategory = () => {
                     </div>
                 </div>
             </div>
+            {/* COFIRMATION MODAL */}
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>
+                        {modalAction.type === 'archive' ? 'Archive' : 'Unarchive'} Payment Category
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p className="mb-1">
+                        Are you sure you want to {modalAction.type} <strong>{modalAction.category?.name}</strong>?
+                    </p>
+                    {modalAction.type === 'archive' ? (
+                        <small style={{ color: '#6c757d', fontSize: '0.90rem' }}>
+                            You can still unarchive the payment category if you change your mind.
+                        </small>
+                    ) : (
+                        <small style={{ color: '#6c757d', fontSize: '0.90rem' }}>
+                            This payment category will be active and visible in the system.
+                        </small>
+                    )}
+                </Modal.Body>
+                <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button 
+                        variant="btn btn-confirm" 
+                        onClick={confirmArchiveAction}
+                        style={{ flex: 'none' }}
+                    >
+                        Confirm
+                    </Button>
+                    <Button 
+                        variant="btn btn-cancel" 
+                        onClick={() => setShowModal(false)}
+                        style={{ marginRight: '0.5rem', flex: 'none' }}
+                    >
+                        Cancel
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };
