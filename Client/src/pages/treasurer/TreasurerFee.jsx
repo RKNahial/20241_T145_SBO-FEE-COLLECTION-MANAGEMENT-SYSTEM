@@ -97,45 +97,27 @@ const TreasurerFee = () => {
     const { triggerPaymentUpdate } = usePayment();
 
     const handleSubmit = async (formData) => {
-        const confirmSave = window.confirm("Do you want to save changes?");
-        if (confirmSave) {
-            try {
-                setStudents(prevStudents =>
-                    prevStudents.map(student =>
-                        student._id === selectedStudent._id
-                            ? { ...student, paymentstatus: formData.status }
-                            : student
-                    )
-                );
-
-                // Trigger payment update to refresh dashboards
-                triggerPaymentUpdate();
-
+        try {
+            // Assuming you have an API endpoint to update the payment
+            const response = await axios.put(`http://localhost:8000/api/payment-fee/update/${selectedStudent._id}`, formData);
+    
+            if (response.data.success) {
                 setSuccessMessage("Payment updated successfully!");
                 setTimeout(() => {
                     setSuccessMessage('');
                 }, 2500);
-
+    
+                // Optionally, refresh the student list or payment data
+                triggerPaymentUpdate();
                 setIsModalOpen(false);
-
-                setTimeout(async () => {
-                    const response = await fetch('http://localhost:8000/api/getAll/students');
-                    if (!response.ok) {
-                        throw new Error('Failed to refresh student data');
-                    }
-                    const data = await response.json();
-                    const activeStudents = data.filter(student => !student.isArchived);
-                    setStudents(activeStudents);
-                }, 500);
-
-            } catch (error) {
-                console.error('Error updating payment status:', error);
-                setError('Failed to update payment status');
-                setTimeout(() => setError(null), 2500);
+            } else {
+                setError('Failed to update payment');
             }
+        } catch (error) {
+            console.error('Error updating payment:', error);
+            setError('Failed to update payment');
         }
     };
-
     //  VIEW PAYMENT MODAL
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [viewedStudent, setViewedStudent] = useState(null);
@@ -325,6 +307,7 @@ const TreasurerFee = () => {
                                         {successMessage}
                                     </div>
                                 )}
+
                                 {/* EMAIL SENT SUCCESS  */}
                                 {emailSuccessMessage && (
                                     <div className="alert alert-success" role="alert">

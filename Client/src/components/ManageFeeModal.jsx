@@ -12,6 +12,7 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
     const [hoverSave, setHoverSave] = useState(false);
     const [hoverCancel, setHoverCancel] = useState(false);
     const [showConfirmation, setShowConfirmation] = useState(false);
+    const [error, setError] = useState('');
 
     useEffect(() => {
         const fetchPaymentCategories = async () => {
@@ -37,10 +38,9 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setShowConfirmation(true); // Show confirmation before proceeding
+        setShowConfirmation(true);
     };
     
-    // Add this new function to handle the actual submission
     const confirmUpdate = async () => {
         const selectedCategory = paymentCategories.find(cat => cat.name === paymentCategory);
     
@@ -65,24 +65,24 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
                 setShowConfirmation(false);
                 onClose();
             } else {
-                throw new Error(response.data.message || 'Failed to update payment');
+                setError(response.data.message || 'Failed to update payment');
             }
         } catch (error) {
             console.error('Error updating payment:', error);
-            alert(error.response?.data?.message || 'Failed to update payment');
+            setError(error.response?.data?.message || 'Failed to update payment');
         }
     };
     const totalPrice = paymentCategories.find(cat => cat.name === paymentCategory)?.totalPrice || 0;
 
     return (
         <>
-        <Modal 
-            show={isOpen} 
-            onHide={onClose}
-            centered
-            backdrop="static"
-            keyboard={false}
-        >
+            <Modal 
+                show={isOpen && !showConfirmation} 
+                onHide={onClose}
+                centered
+                backdrop="static"
+                keyboard={false}
+            >
             <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
                 <Modal.Title style={{ display: 'flex', alignItems: 'center' }}>
                     <i className="fa-solid fa-pen me-2"></i>
@@ -191,11 +191,10 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
 
          {/* Confirmation */}
          <Modal
-         show={showConfirmation}
-         onHide={() => setShowConfirmation(false)}
-         centered
-         style={{ zIndex: 1070 }}
-     >
+            show={showConfirmation}
+            onHide={() => setShowConfirmation(false)}
+            style={{ ...modalStyles.modalTop, zIndex: 1070 }}
+        >
          <Modal.Header closeButton>
              <Modal.Title>
                  <i className="fas fa-exclamation-circle me-2"></i>
@@ -246,6 +245,10 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
 };
 
 const modalStyles = {
+    modalTop: {
+        top: '0%', 
+        transform: 'translateY(0)', 
+    },
     nonEditable: {
         background: '#f0f0f0',
         padding: '0.5rem',
