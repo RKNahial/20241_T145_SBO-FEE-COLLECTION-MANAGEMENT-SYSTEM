@@ -263,7 +263,7 @@ const TreasurerFee = () => {
                 );
 
                 if (emailResponse.status === 200) {
-                    setEmailSuccessMessage('Payment details sent successfully!');
+                    setEmailSuccessMessage('Payment details emailed successfully!');
                     setTimeout(() => setEmailSuccessMessage(''), 3000);
                 }
             }
@@ -451,7 +451,7 @@ const TreasurerFee = () => {
                                     <div className="alert alert-danger">{error}</div>
                                 ) : (
                                     <div className="table-responsive mt-3">
-                                        <table className="table table-bordered table-hover">
+                                        <table className="table table-hover">
                                             <thead>
                                                 <tr>
                                                     <th>#</th>
