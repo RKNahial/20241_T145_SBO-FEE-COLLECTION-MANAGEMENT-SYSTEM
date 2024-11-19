@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import axios from 'axios';
 
-const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent }) => {
+const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent, initialPaymentCategory}) => {
     const [paymentCategories, setPaymentCategories] = useState([]);
     const [amountPaid, setAmountPaid] = useState('');
     const [status, setStatus] = useState('Not Paid');
@@ -20,7 +20,10 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
                 const response = await axios.get('http://localhost:8000/api/payment-categories');
                 const activeCategories = response.data.categories.filter(category => !category.isArchived);
                 setPaymentCategories(activeCategories);
-                if (activeCategories.length > 0) {
+                // Set the payment category to the initial value if provided, otherwise use the first category
+                if (initialPaymentCategory) {
+                    setPaymentCategory(initialPaymentCategory);
+                } else if (activeCategories.length > 0) {
                     setPaymentCategory(activeCategories[0].name);
                 }
             } catch (err) {
@@ -34,7 +37,7 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
             setDate(now.toISOString().split('T')[0]);
             setTime(now.toTimeString().split(' ')[0]);
         }
-    }, [isOpen]);
+    }, [isOpen, initialPaymentCategory]); 
 
     const handleSubmit = async (e) => {
         e.preventDefault();

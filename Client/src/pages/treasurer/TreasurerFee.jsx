@@ -55,6 +55,12 @@ const TreasurerFee = () => {
         fetchStudents();
     }, []);
 
+    // GET CATEGORY NAME
+    const getSelectedCategoryName = () => {
+        const category = paymentCategories.find(cat => cat._id === selectedCategory);
+        return category ? category.name : '';
+    };
+
     // PAYMENT TAG
     const PaymentStatusTag = ({ status, onClick }) => {
         let className;
@@ -506,6 +512,7 @@ const TreasurerFee = () => {
                     studentName={selectedStudent.name}
                     selectedStudent={selectedStudent}
                     onSave={handleSubmit}
+                    initialPaymentCategory={getSelectedCategoryName()}
                 />
             )}
 
