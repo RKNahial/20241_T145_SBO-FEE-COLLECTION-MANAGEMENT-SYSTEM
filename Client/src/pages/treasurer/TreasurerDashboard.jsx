@@ -16,7 +16,6 @@ import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
 import { usePayment } from '../../context/PaymentContext';
 import '../../assets/css/calendar.css';
-import LoginCelebration from '../../components/LoginCelebration';
 
 ChartJS.register(
     CategoryScale,

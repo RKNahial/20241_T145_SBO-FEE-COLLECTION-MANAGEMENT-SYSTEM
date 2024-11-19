@@ -14,10 +14,16 @@ const ConsentModal = ({ isOpen, onClose, onAccept, onDecline }) => {
                     If you decline, your session will last for 1 hour.
                 </p>
                 <div className="consent-buttons">
-                    <button className="btn btn-secondary" onClick={onDecline}>
+                    <button 
+                        className="btn consent-btn decline-btn" 
+                        onClick={onDecline}
+                    >
                         1 Hour Session
                     </button>
-                    <button className="btn btn-primary" onClick={onAccept}>
+                    <button 
+                        className="btn consent-btn accept-btn" 
+                        onClick={onAccept}
+                    >
                         Stay Logged In (24 Hours)
                     </button>
                 </div>

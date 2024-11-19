@@ -37,3 +37,61 @@
     gap: 1rem;
     margin-top: 1.5rem;
 }
+
+.consent-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    min-width: 160px;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+
+.consent-btn.btn-primary {
+    background-color: #FF8C00;
+    color: white;
+}
+
+.consent-btn.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.consent-btn:hover {
+    opacity: 0.9;
+    transition: opacity 0.2s ease;
+}
+
+.consent-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    min-width: 160px;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.accept-btn {
+    background-color: #FF8C00;
+    color: white;
+}
+
+.accept-btn:hover {
+    background-color: #E67E22;
+}
+
+.decline-btn {
+    background-color: #6c757d;
+    color: white;
+}
+
+.decline-btn:hover {
+    background-color: #5a6268;
+}
