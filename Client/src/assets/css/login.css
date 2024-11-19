@@ -95,3 +95,31 @@ h2 .btn {
 .login-container .btn:disabled {
   background-color: #FFB74D; 
 }
+
+.form-check-input {
+  width: 1rem;
+  height: 1rem;
+  margin-right: 10px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+}
+
+.form-check-input:checked {
+  background-color: #FF8C00;
+  border-color: #FF8C00;
+}
+
+.form-check-input:focus {
+  box-shadow: none;
+  border-color: #ccc;
+}
+
+.form-check-input:hover {
+  border-color: #FF8C00;
+}
+
+.smaller-gray-text {
+  font-size: 0.875rem;
+  color: #6c757d;
+}

@@ -9,7 +9,7 @@ import GoogleSignInButton from '../pages/googlelogin';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { auth } from '../pages/firebase/firebaseConfig';
 import { useAuth } from '../context/AuthContext';
-import ConsentModal from '../components/ConsentModal';
+// import ConsentModal from '../components/ConsentModal';
 
 
 const Login = () => {
@@ -20,12 +20,10 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const [recaptchaToken, setRecaptchaToken] = useState(null);
     const navigate = useNavigate();
+    const [keepSignedIn, setKeepSignedIn] = useState(false);
 
-    const [showConsentModal, setShowConsentModal] = useState(false);
-    const [pendingGoogleUser, setPendingGoogleUser] = useState(null);
-
-
-
+    // const [showConsentModal, setShowConsentModal] = useState(false);
+    // const [pendingGoogleUser, setPendingGoogleUser] = useState(null);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -34,7 +32,8 @@ const Login = () => {
             const response = await axios.post('http://localhost:8000/api/login', {
                 email,
                 password,
-                recaptchaToken
+                recaptchaToken,
+                // keepSignedIn
             });
 
             if (response.data.token) {
@@ -57,8 +56,6 @@ const Login = () => {
             setLoading(false);
         }
     };
-
-
 
 
     const handleGoogle = async () => {
@@ -126,7 +123,6 @@ const Login = () => {
 
     const handleLogout = async () => {
         try {
-            // Assuming you have the userId and userModel stored in your client
             const response = await axios.post('http://localhost:8000/api/logout', {
                 userId: storedUserId,
                 userModel: storedUserModel
@@ -289,6 +285,22 @@ const Login = () => {
                             </button>
                         </div>
                     </div>
+                    <div className="form-group">
+                   <div className="form-group">
+                        <div className="form-check">
+                            <input
+                                type="checkbox"
+                                className="form-check-input"
+                                id="keepSignedIn"
+                                checked={keepSignedIn}
+                                onChange={(e) => setKeepSignedIn(e.target.checked)}
+                            />
+                            <label className="form-check-label smaller-gray-text" htmlFor="keepSignedIn">
+                                Keep me logged in for 24 hours
+                            </label>
+                        </div>
+                    </div>
+                </div>
 
                     <ReCAPTCHA
                         sitekey="6LcfaG0qAAAAAFTykOtXdpsqkS9ZUeALt2CgFmId"
@@ -308,12 +320,12 @@ const Login = () => {
                     disabled={loading}
                 />
             </div>
-            <ConsentModal
+            {/* <ConsentModal
                 isOpen={showConsentModal}
                 onClose={() => setShowConsentModal(false)}
                 onAccept={handleConsentAccept}
                 onDecline={handleConsentDecline}
-            />
+            /> */}
         </div>
     );
 };
