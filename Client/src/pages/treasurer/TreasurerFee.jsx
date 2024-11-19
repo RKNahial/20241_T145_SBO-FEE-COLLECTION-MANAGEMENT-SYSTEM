@@ -110,32 +110,83 @@ const TreasurerFee = () => {
                 )
             );
     
-            // Trigger payment update to refresh dashboards
-            triggerPaymentUpdate();
-    
-            setSuccessMessage("Payment updated successfully!");
-            setTimeout(() => {
-                setSuccessMessage('');
-            }, 2500);
-    
-            setIsModalOpen(false);
-    
-            setTimeout(async () => {
-                const response = await fetch('http://localhost:8000/api/getAll/students');
-                if (!response.ok) {
-                    throw new Error('Failed to refresh student data');
+            // Update the categoryPayments state immediately
+            setCategoryPayments(prev => ({
+                ...prev,
+                [selectedStudent._id]: {
+                    status: formData.status,
+                    amountPaid: parseFloat(formData.amountPaid),
+                    totalPrice: formData.totalPrice
                 }
-                const data = await response.json();
-                const activeStudents = data.filter(student => !student.isArchived);
-                setStudents(activeStudents);
-            }, 500);
-    
-        } catch (error) {
-            console.error('Error updating payment status:', error);
-            setError('Failed to update payment status');
-            setTimeout(() => setError(null), 2500);
+            }));
+
+             // Trigger payment update to refresh dashboards
+        triggerPaymentUpdate();
+
+        setSuccessMessage("Payment updated successfully!");
+        setTimeout(() => {
+            setSuccessMessage('');
+        }, 2500);
+
+        setIsModalOpen(false);
+
+        // Refresh the data from server
+        try {
+            const token = localStorage.getItem('token'); // Get the token
+            
+            // Fetch updated students with authorization header
+            const studentsResponse = await fetch('http://localhost:8000/api/getAll/students', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!studentsResponse.ok) {
+                throw new Error('Failed to refresh student data');
+            }
+
+            const studentsData = await studentsResponse.json();
+            const activeStudents = studentsData.filter(student => !student.isArchived);
+            setStudents(activeStudents);
+
+            // Fetch updated payment data for the category
+            if (selectedCategory) {
+                const paymentsResponse = await axios.get(
+                    `http://localhost:8000/api/payment-fee/by-category/${selectedCategory}`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    }
+                );
+                
+                if (paymentsResponse.data.success && Array.isArray(paymentsResponse.data.payments)) {
+                    const paymentData = {};
+                    paymentsResponse.data.payments.forEach(payment => {
+                        if (payment.studentId) {
+                            paymentData[payment.studentId._id] = {
+                                status: payment.status || 'Not Paid',
+                                amountPaid: payment.amountPaid || 0,
+                                totalPrice: payment.totalPrice || 0
+                            };
+                        }
+                    });
+                    setCategoryPayments(paymentData);
+                }
+            }
+        } catch (refreshError) {
+            console.error('Error refreshing data:', refreshError);
+            // Don't show error message since the transaction was successful
+            // Just log it for debugging purposes
         }
-    };
+
+    } catch (error) {
+        console.error('Error updating payment status:', error);
+        setError('Failed to update payment status');
+        setTimeout(() => setError(null), 2500);
+    }
+};
 
     //  VIEW PAYMENT MODAL
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
