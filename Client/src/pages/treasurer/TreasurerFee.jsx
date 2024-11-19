@@ -25,16 +25,29 @@ const TreasurerFee = () => {
     useEffect(() => {
         const fetchStudents = async () => {
             try {
-                const response = await fetch('http://localhost:8000/api/getAll/students');
+                const token = localStorage.getItem('token'); 
+                const response = await fetch('http://localhost:8000/api/getAll/students', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`, 
+                        'Content-Type': 'application/json'
+                    }
+                });
+    
                 if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error('Unauthorized access. Please login again.');
+                    }
                     throw new Error('Failed to fetch students');
                 }
+    
                 const data = await response.json();
-                // Filter only active students
                 const activeStudents = data.filter(student => !student.isArchived);
                 setStudents(activeStudents);
             } catch (err) {
                 setError(err.message);
+                if (err.message.includes('Unauthorized')) {
+                    window.location.href = '/login';
+                }
             } finally {
                 setLoading(false);
             }
@@ -82,42 +95,39 @@ const TreasurerFee = () => {
     const { triggerPaymentUpdate } = usePayment();
 
     const handleSubmit = async (formData) => {
-        const confirmSave = window.confirm("Do you want to save changes?");
-        if (confirmSave) {
-            try {
-                setStudents(prevStudents =>
-                    prevStudents.map(student =>
-                        student._id === selectedStudent._id
-                            ? { ...student, paymentstatus: formData.status }
-                            : student
-                    )
-                );
-
-                // Trigger payment update to refresh dashboards
-                triggerPaymentUpdate();
-
-                setSuccessMessage("Payment updated successfully!");
-                setTimeout(() => {
-                    setSuccessMessage('');
-                }, 2500);
-
-                setIsModalOpen(false);
-
-                setTimeout(async () => {
-                    const response = await fetch('http://localhost:8000/api/getAll/students');
-                    if (!response.ok) {
-                        throw new Error('Failed to refresh student data');
-                    }
-                    const data = await response.json();
-                    const activeStudents = data.filter(student => !student.isArchived);
-                    setStudents(activeStudents);
-                }, 500);
-
-            } catch (error) {
-                console.error('Error updating payment status:', error);
-                setError('Failed to update payment status');
-                setTimeout(() => setError(null), 2500);
-            }
+        try {
+            setStudents(prevStudents =>
+                prevStudents.map(student =>
+                    student._id === selectedStudent._id
+                        ? { ...student, paymentstatus: formData.status }
+                        : student
+                )
+            );
+    
+            // Trigger payment update to refresh dashboards
+            triggerPaymentUpdate();
+    
+            setSuccessMessage("Payment updated successfully!");
+            setTimeout(() => {
+                setSuccessMessage('');
+            }, 2500);
+    
+            setIsModalOpen(false);
+    
+            setTimeout(async () => {
+                const response = await fetch('http://localhost:8000/api/getAll/students');
+                if (!response.ok) {
+                    throw new Error('Failed to refresh student data');
+                }
+                const data = await response.json();
+                const activeStudents = data.filter(student => !student.isArchived);
+                setStudents(activeStudents);
+            }, 500);
+    
+        } catch (error) {
+            console.error('Error updating payment status:', error);
+            setError('Failed to update payment status');
+            setTimeout(() => setError(null), 2500);
         }
     };
 

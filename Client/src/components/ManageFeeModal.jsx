@@ -40,7 +40,7 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
         e.preventDefault();
         setShowConfirmation(true);
     };
-    
+
     const confirmUpdate = async () => {
         const selectedCategory = paymentCategories.find(cat => cat.name === paymentCategory);
     
@@ -206,6 +206,9 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
              <div className="mb-2">
                  <strong>Student:</strong> {studentName}
              </div>
+             <div className="mb-2">
+                <strong>Payment Category:</strong> {paymentCategory}
+            </div>
              <div className="mb-2">
                  <strong>New Status:</strong> {status}
              </div>
