@@ -9,8 +9,6 @@ import GoogleSignInButton from '../pages/googlelogin';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { auth } from '../pages/firebase/firebaseConfig';
 import { useAuth } from '../context/AuthContext';
-// import ConsentModal from '../components/ConsentModal';
-
 
 const Login = () => {
     const { setUser } = useAuth();
@@ -22,9 +20,6 @@ const Login = () => {
     const navigate = useNavigate();
     const [keepSignedIn, setKeepSignedIn] = useState(false);
 
-    // const [showConsentModal, setShowConsentModal] = useState(false);
-    // const [pendingGoogleUser, setPendingGoogleUser] = useState(null);
-
     const handleLogin = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -33,7 +28,7 @@ const Login = () => {
                 email,
                 password,
                 recaptchaToken,
-                // keepSignedIn
+                keepSignedIn
             });
 
             if (response.data.token) {
@@ -43,11 +38,18 @@ const Login = () => {
                     _id: response.data.userId,
                     email: response.data.email,
                     position: response.data.position,
-                    loginLogId: response.data.loginLogId
+                    loginLogId: response.data.loginLogId,
+                    sessionExpiry: new Date().getTime() + (keepSignedIn ? 24 : 1) * 60 * 60 * 1000 // 24 hours or 1 hour
                 };
 
-                setPendingGoogleUser(userDetails);
-                setShowConsentModal(true);
+                // Store user details and complete login
+                localStorage.setItem('userDetails', JSON.stringify(userDetails));
+                setUser(userDetails);
+
+                // Navigate based on position
+                if (userDetails.position.toLowerCase() === 'treasurer') {
+                    navigate('/treasurer/dashboard');
+                }
             }
         } catch (error) {
             console.error('Login error:', error);
@@ -87,11 +89,17 @@ const Login = () => {
                         position: response.data.position,
                         loginLogId: response.data.loginLogId,
                         picture: user.photoURL,
-                        imageUrl: user.photoURL
+                        imageUrl: user.photoURL,
+                        sessionExpiry: new Date().getTime() + (keepSignedIn ? 24 : 1) * 60 * 60 * 1000 // 24 hours or 1 hour
                     };
 
-                    setPendingGoogleUser(userDetails);
-                    setShowConsentModal(true);
+                    // Store user details and complete login
+                    localStorage.setItem('userDetails', JSON.stringify(userDetails));
+                    setUser(userDetails);
+
+                    if (userDetails.position.toLowerCase() === 'treasurer') {
+                        navigate('/treasurer/dashboard');
+                    }
                 } else {
                     setMessage('Access denied. Only authorized users can log in.');
                 }
@@ -101,7 +109,6 @@ const Login = () => {
             setMessage('Failed to login with Google');
         }
     };
-
 
     const togglePassword = () => {
         const passwordInput = document.getElementById('password');
@@ -127,7 +134,7 @@ const Login = () => {
                 userId: storedUserId,
                 userModel: storedUserModel
             });
-            console.log(response.data.message); // Should log "Logout successful"
+            console.log(response.data.message);
         } catch (error) {
             console.error('Logout error:', error);
         }
@@ -157,28 +164,6 @@ const Login = () => {
         // Log the stored details for debugging
         const storedDetails = localStorage.getItem('userDetails');
         console.log('Stored user details:', storedDetails);
-    };
-
-    const handleConsentAccept = () => {
-        if (pendingGoogleUser) {
-            const userDetails = {
-                ...pendingGoogleUser,
-                sessionExpiry: new Date().getTime() + (24 * 60 * 60 * 1000) // 24 hours
-            };
-            completeLogin(userDetails);
-        }
-        setShowConsentModal(false);
-    };
-
-    const handleConsentDecline = () => {
-        if (pendingGoogleUser) {
-            const userDetails = {
-                ...pendingGoogleUser,
-                sessionExpiry: new Date().getTime() + (60 * 60 * 1000) // 1 hour
-            };
-            completeLogin(userDetails);
-        }
-        setShowConsentModal(false);
     };
 
     const completeLogin = (userDetails) => {
@@ -296,7 +281,7 @@ const Login = () => {
                                 onChange={(e) => setKeepSignedIn(e.target.checked)}
                             />
                             <label className="form-check-label smaller-gray-text" htmlFor="keepSignedIn">
-                                Keep me logged in for 24 hours
+                                Keep me signed in for 24 hours
                             </label>
                         </div>
                     </div>
