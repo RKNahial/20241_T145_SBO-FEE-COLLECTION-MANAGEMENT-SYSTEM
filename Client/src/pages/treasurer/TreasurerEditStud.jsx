@@ -40,6 +40,12 @@ const TreasurerEditStud = () => {
         }
     }, [studentData]);
 
+    const clearError = () => {
+        setTimeout(() => {
+            setError(null);
+        }, 3000); 
+    };
+    
     const handleSubmit = (e) => {
         e.preventDefault();
         try {
@@ -47,12 +53,14 @@ const TreasurerEditStud = () => {
             if (!formData.studentId || !formData.name || !formData.yearLevel ||
                 !formData.program || !formData.institutionalEmail) {
                 setError('All fields are required');
+                clearError(); 
                 return;
             }
     
             // Validate email format
             if (!formData.institutionalEmail.endsWith('@student.buksu.edu.ph')) {
                 setError('Email must be a valid BukSU student email');
+                clearError();
                 return;
             }
     
@@ -60,12 +68,14 @@ const TreasurerEditStud = () => {
             setShowModal(true);
         } catch (err) {
             setError(err.message || 'Failed to update student. Please try again.');
+            clearError(); 
         }
     };
     
+    // Also update your confirmUpdate function
     const confirmUpdate = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/students/${id}`, {  // Using the original endpoint
+            const response = await fetch(`http://localhost:8000/api/students/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -82,7 +92,6 @@ const TreasurerEditStud = () => {
             if (data.success) {
                 setSuccessMessage('Student updated successfully!');
                 setShowModal(false);
-                // Add a slight delay before navigation to show the success message
                 setTimeout(() => {
                     navigate('/treasurer/students', {
                         state: { updateSuccess: true }
@@ -93,6 +102,7 @@ const TreasurerEditStud = () => {
             }
         } catch (err) {
             setError(err.message || 'Failed to update student. Please try again.');
+            clearError();
             setShowModal(false);
         }
     };
