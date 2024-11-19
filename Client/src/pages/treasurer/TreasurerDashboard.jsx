@@ -16,6 +16,7 @@ import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
 import { usePayment } from '../../context/PaymentContext';
 import '../../assets/css/calendar.css';
+import LoginCelebration from '../../components/LoginCelebration';
 
 ChartJS.register(
     CategoryScale,
@@ -25,6 +26,9 @@ ChartJS.register(
     Tooltip,
     Legend
 );
+
+const CALENDAR_ID = 'c_24e4973e704b983a944d5bc4cd1a7e0437d3eb519a1935d01706fb81909b68d3@group.calendar.google.com';
+const CALENDAR_URL = `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(CALENDAR_ID)}&ctz=UTC`;
 
 const TreasurerDashboard = () => {
     // NAV AND SIDEBAR
@@ -41,6 +45,13 @@ const TreasurerDashboard = () => {
     const [reportData, setReportData] = useState([]);
     const [reportLoading, setReportLoading] = useState(true);
     const [reportError, setReportError] = useState(null);
+    const [showCelebration, setShowCelebration] = useState(() => {
+        const shouldShow = localStorage.getItem('showLoginCelebration') === 'true';
+        if (shouldShow) {
+            localStorage.removeItem('showLoginCelebration');
+        }
+        return shouldShow;
+    });
 
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
@@ -189,12 +200,13 @@ const TreasurerDashboard = () => {
     };
 
     const handleAddToCalendar = () => {
-        const calendarUrl = 'https://calendar.google.com/calendar/u/0/r/eventedit?cid=c_24e4973e704b983a944d5bc4cd1a7e0437d3eb519a1935d01706fb81909b68d3@group.calendar.google.com';
-        window.open(calendarUrl, '_blank');
+        const addEventUrl = `https://calendar.google.com/calendar/u/0/r/eventedit?cid=${encodeURIComponent(CALENDAR_ID)}`;
+        window.open(addEventUrl, '_blank');
     };
 
     return (
         <div className="sb-nav-fixed">
+            {showCelebration && <LoginCelebration />}
             <Helmet>
                 <title>Treasurer | Dashboard</title>
             </Helmet>
@@ -372,12 +384,12 @@ const TreasurerDashboard = () => {
                                 </div>
 
                                 {/* CALENDAR */}
-                                <div style={{ flex: 1}}>
-                                    <div className="calendar-card" style={{ boxShadow: 'none' }}>
-                                        <div className="calendar-header header">
+                                <div style={{ flex: 1 }}>
+                                    <div className="calendar-card">
+                                        <div className="calendar-header">
                                             <h5 className="calendar-title">Calendar</h5>
                                             <button
-                                                className="add-button"
+                                                className="calendar-add-button"
                                                 onClick={handleAddToCalendar}
                                             >
                                                 <i className="fas fa-plus me-2"></i>
@@ -386,9 +398,10 @@ const TreasurerDashboard = () => {
                                         </div>
                                         <div className="calendar-container">
                                             <iframe
-                                                src="https://calendar.google.com/calendar/embed?src=c_24e4973e704b983a944d5bc4cd1a7e0437d3eb519a1935d01706fb81909b68d3%40group.calendar.google.com&ctz=UTC"
+                                                src={CALENDAR_URL}
                                                 className="calendar-iframe"
-
+                                                frameBorder="0"
+                                                scrolling="no"
                                                 title="Treasurer Calendar"
                                             />
                                         </div>

@@ -113,103 +113,91 @@ const TreasurerProfile = () => {
             <Helmet>
                 <title>Treasurer | Profile</title>
             </Helmet>
-            {/* NAVBAR AND SIDEBAR */}
             <TreasurerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
                 <TreasurerSidebar isCollapsed={isCollapsed} />
-                <div
-                    id="layoutSidenav_content"
-                    style={{
-                        marginLeft: isCollapsed ? '5rem' : '15.625rem',
-                        transition: 'margin-left 0.3s',
-                        flexGrow: 1,
-                        marginTop: '3.5rem'
-                    }}
-                >
-                    {/* CONTENT */}
-                    <div className="container-fluid mb-5 form-top">
-                        {loading ? (
-                            <div>Loading profile...</div>
-                        ) : error ? (
-                            <div className="alert alert-danger">{error}</div>
-                        ) : (
-                            <div className="row">
-                                <div className="col-md-6">
-                                    <div className="card mb-4">
-                                        <div className="card-header">
-                                            <i className="fas fa-user-edit"></i> <span style={{ paddingLeft: '0.50rem', fontWeight: 'bold' }}>Edit Profile</span>
-                                        </div>
-                                        <div className="card-body">
-                                            {successMessage && (
-                                                <div className="alert alert-success">{successMessage}</div>
-                                            )}
-                                            <form onSubmit={handleSubmit}>
-                                                <div className="mb-3">
-                                                    <label className="mb-1">Treasurer Name</label>
+                <div id="layoutSidenav_content" style={{
+                    marginLeft: isCollapsed ? '5rem' : '15.625rem',
+                    transition: 'margin-left 0.3s',
+                    flexGrow: 1,
+                    marginTop: '3.5rem'
+                }}>
+                    <div className="container-fluid px-4">
+                        <div className="row justify-content-center">
+                            <div className="col-lg-7">
+                                <div className="card shadow-lg border-0 rounded-lg mt-5">
+                                    <div className="card-header">
+                                        <h3 className="text-center font-weight-light my-4">Update Profile</h3>
+                                    </div>
+                                    <div className="card-body">
+                                        <form onSubmit={handleSubmit}>
+                                            <div className="mb-3">
+                                                <label className="mb-1">Treasurer Name</label>
+                                                <input
+                                                    type="text"
+                                                    name="name"
+                                                    className="form-control system"
+                                                    value={profile.name}
+                                                    onChange={handleChange}
+                                                />
+                                            </div>
+
+
+                                            <div className="mb-3">
+                                                <label className="mb-1">Email Address</label>
+                                                <input
+                                                    type="email"
+                                                    name="email"
+                                                    className="form-control"
+                                                    value={profile.email}
+                                                    readOnly
+                                                />
+                                            </div>
+                                            <div className="mb-4">
+                                                <label className="mb-1">Position</label>
+                                                <input
+                                                    type="text"
+                                                    name="position"
+                                                    className="form-control"
+                                                    value={profile.position}
+                                                    readOnly
+                                                />
+                                            </div>
+                                            <div className="mb-3">
+                                                <label className="mb-1">Password</label>
+                                                <div className="input-group">
                                                     <input
-                                                        type="text"
-                                                        name="name"
+                                                        type={showPassword ? "text" : "password"}
+                                                        name="password"
                                                         className="form-control system"
-                                                        value={profile.name}
+                                                        value={profile.password}
                                                         onChange={handleChange}
+                                                        placeholder="Enter new password (leave empty to keep current)"
                                                     />
-                                                </div>
-
-
-                                                <div className="mb-3">
-                                                    <label className="mb-1">Email Address</label>
-                                                    <input
-                                                        type="email"
-                                                        name="email"
-                                                        className="form-control"
-                                                        value={profile.email}
-                                                        readOnly
-                                                    />
-                                                </div>
-                                                <div className="mb-4">
-                                                    <label className="mb-1">Position</label>
-                                                    <input
-                                                        type="text"
-                                                        name="position"
-                                                        className="form-control"
-                                                        value={profile.position}
-                                                        readOnly
-                                                    />
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="mb-1">Password</label>
-                                                    <div className="input-group">
-                                                        <input
-                                                            type={showPassword ? "text" : "password"}
-                                                            name="password"
-                                                            className="form-control system"
-                                                            value={profile.password}
-                                                            onChange={handleChange}
-                                                            placeholder="Enter new password (leave empty to keep current)"
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-outline-secondary"
-                                                            onClick={() => setShowPassword(!showPassword)}
-                                                        >
-                                                            <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                                                        </button>
-                                                    </div>
-                                                    <small className="text-muted">
-                                                        Password must contain at least one uppercase letter, one number, and one special character
-                                                    </small>
-                                                </div>
-                                                <div className="mb-0">
-                                                    <button type="submit" className="btn system-button update-button">
-                                                        <i className="fa-solid fa-pen me-2"></i>Update
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-outline-secondary"
+                                                        onClick={() => setShowPassword(!showPassword)}
+                                                    >
+                                                        <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
                                                     </button>
                                                 </div>
-                                            </form>
-                                        </div>
+                                                <small className="text-muted">
+                                                    Password must contain at least one uppercase letter, one number, and one special character
+                                                </small>
+                                            </div>
+                                            <div className="mt-4 mb-0">
+                                                <div className="d-grid">
+                                                    <button type="submit" className="btn system-button update-button">
+                                                        Update Profile
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
-                        )}
+                        </div>
                     </div>
                 </div>
             </div>
