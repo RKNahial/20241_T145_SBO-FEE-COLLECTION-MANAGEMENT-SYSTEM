@@ -25,31 +25,16 @@ const TreasurerFee = () => {
     useEffect(() => {
         const fetchStudents = async () => {
             try {
-                const token = localStorage.getItem('token');
-                const response = await fetch('http://localhost:8000/api/getAll/students', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
+                const response = await fetch('http://localhost:8000/api/getAll/students');
                 if (!response.ok) {
-                    if (response.status === 401) {
-                        throw new Error('Unauthorized access. Please login again.');
-                    }
                     throw new Error('Failed to fetch students');
                 }
-
                 const data = await response.json();
                 // Filter only active students
                 const activeStudents = data.filter(student => !student.isArchived);
                 setStudents(activeStudents);
             } catch (err) {
                 setError(err.message);
-                if (err.message.includes('Unauthorized')) {
-                    // Handle unauthorized access (e.g., redirect to login)
-                    // You might want to implement a redirect here
-                }
             } finally {
                 setLoading(false);
             }
@@ -97,27 +82,45 @@ const TreasurerFee = () => {
     const { triggerPaymentUpdate } = usePayment();
 
     const handleSubmit = async (formData) => {
-        try {
-            // Assuming you have an API endpoint to update the payment
-            const response = await axios.put(`http://localhost:8000/api/payment-fee/update/${selectedStudent._id}`, formData);
-    
-            if (response.data.success) {
+        const confirmSave = window.confirm("Do you want to save changes?");
+        if (confirmSave) {
+            try {
+                setStudents(prevStudents =>
+                    prevStudents.map(student =>
+                        student._id === selectedStudent._id
+                            ? { ...student, paymentstatus: formData.status }
+                            : student
+                    )
+                );
+
+                // Trigger payment update to refresh dashboards
+                triggerPaymentUpdate();
+
                 setSuccessMessage("Payment updated successfully!");
                 setTimeout(() => {
                     setSuccessMessage('');
                 }, 2500);
-    
-                // Optionally, refresh the student list or payment data
-                triggerPaymentUpdate();
+
                 setIsModalOpen(false);
-            } else {
-                setError('Failed to update payment');
+
+                setTimeout(async () => {
+                    const response = await fetch('http://localhost:8000/api/getAll/students');
+                    if (!response.ok) {
+                        throw new Error('Failed to refresh student data');
+                    }
+                    const data = await response.json();
+                    const activeStudents = data.filter(student => !student.isArchived);
+                    setStudents(activeStudents);
+                }, 500);
+
+            } catch (error) {
+                console.error('Error updating payment status:', error);
+                setError('Failed to update payment status');
+                setTimeout(() => setError(null), 2500);
             }
-        } catch (error) {
-            console.error('Error updating payment:', error);
-            setError('Failed to update payment');
         }
     };
+
     //  VIEW PAYMENT MODAL
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [viewedStudent, setViewedStudent] = useState(null);
@@ -307,7 +310,6 @@ const TreasurerFee = () => {
                                         {successMessage}
                                     </div>
                                 )}
-
                                 {/* EMAIL SENT SUCCESS  */}
                                 {emailSuccessMessage && (
                                     <div className="alert alert-success" role="alert">
