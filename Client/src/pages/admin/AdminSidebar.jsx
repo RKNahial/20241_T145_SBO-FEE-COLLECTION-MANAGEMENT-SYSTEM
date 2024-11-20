@@ -1,33 +1,92 @@
 // src//pages/admin/AdminSidebar.jsx
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useAuth } from '../../context/AuthContext';
 
 const AdminSidebar = ({ isCollapsed }) => {
+    const navigate = useNavigate();
+    const { setUser } = useAuth();
+
+    const handleNavigation = (path) => {
+        navigate(path);
+    };
+
+    const handleLogout = async () => {
+        try {
+            const userDetailsString = localStorage.getItem('userDetails');
+            if (userDetailsString) {
+                const userDetails = JSON.parse(userDetailsString);
+                await axios.post('http://localhost:8000/api/logout', {
+                    userId: userDetails._id,
+                    userModel: userDetails.position,
+                    email: userDetails.email,
+                    loginLogId: userDetails.loginLogId
+                });
+            }
+            localStorage.clear();
+            sessionStorage.clear();
+            setUser(null);
+            window.location.href = '/sbo-fee-collection';
+        } catch (error) {
+            console.error('Logout error:', error);
+            localStorage.clear();
+            sessionStorage.clear();
+            setUser(null);
+            window.location.href = '/sbo-fee-collection';
+        }
+    };
+
     return (
         <div className={`sidebar ${isCollapsed ? 'collapsed' : 'expanded'}`}>
             <nav className="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div className="sb-sidenav-menu">
                     <div className="nav" style={{ marginTop: '-0.55rem' }}>
                         <div>
-                            <NavLink className={({ isActive }) => `nav-link mt-4 ${isActive ? 'active' : ''}`} to="/admin/dashboard" end>
-                                <i className="fas fa-home icon-space"></i>{!isCollapsed && <span> Dashboard</span>}
+                            <NavLink
+                                to="/admin/dashboard"
+                                className={({ isActive }) => `nav-link mt-4 ${isActive ? 'active' : ''}`}
+                            >
+                                <i className="fas fa-home icon-space"></i>
+                                {!isCollapsed && <span> Dashboard</span>}
                             </NavLink>
-                            <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/admin/students" end>
-                                <i className="far fa-user icon-space"></i>{!isCollapsed && <span> Students</span>}
+                            <NavLink
+                                to="/admin/students"
+                                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                            >
+                                <i className="far fa-user icon-space"></i>
+                                {!isCollapsed && <span> Students</span>}
                             </NavLink>
-                            <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/admin/officers" end>
-                                <i className="fa fa-users icon-space"></i>{!isCollapsed && <span> Officers</span>}
+                            <NavLink
+                                to="/admin/officers"
+                                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                            >
+                                <i className="fa fa-users icon-space"></i>
+                                {!isCollapsed && <span> Officers</span>}
                             </NavLink>
-                            <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/admin/admins" end>
-                                <i className="fa fa-user-cog icon-space"></i>{!isCollapsed && <span> Admin</span>}
+                            <NavLink
+                                to="/admin/admins"
+                                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                            >
+                                <i className="fa fa-user-cog icon-space"></i>
+                                {!isCollapsed && <span> Admin</span>}
                             </NavLink>
-                            <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/admin/school-year" end>
-                                <i className="fa-regular fa-calendar-days icon-space"></i>{!isCollapsed && <span> School Year</span>}
+                            <NavLink
+                                to="/admin/school-year"
+                                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                            >
+                                <i className="fa-regular fa-calendar-days icon-space"></i>
+                                {!isCollapsed && <span> School Year</span>}
                             </NavLink>
                         </div>
-                        <NavLink className={({ isActive }) => `nav-link logout-link ${isActive ? 'active' : ''}`} to="/sbo-fee-collection" end>
-                            <i className="fas fa-sign-out-alt icon-space logout-link"></i>{!isCollapsed && <span> Logout</span>}
-                        </NavLink>
+                        <button
+                            onClick={handleLogout}
+                            className="nav-link logout-link"
+                            style={{ border: 'none', background: 'none', width: '100%', textAlign: 'left' }}
+                        >
+                            <i className="fas fa-sign-out-alt icon-space logout-link"></i>
+                            {!isCollapsed && <span> Logout</span>}
+                        </button>
                     </div>
                 </div>
             </nav>

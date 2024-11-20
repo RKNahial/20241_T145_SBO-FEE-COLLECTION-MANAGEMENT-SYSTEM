@@ -118,9 +118,9 @@ const AdminAddOfficer = () => {
                                                     required
                                                 >
                                                     <option value="" disabled>Select a position</option>
-                                                    <option value="Officer">Officer</option>
-                                                    <option value="Governor">Governor</option>
-                                                    <option value="Treasurer">Treasurer</option>
+                                                    <option value="officer">Officer</option>
+                                                    <option value="governor">Governor</option>
+                                                    <option value="treasurer">Treasurer</option>
                                                 </select>
                                             </div>
                                             <div className="mb-0">

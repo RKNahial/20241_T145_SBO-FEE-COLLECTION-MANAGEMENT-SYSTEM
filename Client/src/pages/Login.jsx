@@ -31,24 +31,44 @@ const Login = () => {
                 keepSignedIn
             });
 
+            console.log('Server response:', response.data); // Debug log
+
             if (response.data.token) {
-                localStorage.setItem('token', response.data.token);
+                const expiryTime = new Date().getTime() + (keepSignedIn ? 24 : 1) * 60 * 60 * 1000;
 
                 const userDetails = {
                     _id: response.data.userId,
                     email: response.data.email,
                     position: response.data.position,
                     loginLogId: response.data.loginLogId,
-                    sessionExpiry: new Date().getTime() + (keepSignedIn ? 24 : 1) * 60 * 60 * 1000 // 24 hours or 1 hour
+                    sessionExpiry: expiryTime,
+                    keepSignedIn: keepSignedIn
                 };
 
-                // Store user details and complete login
+                // Store authentication data
+                localStorage.setItem('token', response.data.token);
                 localStorage.setItem('userDetails', JSON.stringify(userDetails));
                 setUser(userDetails);
 
-                // Navigate based on position
-                if (userDetails.position.toLowerCase() === 'treasurer') {
+                // Get position and trim/lowercase for consistent comparison
+                const position = (response.data.position || '').toLowerCase().trim();
+                console.log('Position after processing:', position); // Debug log
+
+                // Direct navigation based on position
+                if (position === 'admin') {
+                    navigate('/admin/dashboard');
+                } else if (position === 'treasurer') {
                     navigate('/treasurer/dashboard');
+                } else if (position === 'governor') {
+                    navigate('/governor/dashboard');
+                    console.log('Navigation attempted');
+
+                } else if (position === 'officer') {
+
+                    navigate('/officer/dashboard');
+                } else {
+                    console.error('Unknown position:', position);
+                    setMessage('Invalid user position');
                 }
             }
         } catch (error) {
@@ -176,7 +196,9 @@ const Login = () => {
         setUser(userDetails);
 
         // Handle navigation based on position
-        switch (userDetails.position.toLowerCase()) {
+        const position = userDetails.position.toLowerCase().trim();
+
+        switch (position) {
             case 'admin':
                 navigate('/admin/dashboard');
                 break;
@@ -286,21 +308,21 @@ const Login = () => {
                         </div>
                     </div>
                     <div className="form-group">
-                   <div className="form-group">
-                        <div className="form-check">
-                            <input
-                                type="checkbox"
-                                className="form-check-input"
-                                id="keepSignedIn"
-                                checked={keepSignedIn}
-                                onChange={(e) => setKeepSignedIn(e.target.checked)}
-                            />
-                            <label className="form-check-label smaller-gray-text" htmlFor="keepSignedIn">
-                                Keep me signed in for 24 hours
-                            </label>
+                        <div className="form-group">
+                            <div className="form-check">
+                                <input
+                                    type="checkbox"
+                                    className="form-check-input"
+                                    id="keepSignedIn"
+                                    checked={keepSignedIn}
+                                    onChange={(e) => setKeepSignedIn(e.target.checked)}
+                                />
+                                <label className="form-check-label smaller-gray-text" htmlFor="keepSignedIn">
+                                    Keep me signed in for 24 hours
+                                </label>
+                            </div>
                         </div>
                     </div>
-                </div>
 
                     <ReCAPTCHA
                         sitekey="6LcfaG0qAAAAAFTykOtXdpsqkS9ZUeALt2CgFmId"

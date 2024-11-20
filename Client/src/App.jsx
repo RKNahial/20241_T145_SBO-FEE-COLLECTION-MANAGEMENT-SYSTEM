@@ -121,7 +121,39 @@ const App = () => {
                             </ProtectedRoute>
                         } />
 
-                        {/* Similar structure for officer and governor routes */}
+                        {/* Officer Routes */}
+                        <Route path="/officer/*" element={
+                            <ProtectedRoute allowedRoles={['officer']}>
+                                <Routes>
+                                    <Route path="dashboard" element={<OfficerDashboard />} />
+                                    <Route path="manage-fee" element={<OfficerFee />} />
+                                    <Route path="students" element={<OfficerStudents />} />
+                                    <Route path="students/add-new" element={<OfficerAddStud />} />
+                                    <Route path="students/edit/:id" element={<OfficerEditStud />} />
+                                    <Route path="events" element={<OfficerEvents />} />
+                                    <Route path="events/add-new" element={<OfficerAddEvent />} />
+                                    <Route path="events/edit/:id" element={<OfficerEditEvent />} />
+                                    <Route path="reports" element={<OfficerReports />} />
+                                    <Route path="profile" element={<OfficerProfile />} />
+                                </Routes>
+                            </ProtectedRoute>
+                        } />
+
+                        {/* Governor Routes */}
+                        <Route path="/governor/*" element={
+                            <ProtectedRoute allowedRoles={['governor']}>
+                                <Routes>
+                                    <Route path="dashboard" element={<GovDashboard />} />
+                                    <Route path="students" element={<GovStudents />} />
+                                    <Route path="students/add-new" element={<GovAddStud />} />
+                                    <Route path="students/edit/:id" element={<GovEditStud />} />
+                                    <Route path="officers" element={<GovOfficers />} />
+                                    <Route path="officers/add-new" element={<GovAddOfficer />} />
+                                    <Route path="officers/edit/:id" element={<GovEditOfficer />} />
+                                    <Route path="profile" element={<GovProfile />} />
+                                </Routes>
+                            </ProtectedRoute>
+                        } />
 
                         <Route path="*" element={<Navigate to="/sbo-fee-collection" replace />} />
                     </Routes>

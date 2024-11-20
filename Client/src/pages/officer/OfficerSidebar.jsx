@@ -1,9 +1,25 @@
 // src//pages/officer/OfficerSidebar.jsx
 import { Helmet } from 'react-helmet';
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from '../../context/AuthContext';
 
 const OfficerSidebar = ({ isCollapsed }) => {
+    const navigate = useNavigate();
+    const { setUser } = useAuth();
+
+    const handleLogout = () => {
+        // Clear all localStorage items
+        localStorage.removeItem('token');
+        localStorage.removeItem('userDetails');
+
+        // Clear auth context
+        setUser(null);
+
+        // Navigate to login page
+        navigate('/sbo-fee-collection');
+    };
+
     return (
         <div className={`sidebar ${isCollapsed ? 'collapsed' : 'expanded'}`}>
             <nav className="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
@@ -26,9 +42,14 @@ const OfficerSidebar = ({ isCollapsed }) => {
                                 <i className="far fa-file-alt icon-space"></i>{!isCollapsed && <span> Reports</span>}
                             </NavLink>
                         </div>
-                        <NavLink className={({ isActive }) => `nav-link logout-link ${isActive ? 'active' : ''}`} to="/sbo-fee-collection" end>
-                            <i className="fas fa-sign-out-alt icon-space logout-link"></i>{!isCollapsed && <span> Logout</span>}
-                        </NavLink>
+                        <button
+                            onClick={handleLogout}
+                            className="nav-link logout-link"
+                            style={{ border: 'none', background: 'none', width: '100%', textAlign: 'left' }}
+                        >
+                            <i className="fas fa-sign-out-alt icon-space logout-link"></i>
+                            {!isCollapsed && <span> Logout</span>}
+                        </button>
                     </div>
                 </div>
             </nav>

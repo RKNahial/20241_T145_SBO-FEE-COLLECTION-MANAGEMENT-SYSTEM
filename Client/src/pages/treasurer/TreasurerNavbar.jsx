@@ -48,29 +48,12 @@ const TreasurerNavbar = ({ toggleSidebar }) => {
                 });
             }
 
-            // Sign out from Firebase/Google
-            if (auth.currentUser) {
-                await signOut(auth);
-            }
-
             // Clear all storage
             localStorage.clear();
             sessionStorage.clear();
-
-            // Clear specific consent-related items
-            localStorage.removeItem('token');
-            localStorage.removeItem('userDetails');
-            localStorage.removeItem('showLoginCelebration');
-            sessionStorage.removeItem('showLoginCelebration');
-
-            // Clear any session cookies
-            document.cookie.split(";").forEach(function (c) {
-                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-            });
-
             setUser(null);
 
-            // Force redirect to login
+            // Force redirect to login page
             window.location.href = '/sbo-fee-collection';
         } catch (error) {
             console.error('Logout error:', error);
