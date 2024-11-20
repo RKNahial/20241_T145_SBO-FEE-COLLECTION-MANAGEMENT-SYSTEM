@@ -194,8 +194,23 @@ const Login = () => {
         localStorage.setItem('userDetails', JSON.stringify(userDetails));
         setUser(userDetails);
 
-        if (userDetails.position.toLowerCase() === 'treasurer') {
-            navigate('/treasurer/dashboard');
+        // Handle navigation based on position
+        switch (userDetails.position.toLowerCase()) {
+            case 'admin':
+                navigate('/admin/dashboard');
+                break;
+            case 'treasurer':
+                navigate('/treasurer/dashboard');
+                break;
+            case 'governor':
+                navigate('/governor/dashboard');
+                break;
+            case 'officer':
+                navigate('/officer/dashboard');
+                break;
+            default:
+                console.error('Unknown position:', userDetails.position);
+                setMessage('Invalid user position');
         }
     };
 

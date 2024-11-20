@@ -1,12 +1,9 @@
 const express = require('express');
-const { registerUser, getSessionHistory } = require('../controllers/userController');
 const router = express.Router();
+const { registerUser, addAdmin } = require('../controllers/userController');
+const authMiddleware = require('../middleware/authMiddleware');
 
-// Register route
 router.post('/register', registerUser);
-
-// Add this new route
-router.get('/session-history', getSessionHistory);
+router.post('/admin/add', authMiddleware, addAdmin);
 
 module.exports = router;
-//exports

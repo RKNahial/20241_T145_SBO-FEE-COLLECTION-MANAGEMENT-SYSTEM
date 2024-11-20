@@ -1,25 +1,102 @@
-const { loginAdminService, registerUserService } = require('../services/AdminService');
+const Admin = require('../models/AdminSchema');
 
-const loginAdmin = async (req, res) => {
-    const { email, password, recaptchaToken } = req.body;
-
+exports.getAllAdmins = async (req, res) => {
     try {
-        const result = await loginAdminService(email, password, recaptchaToken);
-        res.status(result.status).json(result.data);
+        const admins = await Admin.find().select('-password');
+        res.status(200).json({
+            success: true,
+            data: admins
+        });
     } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({ message: 'Internal server error.', details: error.message });
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching admins',
+            error: error.message
+        });
     }
 };
 
-const registerUser = async (req, res) => {
+exports.toggleArchiveStatus = async (req, res) => {
     try {
-        const user = await registerUserService(req.body);
-        res.status(201).json(user);
+        const { id } = req.params;
+        const admin = await Admin.findById(id);
+        
+        if (!admin) {
+            return res.status(404).json({
+                success: false,
+                message: 'Admin not found'
+            });
+        }
+
+        admin.isArchived = !admin.isArchived;
+        admin.archivedAt = admin.isArchived ? new Date() : null;
+        await admin.save();
+
+        res.status(200).json({
+            success: true,
+            message: `Admin ${admin.isArchived ? 'archived' : 'unarchived'} successfully`,
+            data: admin
+        });
     } catch (error) {
-        console.error('Registration error:', error);
-        res.status(500).json({ error: 'Server error', details: error.message });
+        res.status(500).json({
+            success: false,
+            message: 'Error toggling archive status',
+            error: error.message
+        });
     }
 };
 
-module.exports = { loginAdmin, registerUser };
+exports.getAdminById = async (req, res) => {
+    try {
+        const admin = await Admin.findById(req.params.id).select('-password');
+        if (!admin) {
+            return res.status(404).json({
+                success: false,
+                message: 'Admin not found'
+            });
+        }
+        res.status(200).json({
+            success: true,
+            data: admin
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching admin',
+            error: error.message
+        });
+    }
+};
+
+exports.updateAdmin = async (req, res) => {
+    try {
+        const { name, ID, email } = req.body;
+        const admin = await Admin.findById(req.params.id);
+
+        if (!admin) {
+            return res.status(404).json({
+                success: false,
+                message: 'Admin not found'
+            });
+        }
+
+        // Update fields
+        admin.name = name || admin.name;
+        admin.ID = ID || admin.ID;
+        admin.email = email || admin.email;
+
+        await admin.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Admin updated successfully',
+            data: admin
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error updating admin',
+            error: error.message
+        });
+    }
+};

@@ -7,31 +7,85 @@ const { addUser } = require('../services/userServices');
 const axios = require('axios');
 const Log = require('../models/LogSchema');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 // Register a new user
 exports.registerUser = async (req, res) => {
     try {
         const user = await addUser(req.body);
-        res.status(201).json({ message: `${user.position} added successfully` });
+        res.status(201).json({ 
+            success: true,
+            message: `${user.position} added successfully`,
+            data: user
+        });
     } catch (error) {
         console.error('Error adding user:', error);
-        res.status(500).json({ message: error.message || 'Failed to add user' });
+        res.status(500).json({ 
+            success: false,
+            message: error.message || 'Failed to add user' 
+        });
     }
-};  
+};
+
+exports.addAdmin = async (req, res) => {
+    try {
+        const { ID, name, email, position } = req.body;
+        
+        if (position !== 'Admin') {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid position for admin registration'
+            });
+        }
+
+        // Generate a random password
+        const password = Math.random().toString(36).slice(-8);
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newAdmin = new Admin({
+            ID,
+            name,
+            email,
+            password: hashedPassword,
+            position
+        });
+
+        await newAdmin.save();
+
+        res.status(201).json({
+            success: true,
+            message: 'Admin added successfully',
+            data: {
+                ...newAdmin.toObject(),
+                temporaryPassword: password
+            }
+        });
+    } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email already exists'
+            });
+        }
+        res.status(500).json({
+            success: false,
+            message: 'Error adding admin',
+            error: error.message
+        });
+    }
+};
 
 exports.login = async (req, res) => {
     const { email, password, recaptchaToken } = req.body;
 
-    // Check if reCAPTCHA token is provided
     if (!recaptchaToken) {
         return res.status(400).json({ message: 'reCAPTCHA verification failed. Please complete the reCAPTCHA.' });
     }
 
     try {
-        // Verify reCAPTCHA token with Google
         const recaptchaResponse = await axios.post(`https://www.google.com/recaptcha/api/siteverify`, null, {
             params: {
-                secret: process.env.RECAPTCHA_SECRET_KEY, // Access secret key from .env
+                secret: process.env.RECAPTCHA_SECRET_KEY,
                 response: recaptchaToken,
             },
         });
@@ -40,20 +94,15 @@ exports.login = async (req, res) => {
             return res.status(400).json({ message: 'reCAPTCHA verification failed. Please try again.' });
         }
 
-        // List of all models to check (Admin, Treasurer, Officer, Governor)
         const models = [Admin, Treasurer, Officer, Governor];
-
         let user = null;
         let position = null;
 
-        // Loop through all models to find the user
-        for (let i = 0; i < models.length; i++) {
-            const Model = models[i];
+        for (const Model of models) {
             user = await Model.findOne({ email });
-
             if (user) {
-                position = user.position;
-                break;  // Exit the loop once a user is found
+                position = Model.modelName.replace('Model', '');
+                break;
             }
         }
 
@@ -61,18 +110,19 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        // Check email domain for specific positions
-        if (['Governor', 'Treasurer', 'Officer'].includes(position) && !email.endsWith('@student.buksu.edu.ph')) {
-            return res.status(403).json({ message: 'Access denied. Invalid email domain.' });
+        // Check if user is archived
+        if (user.isArchived === true) {
+            return res.status(403).json({ 
+                success: false,
+                message: 'Account is archived. Please contact the administrator.' 
+            });
         }
 
-        // Compare the password (assuming password is hashed)
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        // Create the login log entry with more details
         const loginLog = await Log.create({ 
             userId: user._id, 
             userModel: position, 
@@ -86,28 +136,33 @@ exports.login = async (req, res) => {
             status: 'active'
         });
 
-        console.log(`User ${user.email} logged in as ${position} at ${loginLog.timestamp}`);
-
-        // Generate a JWT
         const token = jwt.sign(
-            { userId: user._id, position: user.position },
-            process.env.JWT_SECRET, // Ensure you have a secret key in your .env file
-            { expiresIn: '1h' } // Token expires in 1 hour
+            { 
+                userId: user._id, 
+                position: position,
+                isArchived: user.isArchived
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '8h' }
         );
 
-        // Return all necessary user details
         return res.status(200).json({ 
+            success: true,
             message: 'Login successful', 
-            token, // Include the token in the response
+            token,
             position,
             userId: user._id,
             email: user.email,
             loginLogId: loginLog._id,
-            _id: user._id
+            name: user.name
         });
     } catch (error) {
         console.error('Login error:', error);
-        return res.status(500).json({ message: 'Server error', error: error.message });
+        return res.status(500).json({ 
+            success: false,
+            message: 'Server error', 
+            error: error.message 
+        });
     }
 };
 

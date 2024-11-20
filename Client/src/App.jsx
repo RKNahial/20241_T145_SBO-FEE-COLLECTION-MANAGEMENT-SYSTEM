@@ -53,7 +53,7 @@ import GovProfile from './pages/governor/GovProfile';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminStudents from './pages/admin/AdminStudents';
-import AdminAddStud from './pages/admin/AdminAddStud';
+import AdminAddStud from './pages/admin/AdminAddOfficer';
 import AdminEditStud from './pages/admin/AdminEditStud';
 import AdminOfficers from './pages/admin/AdminOfficers';
 import AdminAddOfficer from './pages/admin/AdminAddOfficer';

@@ -25,7 +25,8 @@ const duesPaymentRoutes = require('./routes/duesPaymentRoutes');
 const paymentCategoryRoutes = require('./routes/paymentCategoryRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const profileRoutes = require('./routes/profileRoutes');
-
+const officialRoutes = require('./routes/officialRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 process.removeAllListeners('warning');
 // Importing database connection
 const connectDB = require('./config/DbConnections');
@@ -51,7 +52,8 @@ app.use('/api', duesPaymentRoutes);
 app.use('/api', paymentCategoryRoutes);
 app.use('/api/payment-fee', paymentRoutes);
 app.use('/api/profile', profileRoutes);
-
+app.use('/api', officialRoutes);
+app.use('/api', adminRoutes);
 
 
 const port = 8000;

@@ -1,4 +1,5 @@
 // src/pages/treasurer/TreasurerFeeAmount.jsx
+import { Modal, Button } from 'react-bootstrap';
 import { Helmet } from 'react-helmet';
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -11,7 +12,9 @@ const TreasurerFeeAmount = () => {
     const [daysCovered, setDaysCovered] = useState(0);
     const [loading, setLoading] = useState(false);
     const [weeksAndMonthsCovered, setWeeksAndMonthsCovered] = useState([]);
-
+    const [showModal, setShowModal] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [error, setError] = useState('');
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -65,20 +68,24 @@ const TreasurerFeeAmount = () => {
         setWeeksAndMonthsCovered(calculateCoverage(inputAmount));
     };
 
+
     const handleSave = async (event) => {
         event.preventDefault();
         if (amount <= 0) {
             alert('Please enter a valid amount');
             return;
         }
-
-        const confirmed = window.confirm("Are you sure you want to proceed with the payment?");
-        if (!confirmed) return;
-
+        setShowModal(true);
+    };
+    
+    const handleConfirmPayment = async () => {
+        setShowModal(false);
         setLoading(true);
+        setError('');
+        setSuccessMessage('');
         let successCount = 0;
         let errorMessages = [];
-
+    
         try {
             for (const coverage of weeksAndMonthsCovered) {
                 try {
@@ -95,9 +102,9 @@ const TreasurerFeeAmount = () => {
                             daysCount: coverage.days
                         }),
                     });
-
+    
                     const data = await response.json();
-
+    
                     if (data.success) {
                         successCount++;
                     } else {
@@ -108,10 +115,10 @@ const TreasurerFeeAmount = () => {
                     errorMessages.push(`${coverage.month} Week ${coverage.week}: Failed to process`);
                 }
             }
-
+    
             if (successCount > 0) {
-                alert(`Successfully processed payments for ${successCount} periods.`);
-
+                setSuccessMessage(`Successfully processed payment for ${officerName} covering ${daysCovered} day/s.`);
+    
                 // Force refresh before navigation
                 await fetch(`http://localhost:8000/api/daily-dues?month=${weeksAndMonthsCovered[0].month}&week=${weeksAndMonthsCovered[0].week}`, {
                     method: 'GET',
@@ -120,27 +127,29 @@ const TreasurerFeeAmount = () => {
                         'Pragma': 'no-cache'
                     }
                 });
-
-                navigate("/treasurer/daily-dues", {
-                    state: {
-                        timestamp: Date.now(),
-                        month: weeksAndMonthsCovered[0].month,
-                        week: weeksAndMonthsCovered[0].week.toString(),
-                        refresh: true
-                    },
-                    replace: true
-                });
+    
+                // Add delay before navigation
+                setTimeout(() => {
+                    navigate("/treasurer/daily-dues", {
+                        state: {
+                            timestamp: Date.now(),
+                            month: weeksAndMonthsCovered[0].month,
+                            week: weeksAndMonthsCovered[0].week.toString(),
+                            refresh: true
+                        },
+                        replace: true
+                    });
+                }, 1000);
             } else {
-                alert(`Failed to process payments:\n${errorMessages.join('\n')}`);
+                setError(`Failed to process payments:\n${errorMessages.join('\n')}`);
             }
         } catch (error) {
             console.error('Error:', error);
-            alert("Failed to process payment. Please try again.");
+            setError("Failed to process payment. Please try again.");
         } finally {
             setLoading(false);
         }
     };
-
     const handleCancel = () => {
         navigate("/treasurer/daily-dues");
     };
@@ -169,7 +178,17 @@ const TreasurerFeeAmount = () => {
                                         <strong>Pay in Amount</strong>
                                     </div>
                                     <div className="card-body">
-                                        <form onSubmit={handleSave}>
+                                        {successMessage && (
+                                            <div className="alert alert-success" role="alert">
+                                                {successMessage}
+                                            </div>
+                                        )}
+                                        {error && (
+                                            <div className="alert alert-danger" role="alert">
+                                                {error}
+                                            </div>
+                                        )}
+                                            <form onSubmit={handleSave}>
                                             <div className="mb-3">
                                                 <label className="mb-1">Name</label>
                                                 <input
@@ -236,6 +255,43 @@ const TreasurerFeeAmount = () => {
                     </div>
                 </div>
             </div>
+            {/* CONFIRMATION MODAL */}
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal.Header closeButton>
+                <Modal.Title>Confirm Payment</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                Are you sure you want to process daily dues for <strong>{officerName}</strong>?
+                <br /><br />
+                Amount: ₱{amount}
+                <br />
+                Days Covered: {daysCovered}
+                <br /><br />
+                Coverage Details:
+                {weeksAndMonthsCovered.map((coverage, index) => (
+                    <div key={index}>
+                        {coverage.month} - Week {coverage.week}: {coverage.days} days
+                    </div>
+                ))}
+            </Modal.Body>
+            <Modal.Footer>
+                <Button 
+                    variant="btn btn-confirm" 
+                    onClick={handleConfirmPayment}
+                    style={{ backgroundColor: '#FF8C00', border: 'none' }}
+                    disabled={loading}
+                >
+                    {loading ? 'Processing...' : 'Confirm'}
+                </Button>
+                <Button 
+                    variant="btn btn-cancel" 
+                    onClick={() => setShowModal(false)}
+                    style={{ backgroundColor: '#6c757d', border: 'none' }}
+                >
+                    Cancel
+                </Button>
+            </Modal.Footer>
+        </Modal>
         </div>
     );
 };

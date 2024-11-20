@@ -1,15 +1,86 @@
 // src/pages/officer/OfficerAddStud.jsx
 import { Helmet } from 'react-helmet';
 import React, { useState } from "react";
-import AdminSidebar from "./AdminSidebar"; 
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { Modal, Button } from 'react-bootstrap';
+import AdminSidebar from "./AdminSidebar";
 import AdminNavbar from "./AdminNavbar";
 
 const AdminAddStud = () => {
-    // NAV AND SIDEBAR
+    // State to handle form data
+    const [formData, setFormData] = useState({
+        name: '',
+        studentId: '',
+        institutionalEmail: '',
+        yearLevel: '',
+        program: ''
+    });
+
+    // State to handle messages and modal
+    const [message, setMessage] = useState(null);
+    const [showModal, setShowModal] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
 
-    const toggleSidebar = () => {
-        setIsCollapsed(prev => !prev);
+    const toggleSidebar = () => setIsCollapsed(prev => !prev);
+    const navigate = useNavigate();
+
+    // Form data change handler
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    // Form submission handlers
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setShowModal(true);
+    };
+
+    const confirmSubmit = async () => {
+        setShowModal(false);
+        try {
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                setMessage({
+                    type: 'error',
+                    text: 'No authentication token found. Please login again.'
+                });
+                navigate('/login');
+                return;
+            }
+
+            const response = await axios.post(
+                'http://localhost:8000/api/users/register',
+                formData,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            setMessage({ type: 'success', text: 'Student added successfully!' });
+            setTimeout(() => {
+                navigate('/admin/students');
+            }, 2000);
+
+        } catch (error) {
+            if (error.response?.status === 401) {
+                const errorMessage = error.response?.data?.message || 'Session expired. Please login again.';
+                setMessage({
+                    type: 'error',
+                    text: errorMessage
+                });
+                localStorage.removeItem('token');
+            } else {
+                setMessage({
+                    type: 'error',
+                    text: error.response?.data?.message || 'Failed to add student. Please try again.'
+                });
+            }
+        }
     };
 
     return (
@@ -17,56 +88,77 @@ const AdminAddStud = () => {
             <Helmet>
                 <title>Admin | Add Student</title>
             </Helmet>
-            {/* NAVBAR AND SIDEBAR */}
             <AdminNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
                 <AdminSidebar isCollapsed={isCollapsed} />
-                <div 
-                    id="layoutSidenav_content" 
-                    style={{ 
-                        marginLeft: isCollapsed ? '5rem' : '15.625rem', 
-                        transition: 'margin-left 0.3s', 
-                        flexGrow: 1,
-                        marginTop: '3.5rem' 
-                    }}
-                >
-                    {/* CONTENT */}
-                    <div className="container-fluid px-4 mb-5 form-top">
-                        <div className="row">
-                            <div className="col-md-6">
-                                <div className="card mb-4">
+                <div className="content-wrapper" style={{
+                    marginLeft: isCollapsed ? '80px' : '240px',
+                    width: `calc(100% - ${isCollapsed ? "80px" : "240px"})`,
+                    transition: 'margin-left 0.3s ease-in-out',
+                    padding: '20px'
+                }}>
+                    <div className="container-fluid">
+                        <div className="row justify-content-center">
+                            <div className="col-lg-6">
+                                <div className="card shadow-lg border-0 rounded-lg mt-3">
                                     <div className="card-header">
-                                        <i className="far fa-plus me-2"></i> <strong>Add New Student</strong>
+                                        <h4 className="text-center font-weight-light my-2">
+                                            <i className="fas fa-user-plus me-2"></i>
+                                            Add Student
+                                        </h4>
                                     </div>
                                     <div className="card-body">
-                                        <form>
+                                        {message && (
+                                            <div className={`alert ${message.type === 'error' ? 'alert-danger' : 'alert-success'}`}>
+                                                {message.text}
+                                            </div>
+                                        )}
+                                        <form onSubmit={handleSubmit}>
                                             <div className="mb-3">
                                                 <label className="mb-1">Student Name</label>
                                                 <input
                                                     type="text"
+                                                    name="name"
+                                                    value={formData.name}
+                                                    onChange={handleChange}
                                                     className="form-control system"
                                                     placeholder="Enter student name"
+                                                    required
                                                 />
                                             </div>
                                             <div className="mb-3">
                                                 <label className="mb-1">Student ID</label>
                                                 <input
-                                                    type="text"
+                                                    type="number"
+                                                    name="studentId"
+                                                    value={formData.studentId}
+                                                    onChange={handleChange}
                                                     className="form-control system"
                                                     placeholder="Enter student ID"
+                                                    required
                                                 />
                                             </div>
                                             <div className="mb-4">
                                                 <label className="mb-1">Institutional Email</label>
                                                 <input
-                                                    type="password"
+                                                    type="email"
+                                                    name="institutionalEmail"
+                                                    value={formData.institutionalEmail}
+                                                    onChange={handleChange}
                                                     className="form-control"
                                                     placeholder="Enter institutional email"
+                                                    required
                                                 />
                                             </div>
                                             <div className="mb-4">
                                                 <label className="mb-1">Choose Year Level</label>
-                                                <select className="form-control form-select" defaultValue="">
+                                                <select
+                                                    className="form-control form-select"
+                                                    name="yearLevel"
+                                                    value={formData.yearLevel}
+                                                    onChange={handleChange}
+                                                    required
+                                                >
                                                     <option value="" disabled>Select a year level</option>
                                                     <option value="1st Year">1st Year</option>
                                                     <option value="2nd Year">2nd Year</option>
@@ -76,7 +168,13 @@ const AdminAddStud = () => {
                                             </div>
                                             <div className="mb-4">
                                                 <label className="mb-1">Choose Program</label>
-                                                <select className="form-control form-select" defaultValue="">
+                                                <select
+                                                    className="form-control form-select"
+                                                    name="program"
+                                                    value={formData.program}
+                                                    onChange={handleChange}
+                                                    required
+                                                >
                                                     <option value="" disabled>Select a program</option>
                                                     <option value="BSIT">BSIT</option>
                                                     <option value="BSEMC">BSEMC</option>
@@ -86,7 +184,9 @@ const AdminAddStud = () => {
                                                 </select>
                                             </div>
                                             <div className="mb-0">
-                                                <button type="submit" className="btn system-button"> <i className="far fa-plus me-1"></i> Add</button>
+                                                <button type="submit" className="btn system-button">
+                                                    <i className="far fa-plus me-1"></i> Add
+                                                </button>
                                             </div>
                                         </form>
                                     </div>
@@ -96,6 +196,32 @@ const AdminAddStud = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Confirmation Modal */}
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm Add Student</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Do you want to add <strong>{formData.name}</strong>?
+                </Modal.Body>
+                <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button
+                        variant="btn btn-confirm"
+                        onClick={confirmSubmit}
+                        style={{ flex: 'none' }}
+                    >
+                        Confirm
+                    </Button>
+                    <Button
+                        variant="btn btn-cancel"
+                        onClick={() => setShowModal(false)}
+                        style={{ marginRight: '0.5rem', flex: 'none' }}
+                    >
+                        Cancel
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };
