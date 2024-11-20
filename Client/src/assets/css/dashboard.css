@@ -169,6 +169,11 @@
   background-color: #f2bdb0; 
 }
 
+.smaller-gray-text {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
 /* CARD */
 .card {
   position: relative;

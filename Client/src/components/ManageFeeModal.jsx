@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import axios from 'axios';
 
-const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent }) => {
+const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent, initialPaymentCategory}) => {
     const [paymentCategories, setPaymentCategories] = useState([]);
     const [amountPaid, setAmountPaid] = useState('');
     const [status, setStatus] = useState('Not Paid');
@@ -12,6 +12,7 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
     const [hoverSave, setHoverSave] = useState(false);
     const [hoverCancel, setHoverCancel] = useState(false);
     const [showConfirmation, setShowConfirmation] = useState(false);
+    const [error, setError] = useState('');
 
     useEffect(() => {
         const fetchPaymentCategories = async () => {
@@ -19,7 +20,10 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
                 const response = await axios.get('http://localhost:8000/api/payment-categories');
                 const activeCategories = response.data.categories.filter(category => !category.isArchived);
                 setPaymentCategories(activeCategories);
-                if (activeCategories.length > 0) {
+                // Set the payment category to the initial value if provided, otherwise use the first category
+                if (initialPaymentCategory) {
+                    setPaymentCategory(initialPaymentCategory);
+                } else if (activeCategories.length > 0) {
                     setPaymentCategory(activeCategories[0].name);
                 }
             } catch (err) {
@@ -33,14 +37,26 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
             setDate(now.toISOString().split('T')[0]);
             setTime(now.toTimeString().split(' ')[0]);
         }
-    }, [isOpen]);
+    }, [isOpen, initialPaymentCategory]); 
+
+    // Update the status change handler
+    const handleStatusChange = (e) => {
+        const newStatus = e.target.value;
+        setStatus(newStatus);
+        
+        // If status is "Fully Paid", set amount to total price
+        if (newStatus === 'Fully Paid') {
+            setAmountPaid(totalPrice.toString());
+        } else if (newStatus === 'Not Paid' || newStatus === 'Refunded') {
+            setAmountPaid('');
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setShowConfirmation(true); // Show confirmation before proceeding
+        setShowConfirmation(true);
     };
-    
-    // Add this new function to handle the actual submission
+
     const confirmUpdate = async () => {
         const selectedCategory = paymentCategories.find(cat => cat.name === paymentCategory);
     
@@ -65,24 +81,24 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
                 setShowConfirmation(false);
                 onClose();
             } else {
-                throw new Error(response.data.message || 'Failed to update payment');
+                setError(response.data.message || 'Failed to update payment');
             }
         } catch (error) {
             console.error('Error updating payment:', error);
-            alert(error.response?.data?.message || 'Failed to update payment');
+            setError(error.response?.data?.message || 'Failed to update payment');
         }
     };
     const totalPrice = paymentCategories.find(cat => cat.name === paymentCategory)?.totalPrice || 0;
 
     return (
         <>
-        <Modal 
-            show={isOpen} 
-            onHide={onClose}
-            centered
-            backdrop="static"
-            keyboard={false}
-        >
+            <Modal 
+                show={isOpen && !showConfirmation} 
+                onHide={onClose}
+                centered
+                backdrop="static"
+                keyboard={false}
+            >
             <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
                 <Modal.Title style={{ display: 'flex', alignItems: 'center' }}>
                     <i className="fa-solid fa-pen me-2"></i>
@@ -98,7 +114,7 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
                         <label className="mb-2">Status:</label>
                         <select 
                             value={status} 
-                            onChange={(e) => setStatus(e.target.value)} 
+                            onChange={handleStatusChange}
                             className="form-select"
                             style={modalStyles.select}
                         >
@@ -191,11 +207,10 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
 
          {/* Confirmation */}
          <Modal
-         show={showConfirmation}
-         onHide={() => setShowConfirmation(false)}
-         centered
-         style={{ zIndex: 1070 }}
-     >
+            show={showConfirmation}
+            onHide={() => setShowConfirmation(false)}
+            style={{ ...modalStyles.modalTop, zIndex: 1070 }}
+        >
          <Modal.Header closeButton>
              <Modal.Title>
                  <i className="fas fa-exclamation-circle me-2"></i>
@@ -207,6 +222,9 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
              <div className="mb-2">
                  <strong>Student:</strong> {studentName}
              </div>
+             <div className="mb-2">
+                <strong>Payment Category:</strong> {paymentCategory}
+            </div>
              <div className="mb-2">
                  <strong>New Status:</strong> {status}
              </div>
@@ -246,6 +264,10 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent 
 };
 
 const modalStyles = {
+    modalTop: {
+        top: '0%', 
+        transform: 'translateY(0)', 
+    },
     nonEditable: {
         background: '#f0f0f0',
         padding: '0.5rem',

@@ -9,8 +9,6 @@ import GoogleSignInButton from '../pages/googlelogin';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { auth } from '../pages/firebase/firebaseConfig';
 import { useAuth } from '../context/AuthContext';
-import ConsentModal from '../components/ConsentModal';
-
 
 const Login = () => {
     const { setUser } = useAuth();
@@ -20,12 +18,7 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const [recaptchaToken, setRecaptchaToken] = useState(null);
     const navigate = useNavigate();
-
-    const [showConsentModal, setShowConsentModal] = useState(false);
-    const [pendingGoogleUser, setPendingGoogleUser] = useState(null);
-
-
-
+    const [keepSignedIn, setKeepSignedIn] = useState(false);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -34,7 +27,8 @@ const Login = () => {
             const response = await axios.post('http://localhost:8000/api/login', {
                 email,
                 password,
-                recaptchaToken
+                recaptchaToken,
+                keepSignedIn
             });
 
             if (response.data.token) {
@@ -44,11 +38,18 @@ const Login = () => {
                     _id: response.data.userId,
                     email: response.data.email,
                     position: response.data.position,
-                    loginLogId: response.data.loginLogId
+                    loginLogId: response.data.loginLogId,
+                    sessionExpiry: new Date().getTime() + (keepSignedIn ? 24 : 1) * 60 * 60 * 1000 // 24 hours or 1 hour
                 };
 
-                setPendingGoogleUser(userDetails);
-                setShowConsentModal(true);
+                // Store user details and complete login
+                localStorage.setItem('userDetails', JSON.stringify(userDetails));
+                setUser(userDetails);
+
+                // Navigate based on position
+                if (userDetails.position.toLowerCase() === 'treasurer') {
+                    navigate('/treasurer/dashboard');
+                }
             }
         } catch (error) {
             console.error('Login error:', error);
@@ -57,8 +58,6 @@ const Login = () => {
             setLoading(false);
         }
     };
-
-
 
 
     const handleGoogle = async () => {
@@ -90,11 +89,17 @@ const Login = () => {
                         position: response.data.position,
                         loginLogId: response.data.loginLogId,
                         picture: user.photoURL,
-                        imageUrl: user.photoURL
+                        imageUrl: user.photoURL,
+                        sessionExpiry: new Date().getTime() + (keepSignedIn ? 24 : 1) * 60 * 60 * 1000 // 24 hours or 1 hour
                     };
 
-                    setPendingGoogleUser(userDetails);
-                    setShowConsentModal(true);
+                    // Store user details and complete login
+                    localStorage.setItem('userDetails', JSON.stringify(userDetails));
+                    setUser(userDetails);
+
+                    if (userDetails.position.toLowerCase() === 'treasurer') {
+                        navigate('/treasurer/dashboard');
+                    }
                 } else {
                     setMessage('Access denied. Only authorized users can log in.');
                 }
@@ -104,7 +109,6 @@ const Login = () => {
             setMessage('Failed to login with Google');
         }
     };
-
 
     const togglePassword = () => {
         const passwordInput = document.getElementById('password');
@@ -126,12 +130,11 @@ const Login = () => {
 
     const handleLogout = async () => {
         try {
-            // Assuming you have the userId and userModel stored in your client
             const response = await axios.post('http://localhost:8000/api/logout', {
                 userId: storedUserId,
                 userModel: storedUserModel
             });
-            console.log(response.data.message); // Should log "Logout successful"
+            console.log(response.data.message);
         } catch (error) {
             console.error('Logout error:', error);
         }
@@ -161,28 +164,6 @@ const Login = () => {
         // Log the stored details for debugging
         const storedDetails = localStorage.getItem('userDetails');
         console.log('Stored user details:', storedDetails);
-    };
-
-    const handleConsentAccept = () => {
-        if (pendingGoogleUser) {
-            const userDetails = {
-                ...pendingGoogleUser,
-                sessionExpiry: new Date().getTime() + (24 * 60 * 60 * 1000) // 24 hours
-            };
-            completeLogin(userDetails);
-        }
-        setShowConsentModal(false);
-    };
-
-    const handleConsentDecline = () => {
-        if (pendingGoogleUser) {
-            const userDetails = {
-                ...pendingGoogleUser,
-                sessionExpiry: new Date().getTime() + (60 * 60 * 1000) // 1 hour
-            };
-            completeLogin(userDetails);
-        }
-        setShowConsentModal(false);
     };
 
     const completeLogin = (userDetails) => {
@@ -304,6 +285,22 @@ const Login = () => {
                             </button>
                         </div>
                     </div>
+                    <div className="form-group">
+                   <div className="form-group">
+                        <div className="form-check">
+                            <input
+                                type="checkbox"
+                                className="form-check-input"
+                                id="keepSignedIn"
+                                checked={keepSignedIn}
+                                onChange={(e) => setKeepSignedIn(e.target.checked)}
+                            />
+                            <label className="form-check-label smaller-gray-text" htmlFor="keepSignedIn">
+                                Keep me signed in for 24 hours
+                            </label>
+                        </div>
+                    </div>
+                </div>
 
                     <ReCAPTCHA
                         sitekey="6LcfaG0qAAAAAFTykOtXdpsqkS9ZUeALt2CgFmId"
@@ -323,12 +320,12 @@ const Login = () => {
                     disabled={loading}
                 />
             </div>
-            <ConsentModal
+            {/* <ConsentModal
                 isOpen={showConsentModal}
                 onClose={() => setShowConsentModal(false)}
                 onAccept={handleConsentAccept}
                 onDecline={handleConsentDecline}
-            />
+            /> */}
         </div>
     );
 };

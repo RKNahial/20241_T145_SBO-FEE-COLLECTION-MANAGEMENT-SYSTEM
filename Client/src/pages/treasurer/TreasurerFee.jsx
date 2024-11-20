@@ -25,30 +25,28 @@ const TreasurerFee = () => {
     useEffect(() => {
         const fetchStudents = async () => {
             try {
-                const token = localStorage.getItem('token');
+                const token = localStorage.getItem('token'); 
                 const response = await fetch('http://localhost:8000/api/getAll/students', {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        'Authorization': `Bearer ${token}`, 
                         'Content-Type': 'application/json'
                     }
                 });
-
+    
                 if (!response.ok) {
                     if (response.status === 401) {
                         throw new Error('Unauthorized access. Please login again.');
                     }
                     throw new Error('Failed to fetch students');
                 }
-
+    
                 const data = await response.json();
-                // Filter only active students
                 const activeStudents = data.filter(student => !student.isArchived);
                 setStudents(activeStudents);
             } catch (err) {
                 setError(err.message);
                 if (err.message.includes('Unauthorized')) {
-                    // Handle unauthorized access (e.g., redirect to login)
-                    // You might want to implement a redirect here
+                    window.location.href = '/login';
                 }
             } finally {
                 setLoading(false);
@@ -56,6 +54,12 @@ const TreasurerFee = () => {
         };
         fetchStudents();
     }, []);
+
+    // GET CATEGORY NAME
+    const getSelectedCategoryName = () => {
+        const category = paymentCategories.find(cat => cat._id === selectedCategory);
+        return category ? category.name : '';
+    };
 
     // PAYMENT TAG
     const PaymentStatusTag = ({ status, onClick }) => {
@@ -97,44 +101,92 @@ const TreasurerFee = () => {
     const { triggerPaymentUpdate } = usePayment();
 
     const handleSubmit = async (formData) => {
-        const confirmSave = window.confirm("Do you want to save changes?");
-        if (confirmSave) {
-            try {
-                setStudents(prevStudents =>
-                    prevStudents.map(student =>
-                        student._id === selectedStudent._id
-                            ? { ...student, paymentstatus: formData.status }
-                            : student
-                    )
-                );
+        try {
+            setStudents(prevStudents =>
+                prevStudents.map(student =>
+                    student._id === selectedStudent._id
+                        ? { ...student, paymentstatus: formData.status }
+                        : student
+                )
+            );
+    
+            // Update the categoryPayments state immediately
+            setCategoryPayments(prev => ({
+                ...prev,
+                [selectedStudent._id]: {
+                    status: formData.status,
+                    amountPaid: parseFloat(formData.amountPaid),
+                    totalPrice: formData.totalPrice
+                }
+            }));
 
-                // Trigger payment update to refresh dashboards
-                triggerPaymentUpdate();
+             // Trigger payment update to refresh dashboards
+        triggerPaymentUpdate();
 
-                setSuccessMessage("Payment updated successfully!");
-                setTimeout(() => {
-                    setSuccessMessage('');
-                }, 2500);
+        setSuccessMessage("Payment updated successfully!");
+        setTimeout(() => {
+            setSuccessMessage('');
+        }, 2500);
 
-                setIsModalOpen(false);
+        setIsModalOpen(false);
 
-                setTimeout(async () => {
-                    const response = await fetch('http://localhost:8000/api/getAll/students');
-                    if (!response.ok) {
-                        throw new Error('Failed to refresh student data');
-                    }
-                    const data = await response.json();
-                    const activeStudents = data.filter(student => !student.isArchived);
-                    setStudents(activeStudents);
-                }, 500);
+        // Refresh the data from server
+        try {
+            const token = localStorage.getItem('token'); // Get the token
+            
+            // Fetch updated students with authorization header
+            const studentsResponse = await fetch('http://localhost:8000/api/getAll/students', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
 
-            } catch (error) {
-                console.error('Error updating payment status:', error);
-                setError('Failed to update payment status');
-                setTimeout(() => setError(null), 2500);
+            if (!studentsResponse.ok) {
+                throw new Error('Failed to refresh student data');
             }
+
+            const studentsData = await studentsResponse.json();
+            const activeStudents = studentsData.filter(student => !student.isArchived);
+            setStudents(activeStudents);
+
+            // Fetch updated payment data for the category
+            if (selectedCategory) {
+                const paymentsResponse = await axios.get(
+                    `http://localhost:8000/api/payment-fee/by-category/${selectedCategory}`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    }
+                );
+                
+                if (paymentsResponse.data.success && Array.isArray(paymentsResponse.data.payments)) {
+                    const paymentData = {};
+                    paymentsResponse.data.payments.forEach(payment => {
+                        if (payment.studentId) {
+                            paymentData[payment.studentId._id] = {
+                                status: payment.status || 'Not Paid',
+                                amountPaid: payment.amountPaid || 0,
+                                totalPrice: payment.totalPrice || 0
+                            };
+                        }
+                    });
+                    setCategoryPayments(paymentData);
+                }
+            }
+        } catch (refreshError) {
+            console.error('Error refreshing data:', refreshError);
+            // Don't show error message since the transaction was successful
+            // Just log it for debugging purposes
         }
-    };
+
+    } catch (error) {
+        console.error('Error updating payment status:', error);
+        setError('Failed to update payment status');
+        setTimeout(() => setError(null), 2500);
+    }
+};
 
     //  VIEW PAYMENT MODAL
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -211,7 +263,7 @@ const TreasurerFee = () => {
                 );
 
                 if (emailResponse.status === 200) {
-                    setEmailSuccessMessage('Payment details sent successfully!');
+                    setEmailSuccessMessage('Payment details emailed successfully!');
                     setTimeout(() => setEmailSuccessMessage(''), 3000);
                 }
             }
@@ -399,7 +451,7 @@ const TreasurerFee = () => {
                                     <div className="alert alert-danger">{error}</div>
                                 ) : (
                                     <div className="table-responsive mt-3">
-                                        <table className="table table-bordered table-hover">
+                                        <table className="table table-hover">
                                             <thead>
                                                 <tr>
                                                     <th>#</th>
@@ -511,6 +563,7 @@ const TreasurerFee = () => {
                     studentName={selectedStudent.name}
                     selectedStudent={selectedStudent}
                     onSave={handleSubmit}
+                    initialPaymentCategory={getSelectedCategoryName()}
                 />
             )}
 

@@ -146,13 +146,6 @@ const TreasurerArchivedStud = () => {
         }
     };
 
-    const handleOpenGoogleNotes = (studentId) => {
-        const noteTitle = `Notes for ${studentId}`;
-        const noteContent = `Add your notes for student ${studentId} here.`;
-        const googleKeepUrl = `https://keep.google.com/#NOTE&title=${encodeURIComponent(noteTitle)}&text=${encodeURIComponent(noteContent)}`;
-        window.open(googleKeepUrl, '_blank');
-    };
-
     const handleSearchSubmit = (e) => {
         e.preventDefault();
     };
@@ -258,12 +251,6 @@ const TreasurerArchivedStud = () => {
                                                         >
                                                             <i className="fas fa-edit"></i>
                                                         </Link>
-                                                        <button
-                                                            className="btn btn-notes btn-sm"
-                                                            onClick={() => handleOpenGoogleNotes(student.studentId)}
-                                                        >
-                                                            <i className="fas fa-sticky-note"></i>
-                                                        </button>
                                                         <button
                                                             className="btn btn-archive btn-open btn-sm"
                                                             onClick={() => handleArchiveAction(student._id, student.name)}

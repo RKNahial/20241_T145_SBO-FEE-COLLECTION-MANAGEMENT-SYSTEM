@@ -1,5 +1,5 @@
-// src/components/ViewFeeModal.jsx
 import React, { useState, useEffect } from 'react';
+import { Modal, Button, Row, Col, Spinner, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import emailjs from '@emailjs/browser';
 
@@ -16,10 +16,8 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId }) => {
                         ? `http://localhost:8000/api/payment-fee/details/${student._id}?category=${categoryId}`
                         : `http://localhost:8000/api/payment-fee/details/${student._id}`;
                     const response = await axios.get(url);
-                    console.log('API Response:', response.data);
                     if (response.data.success) {
                         setPaymentDetails(response.data.paymentFee);
-                        console.log('Set Payment Details:', response.data.paymentFee);
                     } else {
                         throw new Error(response.data.message);
                     }
@@ -37,18 +35,8 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId }) => {
         }
     }, [isOpen, student, categoryId]);
 
-    if (!isOpen) return null;
-
-    const handleClose = (e) => {
-        if (e.target.id === 'modal') {
-            onClose();
-        }
-    };
-
     const handleSendEmail = async () => {
         if (!student.institutionalEmail || !paymentDetails) return;
-
-        console.log('Payment Details before email:', paymentDetails);
 
         const templateParams = {
             from_name: "COT-SBO COLLECTION FEE MANAGEMENT SYSTEM",
@@ -62,8 +50,6 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId }) => {
                 `• Amount: ₱${t.amount.toFixed(2)}\n  Date: ${t.formattedDate}\n  Status: ${t.previousStatus || 'New'} → ${t.newStatus}`
             ).join('\n\n') || 'No transaction history'
         };
-
-        console.log('Template Params:', templateParams);
 
         try {
             const response = await emailjs.send(
@@ -83,45 +69,63 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId }) => {
     };
 
     return (
-        <div id="modal" onClick={handleClose} style={modalStyles.overlay}>
-            <div style={modalStyles.modal}>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
+        <Modal
+            show={isOpen}
+            onHide={onClose}
+            centered
+            size="md"
+            backdrop="static"
+            keyboard={false}
+        >
+            <Modal.Header closeButton className="border-0">
+                <Modal.Title>
                     <i className="fa-solid fa-eye me-2"></i>
-                    <h2 style={{ margin: 0 }}>View Payment Details</h2>
-                </div>
+                    View Payment Details
+                </Modal.Title>
+            </Modal.Header>
 
+            <Modal.Body className="px-4">
                 {loading ? (
-                    <div>Loading payment details...</div>
+                    <div className="text-center">
+                        <Spinner animation="border" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </Spinner>
+                    </div>
                 ) : error ? (
-                    <div style={{ color: 'red' }}>{error}</div>
+                    <Alert variant="danger">{error}</Alert>
                 ) : (
                     <>
-                        <div style={modalStyles.row}>
-                            <span style={{ fontWeight: 'bold' }}>Student:</span> {student.name}
-                        </div>
-                        <div style={modalStyles.row}>
-                            <span style={{ fontWeight: 'bold' }}>Payment Status:</span> {student.paymentstatus}
-                        </div>
-                        <div style={modalStyles.row}>
-                            <span style={{ fontWeight: 'bold' }}>Payment Category:</span>
-                            {paymentDetails?.paymentCategory || 'N/A'}
-                        </div>
-                        <div style={modalStyles.row}>
-                            <span style={{ fontWeight: 'bold' }}>Total Price:</span>
-                            ₱{paymentDetails?.totalPrice?.toFixed(2) || '0.00'}
-                        </div>
-                        <div style={modalStyles.row}>
-                            <span style={{ fontWeight: 'bold' }}>Amount Paid:</span>
-                            ₱{paymentDetails?.amountPaid?.toFixed(2) || '0.00'}
-                        </div>
+                        <Row className="mb-3">
+                            <Col xs={5} className="fw-bold">Student:</Col>
+                            <Col>{student.name}</Col>
+                        </Row>
+                        <Row className="mb-3">
+                            <Col xs={5} className="fw-bold">Payment Status:</Col>
+                            <Col>{student.paymentstatus}</Col>
+                        </Row>
+                        <Row className="mb-3">
+                            <Col xs={5} className="fw-bold">Payment Category:</Col>
+                            <Col>{paymentDetails?.paymentCategory || 'N/A'}</Col>
+                        </Row>
+                        <Row className="mb-3">
+                            <Col xs={5} className="fw-bold">Total Price:</Col>
+                            <Col>₱{paymentDetails?.totalPrice?.toFixed(2) || '0.00'}</Col>
+                        </Row>
+                        <Row className="mb-3">
+                            <Col xs={5} className="fw-bold">Amount Paid:</Col>
+                            <Col>₱{paymentDetails?.amountPaid?.toFixed(2) || '0.00'}</Col>
+                        </Row>
 
-                        {/* Transaction History */}
-                        <div style={modalStyles.section}>
-                            <h3 style={modalStyles.sectionTitle}>Transaction History</h3>
+                        <div className="mt-4 pt-3 border-top">
+                            <h5 className="mb-3">Transaction History</h5>
                             {paymentDetails?.transactions?.length > 0 ? (
-                                <div style={modalStyles.transactionList}>
+                                <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
                                     {paymentDetails.transactions.map((transaction, index) => (
-                                        <div key={index} style={modalStyles.transaction}>
+                                        <div 
+                                            key={index} 
+                                            className="p-3 mb-2 bg-light rounded"
+                                            style={{ fontSize: '0.875rem' }}
+                                        >
                                             <div>Amount: ₱{transaction.amount.toFixed(2)}</div>
                                             <div>Date: {transaction.formattedDate}</div>
                                             <div>Status Change: {transaction.previousStatus || 'New'} → {transaction.newStatus}</div>
@@ -129,95 +133,30 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId }) => {
                                     ))}
                                 </div>
                             ) : (
-                                <div>No transaction history available</div>
+                                <div className="text-muted">No transaction history available</div>
                             )}
-                        </div>
-
-                        <div style={modalStyles.buttonContainerRight}>
-                            <button
-                                type="button"
-                                onClick={handleSendEmail}
-                                style={{
-                                    ...modalStyles.buttonStyles,
-                                    backgroundColor: '#28a745',
-                                    marginRight: '0.5rem'
-                                }}
-                            >
-                                Send Email
-                            </button>
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                style={{ ...modalStyles.buttonStyles, backgroundColor: '#DC3545' }}
-                            >
-                                Close
-                            </button>
                         </div>
                     </>
                 )}
-            </div>
-        </div>
-    );
-};
+            </Modal.Body>
 
-const modalStyles = {
-    overlay: {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1050,
-    },
-    modal: {
-        background: 'white',
-        padding: '1.25rem',
-        borderRadius: '1rem',
-        width: '25rem',
-        boxShadow: '0 0.125rem 0.625rem rgba(0, 0, 0, 0.1)',
-        zIndex: 1060,
-    },
-    row: {
-        marginBottom: '0.625rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    buttonContainerRight: {
-        display: 'flex',
-        justifyContent: 'flex-end',
-    },
-    buttonStyles: {
-        borderRadius: '0.35rem',
-        color: '#EAEAEA',
-        border: 'none',
-        padding: '0.5rem 1rem',
-        transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
-    },
-    section: {
-        marginTop: '1rem',
-        borderTop: '1px solid #dee2e6',
-        paddingTop: '1rem'
-    },
-    sectionTitle: {
-        fontSize: '1rem',
-        marginBottom: '0.5rem'
-    },
-    transactionList: {
-        maxHeight: '200px',
-        overflowY: 'auto'
-    },
-    transaction: {
-        padding: '0.5rem',
-        marginBottom: '0.5rem',
-        backgroundColor: '#f8f9fa',
-        borderRadius: '0.25rem',
-        fontSize: '0.875rem'
-    }
+            <Modal.Footer className="border-0 px-4 pb-4">
+                <Button
+                    variant="success"
+                    onClick={handleSendEmail}
+                    className="me-2"
+                >
+                    Send Email
+                </Button>
+                <Button
+                    variant="danger"
+                    onClick={onClose}
+                >
+                    Close
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    );
 };
 
 export default ViewFeeModal;

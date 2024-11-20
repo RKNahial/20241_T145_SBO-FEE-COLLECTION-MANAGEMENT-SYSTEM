@@ -17,6 +17,7 @@ import TreasurerNavbar from "./TreasurerNavbar";
 import { usePayment } from '../../context/PaymentContext';
 import '../../assets/css/calendar.css';
 
+
 ChartJS.register(
     CategoryScale,
     LinearScale,
@@ -386,7 +387,7 @@ const TreasurerDashboard = () => {
                                 <div style={{ flex: 1 }}>
                                     <div className="calendar-card">
                                         <div className="calendar-header">
-                                            <h5 className="calendar-title">Calendar</h5>
+                                            <h5 className="calendar-title header">Calendar</h5>
                                             <button
                                                 className="calendar-add-button"
                                                 onClick={handleAddToCalendar}
