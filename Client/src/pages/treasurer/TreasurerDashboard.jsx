@@ -16,6 +16,8 @@ import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
 import { usePayment } from '../../context/PaymentContext';
 import '../../assets/css/calendar.css';
+import { getAnalytics, logEvent } from "firebase/analytics";
+import { app } from '../firebase/firebaseConfig';
 
 
 ChartJS.register(
@@ -52,6 +54,9 @@ const TreasurerDashboard = () => {
         }
         return shouldShow;
     });
+
+    // Add analytics initialization
+    const analytics = getAnalytics(app);
 
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
@@ -157,6 +162,15 @@ const TreasurerDashboard = () => {
         };
 
         fetchReportData();
+    }, []);
+
+    useEffect(() => {
+        logEvent(analytics, 'page_view', {
+            page_title: 'Treasurer Dashboard',
+            page_location: window.location.href,
+            page_path: window.location.pathname,
+            user_role: 'treasurer'
+        });
     }, []);
 
     const formatAmount = (amount) => {

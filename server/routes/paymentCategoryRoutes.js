@@ -9,7 +9,6 @@ const {
     toggleArchiveStatus 
 } = require('../controllers/paymentCategoryController');
 
-const { getPaymentsByCategory } = require('../controllers/paymentFeeController');
 
 // Status-specific Routes
 router.get('/payment-categories/active', getActiveCategories);
@@ -22,6 +21,5 @@ router.put('/payment-categories/:id', updateCategory);
 router.put('/payment-categories/:id/toggle-archive', toggleArchiveStatus);
 
 // Payment Fee Routes
-router.get('/payment-fee/by-category/:categoryId', getPaymentsByCategory);
 
 module.exports = router;

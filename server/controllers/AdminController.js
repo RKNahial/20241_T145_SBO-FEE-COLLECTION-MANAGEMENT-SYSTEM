@@ -1,4 +1,6 @@
 const Admin = require('../models/AdminSchema');
+const Student = require('../models/studentSchema');
+const Officer = require('../models/OfficerSchema');
 
 exports.getAllAdmins = async (req, res) => {
     try {
@@ -100,3 +102,35 @@ exports.updateAdmin = async (req, res) => {
         });
     }
 };
+
+exports.getActiveStudentsCount = async (req, res) => {
+    try {
+        const count = await Student.countDocuments({ isArchived: false });
+        res.json({ count });
+    } catch (error) {
+        console.error('Error counting students:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.getActiveOfficersCount = async (req, res) => {
+    try {
+        const count = await Officer.countDocuments({ isArchived: false });
+        res.json({ count });
+    } catch (error) {
+        console.error('Error counting officers:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.getActiveAdminsCount = async (req, res) => {
+    try {
+        const count = await Admin.countDocuments({ isArchived: false });
+        res.json({ count });
+    } catch (error) {
+        console.error('Error counting admins:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+

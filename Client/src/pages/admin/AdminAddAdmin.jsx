@@ -1,59 +1,96 @@
 // src/pages/admin/AdminAddAdmin.jsx
 import { Helmet } from 'react-helmet';
 import React, { useState } from "react";
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { Modal, Button } from 'react-bootstrap';
 import AdminSidebar from "./AdminSidebar";
 import AdminNavbar from "./AdminNavbar";
-import axios from 'axios';
 
 const AdminAddAdmin = () => {
-    const [isCollapsed, setIsCollapsed] = useState(false);
     const [formData, setFormData] = useState({
-        ID: '',
         name: '',
+        ID: '',
         email: '',
-        position: 'Admin'
+        position: 'Admin'  // Default value since this is for adding admins
     });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [successMessage, setSuccessMessage] = useState('');
-    const [temporaryPassword, setTemporaryPassword] = useState('');
+
+    const [message, setMessage] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    const toggleSidebar = () => setIsCollapsed(prev => !prev);
 
     const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError(null);
-        setSuccessMessage('');
+    const navigate = useNavigate();
 
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setShowModal(true);
+    };
+
+    const confirmSubmit = async () => {
+        setShowModal(false);
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.post(
-                'http://localhost:8000/api/users/register',
-                formData,
-                {
-                    headers: { Authorization: `Bearer ${token}` }
+            console.log('Current token:', token);
+
+            if (!token) {
+                console.log('No token found in localStorage');
+                setMessage({
+                    type: 'error',
+                    text: 'No authentication token found. Please login again.'
+                });
+                navigate('/login');
+                return;
+            }
+
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
+            };
+            console.log('Request config:', config);
+
+            const response = await axios.post(
+                'http://localhost:8000/api/add/admin',
+                formData,
+                config
             );
 
-            setSuccessMessage('Admin added successfully');
-            setTemporaryPassword(response.data.data.temporaryPassword);
-            setFormData({ ID: '', name: '', email: '', position: 'Admin' });
-        } catch (error) {
-            setError(error.response?.data?.message || 'Error adding admin');
-        } finally {
-            setLoading(false);
-        }
-    };
+            console.log('API response:', response);
+            setMessage({ type: 'success', text: 'Admin added successfully!' });
 
-    // NAV AND SIDEBAR
-    const toggleSidebar = () => {
-        setIsCollapsed(prev => !prev);
+            setTimeout(() => {
+                navigate('/admin/admins');
+            }, 2000);
+
+        } catch (error) {
+            console.error('Error details:', {
+                status: error.response?.status,
+                statusText: error.response?.statusText,
+                data: error.response?.data,
+                headers: error.response?.headers
+            });
+
+            if (error.response?.status === 401) {
+                const errorMessage = error.response?.data?.message || 'Session expired. Please login again.';
+                console.log('Authentication error:', errorMessage);
+                setMessage({
+                    type: 'error',
+                    text: errorMessage
+                });
+                localStorage.removeItem('token');
+            } else {
+                setMessage({
+                    type: 'error',
+                    text: error.response?.data?.message || 'Failed to add admin. Please try again.'
+                });
+            }
+        }
     };
 
     return (
@@ -61,27 +98,26 @@ const AdminAddAdmin = () => {
             <Helmet>
                 <title>Admin | Add Admin</title>
             </Helmet>
-            {/* NAVBAR AND SIDEBAR */}
             <AdminNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
                 <AdminSidebar isCollapsed={isCollapsed} />
-                <div
-                    id="layoutSidenav_content"
-                    style={{
-                        marginLeft: isCollapsed ? '5rem' : '15.625rem',
-                        transition: 'margin-left 0.3s',
-                        flexGrow: 1,
-                        marginTop: '3.5rem'
-                    }}
-                >
-                    {/* CONTENT */}
-                    <div className="container-fluid px-4 mb-5 form-top">
+                <div id="layoutSidenav_content">
+                    <div className="container-fluid px-4">
+                        <div className="row align-items-center">
+                            <div className="col-6">
+                                <h1 className="mt-4 mb-4">Add Admin</h1>
+                            </div>
+                        </div>
+
+                        {message && (
+                            <div className={`alert ${message.type === 'success' ? 'alert-success' : 'alert-danger'}`}>
+                                {message.text}
+                            </div>
+                        )}
+
                         <div className="row">
-                            <div className="col-md-6">
+                            <div className="col-lg-12">
                                 <div className="card mb-4">
-                                    <div className="card-header">
-                                        <i className="far fa-plus me-2"></i> <strong>Add New Admin</strong>
-                                    </div>
                                     <div className="card-body">
                                         <form onSubmit={handleSubmit}>
                                             <div className="mb-3">
@@ -89,22 +125,22 @@ const AdminAddAdmin = () => {
                                                 <input
                                                     type="text"
                                                     name="name"
-                                                    className="form-control system"
-                                                    placeholder="Enter admin name"
                                                     value={formData.name}
                                                     onChange={handleChange}
+                                                    className="form-control system"
+                                                    placeholder="Enter admin name"
                                                     required
                                                 />
                                             </div>
                                             <div className="mb-3">
-                                                <label className="mb-1">Admin ID</label>
+                                                <label className="mb-1">Employee ID</label>
                                                 <input
                                                     type="text"
                                                     name="ID"
-                                                    className="form-control system"
-                                                    placeholder="Enter admin ID"
                                                     value={formData.ID}
                                                     onChange={handleChange}
+                                                    className="form-control system"
+                                                    placeholder="Enter employee ID"
                                                     required
                                                 />
                                             </div>
@@ -113,31 +149,19 @@ const AdminAddAdmin = () => {
                                                 <input
                                                     type="email"
                                                     name="email"
-                                                    className="form-control"
-                                                    placeholder="Enter institutional email"
                                                     value={formData.email}
                                                     onChange={handleChange}
+                                                    className="form-control"
+                                                    placeholder="Enter email address"
                                                     required
                                                 />
                                             </div>
-                                            {error && <div className="alert alert-danger">{error}</div>}
-                                            {successMessage && (
-                                                <div className="alert alert-success">
-                                                    {successMessage}
-                                                    {temporaryPassword && (
-                                                        <div>
-                                                            Temporary Password: <strong>{temporaryPassword}</strong>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
                                             <div className="mb-0">
                                                 <button
                                                     type="submit"
                                                     className="btn system-button"
-                                                    disabled={loading}
                                                 >
-                                                    {loading ? 'Adding...' : <><i className="far fa-plus me-1"></i> Add</>}
+                                                    <i className="far fa-plus me-1"></i> Add
                                                 </button>
                                             </div>
                                         </form>
@@ -148,6 +172,31 @@ const AdminAddAdmin = () => {
                     </div>
                 </div>
             </div>
+
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm Add Admin</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Do you want to add <strong>{formData.name}</strong> as an admin?
+                </Modal.Body>
+                <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button
+                        variant="btn btn-confirm"
+                        onClick={confirmSubmit}
+                        style={{ flex: 'none' }}
+                    >
+                        Confirm
+                    </Button>
+                    <Button
+                        variant="btn btn-cancel"
+                        onClick={() => setShowModal(false)}
+                        style={{ marginRight: '0.5rem', flex: 'none' }}
+                    >
+                        Cancel
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

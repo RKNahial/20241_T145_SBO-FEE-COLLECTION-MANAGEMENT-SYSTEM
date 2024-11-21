@@ -1,9 +1,16 @@
 const Student = require('../models/studentSchema');
 
 // Function to add a new student
-exports.addStudent = async (req, res) => {
+exports.addStudent = async (req, res, next) => {
     try {
-        // Check if user is authenticated (req.user will be set by auth middleware)
+        // Log request details
+        console.log('\n--- New Student Addition Request ---');
+        console.log('Time:', new Date().toISOString());
+        console.log('Headers:', req.headers);
+        console.log('Body:', req.body);
+        console.log('User:', req.user);
+
+        // Check if user is authenticated
         if (!req.user) {
             return res.status(401).json({ message: 'Unauthorized access' });
         }
@@ -22,9 +29,21 @@ exports.addStudent = async (req, res) => {
         // Save the student to the database
         await student.save();
         
+        // Log response details
+        console.log('\n--- Response ---');
+        console.log('Status:', res.statusCode);
+        console.log('Response Body:', { message: 'Student added successfully' });
+        console.log('------------------------\n');
+
         res.status(201).json({ message: 'Student added successfully' });
     } catch (error) {
+        // Log error details
+        console.log('\n--- Error ---');
+        console.log('Error:', error);
+        console.log('------------------------\n');
+        
         console.error('Error adding student:', error);
         res.status(500).json({ message: 'Failed to add student', error: error.message });
+        next(error);
     }
 };

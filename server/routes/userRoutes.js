@@ -3,7 +3,7 @@ const router = express.Router();
 const { registerUser, addAdmin } = require('../controllers/userController');
 const authMiddleware = require('../middleware/authMiddleware');
 
-router.post('/register', registerUser);
-router.post('/admin/add', authMiddleware, addAdmin);
+router.post('/users/register', registerUser);
+router.post('/users/admin/add', authMiddleware, addAdmin);
 
 module.exports = router;

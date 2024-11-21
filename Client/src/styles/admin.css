@@ -1,0 +1,9 @@
+.analytics-card {
+    background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+    color: white;
+}
+
+.analytics-icon {
+    font-size: 2rem;
+    opacity: 0.8;
+} 

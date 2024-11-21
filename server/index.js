@@ -41,17 +41,17 @@ connectDB();
 
 
 // Correct route prefixes
-app.use('/api/users', userRoutes);
+app.use('/api', userRoutes);
 app.use('/api', loginRoutes);
-app.use('/api/auth', googleroutes);
+app.use('/api', googleroutes);
 app.use('/api', studentRoutes);
-app.use('/api/getAll/students', GetAllstudentsRoutes);
+app.use('/api', GetAllstudentsRoutes);
 app.use('/api', ArchiveStud); // Mount the student routes under /api
 app.use('/api', UpdateStudentRoutes);
 app.use('/api', duesPaymentRoutes);
 app.use('/api', paymentCategoryRoutes);
-app.use('/api/payment-fee', paymentRoutes);
-app.use('/api/profile', profileRoutes);
+app.use('/api', paymentRoutes);
+app.use('/api', profileRoutes);
 app.use('/api', officialRoutes);
 app.use('/api', adminRoutes);
 

@@ -1,43 +1,14 @@
-const Student = require('../models/studentSchema');
+const updateStudentService = require('../services/updateStudentService');
 
 const updateStudent = async (req, res) => {
     try {
         const { id } = req.params;
-        const { studentId, name, yearLevel, program, institutionalEmail } = req.body;
-
-        console.log('Updating student with ID:', id);
-        console.log('Update data:', req.body);
-
+        
         // Validate input
-        if (!studentId || !name || !yearLevel || !program || !institutionalEmail) {
-            return res.status(400).json({
-                success: false,
-                message: 'All fields are required'
-            });
-        }
+        await updateStudentService.validateInput(req.body);
 
-        // Find student and update with all fields
-        const updatedStudent = await Student.findByIdAndUpdate(
-            id,
-            {
-                studentId,
-                name,
-                yearLevel,
-                program,
-                institutionalEmail
-            },
-            { new: true, runValidators: true }
-        );
-
-        if (!updatedStudent) {
-            console.log('Student not found with ID:', id);
-            return res.status(404).json({
-                success: false,
-                message: 'Student not found'
-            });
-        }
-
-        console.log('Student updated successfully:', updatedStudent);
+        // Update student
+        const updatedStudent = await updateStudentService.updateStudent(id, req.body);
 
         res.status(200).json({
             success: true,
@@ -47,6 +18,21 @@ const updateStudent = async (req, res) => {
 
     } catch (error) {
         console.error('Error updating student:', error);
+        
+        if (error.message === 'All fields are required') {
+            return res.status(400).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        if (error.message === 'Student not found') {
+            return res.status(404).json({
+                success: false,
+                message: error.message
+            });
+        }
+
         res.status(500).json({
             success: false,
             message: 'Error updating student',

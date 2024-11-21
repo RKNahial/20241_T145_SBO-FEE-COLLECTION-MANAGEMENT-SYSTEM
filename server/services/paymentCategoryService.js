@@ -3,38 +3,65 @@ const PaymentCategory = require('../models/PaymentCategory');
 
 class PaymentCategoryService {
     async createCategory(categoryData) {
-        try {
-            // Check if category with same ID already exists
-            const existingCategory = await PaymentCategory.findOne({ 
-                categoryId: categoryData.categoryId 
-            });
-            
-            if (existingCategory) {
-                throw new Error('Category ID already exists');
-            }
-
-            const category = new PaymentCategory(categoryData);
-            await category.save();
-            return category;
-        } catch (error) {
-            throw error;
+        const { categoryId, name, totalPrice } = categoryData;
+        
+        if (!categoryId) {
+            throw new Error('Category ID is required');
         }
+
+        const newCategory = new PaymentCategory({
+            categoryId,
+            name,
+            totalPrice
+        });
+
+        return await newCategory.save();
     }
 
     async getAllCategories() {
-        try {
-            return await PaymentCategory.find({}).sort({ createdAt: -1 });
-        } catch (error) {
-            throw error;
-        }
+        return await PaymentCategory.find().sort({ createdAt: -1 });
     }
 
     async getCategoryById(id) {
-        try {
-            return await PaymentCategory.findById(id);
-        } catch (error) {
-            throw error;
+        const category = await PaymentCategory.findById(id);
+        if (!category) {
+            throw new Error('Category not found');
         }
+        return category;
+    }
+
+    async updateCategory(id, updateData) {
+        const { name, totalPrice } = updateData;
+        const updatedCategory = await PaymentCategory.findByIdAndUpdate(
+            id,
+            { 
+                name, 
+                totalPrice,
+                updatedAt: new Date()
+            },
+            { new: true }
+        );
+
+        if (!updatedCategory) {
+            throw new Error('Category not found');
+        }
+        return updatedCategory;
+    }
+
+    async toggleArchiveStatus(id) {
+        const category = await PaymentCategory.findById(id);
+        if (!category) {
+            throw new Error('Category not found');
+        }
+
+        category.isArchived = !category.isArchived;
+        await category.save();
+        return category;
+    }
+
+    async getActiveCategories() {
+        return await PaymentCategory.find({ isArchived: false })
+            .sort({ createdAt: -1 });
     }
 }
 

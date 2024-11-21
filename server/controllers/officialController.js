@@ -1,34 +1,8 @@
-const Admin = require('../models/AdminSchema');
-const Treasurer = require('../models/TreasurerSchema');
-const Officer = require('../models/OfficerSchema');
-const Governor = require('../models/GovernorSchema');
+const officialService = require('../services/officialService');
 
-// Get all officials (Officers, Treasurers, Governors)
 exports.getAllOfficials = async (req, res) => {
     try {
-        // Fetch data from all collections
-        const [officers, treasurers, governors] = await Promise.all([
-            Officer.find().select('-password'),
-            Treasurer.find().select('-password'),
-            Governor.find().select('-password')
-        ]);
-
-        // Combine and format the data
-        const allOfficials = [
-            ...officers.map(officer => ({
-                ...officer.toObject(),
-                type: 'Officer'
-            })),
-            ...treasurers.map(treasurer => ({
-                ...treasurer.toObject(),
-                type: 'Treasurer'
-            })),
-            ...governors.map(governor => ({
-                ...governor.toObject(),
-                type: 'Governor'
-            }))
-        ];
-
+        const allOfficials = await officialService.getAllOfficials();
         res.status(200).json({
             success: true,
             data: allOfficials
@@ -43,48 +17,13 @@ exports.getAllOfficials = async (req, res) => {
     }
 };
 
-// Archive/Unarchive official
 exports.toggleArchiveStatus = async (req, res) => {
     try {
         const { id } = req.params;
         const { type } = req.query;
         const isArchiving = req.path.includes('archive');
 
-        let Model;
-        switch (type) {
-            case 'Officer':
-                Model = Officer;
-                break;
-            case 'Treasurer':
-                Model = Treasurer;
-                break;
-            case 'Governor':
-                Model = Governor;
-                break;
-            default:
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid official type'
-                });
-        }
-
-        const updateData = {
-            isArchived: isArchiving,
-            archivedAt: isArchiving ? new Date() : null
-        };
-
-        const official = await Model.findByIdAndUpdate(
-            id,
-            updateData,
-            { new: true }
-        );
-
-        if (!official) {
-            return res.status(404).json({
-                success: false,
-                message: 'Official not found'
-            });
-        }
+        const official = await officialService.toggleArchiveStatus(id, type, isArchiving);
 
         res.status(200).json({
             success: true,
@@ -104,38 +43,11 @@ exports.toggleArchiveStatus = async (req, res) => {
 exports.getOfficialById = async (req, res) => {
     try {
         const { id } = req.params;
-        
-        // Try to find the official in each collection
-        let official = await Officer.findById(id).select('-password');
-        let type = 'Officer';
-
-        if (!official) {
-            official = await Treasurer.findById(id).select('-password');
-            type = 'Treasurer';
-        }
-
-        if (!official) {
-            official = await Governor.findById(id).select('-password');
-            type = 'Governor';
-        }
-
-        if (!official) {
-            return res.status(404).json({
-                success: false,
-                message: 'Official not found'
-            });
-        }
-
-        // Add the type and position to the response
-        const officialWithType = {
-            ...official.toObject(),
-            type,
-            position: official.position || type // Use existing position or fallback to type
-        };
+        const official = await officialService.getOfficialById(id);
 
         res.status(200).json({
             success: true,
-            data: officialWithType
+            data: official
         });
     } catch (error) {
         console.error('Error fetching official:', error);
@@ -152,7 +64,6 @@ exports.updateOfficial = async (req, res) => {
         const { id } = req.params;
         const { name, ID, email, position, type } = req.body;
 
-        // Validate required fields
         if (!name || !ID || !email || !position || !type) {
             return res.status(400).json({
                 success: false,
@@ -160,65 +71,12 @@ exports.updateOfficial = async (req, res) => {
             });
         }
 
-        let Model;
-        switch (type) {
-            case 'Officer':
-                Model = Officer;
-                break;
-            case 'Treasurer':
-                Model = Treasurer;
-                break;
-            case 'Governor':
-                Model = Governor;
-                break;
-            default:
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid official type'
-                });
-        }
+        const updatedOfficial = await officialService.updateOfficial(id, req.body);
 
-        // Check if email already exists for another user
-        const existingUser = await Model.findOne({ 
-            email: email,
-            _id: { $ne: id } // Exclude current user
-        });
-
-        if (existingUser) {
-            return res.status(400).json({
-                success: false,
-                message: 'Email already exists'
-            });
-        }
-
-        const updatedOfficial = await Model.findByIdAndUpdate(
-            id,
-            { 
-                name, 
-                ID, 
-                email, 
-                position,
-                updatedAt: new Date()
-            },
-            { 
-                new: true, 
-                runValidators: true 
-            }
-        ).select('-password');
-
-        if (!updatedOfficial) {
-            return res.status(404).json({
-                success: false,
-                message: 'Official not found'
-            });
-        }
-
-        // Add audit log here if needed
-        
         res.status(200).json({
             success: true,
             message: 'Official updated successfully',
-            data: { ...updatedOfficial.toObject(), type }
+            data: updatedOfficial
         });
     } catch (error) {
         console.error('Error updating official:', error);

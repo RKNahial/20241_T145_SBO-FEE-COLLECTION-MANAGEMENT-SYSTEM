@@ -1,32 +1,32 @@
-const Officer = require('../models/OfficerSchema');
-const ArchivedOfficer = require('../models/OfficerArchive');
+const officerArchiveService = require('../services/officerArchiveService');
 
-// Function to archive an officer
-async function archiveOfficer(officerId, reason) {
+exports.archiveOfficer = async (req, res) => {
     try {
-        // Find the officer in the active collection
-        const officer = await Officer.findOne({ studentID: officerId });
-        if (!officer) return { error: "Officer not found" };
+        const { officerId } = req.params;
+        const { reason } = req.body;
 
-        // Create a new archived officer document
-        const archivedOfficer = new ArchivedOfficer({
-            ...officer.toObject(),  // Copy officer details
-            archived_date: new Date(),
-            archived_reason: reason,
-        });
-
-        // Save the archived officer and remove from active collection
-        await archivedOfficer.save();
-        await Officer.deleteOne({ studentID: officerId });
-
-        return { message: "Officer archived successfully" };
+        const result = await officerArchiveService.archiveOfficer(officerId, reason);
+        res.status(200).json(result);
     } catch (error) {
-        console.error("Error archiving officer:", error);
-        return { error: "Failed to archive officer" };
+        console.error('Error in archiveOfficer controller:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to archive officer',
+            error: error.message
+        });
     }
-}
+};
 
-// Export the function
-module.exports = {
-    archiveOfficer,
+exports.getArchivedOfficers = async (req, res) => {
+    try {
+        const result = await officerArchiveService.getArchivedOfficers();
+        res.status(200).json(result);
+    } catch (error) {
+        console.error('Error in getArchivedOfficers controller:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch archived officers',
+            error: error.message
+        });
+    }
 };

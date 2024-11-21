@@ -1,21 +1,9 @@
 // controllers/paymentCategoryController.js
-const PaymentCategory = require('../models/PaymentCategory');
+const paymentCategoryService = require('../services/paymentCategoryService');
 
 exports.createCategory = async (req, res) => {
     try {
-        const { categoryId, name, totalPrice } = req.body;
-
-        if (!categoryId) {
-            return res.status(400).json({ message: 'Category ID is required' });
-        }
-
-        const newCategory = new PaymentCategory({
-            categoryId,
-            name,
-            totalPrice
-        });
-
-        const savedCategory = await newCategory.save();
+        const savedCategory = await paymentCategoryService.createCategory(req.body);
         res.status(201).json({ 
             success: true,
             category: savedCategory,
@@ -38,7 +26,7 @@ exports.createCategory = async (req, res) => {
 
 exports.getAllCategories = async (req, res) => {
     try {
-        const categories = await PaymentCategory.find().sort({ createdAt: -1 });
+        const categories = await paymentCategoryService.getAllCategories();
         res.status(200).json({
             success: true,
             categories
@@ -53,36 +41,22 @@ exports.getAllCategories = async (req, res) => {
 
 exports.getCategoryById = async (req, res) => {
     try {
-        const category = await PaymentCategory.findById(req.params.id);
-        if (!category) {
-            return res.status(404).json({ message: 'Category not found' });
-        }
+        const category = await paymentCategoryService.getCategoryById(req.params.id);
         res.json(category);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching category', error: error.message });
+        res.status(500).json({ 
+            message: 'Error fetching category', 
+            error: error.message 
+        });
     }
 };
 
 exports.updateCategory = async (req, res) => {
     try {
-        const { name, totalPrice } = req.body;
-        const updatedCategory = await PaymentCategory.findByIdAndUpdate(
+        const updatedCategory = await paymentCategoryService.updateCategory(
             req.params.id,
-            { 
-                name, 
-                totalPrice,
-                updatedAt: new Date()
-            },
-            { new: true }
+            req.body
         );
-
-        if (!updatedCategory) {
-            return res.status(404).json({ 
-                success: false,
-                message: 'Category not found' 
-            });
-        }
-
         res.json({
             success: true,
             message: 'Category updated successfully',
@@ -99,17 +73,7 @@ exports.updateCategory = async (req, res) => {
 
 exports.toggleArchiveStatus = async (req, res) => {
     try {
-        const category = await PaymentCategory.findById(req.params.id);
-        if (!category) {
-            return res.status(404).json({ 
-                success: false,
-                message: 'Category not found' 
-            });
-        }
-
-        category.isArchived = !category.isArchived;
-        await category.save();
-
+        const category = await paymentCategoryService.toggleArchiveStatus(req.params.id);
         res.json({
             success: true,
             message: `Category ${category.isArchived ? 'archived' : 'unarchived'} successfully`,
@@ -126,9 +90,7 @@ exports.toggleArchiveStatus = async (req, res) => {
 
 exports.getActiveCategories = async (req, res) => {
     try {
-        const activeCategories = await PaymentCategory.find({ isArchived: false })
-            .sort({ createdAt: -1 });
-        
+        const activeCategories = await paymentCategoryService.getActiveCategories();
         res.status(200).json({
             success: true,
             categories: activeCategories

@@ -4,13 +4,20 @@ import React, { useState, useEffect } from "react";
 import AdminNavbar from "./AdminNavbar";
 import AdminSidebar from "./AdminSidebar";
 import axios from 'axios';
+import { getAnalytics, logEvent } from "firebase/analytics";
+import { app } from '../firebase/firebaseConfig';
 
 const AdminDashboard = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [totalActiveStudents, setTotalActiveStudents] = useState(0);
     const [totalActiveOfficers, setTotalActiveOfficers] = useState(0);
     const [totalAdmins, setTotalAdmins] = useState(0);
-    const [totalSchoolYears, setTotalSchoolYears] = useState(0);
+    const [analyticsData, setAnalyticsData] = useState({
+        pageViews: 0,
+        activeUsers: 0,
+        totalEvents: 0
+    });
+    const analytics = getAnalytics(app);
 
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
@@ -27,26 +34,63 @@ const AdminDashboard = () => {
                 const token = localStorage.getItem('token');
                 const headers = { Authorization: `Bearer ${token}` };
 
-                // Fetch all counts in parallel
-                const [studentsRes, officersRes, adminsRes, schoolYearsRes] = await Promise.all([
+                const [studentsRes, officersRes, adminsRes] = await Promise.all([
                     axios.get('http://localhost:8000/api/admin/students/active/count', { headers }),
                     axios.get('http://localhost:8000/api/admin/officers/active/count', { headers }),
                     axios.get('http://localhost:8000/api/admin/admins/count', { headers }),
-                    axios.get('http://localhost:8000/api/admin/school-years/count', { headers })
                 ]);
 
                 setTotalActiveStudents(studentsRes.data.count || 0);
                 setTotalActiveOfficers(officersRes.data.count || 0);
                 setTotalAdmins(adminsRes.data.count || 0);
-                setTotalSchoolYears(schoolYearsRes.data.count || 0);
 
+                // Log analytics event
+                logEvent(analytics, 'dashboard_data_loaded', {
+                    active_students: studentsRes.data.count,
+                    active_officers: officersRes.data.count,
+                    total_admins: adminsRes.data.count
+                });
             } catch (error) {
                 console.error('Error fetching dashboard data:', error);
+                logEvent(analytics, 'dashboard_data_error', {
+                    error_message: error.message
+                });
             }
         };
 
         fetchDashboardData();
-    }, []);
+    }, [analytics]);
+
+    useEffect(() => {
+        // Log page view when component mounts
+        logEvent(analytics, 'page_view', {
+            page_title: 'Admin Dashboard',
+            page_location: window.location.href,
+            page_path: window.location.pathname,
+            user_role: 'admin'
+        });
+
+        // Set up an interval to fetch analytics data
+        const fetchAnalyticsData = async () => {
+            try {
+                // Get analytics data from Firebase Analytics
+                logEvent(analytics, 'get_analytics');
+                setAnalyticsData(prev => ({
+                    ...prev,
+                    pageViews: prev.pageViews + 1
+                }));
+            } catch (error) {
+                console.error('Error fetching analytics data:', error);
+            }
+        };
+
+        fetchAnalyticsData();
+
+        // Clean up
+        return () => {
+            // Cleanup if needed
+        };
+    }, [analytics]);
 
     return (
         <div className="sb-nav-fixed">
@@ -56,13 +100,16 @@ const AdminDashboard = () => {
             <AdminNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
                 <AdminSidebar isCollapsed={isCollapsed} />
-                <div id="layoutSidenav_content" style={{
-                    marginLeft: isCollapsed ? '5rem' : '15.625rem',
-                    marginRight: '0rem',
-                    transition: 'margin-left 0.3s',
-                    flexGrow: 1,
-                    marginTop: '3.5rem'
-                }}>
+                <div
+                    id="layoutSidenav_content"
+                    style={{
+                        marginLeft: isCollapsed ? '5rem' : '15.625rem',
+                        marginRight: '0rem',
+                        transition: 'margin-left 0.3s',
+                        flexGrow: 1,
+                        marginTop: '3.5rem'
+                    }}
+                >
                     <div className="container-fluid px-5 mb-5">
                         <p className="system-gray mt-4 welcome-text">Welcome back, admin!</p>
 
@@ -105,10 +152,10 @@ const AdminDashboard = () => {
                                 <div className="card orange-card mb-4">
                                     <div className="card-body d-flex justify-content-between align-items-center">
                                         <div>
-                                            <h2 className="big-text">{formatNumber(totalSchoolYears)}</h2>
-                                            <h5 className="small-text">School Years</h5>
+                                            <h2 className="big-text">{analyticsData.pageViews}</h2>
+                                            <h5 className="small-text">Page Views</h5>
                                         </div>
-                                        <i className="fas fa-calendar-alt big-icon text-white"></i>
+                                        <i className="fas fa-chart-line big-icon text-white"></i>
                                     </div>
                                 </div>
                             </div>

@@ -40,8 +40,10 @@ const AdminAddStud = () => {
         setShowModal(false);
         try {
             const token = localStorage.getItem('token');
+            console.log('Current token:', token);
 
             if (!token) {
+                console.log('No token found in localStorage');
                 setMessage({
                     type: 'error',
                     text: 'No authentication token found. Please login again.'
@@ -50,25 +52,38 @@ const AdminAddStud = () => {
                 return;
             }
 
-            const response = await axios.post(
-                'http://localhost:8000/api/users/register',
-                formData,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
+            };
+            console.log('Request config:', config);
+
+            const response = await axios.post(
+                'http://localhost:8000/api/add/students',
+                formData,
+                config
             );
 
+            console.log('API response:', response);
             setMessage({ type: 'success', text: 'Student added successfully!' });
+
             setTimeout(() => {
                 navigate('/admin/students');
             }, 2000);
 
         } catch (error) {
+            console.error('Error details:', {
+                status: error.response?.status,
+                statusText: error.response?.statusText,
+                data: error.response?.data,
+                headers: error.response?.headers
+            });
+
             if (error.response?.status === 401) {
                 const errorMessage = error.response?.data?.message || 'Session expired. Please login again.';
+                console.log('Authentication error:', errorMessage);
                 setMessage({
                     type: 'error',
                     text: errorMessage
@@ -97,19 +112,16 @@ const AdminAddStud = () => {
                     transition: 'margin-left 0.3s ease-in-out',
                     padding: '20px'
                 }}>
-                    <div className="container-fluid">
-                        <div className="row justify-content-center">
-                            <div className="col-lg-6">
-                                <div className="card shadow-lg border-0 rounded-lg mt-3">
+                    <div className="container-fluid px-4 mb-5 form-top">
+                        <div className="row">
+                            <div className="col-md-6">
+                                <div className="card mb-4">
                                     <div className="card-header">
-                                        <h4 className="text-center font-weight-light my-2">
-                                            <i className="fas fa-user-plus me-2"></i>
-                                            Add Student
-                                        </h4>
+                                        <i className="far fa-plus me-2"></i> <strong>Add New Student</strong>
                                     </div>
                                     <div className="card-body">
                                         {message && (
-                                            <div className={`alert ${message.type === 'error' ? 'alert-danger' : 'alert-success'}`}>
+                                            <div className={`alert ${message.type === 'success' ? 'alert-success' : 'alert-danger'} mb-3`}>
                                                 {message.text}
                                             </div>
                                         )}
