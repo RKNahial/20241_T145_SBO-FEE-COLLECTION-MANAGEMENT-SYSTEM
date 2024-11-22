@@ -64,20 +64,39 @@ exports.updateDailyDues = async (req, res) => {
 exports.toggleDuesStatus = async (req, res) => {
     try {
         const { userId } = req.params;
-        const { day, month, week } = req.body;
+        const { month, week, day, newStatus } = req.body;
 
-        const updatedRecord = await dailyDuesService.toggleDuesStatus(userId, day, month, week);
+        if (!userId || !month || !week || !day || !newStatus) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required fields'
+            });
+        }
 
-        res.status(200).json({
+        const result = await dailyDuesService.toggleDuesStatus(
+            userId,
+            day,
+            month,
+            week
+        );
+
+        if (!result) {
+            return res.status(404).json({
+                success: false,
+                message: 'Dues record not found'
+            });
+        }
+
+        res.json({
             success: true,
-            message: 'Status toggled successfully',
-            data: updatedRecord
+            message: 'Dues status updated successfully',
+            data: result
         });
     } catch (error) {
-        console.error('Toggle status error:', error);
+        console.error('Error updating dues:', error);
         res.status(500).json({
             success: false,
-            message: 'Failed to toggle status',
+            message: 'Error updating dues status',
             error: error.message
         });
     }

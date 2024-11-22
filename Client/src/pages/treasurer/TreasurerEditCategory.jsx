@@ -14,7 +14,7 @@ const TreasurerEditCategory = () => {
     const [successMessage, setSuccessMessage] = useState("");
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-const [pendingFormData, setPendingFormData] = useState(null);
+    const [pendingFormData, setPendingFormData] = useState(null);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -50,13 +50,47 @@ const [pendingFormData, setPendingFormData] = useState(null);
         });
         setShowModal(true);
     };
-    
+
     const confirmUpdate = async () => {
         try {
-            await axios.put(`http://localhost:8000/api/payment-categories/${id}`, {
-                name: pendingFormData.name,
-                totalPrice: Number(pendingFormData.totalPrice)
-            });
+            const token = localStorage.getItem('token');
+            const response = await axios.put(
+                `http://localhost:8000/api/payment-categories/${id}`,
+                {
+                    name: pendingFormData.name,
+                    totalPrice: Number(pendingFormData.totalPrice)
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
+
+            // Log the category update
+            await axios.post(
+                'http://localhost:8000/api/history-logs/category-update',
+                {
+                    categoryId: id,
+                    previousData: {
+                        name: formData.name,
+                        totalPrice: formData.totalPrice,
+                        categoryId: formData.categoryId
+                    },
+                    newData: {
+                        name: pendingFormData.name,
+                        totalPrice: pendingFormData.totalPrice,
+                        categoryId: formData.categoryId
+                    }
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
             setSuccessMessage('Category updated successfully!');
             setShowModal(false);
             setTimeout(() => {
@@ -152,40 +186,40 @@ const [pendingFormData, setPendingFormData] = useState(null);
             </div>
             {/* CONFIRMATION MODAL */}
             <Modal show={showModal} onHide={() => setShowModal(false)}>
-            <Modal.Header closeButton>
-                <Modal.Title>
-                    Update Payment Category
-                </Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <p className="mb-1">
-                    Are you sure you want to update this payment category?
-                </p>
-                {pendingFormData && (
-                    <div className="mt-3">
-                        <p className="mb-1"><strong>Category ID:</strong> {pendingFormData.categoryId}</p>
-                        <p className="mb-1"><strong>Name:</strong> {pendingFormData.name}</p>
-                        <p className="mb-1"><strong>Total Price:</strong> ₱{pendingFormData.totalPrice}</p>
-                    </div>
-                )}
-            </Modal.Body>
-            <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Button 
-                    variant="btn btn-confirm" 
-                    onClick={confirmUpdate}
-                    style={{ flex: 'none' }}
-                >
-                    Confirm
-                </Button>
-                <Button 
-                    variant="btn btn-cancel" 
-                    onClick={() => setShowModal(false)}
-                    style={{ marginRight: '0.5rem', flex: 'none' }}
-                >
-                    Cancel
-                </Button>
-            </Modal.Footer>
-        </Modal>
+                <Modal.Header closeButton>
+                    <Modal.Title>
+                        Update Payment Category
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p className="mb-1">
+                        Are you sure you want to update this payment category?
+                    </p>
+                    {pendingFormData && (
+                        <div className="mt-3">
+                            <p className="mb-1"><strong>Category ID:</strong> {pendingFormData.categoryId}</p>
+                            <p className="mb-1"><strong>Name:</strong> {pendingFormData.name}</p>
+                            <p className="mb-1"><strong>Total Price:</strong> ₱{pendingFormData.totalPrice}</p>
+                        </div>
+                    )}
+                </Modal.Body>
+                <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button
+                        variant="btn btn-confirm"
+                        onClick={confirmUpdate}
+                        style={{ flex: 'none' }}
+                    >
+                        Confirm
+                    </Button>
+                    <Button
+                        variant="btn btn-cancel"
+                        onClick={() => setShowModal(false)}
+                        style={{ marginRight: '0.5rem', flex: 'none' }}
+                    >
+                        Cancel
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

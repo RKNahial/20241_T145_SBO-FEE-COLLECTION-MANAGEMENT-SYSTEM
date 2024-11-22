@@ -1,4 +1,4 @@
-const Student = require('../models/Student');
+const Student = require('../models/studentSchema');
 const ActivityLog = require('../models/ActivityLog');
 
 class StudentActivityService {

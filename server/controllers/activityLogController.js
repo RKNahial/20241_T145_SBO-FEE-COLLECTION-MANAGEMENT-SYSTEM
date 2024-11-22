@@ -26,7 +26,8 @@ exports.getActivityLogs = async (req, res) => {
         const logs = await ActivityLog.find()
             .sort({ timestamp: -1 })
             .limit(100);
-        res.status(200).json({ success: true, logs });
+            
+        res.status(200).json(logs);
     } catch (error) {
         res.status(500).json({ success: false, error: 'Failed to fetch activity logs' });
     }

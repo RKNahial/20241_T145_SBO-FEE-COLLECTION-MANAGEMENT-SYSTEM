@@ -1,4 +1,5 @@
 const Student = require('../models/studentSchema');
+const loggingService = require('../services/loggingService');
 
 // Function to add a new student
 exports.addStudent = async (req, res, next) => {
@@ -29,6 +30,24 @@ exports.addStudent = async (req, res, next) => {
         // Save the student to the database
         await student.save();
         
+        // Create log entry
+        await loggingService.createLog({
+            userName: req.user.name,
+            userEmail: req.user.email,
+            userPosition: 'Treasurer',
+            action: 'ADD_STUDENT',
+            details: `Added new student: ${name} (${studentId})`,
+            metadata: {
+                studentId: student._id,
+                studentDetails: {
+                    name,
+                    studentId,
+                    yearLevel,
+                    program
+                }
+            }
+        });
+
         // Log response details
         console.log('\n--- Response ---');
         console.log('Status:', res.statusCode);

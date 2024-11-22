@@ -78,6 +78,13 @@ const AdminSidebar = ({ isCollapsed }) => {
                                 <i className="fa-regular fa-calendar-days icon-space"></i>
                                 {!isCollapsed && <span> School Year</span>}
                             </NavLink>
+                            <NavLink
+                                to="/admin/history-logs"
+                                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                            >
+                                <i className="fas fa-history icon-space"></i>
+                                {!isCollapsed && <span> History Logs</span>}
+                            </NavLink>
                         </div>
                         <button
                             onClick={handleLogout}

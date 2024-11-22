@@ -5,6 +5,14 @@ const activityLogSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    userName: {
+        type: String,
+        required: true
+    },
+    userEmail: {
+        type: String,
+        required: true
+    },
     userPosition: {
         type: String,
         required: true
@@ -30,6 +38,11 @@ const activityLogSchema = new mongoose.Schema({
     timestamp: {
         type: Date,
         default: Date.now
+    },
+    status: {
+        type: String,
+        enum: ['active', 'completed'],
+        default: 'completed'
     },
     ipAddress: String
 }, { timestamps: true });

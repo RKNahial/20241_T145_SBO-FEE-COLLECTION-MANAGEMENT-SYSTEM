@@ -33,7 +33,33 @@ const TreasurerAddCategory = () => {
 
     const confirmAddCategory = async () => {
         try {
-            const response = await axios.post('http://localhost:8000/api/payment-categories', pendingFormData);
+            const token = localStorage.getItem('token');
+            const response = await axios.post('http://localhost:8000/api/payment-categories', pendingFormData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            // Log the category addition
+            await axios.post(
+                'http://localhost:8000/api/history-logs/category',
+                {
+                    categoryId: response.data.category._id,
+                    categoryDetails: {
+                        categoryId: pendingFormData.categoryId,
+                        name: pendingFormData.name,
+                        totalPrice: pendingFormData.totalPrice
+                    }
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
             setSuccessMessage('Category added successfully!');
             setCategoryId(response.data.category._id);
             setShowModal(false);
@@ -45,7 +71,7 @@ const TreasurerAddCategory = () => {
             setShowModal(false);
         }
     };
-    
+
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -137,40 +163,40 @@ const TreasurerAddCategory = () => {
                 </div>
             </div>
             <Modal show={showModal} onHide={() => setShowModal(false)}>
-            <Modal.Header closeButton>
-                <Modal.Title>
-                    Add Payment Category
-                </Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <p className="mb-1">
-                    Are you sure you want to add this payment category?
-                </p>
-                {pendingFormData && (
-                    <div className="mt-3">
-                        <p className="mb-1"><strong>Category ID:</strong> {pendingFormData.categoryId}</p>
-                        <p className="mb-1"><strong>Name:</strong> {pendingFormData.name}</p>
-                        <p className="mb-1"><strong>Total Price:</strong> ₱{pendingFormData.totalPrice}</p>
-                    </div>
-                )}
-            </Modal.Body>
-            <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Button 
-                    variant="btn btn-confirm" 
-                    onClick={confirmAddCategory}
-                    style={{ flex: 'none' }}
-                >
-                    Confirm
-                </Button>
-                <Button 
-                    variant="btn btn-cancel" 
-                    onClick={() => setShowModal(false)}
-                    style={{ marginRight: '0.5rem', flex: 'none' }}
-                >
-                    Cancel
-                </Button>
-            </Modal.Footer>
-        </Modal>
+                <Modal.Header closeButton>
+                    <Modal.Title>
+                        Add Payment Category
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p className="mb-1">
+                        Are you sure you want to add this payment category?
+                    </p>
+                    {pendingFormData && (
+                        <div className="mt-3">
+                            <p className="mb-1"><strong>Category ID:</strong> {pendingFormData.categoryId}</p>
+                            <p className="mb-1"><strong>Name:</strong> {pendingFormData.name}</p>
+                            <p className="mb-1"><strong>Total Price:</strong> ₱{pendingFormData.totalPrice}</p>
+                        </div>
+                    )}
+                </Modal.Body>
+                <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button
+                        variant="btn btn-confirm"
+                        onClick={confirmAddCategory}
+                        style={{ flex: 'none' }}
+                    >
+                        Confirm
+                    </Button>
+                    <Button
+                        variant="btn btn-cancel"
+                        onClick={() => setShowModal(false)}
+                        style={{ marginRight: '0.5rem', flex: 'none' }}
+                    >
+                        Cancel
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

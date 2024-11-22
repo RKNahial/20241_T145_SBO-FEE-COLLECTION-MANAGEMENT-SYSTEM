@@ -90,8 +90,8 @@ const TreasurerStudents = () => {
     const filteredStudents = students.filter(student => {
         const matchesSearch = student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             student.studentId?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-        switch(statusFilter) {
+
+        switch (statusFilter) {
             case 'Active':
                 return matchesSearch && !student.isArchived;
             case 'Archived':
@@ -111,34 +111,49 @@ const TreasurerStudents = () => {
         });
         setShowModal(true);
     };
-    
+
     const confirmAction = async () => {
         try {
             const token = localStorage.getItem('token');
+            const userDetailsStr = localStorage.getItem('userDetails');
+
+            if (!userDetailsStr) {
+                setError('Session expired. Please login again.');
+                return;
+            }
+
+            const userDetails = JSON.parse(userDetailsStr);
             const isArchiving = modalAction.type === 'archive';
             const endpoint = isArchiving ? 'archive' : 'unarchive';
-            
+
             const response = await fetch(`http://localhost:8000/api/${endpoint}/${modalAction.student.id}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify({
+                    userName: userDetails.name || userDetails.email.split('@')[0],
+                    userEmail: userDetails.email,
+                    userPosition: userDetails.position,
+                    userId: userDetails._id
+                })
             });
-            
+
             if (response.ok) {
                 setSuccessMessage(`${modalAction.student.name} has been successfully ${modalAction.type}d!`);
-                setStudents(prev => prev.map(s => 
-                    s._id === modalAction.student.id 
-                        ? { ...s, isArchived: isArchiving } 
+                setStudents(prev => prev.map(s =>
+                    s._id === modalAction.student.id
+                        ? { ...s, isArchived: isArchiving }
                         : s
                 ));
             } else {
                 const errorData = await response.json();
-                setError(errorData.error);
+                setError(typeof errorData.message === 'string' ? errorData.message : 'An error occurred');
             }
         } catch (error) {
-            setError(`Failed to ${modalAction.type} student`);
+            console.error('Archive error:', error);
+            setError('Failed to perform action. Please try again.');
         } finally {
             setShowModal(false);
             setModalAction({ type: '', student: null });
@@ -226,6 +241,25 @@ const TreasurerStudents = () => {
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+    const checkEditLock = async (studentId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(
+                `http://localhost:8000/api/students/${studentId}/check-lock/EDIT`,
+                {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }
+            );
+            return {
+                locked: !response.data.success,
+                userName: response.data.userName
+            };
+        } catch (error) {
+            console.error('Error checking lock:', error);
+            return { locked: false };
+        }
+    };
+
     return (
         <div className="sb-nav-fixed">
             <Helmet>
@@ -289,7 +323,7 @@ const TreasurerStudents = () => {
                                             <div className="d-flex align-items-center me-3">
                                                 <label className="me-2 mb-0">Student Status</label>
                                                 <div className="dashboard-select" style={{ width: 'auto' }}>
-                                                   <select
+                                                    <select
                                                         className="form-control"
                                                         value={statusFilter}
                                                         onChange={(e) => setStatusFilter(e.target.value)}
@@ -350,8 +384,19 @@ const TreasurerStudents = () => {
                                                         <td>
                                                             <Link
                                                                 to={`/treasurer/students/edit/${student._id}`}
-                                                                state={{ studentData: student }}  // Pass the entire student object
+                                                                state={{ studentData: student }}
                                                                 className="btn btn-edit btn-sm"
+                                                                onClick={async (e) => {
+                                                                    e.preventDefault();
+                                                                    const lockStatus = await checkEditLock(student._id);
+                                                                    if (lockStatus.locked) {
+                                                                        setError(`This student is currently being edited by ${lockStatus.userName}`);
+                                                                    } else {
+                                                                        navigate(`/treasurer/students/edit/${student._id}`, {
+                                                                            state: { studentData: student }
+                                                                        });
+                                                                    }
+                                                                }}
                                                             >
                                                                 <i className="fas fa-edit"></i>
                                                             </Link>
@@ -430,16 +475,16 @@ const TreasurerStudents = () => {
                     )}
                 </Modal.Body>
                 <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button 
-                        variant="btn btn-confirm" 
-                        onClick={confirmAction} 
+                    <Button
+                        variant="btn btn-confirm"
+                        onClick={confirmAction}
                         style={{ flex: 'none' }}
                     >
                         Confirm
                     </Button>
-                    <Button 
-                        variant="btn btn-cancel" 
-                        onClick={() => setShowModal(false)} 
+                    <Button
+                        variant="btn btn-cancel"
+                        onClick={() => setShowModal(false)}
                         style={{ marginRight: '0.5rem', flex: 'none' }}
                     >
                         Cancel

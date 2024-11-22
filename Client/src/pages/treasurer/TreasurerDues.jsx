@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
+import axios from 'axios';
 
 const TreasurerDues = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -70,9 +71,7 @@ const TreasurerDues = () => {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Cache-Control': 'no-cache',
-                    'Pragma': 'no-cache',
-                    'If-None-Match': ''
+                    'Content-Type': 'application/json'
                 }
             });
 
@@ -158,36 +157,54 @@ const TreasurerDues = () => {
         }
     }, [location.state]);
 
-    const handleStatusToggle = async (officerId, day, currentStatus) => {
+    const handleStatusToggle = async (userId, day, currentStatus) => {
         try {
-            const response = await fetch(`http://localhost:8000/api/daily-dues/${officerId}/toggle-status`, {
+            const token = localStorage.getItem('token');
+            const newStatus = currentStatus === 'Paid' ? 'Not Paid' : 'Paid';
+
+            const response = await fetch(`http://localhost:8000/api/daily-dues/${userId}/toggle`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    day,
                     month: selectedMonth,
                     week: selectedWeek,
-                    currentStatus,
-                    daysCount: 1
+                    day,
+                    newStatus
                 })
             });
 
-            if (response.status === 401) {
-                localStorage.removeItem('token');
-                navigate('/login');
-                return;
+            if (response.ok) {
+                await axios.post(
+                    'http://localhost:8000/api/history-logs/dues-toggle',
+                    {
+                        userId,
+                        duesDetails: {
+                            month: selectedMonth,
+                            week: selectedWeek,
+                            day,
+                            previousStatus: currentStatus,
+                            newStatus
+                        }
+                    },
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+
+                refreshData();
+            } else {
+                const errorData = await response.json();
+                setError(errorData.message || 'Failed to update payment status');
             }
-
-            if (!response.ok) throw new Error('Failed to update status');
-
-            // Refresh the data after successful update
-            refreshData();
         } catch (error) {
-            console.error('Error toggling status:', error);
-            setError('Failed to update status');
+            console.error('Error toggling payment status:', error);
+            setError('Failed to update payment status');
         }
     };
 

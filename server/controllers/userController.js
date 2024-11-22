@@ -1,5 +1,6 @@
 // controllers/userController.js
 const userService = require('../services/userService');
+const jwt = require('jsonwebtoken');
 
 exports.registerUser = async (req, res) => {
     try {
@@ -53,16 +54,15 @@ exports.addAdmin = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-    const { email, password, recaptchaToken } = req.body;
-
     try {
-        if (!recaptchaToken) {
-            return res.status(400).json({ message: 'reCAPTCHA verification failed. Please complete the reCAPTCHA.' });
-        }
-
-        const isRecaptchaValid = await userService.verifyRecaptcha(recaptchaToken);
-        if (!isRecaptchaValid) {
-            return res.status(400).json({ message: 'reCAPTCHA verification failed. Please try again.' });
+        const { email, password, recaptchaToken } = req.body;
+        
+        // Skip recaptcha verification in development
+        if (process.env.NODE_ENV !== 'development') {
+            const isRecaptchaValid = await userService.verifyRecaptcha(recaptchaToken);
+            if (!isRecaptchaValid) {
+                return res.status(400).json({ message: 'Invalid reCAPTCHA' });
+            }
         }
 
         const userFound = await userService.findUserByEmail(email);
@@ -92,48 +92,47 @@ exports.login = async (req, res) => {
             req.headers['user-agent']
         );
 
-        const token = userService.generateToken(user._id, position, user.isArchived);
+        const token = jwt.sign(
+            { userId: user._id, position },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
 
-        res.status(200).json({
-            success: true,
-            message: 'Login successful',
+        res.json({
             token,
-            position,
             userId: user._id,
             email: user.email,
-            loginLogId: loginLog._id,
-            name: user.name
+            position,
+            loginLogId: loginLog._id
         });
     } catch (error) {
         console.error('Login error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Server error',
-            error: error.message
-        });
+        res.status(500).json({ message: 'Login failed', error: error.message });
     }
 };
 
 exports.logout = async (req, res) => {
     try {
-        const logoutResult = await userService.processLogout(
-            req.body,
-            req.ip,
-            req.headers['user-agent']
-        );
+        const { userId, loginLogId } = req.body;
+
+        if (!userId || !loginLogId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required parameters'
+            });
+        }
+
+        await userService.processLogout(userId, loginLogId);
 
         res.status(200).json({
             success: true,
-            message: 'Logout successful',
-            logoutLogId: logoutResult.logoutLog._id,
-            logoutTime: logoutResult.logoutTime,
-            sessionDuration: logoutResult.sessionDuration
+            message: 'Logged out successfully'
         });
     } catch (error) {
         console.error('Logout error:', error);
         res.status(500).json({
             success: false,
-            message: 'Server error during logout',
+            message: 'Error processing logout',
             error: error.message
         });
     }

@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { updateStudent } = require('../controllers/UpdateStudent');
+const auth = require('../middleware/auth');
+const studentController = require('../controllers/StudentController');
 
-// Update student route
-router.put('/students/:id', updateStudent);
+router.get('/students/:id', auth, studentController.getStudentById);
+router.put('/students/:id', auth, studentController.updateStudent);
 
 module.exports = router;

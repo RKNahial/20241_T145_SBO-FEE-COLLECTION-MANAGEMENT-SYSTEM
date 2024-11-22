@@ -90,11 +90,42 @@ const TreasurerFeeCategory = () => {
         });
         setShowModal(true);
     };
-    
+
     const confirmArchiveAction = async () => {
         try {
-            const response = await axios.put(`http://localhost:8000/api/payment-categories/${modalAction.category._id}/toggle-archive`);
+            const token = localStorage.getItem('token');
+            const response = await axios.put(
+                `http://localhost:8000/api/payment-categories/${modalAction.category._id}/toggle-archive`,
+                {},
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
             if (response.data && response.data.category) {
+                // Log the archive/unarchive action
+                await axios.post(
+                    'http://localhost:8000/api/history-logs/category-archive',
+                    {
+                        categoryId: modalAction.category._id,
+                        action: modalAction.type.toUpperCase(),
+                        categoryDetails: {
+                            categoryId: modalAction.category.categoryId,
+                            name: modalAction.category.name,
+                            totalPrice: modalAction.category.totalPrice
+                        }
+                    },
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+
                 setCategories(prev => prev.map(c =>
                     c._id === modalAction.category._id ? response.data.category : c
                 ));
@@ -108,12 +139,12 @@ const TreasurerFeeCategory = () => {
             setModalAction({ type: '', category: null });
         }
     };
-    
+
 
     return (
         <div className="sb-nav-fixed">
             <Helmet>
-                <title>Treasurers | Payment Categories</title>
+                <title>Treasurer | Payment Categories</title>
             </Helmet>
             <TreasurerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
@@ -299,15 +330,15 @@ const TreasurerFeeCategory = () => {
                     )}
                 </Modal.Body>
                 <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button 
-                        variant="btn btn-confirm" 
+                    <Button
+                        variant="btn btn-confirm"
                         onClick={confirmArchiveAction}
                         style={{ flex: 'none' }}
                     >
                         Confirm
                     </Button>
-                    <Button 
-                        variant="btn btn-cancel" 
+                    <Button
+                        variant="btn btn-cancel"
                         onClick={() => setShowModal(false)}
                         style={{ marginRight: '0.5rem', flex: 'none' }}
                     >

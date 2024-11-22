@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const auth = require('../middleware/auth');
 const paymentFeeController = require('../controllers/paymentFeeController');
 
-router.get('/payment-fee/details/:studentId', paymentFeeController.getPaymentDetails);
-router.put('/payment-fee/update/:studentId', paymentFeeController.updatePaymentStatus);
+router.put('/payment-fee/update/:studentId', auth, paymentFeeController.updatePaymentStatus);
+router.get('/payment-fee/details/:studentId', auth, paymentFeeController.getPaymentDetails);
 router.get('/payment-fee/by-category/:categoryId', paymentFeeController.getPaymentsByCategory);
 router.get('/payment-fee/recent-payments', paymentFeeController.getRecentPayments);
 router.get('/payment-fee/total-fees', paymentFeeController.getTotalFees);

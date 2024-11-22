@@ -1,6 +1,6 @@
 // src/pages/Login.jsx
 import { Helmet } from 'react-helmet';
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../assets/css/login.css';
@@ -9,6 +9,7 @@ import GoogleSignInButton from '../pages/googlelogin';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { auth } from '../pages/firebase/firebaseConfig';
 import { useAuth } from '../context/AuthContext';
+import OTPVerificationModal from '../components/OTPVerificationModal';
 
 const Login = () => {
     const { setUser } = useAuth();
@@ -24,6 +25,8 @@ const Login = () => {
     const [otpCode, setOtpCode] = useState('');
     const [verifying, setVerifying] = useState(false);
     const [otpVerified, setOtpVerified] = useState(false);
+    const [showOTPModal, setShowOTPModal] = useState(false);
+    const [recaptchaExpiry, setRecaptchaExpiry] = useState(null);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -150,7 +153,27 @@ const Login = () => {
     };
 
     const onRecaptchaChange = (token) => {
-        setRecaptchaToken(token);
+        if (token) {
+            setRecaptchaToken(token);
+            setShowOTPModal(true);
+
+            // Set expiration timer for 5 minutes
+            const expiryTime = new Date().getTime() + (5 * 60 * 1000); // 5 minutes
+            setRecaptchaExpiry(expiryTime);
+
+            // Set timeout to clear reCAPTCHA after 5 minutes
+            setTimeout(() => {
+                setRecaptchaToken(null);
+                setRecaptchaExpiry(null);
+                setShowOTPModal(false);
+                setOtpVerified(false);
+                // Reset the reCAPTCHA widget
+                if (window.grecaptcha) {
+                    window.grecaptcha.reset();
+                }
+                setMessage('reCAPTCHA expired. Please verify again.');
+            }, 5 * 60 * 1000); // 5 minutes
+        }
     };
 
     const handleLogout = async () => {
@@ -261,58 +284,31 @@ const Login = () => {
         }
     };
 
-    // Function to send OTP
-    const handleSendOTP = async () => {
-        try {
-            setLoading(true);
-            // Format for US numbers (+1)
-            let formattedPhoneNumber = phoneNumber;
-            if (!phoneNumber.startsWith('+')) {
-                formattedPhoneNumber = phoneNumber.startsWith('1')
-                    ? `+${phoneNumber}`
-                    : `+1${phoneNumber.replace(/^1/, '')}`;
-            }
-
-            console.log('Sending OTP to:', formattedPhoneNumber); // Debug log
-
-            const response = await axios.post('http://localhost:8000/api/send-otp', {
-                phoneNumber: formattedPhoneNumber
-            });
-
-            if (response.data.success) {
-                setOtpSent(true);
-                setMessage('OTP call initiated. You will receive a call shortly.');
-            }
-        } catch (error) {
-            console.error('Error sending OTP:', error.response?.data || error);
-            setMessage(error.response?.data?.message || 'Failed to send OTP. Please check your phone number.');
-        } finally {
-            setLoading(false);
+    useEffect(() => {
+        let expiryCheck;
+        if (recaptchaExpiry) {
+            expiryCheck = setInterval(() => {
+                const currentTime = new Date().getTime();
+                if (currentTime > recaptchaExpiry) {
+                    setRecaptchaToken(null);
+                    setRecaptchaExpiry(null);
+                    setShowOTPModal(false);
+                    setOtpVerified(false);
+                    if (window.grecaptcha) {
+                        window.grecaptcha.reset();
+                    }
+                    setMessage('reCAPTCHA expired. Please verify again.');
+                    clearInterval(expiryCheck);
+                }
+            }, 1000);
         }
-    };
 
-    // Function to verify OTP
-    const handleVerifyOTP = async () => {
-        try {
-            setVerifying(true);
-            const response = await axios.post('http://localhost:8000/api/verify-otp', {
-                phoneNumber: phoneNumber,
-                otpCode: otpCode
-            });
-
-            if (response.data.valid) {
-                setOtpVerified(true);
-                setMessage('OTP verified successfully. You can now login.');
-            } else {
-                setMessage('Invalid OTP code');
+        return () => {
+            if (expiryCheck) {
+                clearInterval(expiryCheck);
             }
-        } catch (error) {
-            console.error('Error verifying OTP:', error);
-            setMessage(error.response?.data?.message || 'Failed to verify OTP');
-        } finally {
-            setVerifying(false);
-        }
-    };
+        };
+    }, [recaptchaExpiry]);
 
     return (
         <div className="login-body">
@@ -385,63 +381,32 @@ const Login = () => {
                     <ReCAPTCHA
                         sitekey="6LcfaG0qAAAAAFTykOtXdpsqkS9ZUeALt2CgFmId"
                         onChange={onRecaptchaChange}
+                        onExpired={() => {
+                            setRecaptchaToken(null);
+                            setRecaptchaExpiry(null);
+                            setShowOTPModal(false);
+                            setOtpVerified(false);
+                            setMessage('reCAPTCHA expired. Please verify again.');
+                        }}
                     />
 
-                    {!otpSent ? (
-                        <div className="form-group">
-                            <div className="input-icon-wrapper">
-                                <input
-                                    type="tel"
-                                    className="form-control login-form"
-                                    placeholder="Phone Number (+1XXXXXXXXXX)"
-                                    value={phoneNumber}
-                                    onChange={(e) => setPhoneNumber(e.target.value)}
-                                    required
-                                />
-                                <i className="input-icon fas fa-phone"></i>
-                            </div>
-                            <button
-                                type="button"
-                                className="btn btn-primary mt-2"
-                                onClick={handleSendOTP}
-                                disabled={loading || !phoneNumber}
-                            >
-                                {loading ? 'Sending...' : 'Send OTP'}
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="form-group">
-                            <div className="input-icon-wrapper">
-                                <input
-                                    type="text"
-                                    className="form-control login-form"
-                                    placeholder="Enter OTP Code"
-                                    value={otpCode}
-                                    onChange={(e) => setOtpCode(e.target.value)}
-                                    required
-                                />
-                                <i className="input-icon fas fa-key"></i>
-                            </div>
-                            <button
-                                type="button"
-                                className="btn btn-primary mt-2"
-                                onClick={handleVerifyOTP}
-                                disabled={verifying || !otpCode}
-                            >
-                                {verifying ? 'Verifying...' : 'Verify OTP'}
-                            </button>
-                            <button
-                                type="button"
-                                className="btn btn-link"
-                                onClick={() => {
-                                    setOtpSent(false);
-                                    setOtpCode('');
-                                }}
-                            >
-                                Change Phone Number
-                            </button>
-                        </div>
-                    )}
+                    <OTPVerificationModal
+                        show={showOTPModal}
+                        onClose={() => setShowOTPModal(false)}
+                        onVerificationComplete={() => setOtpVerified(true)}
+                        phoneNumber={phoneNumber}
+                        setPhoneNumber={setPhoneNumber}
+                        otpSent={otpSent}
+                        setOtpSent={setOtpSent}
+                        otpCode={otpCode}
+                        setOtpCode={setOtpCode}
+                        loading={loading}
+                        setLoading={setLoading}
+                        verifying={verifying}
+                        setVerifying={setVerifying}
+                        setOtpVerified={setOtpVerified}
+                        setMessage={setMessage}
+                    />
 
                     <button type="submit" className="btn btn-primary login-button" disabled={loading || !recaptchaToken || !otpVerified}>
                         <i className="fas fa-sign-in-alt mr-2"></i> {loading ? 'Logging in...' : 'LOGIN'}

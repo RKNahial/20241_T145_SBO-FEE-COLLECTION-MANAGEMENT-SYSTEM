@@ -6,61 +6,54 @@ const Log = require('../models/LogSchema');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const axios = require('axios');
-const { generatePassword } = require('../utils/passwordGenerator');
-const { hashPassword, comparePassword } = require('../helpers/authOfficer');
-const { findUserByEmail } = require('../utils/userUtils');
 
 class UserService {
-    // Email validation utility
-    validateEmailDomain(email, position) {
-        if (position.toLowerCase() === 'admin') {
-            return true;
+    async verifyRecaptcha(token) {
+        try {
+            const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+            const response = await axios.post(
+                `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${token}`
+            );
+            
+            return response.data.success;
+        } catch (error) {
+            console.error('reCAPTCHA verification error:', error);
+            return false;
         }
-        return email.endsWith('@student.buksu.edu.ph');
-    }
-
-    // Model mapping utility
-    getModelByPosition(position) {
-        switch (position.toLowerCase()) {
-            case 'admin': return Admin;
-            case 'treasurer': return Treasurer;
-            case 'officer': return Officer;
-            case 'governor': return Governor;
-            default: throw new Error('Invalid position');
-        }
-    }
-
-    async verifyRecaptcha(recaptchaToken) {
-        const recaptchaResponse = await axios.post(
-            `https://www.google.com/recaptcha/api/siteverify`,
-            null,
-            {
-                params: {
-                    secret: process.env.RECAPTCHA_SECRET_KEY,
-                    response: recaptchaToken,
-                },
-            }
-        );
-        return recaptchaResponse.data.success;
     }
 
     async findUserByEmail(email) {
-        return findUserByEmail(email);
+        const models = [Admin, Treasurer, Officer, Governor];
+        for (const Model of models) {
+            const user = await Model.findOne({ email });
+            if (user) {
+                return {
+                    user,
+                    position: Model.modelName.replace('Model', '')
+                };
+            }
+        }
+        return null;
     }
 
     async createLoginLog(userId, position, email, ipAddress, userAgent) {
-        return await Log.create({
-            userId,
-            userModel: position,
-            action: 'login',
-            timestamp: new Date(),
-            details: {
-                email,
-                ipAddress,
-                userAgent
-            },
-            status: 'active'
-        });
+        try {
+            return await Log.create({
+                userId,
+                userModel: position,
+                email: email,
+                action: 'login',
+                timestamp: new Date(),
+                details: {
+                    ipAddress,
+                    userAgent
+                },
+                status: 'active'
+            });
+        } catch (error) {
+            console.error('Error creating login log:', error);
+            throw error;
+        }
     }
 
     generateToken(userId, position, isArchived) {
@@ -71,40 +64,9 @@ class UserService {
         );
     }
 
-    async addUser(userData) {
-        const { ID, name, email, position } = userData;
-
-        if (!this.validateEmailDomain(email, position)) {
-            throw new Error(`${position} must use an email with @student.buksu.edu.ph domain`);
-        }
-
-        const password = generatePassword();
-        console.log(`Generated password for user ${name}: ${password}`);
-
-        const Model = this.getModelByPosition(position);
-        const hashedPassword = await hashPassword(password);
-
-        const newUser = new Model({
-            ID,
-            name,
-            email,
-            password: hashedPassword,
-            position
-        });
-
-        try {
-            return await newUser.save();
-        } catch (error) {
-            if (error.code === 11000) {
-                throw new Error('Email already exists');
-            }
-            throw error;
-        }
-    }
-
     async addAdmin(userData) {
         const { ID, name, email, position } = userData;
-        const password = generatePassword();
+        const password = Math.random().toString(36).slice(-8);
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newAdmin = new Admin({
@@ -115,17 +77,8 @@ class UserService {
             position
         });
 
-        const admin = await newAdmin.save();
-        return { admin, temporaryPassword: password };
+        await newAdmin.save();
     }
 }
 
-// Add comparePassword method to all schemas
-[Admin, Treasurer, Officer, Governor].forEach(Model => {
-    Model.schema.methods.comparePassword = async function(password) {
-        return await comparePassword(password, this.password);
-    };
-});
-
-// Export a single instance
 module.exports = new UserService(); 

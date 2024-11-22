@@ -1,48 +1,43 @@
 const jwt = require('jsonwebtoken');
+const Admin = require('../models/AdminSchema');
+const Treasurer = require('../models/TreasurerSchema');
+const Officer = require('../models/OfficerSchema');
 
 const auth = async (req, res, next) => {
-    console.log('Auth Middleware - Headers:', req.headers);
-
     try {
-        const authHeader = req.header('Authorization');
-        console.log('Auth Header:', authHeader);
-        
-        if (!authHeader) {
-            console.log('No Authorization header found');
-            return res.status(401).json({ 
-                message: 'No Authorization header found' 
-            });
+        const token = req.header('Authorization').replace('Bearer ', '');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        let user;
+        const userModel = decoded.position;
+        const Model = {
+            'Admin': Admin,
+            'Treasurer': Treasurer,
+            'Officer': Officer
+        }[userModel];
+
+        if (!Model) {
+            throw new Error('Invalid user position');
         }
 
-        const token = authHeader.replace('Bearer ', '');
-        console.log('Extracted token:', token.substring(0, 20) + '...');
-        
-        if (!token) {
-            console.log('No token found in Authorization header');
-            return res.status(401).json({ 
-                message: 'No token found in Authorization header' 
-            });
+        user = await Model.findById(decoded.userId);
+        if (!user) {
+            throw new Error('User not found');
         }
 
-        try {
-            console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            console.log('Token decoded successfully:', decoded);
-            req.user = decoded;
-            next();
-        } catch (error) {
-            console.log('Token verification failed:', error.message);
-            return res.status(401).json({ 
-                message: 'Invalid or expired token',
-                error: error.message 
-            });
-        }
+        // Attach complete user info to request
+        req.user = {
+            _id: user._id,
+            name: user.name || user.email.split('@')[0],
+            email: user.email,
+            position: userModel,
+            picture: user.picture || user.imageUrl
+        };
+
+        next();
     } catch (error) {
-        console.log('Auth middleware error:', error.message);
-        res.status(401).json({ 
-            message: 'Authentication failed',
-            error: error.message 
-        });
+        console.error('Auth middleware error:', error);
+        res.status(401).json({ message: 'Authentication failed' });
     }
 };
 

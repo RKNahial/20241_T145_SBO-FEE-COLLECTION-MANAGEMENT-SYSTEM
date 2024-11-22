@@ -8,12 +8,16 @@ const logSchema = new mongoose.Schema({
     userModel: {
         type: String,
         required: true,
-        enum: ['admin','Admin', 'Treasurer', 'Officer', 'Governor']
+        enum: ['Admin', 'Treasurer', 'Officer']
+    },
+    email: {
+        type: String,
+        required: true
     },
     action: {
         type: String,
         required: true,
-        enum: ['login', 'logout']
+        default: 'login'
     },
     timestamp: {
         type: Date,

@@ -4,6 +4,7 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Modal, Button } from 'react-bootstrap';
 import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
+import axios from 'axios';
 
 const TreasurerEditStud = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -40,12 +41,58 @@ const TreasurerEditStud = () => {
         }
     }, [studentData]);
 
+    useEffect(() => {
+        let lockTimer;
+
+        const acquireLock = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.post(
+                    `http://localhost:8000/api/students/${id}/acquire-lock/EDIT`,
+                    {},
+                    {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }
+                );
+
+                if (!response.data.success) {
+                    setError(response.data.message);
+                    navigate('/treasurer/students');
+                } else {
+                    // Set timer to show warning when lock is about to expire
+                    lockTimer = setTimeout(() => {
+                        setError('Your edit session will expire in 5 seconds. Please save your changes.');
+                    }, 15000); // Show warning 5 seconds before expiration
+                }
+            } catch (error) {
+                setError('Unable to edit student at this time');
+                navigate('/treasurer/students');
+            }
+        };
+
+        acquireLock();
+
+        return () => {
+            if (lockTimer) clearTimeout(lockTimer);
+            const releaseLock = async () => {
+                const token = localStorage.getItem('token');
+                await axios.delete(
+                    `http://localhost:8000/api/students/${id}/release-lock/EDIT`,
+                    {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }
+                );
+            };
+            releaseLock();
+        };
+    }, [id, navigate]);
+
     const clearError = () => {
         setTimeout(() => {
             setError(null);
-        }, 3000); 
+        }, 3000);
     };
-    
+
     const handleSubmit = (e) => {
         e.preventDefault();
         try {
@@ -53,53 +100,67 @@ const TreasurerEditStud = () => {
             if (!formData.studentId || !formData.name || !formData.yearLevel ||
                 !formData.program || !formData.institutionalEmail) {
                 setError('All fields are required');
-                clearError(); 
+                clearError();
                 return;
             }
-    
+
             // Validate email format
             if (!formData.institutionalEmail.endsWith('@student.buksu.edu.ph')) {
                 setError('Email must be a valid BukSU student email');
                 clearError();
                 return;
             }
-    
+
             // If validation passes, show modal
             setShowModal(true);
         } catch (err) {
             setError(err.message || 'Failed to update student. Please try again.');
-            clearError(); 
+            clearError();
         }
     };
-    
+
     // Also update your confirmUpdate function
     const confirmUpdate = async () => {
         try {
+            const token = localStorage.getItem('token');
+            const userDetailsStr = localStorage.getItem('userDetails');
+
+            if (!userDetailsStr) {
+                setError('Session expired. Please login again.');
+                return;
+            }
+
+            const userDetails = JSON.parse(userDetailsStr);
+
             const response = await fetch(`http://localhost:8000/api/students/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({
+                    ...formData,
+                    userName: userDetails.name || userDetails.email.split('@')[0],
+                    userEmail: userDetails.email,
+                    userPosition: userDetails.position,
+                    userId: userDetails._id,
+                    previousData: studentData // Include previous data for logging changes
+                })
             });
-    
+
             const data = await response.json();
-    
+
             if (!response.ok) {
                 throw new Error(data.message || 'Failed to update student');
             }
-    
-            if (data.success) {
-                setSuccessMessage('Student updated successfully!');
-                setShowModal(false);
-                setTimeout(() => {
-                    navigate('/treasurer/students', {
-                        state: { updateSuccess: true }
-                    });
-                }, 2000);
-            } else {
-                throw new Error(data.message || 'Failed to update student');
-            }
+
+            setSuccessMessage('Student updated successfully!');
+            setShowModal(false);
+            setTimeout(() => {
+                navigate('/treasurer/students', {
+                    state: { updateSuccess: true }
+                });
+            }, 2000);
         } catch (err) {
             setError(err.message || 'Failed to update student. Please try again.');
             clearError();
@@ -226,8 +287,8 @@ const TreasurerEditStud = () => {
                     </div>
                 </div>
             </div>
-                {/* Update Confirmation Modal */}
-                <Modal show={showModal} onHide={() => setShowModal(false)}>
+            {/* Update Confirmation Modal */}
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Confirm Update Student</Modal.Title>
                 </Modal.Header>
@@ -235,16 +296,16 @@ const TreasurerEditStud = () => {
                     Do you want to update <strong>{formData.name}</strong>?
                 </Modal.Body>
                 <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button 
-                        variant="btn btn-confirm" 
-                        onClick={confirmUpdate} 
+                    <Button
+                        variant="btn btn-confirm"
+                        onClick={confirmUpdate}
                         style={{ flex: 'none' }}
                     >
                         Confirm
                     </Button>
-                    <Button 
-                        variant="btn btn-cancel" 
-                        onClick={() => setShowModal(false)} 
+                    <Button
+                        variant="btn btn-cancel"
+                        onClick={() => setShowModal(false)}
                         style={{ marginRight: '0.5rem', flex: 'none' }}
                     >
                         Cancel

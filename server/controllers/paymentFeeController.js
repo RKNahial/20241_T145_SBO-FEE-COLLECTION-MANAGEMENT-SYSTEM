@@ -1,19 +1,23 @@
 const PaymentFee = require('../models/PaymentFee');
 const Student = require('../models/studentSchema');
 const PaymentCategory = require('../models/PaymentCategory');
+const HistoryLog = require('../models/HistoryLog');
 
 exports.updatePaymentStatus = async (req, res) => {
     try {
         const { studentId } = req.params;
         const { status, amountPaid, paymentCategory, paymentDate, totalPrice } = req.body;
 
+        // Find the student
+        const student = await Student.findById(studentId);
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+
         // Find the payment category
         const category = await PaymentCategory.findOne({ name: paymentCategory });
         if (!category) {
-            return res.status(404).json({
-                success: false,
-                message: 'Payment category not found'
-            });
+            return res.status(404).json({ success: false, message: 'Payment category not found' });
         }
 
         // Find or create payment record
@@ -21,6 +25,9 @@ exports.updatePaymentStatus = async (req, res) => {
             studentId,
             categoryId: category._id
         });
+
+        const previousStatus = paymentFee ? paymentFee.status : 'Not Paid';
+        const previousAmount = paymentFee ? paymentFee.amountPaid : 0;
 
         if (!paymentFee) {
             paymentFee = new PaymentFee({
@@ -32,10 +39,8 @@ exports.updatePaymentStatus = async (req, res) => {
             });
         }
 
-        // Record the transaction
-        const previousStatus = paymentFee.status;
+        // Record the transaction and update payment details
         const transactionAmount = status === 'Not Paid' ? 0 : parseFloat(amountPaid);
-
         paymentFee.transactions.push({
             amount: transactionAmount,
             date: new Date(paymentDate),
@@ -44,7 +49,6 @@ exports.updatePaymentStatus = async (req, res) => {
             newStatus: status
         });
 
-        // Update payment details
         paymentFee.status = status;
         paymentFee.amountPaid = transactionAmount;
         paymentFee.paymentDate = status !== 'Not Paid' ? new Date(paymentDate) : null;
@@ -52,9 +56,24 @@ exports.updatePaymentStatus = async (req, res) => {
 
         await paymentFee.save();
 
-        // Update student's overall payment status
-        await Student.findByIdAndUpdate(studentId, {
-            paymentstatus: status
+        // Create history log
+        await HistoryLog.create({
+            userName: req.user.name,
+            userEmail: req.user.email,
+            userPosition: req.user.position,
+            action: 'PAYMENT_UPDATE',
+            details: `${req.user.name} (${req.user.position}) updated payment for student: ${student.name}`,
+            metadata: {
+                studentId,
+                studentName: student.name,
+                paymentCategory,
+                previousStatus,
+                newStatus: status,
+                previousAmount,
+                newAmount: transactionAmount,
+                totalPrice,
+                paymentDate
+            }
         });
 
         res.json({

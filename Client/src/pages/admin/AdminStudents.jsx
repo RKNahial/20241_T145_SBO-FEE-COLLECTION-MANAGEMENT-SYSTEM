@@ -1,11 +1,14 @@
 // src/pages/admin/AdminStudents.jsx
 import { Helmet } from 'react-helmet';
 import React, { useState, useEffect } from "react";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AdminSidebar from "./AdminSidebar";
 import AdminNavbar from "./AdminNavbar";
 import { Modal, Button } from 'react-bootstrap';
+import axios from 'axios';
 const AdminStudents = () => {
+    const navigate = useNavigate();
+
     // NAV AND SIDEBAR
     const [isCollapsed, setIsCollapsed] = useState(false);
     const toggleSidebar = () => {
@@ -102,12 +105,44 @@ const AdminStudents = () => {
     };
 
     // Handle archive and unarchive actions
-    const handleArchiveAction = (studentId, studentName, isArchived) => {
-        setModalAction({
-            type: isArchived ? 'unarchive' : 'archive',
-            student: { id: studentId, name: studentName }
-        });
-        setShowModal(true);
+    const handleArchiveAction = async (studentId, studentName, isArchived) => {
+        try {
+            const token = localStorage.getItem('token');
+            const lockStatus = await axios.get(
+                `http://localhost:8000/api/students/${studentId}/check-lock/ARCHIVE`,
+                {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }
+            );
+
+            if (!lockStatus.data.success) {
+                setError(`This student is currently being ${isArchived ? 'unarchived' : 'archived'} by ${lockStatus.data.userName}`);
+                return;
+            }
+
+            // Acquire lock before proceeding
+            const acquireLock = await axios.post(
+                `http://localhost:8000/api/students/${studentId}/acquire-lock/ARCHIVE`,
+                {},
+                {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }
+            );
+
+            if (!acquireLock.data.success) {
+                setError(acquireLock.data.message);
+                return;
+            }
+
+            setModalAction({
+                type: isArchived ? 'unarchive' : 'archive',
+                student: { id: studentId, name: studentName }
+            });
+            setShowModal(true);
+        } catch (error) {
+            console.error('Error checking/acquiring lock:', error);
+            setError('Failed to perform action. Please try again.');
+        }
     };
 
     const confirmAction = async () => {
@@ -133,7 +168,14 @@ const AdminStudents = () => {
             setShowModal(false);
             setSuccessMessage(`Student ${modalAction.type}d successfully`);
 
-            // Clear success message after 3 seconds
+            // Release the lock
+            await axios.delete(
+                `http://localhost:8000/api/students/${modalAction.student.id}/release-lock/ARCHIVE`,
+                {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }
+            );
+
             setTimeout(() => {
                 setSuccessMessage("");
             }, 3000);
@@ -159,6 +201,26 @@ const AdminStudents = () => {
     const sortedItems = [...currentItems].sort((a, b) =>
         a.name.localeCompare(b.name)
     );
+
+    const checkEditLock = async (studentId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(
+                `http://localhost:8000/api/students/${studentId}/check-lock/EDIT`,
+                {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }
+            );
+            return {
+                locked: !response.data.success,
+                userName: response.data.userName
+            };
+        } catch (error) {
+            console.error('Error checking edit lock:', error);
+            setError('Error checking edit lock status');
+            return { locked: true };
+        }
+    };
 
     return (
         <div className={`sb-nav-fixed ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
@@ -293,7 +355,19 @@ const AdminStudents = () => {
                                                                 />
                                                             </td>
                                                             <td>
-                                                                <Link to={`/admin/students/edit/${student._id}`} className="btn btn-edit btn-sm">
+                                                                <Link
+                                                                    to={`/admin/students/edit/${student._id}`}
+                                                                    className="btn btn-edit btn-sm"
+                                                                    onClick={async (e) => {
+                                                                        e.preventDefault();
+                                                                        const lockStatus = await checkEditLock(student._id);
+                                                                        if (lockStatus.locked) {
+                                                                            setError(`This student is currently being edited by ${lockStatus.userName}`);
+                                                                        } else {
+                                                                            navigate(`/admin/students/edit/${student._id}`);
+                                                                        }
+                                                                    }}
+                                                                >
                                                                     <i className="fas fa-edit"></i>
                                                                 </Link>
 

@@ -25,21 +25,21 @@ const TreasurerFee = () => {
     useEffect(() => {
         const fetchStudents = async () => {
             try {
-                const token = localStorage.getItem('token'); 
+                const token = localStorage.getItem('token');
                 const response = await fetch('http://localhost:8000/api/getAll/students', {
                     headers: {
-                        'Authorization': `Bearer ${token}`, 
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     }
                 });
-    
+
                 if (!response.ok) {
                     if (response.status === 401) {
                         throw new Error('Unauthorized access. Please login again.');
                     }
                     throw new Error('Failed to fetch students');
                 }
-    
+
                 const data = await response.json();
                 const activeStudents = data.filter(student => !student.isArchived);
                 setStudents(activeStudents);
@@ -109,7 +109,7 @@ const TreasurerFee = () => {
                         : student
                 )
             );
-    
+
             // Update the categoryPayments state immediately
             setCategoryPayments(prev => ({
                 ...prev,
@@ -120,73 +120,73 @@ const TreasurerFee = () => {
                 }
             }));
 
-             // Trigger payment update to refresh dashboards
-        triggerPaymentUpdate();
+            // Trigger payment update to refresh dashboards
+            triggerPaymentUpdate();
 
-        setSuccessMessage("Payment updated successfully!");
-        setTimeout(() => {
-            setSuccessMessage('');
-        }, 2500);
+            setSuccessMessage("Payment updated successfully!");
+            setTimeout(() => {
+                setSuccessMessage('');
+            }, 2500);
 
-        setIsModalOpen(false);
+            setIsModalOpen(false);
 
-        // Refresh the data from server
-        try {
-            const token = localStorage.getItem('token'); // Get the token
-            
-            // Fetch updated students with authorization header
-            const studentsResponse = await fetch('http://localhost:8000/api/getAll/students', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            // Refresh the data from server
+            try {
+                const token = localStorage.getItem('token'); // Get the token
 
-            if (!studentsResponse.ok) {
-                throw new Error('Failed to refresh student data');
-            }
-
-            const studentsData = await studentsResponse.json();
-            const activeStudents = studentsData.filter(student => !student.isArchived);
-            setStudents(activeStudents);
-
-            // Fetch updated payment data for the category
-            if (selectedCategory) {
-                const paymentsResponse = await axios.get(
-                    `http://localhost:8000/api/payment-fee/by-category/${selectedCategory}`,
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
+                // Fetch updated students with authorization header
+                const studentsResponse = await fetch('http://localhost:8000/api/getAll/students', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
                     }
-                );
-                
-                if (paymentsResponse.data.success && Array.isArray(paymentsResponse.data.payments)) {
-                    const paymentData = {};
-                    paymentsResponse.data.payments.forEach(payment => {
-                        if (payment.studentId) {
-                            paymentData[payment.studentId._id] = {
-                                status: payment.status || 'Not Paid',
-                                amountPaid: payment.amountPaid || 0,
-                                totalPrice: payment.totalPrice || 0
-                            };
-                        }
-                    });
-                    setCategoryPayments(paymentData);
-                }
-            }
-        } catch (refreshError) {
-            console.error('Error refreshing data:', refreshError);
-            // Don't show error message since the transaction was successful
-            // Just log it for debugging purposes
-        }
+                });
 
-    } catch (error) {
-        console.error('Error updating payment status:', error);
-        setError('Failed to update payment status');
-        setTimeout(() => setError(null), 2500);
-    }
-};
+                if (!studentsResponse.ok) {
+                    throw new Error('Failed to refresh student data');
+                }
+
+                const studentsData = await studentsResponse.json();
+                const activeStudents = studentsData.filter(student => !student.isArchived);
+                setStudents(activeStudents);
+
+                // Fetch updated payment data for the category
+                if (selectedCategory) {
+                    const paymentsResponse = await axios.get(
+                        `http://localhost:8000/api/payment-fee/by-category/${selectedCategory}`,
+                        {
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        }
+                    );
+
+                    if (paymentsResponse.data.success && Array.isArray(paymentsResponse.data.payments)) {
+                        const paymentData = {};
+                        paymentsResponse.data.payments.forEach(payment => {
+                            if (payment.studentId) {
+                                paymentData[payment.studentId._id] = {
+                                    status: payment.status || 'Not Paid',
+                                    amountPaid: payment.amountPaid || 0,
+                                    totalPrice: payment.totalPrice || 0
+                                };
+                            }
+                        });
+                        setCategoryPayments(paymentData);
+                    }
+                }
+            } catch (refreshError) {
+                console.error('Error refreshing data:', refreshError);
+                // Don't show error message since the transaction was successful
+                // Just log it for debugging purposes
+            }
+
+        } catch (error) {
+            console.error('Error updating payment status:', error);
+            setError('Failed to update payment status');
+            setTimeout(() => setError(null), 2500);
+        }
+    };
 
     //  VIEW PAYMENT MODAL
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -238,10 +238,18 @@ const TreasurerFee = () => {
     // Update the handleEmailClick function
     const handleEmailClick = async (student) => {
         try {
-            const response = await axios.get(`http://localhost:8000/api/payment-fee/details/${student._id}`);
+            const token = localStorage.getItem('token');
+            const response = await axios.get(
+                `http://localhost:8000/api/payment-fee/details/${student._id}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
+
             if (response.data.success) {
                 const paymentDetails = response.data.paymentFee;
-
                 const templateParams = {
                     from_name: "COT-SBO COLLECTION FEE MANAGEMENT SYSTEM",
                     to_name: student.name,
@@ -255,22 +263,44 @@ const TreasurerFee = () => {
                     ).join('\n\n') || 'No transaction history'
                 };
 
+                // Send email first
                 const emailResponse = await emailjs.send(
                     "service_bni941i",
                     "template_x5s32eh",
                     templateParams,
-                    "Nqbgnjhv9ss88DOrk"
+                    "Nqbgnjhv9ss88DOrk" // Your EmailJS public key
                 );
 
                 if (emailResponse.status === 200) {
-                    setEmailSuccessMessage('Payment details emailed successfully!');
-                    setTimeout(() => setEmailSuccessMessage(''), 3000);
+                    // Log the successful email sending
+                    await axios.post(
+                        'http://localhost:8000/api/history-logs/email',
+                        {
+                            studentId: student._id,
+                            studentName: student.name,
+                            studentEmail: student.institutionalEmail,
+                            paymentDetails: {
+                                category: paymentDetails.paymentCategory,
+                                status: student.paymentstatus,
+                                totalPrice: paymentDetails.totalPrice,
+                                amountPaid: paymentDetails.amountPaid
+                            }
+                        },
+                        {
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            }
+                        }
+                    );
+
+                    setSuccessMessage(`Payment details sent to ${student.name}'s email successfully!`);
+                    setTimeout(() => setSuccessMessage(''), 3000);
                 }
             }
         } catch (error) {
             console.error('Error sending email:', error);
-            setError('Failed to send email');
-            setTimeout(() => setError(null), 3000);
+            setError('Failed to send email. Please try again.');
         }
     };
 

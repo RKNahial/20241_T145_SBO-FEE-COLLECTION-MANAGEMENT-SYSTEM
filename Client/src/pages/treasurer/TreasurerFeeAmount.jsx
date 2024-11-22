@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
+import axios from 'axios';
 
 const TreasurerFeeAmount = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -77,7 +78,7 @@ const TreasurerFeeAmount = () => {
         }
         setShowModal(true);
     };
-    
+
     const handleConfirmPayment = async () => {
         setShowModal(false);
         setLoading(true);
@@ -85,14 +86,17 @@ const TreasurerFeeAmount = () => {
         setSuccessMessage('');
         let successCount = 0;
         let errorMessages = [];
-    
+
         try {
+            const token = localStorage.getItem('token');
+
             for (const coverage of weeksAndMonthsCovered) {
                 try {
                     const response = await fetch(`http://localhost:8000/api/daily-dues/${userId}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
                         },
                         body: JSON.stringify({
                             amount: coverage.days * 5,
@@ -102,10 +106,31 @@ const TreasurerFeeAmount = () => {
                             daysCount: coverage.days
                         }),
                     });
-    
+
                     const data = await response.json();
-    
+
                     if (data.success) {
+                        // Log the payment
+                        await axios.post(
+                            'http://localhost:8000/api/history-logs/dues-payment',
+                            {
+                                userId,
+                                officerName,
+                                paymentDetails: {
+                                    amount: coverage.days * 5,
+                                    month: coverage.month,
+                                    week: coverage.week,
+                                    daysCount: coverage.days,
+                                    userType
+                                }
+                            },
+                            {
+                                headers: {
+                                    'Authorization': `Bearer ${token}`,
+                                    'Content-Type': 'application/json'
+                                }
+                            }
+                        );
                         successCount++;
                     } else {
                         errorMessages.push(`${coverage.month} Week ${coverage.week}: ${data.message}`);
@@ -115,10 +140,10 @@ const TreasurerFeeAmount = () => {
                     errorMessages.push(`${coverage.month} Week ${coverage.week}: Failed to process`);
                 }
             }
-    
+
             if (successCount > 0) {
                 setSuccessMessage(`Successfully processed payment for ${officerName} covering ${daysCovered} day/s.`);
-    
+
                 // Force refresh before navigation
                 await fetch(`http://localhost:8000/api/daily-dues?month=${weeksAndMonthsCovered[0].month}&week=${weeksAndMonthsCovered[0].week}`, {
                     method: 'GET',
@@ -127,7 +152,7 @@ const TreasurerFeeAmount = () => {
                         'Pragma': 'no-cache'
                     }
                 });
-    
+
                 // Add delay before navigation
                 setTimeout(() => {
                     navigate("/treasurer/daily-dues", {
@@ -157,7 +182,7 @@ const TreasurerFeeAmount = () => {
     return (
         <div className="sb-nav-fixed">
             <Helmet>
-                <title>Treasurer | Pay in Amount</title>
+                <title>Treasurers | Pay in Amount</title>
             </Helmet>
             <TreasurerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
@@ -188,7 +213,7 @@ const TreasurerFeeAmount = () => {
                                                 {error}
                                             </div>
                                         )}
-                                            <form onSubmit={handleSave}>
+                                        <form onSubmit={handleSave}>
                                             <div className="mb-3">
                                                 <label className="mb-1">Name</label>
                                                 <input
@@ -257,41 +282,41 @@ const TreasurerFeeAmount = () => {
             </div>
             {/* CONFIRMATION MODAL */}
             <Modal show={showModal} onHide={() => setShowModal(false)}>
-            <Modal.Header closeButton>
-                <Modal.Title>Confirm Payment</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                Are you sure you want to process daily dues for <strong>{officerName}</strong>?
-                <br /><br />
-                Amount: ₱{amount}
-                <br />
-                Days Covered: {daysCovered}
-                <br /><br />
-                Coverage Details:
-                {weeksAndMonthsCovered.map((coverage, index) => (
-                    <div key={index}>
-                        {coverage.month} - Week {coverage.week}: {coverage.days} days
-                    </div>
-                ))}
-            </Modal.Body>
-            <Modal.Footer>
-                <Button 
-                    variant="btn btn-confirm" 
-                    onClick={handleConfirmPayment}
-                    style={{ backgroundColor: '#FF8C00', border: 'none' }}
-                    disabled={loading}
-                >
-                    {loading ? 'Processing...' : 'Confirm'}
-                </Button>
-                <Button 
-                    variant="btn btn-cancel" 
-                    onClick={() => setShowModal(false)}
-                    style={{ backgroundColor: '#6c757d', border: 'none' }}
-                >
-                    Cancel
-                </Button>
-            </Modal.Footer>
-        </Modal>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm Payment</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Are you sure you want to process daily dues for <strong>{officerName}</strong>?
+                    <br /><br />
+                    Amount: ₱{amount}
+                    <br />
+                    Days Covered: {daysCovered}
+                    <br /><br />
+                    Coverage Details:
+                    {weeksAndMonthsCovered.map((coverage, index) => (
+                        <div key={index}>
+                            {coverage.month} - Week {coverage.week}: {coverage.days} days
+                        </div>
+                    ))}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button
+                        variant="btn btn-confirm"
+                        onClick={handleConfirmPayment}
+                        style={{ backgroundColor: '#FF8C00', border: 'none' }}
+                        disabled={loading}
+                    >
+                        {loading ? 'Processing...' : 'Confirm'}
+                    </Button>
+                    <Button
+                        variant="btn btn-cancel"
+                        onClick={() => setShowModal(false)}
+                        style={{ backgroundColor: '#6c757d', border: 'none' }}
+                    >
+                        Cancel
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };
