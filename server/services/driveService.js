@@ -63,6 +63,56 @@ class DriveService {
       throw error;
     }
   }
+
+  async getDriveStats() {
+    try {
+      // Get all files (excluding folders)
+      const response = await drive.files.list({
+        q: "mimeType != 'application/vnd.google-apps.folder'",
+        fields: 'files(size)',
+        pageSize: 1000
+      });
+
+      const files = response.data.files;
+      const totalFiles = files.length;
+      const totalStorage = files.reduce((acc, file) => acc + (parseInt(file.size) || 0), 0);
+
+      return {
+        totalFiles,
+        totalStorage: Math.round(totalStorage / 1024 / 1024) // Convert to MB
+      };
+    } catch (error) {
+      console.error('Error getting drive stats:', error);
+      throw error;
+    }
+  }
+
+  async listFiles() {
+    try {
+      const response = await drive.files.list({
+        fields: 'files(id, name, mimeType, size, modifiedTime, webViewLink, webContentLink)',
+        pageSize: 100,
+        orderBy: 'modifiedTime desc'
+      });
+      
+      return response.data.files;
+    } catch (error) {
+      console.error('Error listing files:', error);
+      throw error;
+    }
+  }
+
+  async deleteFile(fileId) {
+    try {
+      await drive.files.delete({
+        fileId: fileId
+      });
+      return true;
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = new DriveService(); 

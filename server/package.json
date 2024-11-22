@@ -11,6 +11,7 @@
   "description": "",
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
+    "@google-analytics/data": "^4.11.0",
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
     "chart.js": "^4.4.6",

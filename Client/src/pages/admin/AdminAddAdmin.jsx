@@ -101,7 +101,13 @@ const AdminAddAdmin = () => {
             <AdminNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
                 <AdminSidebar isCollapsed={isCollapsed} />
-                <div id="layoutSidenav_content">
+                <div id="layoutSidenav_content" style={{
+                    flex: '1',
+                    marginLeft: isCollapsed ? '70px' : '250px',  // Adjust these values based on your sidebar width
+                    transition: 'margin-left 0.3s ease-in-out',
+                    position: 'relative',
+                    zIndex: 0
+                }}>
                     <div className="container-fluid px-4">
                         <div className="row align-items-center">
                             <div className="col-6">

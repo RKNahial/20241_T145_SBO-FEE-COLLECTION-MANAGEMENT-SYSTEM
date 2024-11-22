@@ -1,5 +1,10 @@
 const cors = require('cors');
 
-const corsMiddleware = cors();
+const corsOptions = {
+    origin: 'http://localhost:3026',  // Your frontend URL
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
 
-module.exports = corsMiddleware;
+module.exports = cors(corsOptions);

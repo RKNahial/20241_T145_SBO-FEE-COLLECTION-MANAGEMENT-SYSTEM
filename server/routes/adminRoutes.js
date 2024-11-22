@@ -15,4 +15,9 @@ router.get('/admin/students/active/count', authMiddleware, adminController.getAc
 router.get('/admin/officers/active/count', authMiddleware, adminController.getActiveOfficersCount);
 router.get('/admin/admins/count', authMiddleware, adminController.getActiveAdminsCount);
 
+// Add these routes
+router.get('/admin/active-students-count', authMiddleware, adminController.getActiveStudentsCount);
+router.get('/admin/active-officers-count', authMiddleware, adminController.getActiveOfficersCount);
+router.get('/admin/active-admins-count', authMiddleware, adminController.getActiveAdminsCount);
+
 module.exports = router; 
