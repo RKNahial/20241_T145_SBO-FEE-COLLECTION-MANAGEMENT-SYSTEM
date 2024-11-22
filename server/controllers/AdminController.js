@@ -1,6 +1,7 @@
 const Admin = require('../models/AdminSchema');
 const Student = require('../models/studentSchema');
 const Officer = require('../models/OfficerSchema');
+const bcrypt = require('bcrypt');
 
 exports.getAllAdmins = async (req, res) => {
     try {
@@ -130,6 +131,90 @@ exports.getActiveAdminsCount = async (req, res) => {
     } catch (error) {
         console.error('Error counting admins:', error);
         res.status(500).json({ message: error.message });
+    }
+};
+
+exports.getAdminProfile = async (req, res) => {
+    try {
+        // Get user ID from the token
+        const userId = req.userData.userId;
+        
+        const admin = await Admin.findById(userId)
+            .select('-password -__v');
+
+        if (!admin) {
+            return res.status(404).json({
+                success: false,
+                message: 'Admin not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            data: {
+                name: admin.name,
+                ID: admin.ID,
+                email: admin.email,
+                position: admin.position
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching admin profile:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching admin profile',
+            error: error.message
+        });
+    }
+};
+
+exports.updateAdminProfile = async (req, res) => {
+    try {
+        const userId = req.userData.userId;
+        const { name, ID, email, password } = req.body;
+
+        const updateData = {
+            name,
+            ID,
+            email
+        };
+
+        // Only hash and update password if it's provided
+        if (password && password.trim() !== '') {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            updateData.password = hashedPassword;
+        }
+
+        const admin = await Admin.findByIdAndUpdate(
+            userId,
+            { $set: updateData },
+            { new: true }
+        ).select('-password -__v');
+
+        if (!admin) {
+            return res.status(404).json({
+                success: false,
+                message: 'Admin not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Profile updated successfully',
+            data: {
+                name: admin.name,
+                ID: admin.ID,
+                email: admin.email,
+                position: admin.position
+            }
+        });
+    } catch (error) {
+        console.error('Error updating admin profile:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating admin profile',
+            error: error.message
+        });
     }
 };
 

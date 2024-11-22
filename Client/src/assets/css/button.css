@@ -331,3 +331,18 @@ button:focus {
     opacity: 0.8;
     cursor: pointer;
 }
+.btn-add {
+    transition: all 0.3s ease;
+}
+
+.btn-add:hover {
+    background-color: #e67e00 !important;
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.search-filter-container {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}

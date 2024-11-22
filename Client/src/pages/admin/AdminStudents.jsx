@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 import AdminSidebar from "./AdminSidebar";
 import AdminNavbar from "./AdminNavbar";
 import { Modal, Button } from 'react-bootstrap';
-
 const AdminStudents = () => {
     // NAV AND SIDEBAR
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -156,60 +155,40 @@ const AdminStudents = () => {
         setCurrentPage(1);
     }, [students, searchTerm, statusFilter]);
 
+    // Add this sorting function after the state declarations
+    const sortedItems = [...currentItems].sort((a, b) =>
+        a.name.localeCompare(b.name)
+    );
+
     return (
-        <div className="admin-container">
+        <div className={`sb-nav-fixed ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
             <Helmet>
-                <title>Admin - Students</title>
+                <title>Admin | Students</title>
             </Helmet>
             <AdminNavbar toggleSidebar={toggleSidebar} />
             <div className="d-flex">
                 <AdminSidebar isCollapsed={isCollapsed} />
                 <div className="content-wrapper" style={{
-                    marginLeft: isCollapsed ? '80px' : '240px',
-                    width: 'calc(100% - ${isCollapsed ? "80px" : "240px"})',
-                    transition: 'margin-left 0.3s ease-in-out',
-                    padding: '20px'
+                    marginLeft: isCollapsed ? '5rem' : '15.625rem',
+                    transition: 'margin-left 0.3s ease',
+                    width: `calc(100% - ${isCollapsed ? '5rem' : '15.625rem'})`
                 }}>
-                    <div className="container-fluid">
-                        <div className="card">
-                            <div className="card-body">
-                                <div className="d-flex justify-content-between align-items-center mb-3">
-                                    <h5 className="card-title">Students</h5>
-                                    <Link to="/admin/students/add-new" className="btn btn-primary">
-                                        <i className="fas fa-plus"></i> Add Student
+                    <div className="table-container">
+                        <div className="container-fluid px-4">
+                            <div className="content-card">
+                                <div className="d-flex justify-content-between align-items-center mb-4">
+                                    <h5 className="card-title mb-0">
+                                        <i className="fas fa-users text-primary me-2"></i>
+                                        Student Management
+                                    </h5>
+                                    <Link to="/admin/students/add" className="btn btn-primary btn-sm">
+                                        <i className="fas fa-plus"></i>
+                                        Add Student
                                     </Link>
                                 </div>
 
                                 {/* Search and Filter Section */}
-                                <div className="row mb-3">
-                                    <div className="col-md-6">
-                                        <div className="input-group">
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                placeholder="Search by name or ID..."
-                                                value={searchTerm}
-                                                onChange={(e) => setSearchTerm(e.target.value)}
-                                            />
-                                            <div className="input-group-append">
-                                                <span className="input-group-text">
-                                                    <i className="fas fa-search"></i>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="col-md-6">
-                                        <select
-                                            className="form-control"
-                                            value={statusFilter}
-                                            onChange={(e) => setStatusFilter(e.target.value)}
-                                        >
-                                            <option value="Active">Active</option>
-                                            <option value="Archived">Archived</option>
-                                            <option value="All">All</option>
-                                        </select>
-                                    </div>
-                                </div>
+
 
                                 {/* Table Section */}
                                 {loading ? (
@@ -219,26 +198,94 @@ const AdminStudents = () => {
                                 ) : (
                                     <>
                                         <div className="table-responsive">
+                                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                                <div className="d-flex gap-2">
+                                                    <Link
+                                                        to="/admin/students/add-new"
+                                                        className="btn btn-add"
+                                                        style={{
+                                                            backgroundColor: '#FF8C00',
+                                                            color: 'white',
+                                                            padding: '0.5rem 1rem',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '0.5rem'
+                                                        }}
+                                                    >
+                                                        <i className="fas fa-plus"></i>
+                                                        Add Student
+                                                    </Link>
+                                                    <button
+                                                        className="btn btn-secondary"
+                                                        onClick={() => setStatusFilter("Archived")}
+                                                        style={{ backgroundColor: '#FF8C00', color: 'white', border: 'none' }}
+                                                    >
+                                                        <i className="fas fa-archive me-1"></i>
+                                                        Show Archived
+                                                    </button>
+                                                </div>
+                                                <div className="d-flex align-items-center" style={{ width: 'auto' }}>
+                                                    <select
+                                                        className="form-select me-2"
+                                                        value={statusFilter}
+                                                        onChange={(e) => setStatusFilter(e.target.value)}
+                                                        style={{ width: 'auto', minWidth: '120px' }}
+                                                    >
+                                                        <option value="Active">Active</option>
+                                                        <option value="Archived">Archived</option>
+                                                        <option value="All">All</option>
+                                                    </select>
+                                                    <div className="input-group" style={{ width: 'auto', position: 'relative' }}>
+                                                        <span className="input-group-text" style={{ backgroundColor: 'transparent', border: 'none', position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}>
+                                                            <i className="fas fa-search" style={{ color: '#6c757d' }}></i>
+                                                        </span>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            placeholder="Search students..."
+                                                            value={searchTerm}
+                                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                                            aria-label="Search students"
+                                                            style={{
+                                                                paddingLeft: '40px',
+                                                                borderRadius: '5px',
+                                                                border: '1px solid #ced4da',
+                                                                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                                                                width: '250px'
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <table className="table table-bordered table-hover">
                                                 <thead>
                                                     <tr>
-                                                        <th>#</th>
-                                                        <th>Student ID</th>
-                                                        <th>Student Name</th>
-                                                        <th>Year Level</th>
-                                                        <th>Program</th>
-                                                        <th>Status</th>
-                                                        <th>Actions</th>
+                                                        <th scope="col">#</th>
+                                                        <th scope="col">Student ID</th>
+                                                        <th scope="col">Name</th>
+                                                        <th scope="col">Program</th>
+                                                        <th scope="col">Year Level</th>
+                                                        <th scope="col">Status</th>
+                                                        <th scope="col">Actions</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {currentItems.map((student, index) => (
+                                                    {sortedItems.map((student, index) => (
                                                         <tr key={student._id}>
                                                             <td>{indexOfFirstItem + index + 1}</td>
-                                                            <td>{student.studentId}</td>
-                                                            <td>{student.name}</td>
-                                                            <td>{student.yearLevel}</td>
+                                                            <td>
+                                                                <span className="fw-medium">{student.studentId}</span>
+                                                            </td>
+                                                            <td>
+                                                                <div className="d-flex align-items-center justify-content-center">
+                                                                    <div className="text-center">
+                                                                        <h6 className="mb-0">{student.name}</h6>
+                                                                        <small className="text-muted">{student.institutionalEmail}</small>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
                                                             <td>{student.program}</td>
+                                                            <td>{student.yearLevel}</td>
                                                             <td>
                                                                 <StudentStatusTag
                                                                     status={student.isArchived ? 'Archived' : 'Active'}
@@ -246,19 +293,10 @@ const AdminStudents = () => {
                                                                 />
                                                             </td>
                                                             <td>
-                                                                <Link
-                                                                    to={`/admin/students/edit/${student._id}`}
-                                                                    state={{ studentData: student }}
-                                                                    className="btn btn-edit btn-sm"
-                                                                >
+                                                                <Link to={`/admin/students/edit/${student._id}`} className="btn btn-edit btn-sm">
                                                                     <i className="fas fa-edit"></i>
                                                                 </Link>
-                                                                <button
-                                                                    className="btn btn-notes btn-sm"
-                                                                    onClick={() => handleOpenGoogleNotes(student.studentId)}
-                                                                >
-                                                                    <i className="fas fa-sticky-note"></i>
-                                                                </button>
+
                                                                 <button
                                                                     className={`btn btn-archive btn-sm ${student.isArchived ? 'btn-open' : ''}`}
                                                                     onClick={() => handleArchiveAction(student._id, student.name, student.isArchived)}

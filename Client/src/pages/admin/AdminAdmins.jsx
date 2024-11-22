@@ -133,10 +133,18 @@ const AdminAdmins = () => {
                                 <div className="d-flex justify-content-between mb-3 align-items-center">
                                     <div>
                                         <Link to="/admin/admins/add-new" className="btn system-button me-2">
-                                            <i className="far fa-plus me-1"></i> Add Admin
+                                            <i className="far fa-plus me-1"></i> Add
                                         </Link>
+                                        <button
+                                            className="btn btn-secondary"
+                                            onClick={() => setStatusFilter("Archived")}
+                                            style={{ backgroundColor: '#FF8C00', color: 'white', border: 'none' }}
+                                        >
+                                            <i className="fas fa-archive me-1"></i>
+                                            Show Archived
+                                        </button>
                                     </div>
-                                    <div className="d-flex align-items-center" style={{ maxWidth: '50%' }}>
+                                    <div className="d-flex align-items-center" style={{ width: 'auto' }}>
                                         <select
                                             className="form-select me-2"
                                             value={statusFilter}
@@ -147,26 +155,23 @@ const AdminAdmins = () => {
                                             <option value="Active">Active</option>
                                             <option value="Archived">Archived</option>
                                         </select>
-                                        <div className="position-relative" style={{ flex: '1' }}>
-                                            <i className="fas fa-search search-icon"
-                                                style={{
-                                                    position: 'absolute',
-                                                    left: '10px',
-                                                    top: '50%',
-                                                    transform: 'translateY(-50%)',
-                                                    color: '#6c757d',
-                                                    zIndex: 1
-                                                }}
-                                            ></i>
+                                        <div className="input-group" style={{ width: 'auto', position: 'relative' }}>
+                                            <span className="input-group-text" style={{ backgroundColor: 'transparent', border: 'none', position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}>
+                                                <i className="fas fa-search" style={{ color: '#6c757d' }}></i>
+                                            </span>
                                             <input
                                                 type="text"
-                                                className="form-control ps-4"
+                                                className="form-control"
                                                 placeholder="Search admin..."
                                                 value={searchTerm}
                                                 onChange={(e) => setSearchTerm(e.target.value)}
+                                                aria-label="Search admin"
                                                 style={{
-                                                    paddingLeft: '35px',
-                                                    width: '100%'
+                                                    paddingLeft: '40px',
+                                                    borderRadius: '5px',
+                                                    border: '1px solid #ced4da',
+                                                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                                                    width: '250px'
                                                 }}
                                             />
                                         </div>

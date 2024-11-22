@@ -160,57 +160,81 @@ const AdminDashboard = () => {
                         {/* Statistics Cards Row */}
                         <div className="row justify-content-center mb-4">
                             <div className="col-xl-3 col-md-6 mb-3">
-                                <div className="card border-0 shadow-sm">
-                                    <div className="card-body d-flex align-items-center justify-content-center py-3">
+                                <div className="card border-0" style={{
+                                    borderRadius: '15px',
+                                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+                                }}>
+                                    <div className="card-body d-flex align-items-center justify-content-center py-3"
+                                        style={{
+                                            backgroundColor: '#FF8C00',
+                                            borderRadius: '15px'
+                                        }}>
                                         <div className="text-center">
                                             <div className="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
                                                 style={{
                                                     width: '45px',
                                                     height: '45px',
-                                                    backgroundColor: 'rgba(13, 110, 253, 0.1)'
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
                                                 }}>
-                                                <i className="fas fa-user-graduate fa-lg text-primary"></i>
+                                                <i className="fas fa-user-graduate fa-lg text-white"></i>
                                             </div>
-                                            <h5 className="mb-1 fw-bold">{stats.totalActiveStudents}</h5>
-                                            <p className="mb-0 text-muted small">Active Students</p>
+                                            <h5 className="mb-1 fw-bold text-white">{stats.totalActiveStudents}</h5>
+                                            <p className="mb-0 text-white">Active Students</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="col-xl-3 col-md-6 mb-3">
-                                <div className="card border-0 shadow-sm">
-                                    <div className="card-body d-flex align-items-center justify-content-center py-3">
+                                <div className="card border-0" style={{
+                                    borderRadius: '15px',
+                                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+                                }}>
+                                    <div className="card-body d-flex align-items-center justify-content-center py-3"
+                                        style={{
+                                            backgroundColor: '#FF8C00',
+                                            borderRadius: '15px'
+                                        }}>
                                         <div className="text-center">
                                             <div className="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
                                                 style={{
                                                     width: '45px',
                                                     height: '45px',
-                                                    backgroundColor: 'rgba(25, 135, 84, 0.1)'
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
                                                 }}>
-                                                <i className="fas fa-user-tie fa-lg text-success"></i>
+                                                <i className="fas fa-user-tie fa-lg text-white"></i>
                                             </div>
-                                            <h5 className="mb-1 fw-bold">{stats.totalActiveOfficers}</h5>
-                                            <p className="mb-0 text-muted small">Active Officers</p>
+                                            <h5 className="mb-1 fw-bold text-white">{stats.totalActiveOfficers}</h5>
+                                            <p className="mb-0 text-white">Active Officers</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="col-xl-3 col-md-6 mb-3">
-                                <div className="card border-0 shadow-sm">
-                                    <div className="card-body d-flex align-items-center justify-content-center py-3">
+                                <div className="card border-0" style={{
+                                    borderRadius: '15px',
+                                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+                                }}>
+                                    <div className="card-body d-flex align-items-center justify-content-center py-3"
+                                        style={{
+                                            backgroundColor: '#FF8C00',
+                                            borderRadius: '15px'
+                                        }}>
                                         <div className="text-center">
                                             <div className="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
                                                 style={{
                                                     width: '45px',
                                                     height: '45px',
-                                                    backgroundColor: 'rgba(255, 193, 7, 0.1)'
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
                                                 }}>
-                                                <i className="fas fa-user-shield fa-lg text-warning"></i>
+                                                <i className="fas fa-user-shield fa-lg text-white"></i>
                                             </div>
-                                            <h5 className="mb-1 fw-bold">{stats.totalAdmins}</h5>
-                                            <p className="mb-0 text-muted small">Total Admins</p>
+                                            <h5 className="mb-1 fw-bold text-white">{stats.totalAdmins}</h5>
+                                            <p className="mb-0 text-white">Total Admins</p>
                                         </div>
                                     </div>
                                 </div>
@@ -342,24 +366,44 @@ const AdminDashboard = () => {
                                                             <td>{file.mimeType}</td>
                                                             <td>{formatFileSize(file.size)}</td>
                                                             <td>{new Date(file.modifiedTime).toLocaleString()}</td>
-                                                            <td>
-                                                                <div className="btn-group">
+                                                            <td className="align-middle">
+                                                                <div className="d-flex align-items-center justify-content-center" style={{ gap: '8px' }}>
                                                                     <a
                                                                         href={file.webViewLink}
                                                                         target="_blank"
                                                                         rel="noopener noreferrer"
-                                                                        className="btn btn-sm btn-primary"
+                                                                        className="btn btn-primary"
+                                                                        style={{
+                                                                            width: '36px',
+                                                                            height: '36px',
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            justifyContent: 'center',
+                                                                            padding: 0,
+                                                                            lineHeight: '1',
+                                                                            marginBottom: '14px',
+                                                                        }}
                                                                     >
-                                                                        <i className="fas fa-eye"></i>
+                                                                        <i className="fas fa-eye" style={{ fontSize: '16px' }}></i>
                                                                     </a>
                                                                     <a
                                                                         href={file.webContentLink}
-                                                                        className="btn btn-sm btn-success"
                                                                         download
-                                                                    >
-                                                                        <i className="fas fa-download"></i>
-                                                                    </a>
+                                                                        className="btn btn-success"
+                                                                        style={{
+                                                                            width: '36px',
+                                                                            height: '36px',
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            justifyContent: 'center',
+                                                                            padding: 0,
+                                                                            lineHeight: '1'
 
+
+                                                                        }}
+                                                                    >
+                                                                        <i className="fas fa-download" style={{ fontSize: '16px' }}></i>
+                                                                    </a>
                                                                 </div>
                                                             </td>
                                                         </tr>

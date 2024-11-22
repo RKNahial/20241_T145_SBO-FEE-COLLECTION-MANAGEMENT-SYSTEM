@@ -11,13 +11,14 @@ router.put('/admins/:id/archive', authMiddleware, adminController.toggleArchiveS
 router.put('/admins/:id/unarchive', authMiddleware, adminController.toggleArchiveStatus);
 
 // Count routes
-router.get('/admin/students/active/count', authMiddleware, adminController.getActiveStudentsCount);
-router.get('/admin/officers/active/count', authMiddleware, adminController.getActiveOfficersCount);
-router.get('/admin/admins/count', authMiddleware, adminController.getActiveAdminsCount);
+
 
 // Add these routes
 router.get('/admin/active-students-count', authMiddleware, adminController.getActiveStudentsCount);
 router.get('/admin/active-officers-count', authMiddleware, adminController.getActiveOfficersCount);
 router.get('/admin/active-admins-count', authMiddleware, adminController.getActiveAdminsCount);
+
+router.get('/admin/profile', authMiddleware, adminController.getAdminProfile);
+router.put('/admin/profile/update', authMiddleware, adminController.updateAdminProfile);
 
 module.exports = router; 
