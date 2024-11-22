@@ -1,6 +1,6 @@
 // src/pages/admin/AdminDashboard.jsx
 import { Helmet } from 'react-helmet';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import AdminNavbar from "./AdminNavbar";
 import AdminSidebar from "./AdminSidebar";
 import axios from 'axios';
@@ -17,6 +17,10 @@ const AdminDashboard = () => {
         activeUsers: 0,
         totalEvents: 0
     });
+    const [driveStats, setDriveStats] = useState({
+        totalFiles: 0,
+        totalStorage: 0
+    });
     const analytics = getAnalytics(app);
 
     const toggleSidebar = () => {
@@ -28,6 +32,30 @@ const AdminDashboard = () => {
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     };
 
+    const fetchDriveStats = useCallback(async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const headers = { Authorization: `Bearer ${token}` };
+
+            const response = await axios.get('http://localhost:8000/api/drive/stats', { headers });
+
+            setDriveStats({
+                totalFiles: response.data.totalFiles || 0,
+                totalStorage: response.data.totalStorage || 0
+            });
+
+            logEvent(analytics, 'drive_stats_loaded', {
+                total_files: response.data.totalFiles,
+                total_storage: response.data.totalStorage
+            });
+        } catch (error) {
+            console.error('Error fetching drive stats:', error);
+            logEvent(analytics, 'drive_stats_error', {
+                error_message: error.message
+            });
+        }
+    }, [analytics]);
+
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
@@ -38,13 +66,13 @@ const AdminDashboard = () => {
                     axios.get('http://localhost:8000/api/admin/students/active/count', { headers }),
                     axios.get('http://localhost:8000/api/admin/officers/active/count', { headers }),
                     axios.get('http://localhost:8000/api/admin/admins/count', { headers }),
+                    fetchDriveStats()
                 ]);
 
                 setTotalActiveStudents(studentsRes.data.count || 0);
                 setTotalActiveOfficers(officersRes.data.count || 0);
                 setTotalAdmins(adminsRes.data.count || 0);
 
-                // Log analytics event
                 logEvent(analytics, 'dashboard_data_loaded', {
                     active_students: studentsRes.data.count,
                     active_officers: officersRes.data.count,
@@ -59,7 +87,7 @@ const AdminDashboard = () => {
         };
 
         fetchDashboardData();
-    }, [analytics]);
+    }, [analytics, fetchDriveStats]);
 
     useEffect(() => {
         // Log page view when component mounts

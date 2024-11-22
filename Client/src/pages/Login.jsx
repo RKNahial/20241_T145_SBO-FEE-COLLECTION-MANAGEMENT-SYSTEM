@@ -265,14 +265,18 @@ const Login = () => {
     const handleSendOTP = async () => {
         try {
             setLoading(true);
-            // Format the phone number to ensure it matches E.164 format
-            const formattedPhoneNumber = phoneNumber.startsWith('+')
-                ? phoneNumber
-                : `+${phoneNumber}`;
+            // Format for US numbers (+1)
+            let formattedPhoneNumber = phoneNumber;
+            if (!phoneNumber.startsWith('+')) {
+                formattedPhoneNumber = phoneNumber.startsWith('1')
+                    ? `+${phoneNumber}`
+                    : `+1${phoneNumber.replace(/^1/, '')}`;
+            }
+
+            console.log('Sending OTP to:', formattedPhoneNumber); // Debug log
 
             const response = await axios.post('http://localhost:8000/api/send-otp', {
-                phoneNumber: formattedPhoneNumber,
-                channel: 'call'  // Specify that we want a voice call
+                phoneNumber: formattedPhoneNumber
             });
 
             if (response.data.success) {
@@ -280,8 +284,8 @@ const Login = () => {
                 setMessage('OTP call initiated. You will receive a call shortly.');
             }
         } catch (error) {
-            console.error('Error initiating OTP call:', error);
-            setMessage(error.response?.data?.message || 'Failed to initiate OTP call');
+            console.error('Error sending OTP:', error.response?.data || error);
+            setMessage(error.response?.data?.message || 'Failed to send OTP. Please check your phone number.');
         } finally {
             setLoading(false);
         }
@@ -389,7 +393,7 @@ const Login = () => {
                                 <input
                                     type="tel"
                                     className="form-control login-form"
-                                    placeholder="Phone Number (+639XXXXXXXXX)"
+                                    placeholder="Phone Number (+1XXXXXXXXXX)"
                                     value={phoneNumber}
                                     onChange={(e) => setPhoneNumber(e.target.value)}
                                     required
