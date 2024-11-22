@@ -19,6 +19,11 @@ const Login = () => {
     const [recaptchaToken, setRecaptchaToken] = useState(null);
     const navigate = useNavigate();
     const [keepSignedIn, setKeepSignedIn] = useState(false);
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [otpSent, setOtpSent] = useState(false);
+    const [otpCode, setOtpCode] = useState('');
+    const [verifying, setVerifying] = useState(false);
+    const [otpVerified, setOtpVerified] = useState(false);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -256,6 +261,55 @@ const Login = () => {
         }
     };
 
+    // Function to send OTP
+    const handleSendOTP = async () => {
+        try {
+            setLoading(true);
+            // Format the phone number to ensure it matches E.164 format
+            const formattedPhoneNumber = phoneNumber.startsWith('+')
+                ? phoneNumber
+                : `+${phoneNumber}`;
+
+            const response = await axios.post('http://localhost:8000/api/send-otp', {
+                phoneNumber: formattedPhoneNumber,
+                channel: 'call'  // Specify that we want a voice call
+            });
+
+            if (response.data.success) {
+                setOtpSent(true);
+                setMessage('OTP call initiated. You will receive a call shortly.');
+            }
+        } catch (error) {
+            console.error('Error initiating OTP call:', error);
+            setMessage(error.response?.data?.message || 'Failed to initiate OTP call');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Function to verify OTP
+    const handleVerifyOTP = async () => {
+        try {
+            setVerifying(true);
+            const response = await axios.post('http://localhost:8000/api/verify-otp', {
+                phoneNumber: phoneNumber,
+                otpCode: otpCode
+            });
+
+            if (response.data.valid) {
+                setOtpVerified(true);
+                setMessage('OTP verified successfully. You can now login.');
+            } else {
+                setMessage('Invalid OTP code');
+            }
+        } catch (error) {
+            console.error('Error verifying OTP:', error);
+            setMessage(error.response?.data?.message || 'Failed to verify OTP');
+        } finally {
+            setVerifying(false);
+        }
+    };
+
     return (
         <div className="login-body">
             <Helmet>
@@ -268,12 +322,12 @@ const Login = () => {
                 <h2>LOGIN</h2>
 
                 {message && (
-                    <div className="alert alert-danger" role="alert">
+                    <div className={`alert ${message.includes('success') ? 'alert-success' : 'alert-danger'}`}>
                         {message}
                     </div>
                 )}
 
-                <form onSubmit={handleLogin}>
+                <form id="loginForm" onSubmit={handleLogin}>
                     <div className="form-group">
                         <div className="input-icon-wrapper">
                             <input
@@ -329,7 +383,63 @@ const Login = () => {
                         onChange={onRecaptchaChange}
                     />
 
-                    <button type="submit" className="btn btn-primary login-button" disabled={loading || !recaptchaToken}>
+                    {!otpSent ? (
+                        <div className="form-group">
+                            <div className="input-icon-wrapper">
+                                <input
+                                    type="tel"
+                                    className="form-control login-form"
+                                    placeholder="Phone Number (+639XXXXXXXXX)"
+                                    value={phoneNumber}
+                                    onChange={(e) => setPhoneNumber(e.target.value)}
+                                    required
+                                />
+                                <i className="input-icon fas fa-phone"></i>
+                            </div>
+                            <button
+                                type="button"
+                                className="btn btn-primary mt-2"
+                                onClick={handleSendOTP}
+                                disabled={loading || !phoneNumber}
+                            >
+                                {loading ? 'Sending...' : 'Send OTP'}
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="form-group">
+                            <div className="input-icon-wrapper">
+                                <input
+                                    type="text"
+                                    className="form-control login-form"
+                                    placeholder="Enter OTP Code"
+                                    value={otpCode}
+                                    onChange={(e) => setOtpCode(e.target.value)}
+                                    required
+                                />
+                                <i className="input-icon fas fa-key"></i>
+                            </div>
+                            <button
+                                type="button"
+                                className="btn btn-primary mt-2"
+                                onClick={handleVerifyOTP}
+                                disabled={verifying || !otpCode}
+                            >
+                                {verifying ? 'Verifying...' : 'Verify OTP'}
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-link"
+                                onClick={() => {
+                                    setOtpSent(false);
+                                    setOtpCode('');
+                                }}
+                            >
+                                Change Phone Number
+                            </button>
+                        </div>
+                    )}
+
+                    <button type="submit" className="btn btn-primary login-button" disabled={loading || !recaptchaToken || !otpVerified}>
                         <i className="fas fa-sign-in-alt mr-2"></i> {loading ? 'Logging in...' : 'LOGIN'}
                     </button>
                 </form>

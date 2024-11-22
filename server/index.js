@@ -27,6 +27,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const officialRoutes = require('./routes/officialRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const authRoutes = require('./routes/OTPRoutes');
 process.removeAllListeners('warning');
 // Importing database connection
 const connectDB = require('./config/DbConnections');
@@ -54,7 +55,7 @@ app.use('/api', paymentRoutes);
 app.use('/api', profileRoutes);
 app.use('/api', officialRoutes);
 app.use('/api', adminRoutes);
-
+app.use('/api', authRoutes);
 
 const port = 8000;
 app.listen(port, () => console.log(`Server is running on port ${port}`));
