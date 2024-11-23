@@ -303,7 +303,7 @@ const TreasurerFee = () => {
                         }
                     );
 
-                    setSuccessMessage(`Payment details sent to ${student.name}'s email successfully!`);
+                    setSuccessMessage(`Payment details emailed to ${student.name}'s successfully!`);
                     setTimeout(() => setSuccessMessage(''), 3000);
                 }
             }

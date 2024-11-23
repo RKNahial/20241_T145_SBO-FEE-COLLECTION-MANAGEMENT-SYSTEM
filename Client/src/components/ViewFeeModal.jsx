@@ -70,8 +70,8 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId, onEmailSuccess }) 
             );
 
             if (response.status === 200) {
-                onEmailSuccess("Payment details sent successfully!"); // Call the success callback
-                onClose(); // Close the modal
+                onEmailSuccess(`Payment details emailed to ${student.name}'s successfully!`);
+                onClose(); 
             }
         } catch (error) {
             console.error('Error sending email:', error);
