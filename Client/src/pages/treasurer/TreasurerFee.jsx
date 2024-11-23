@@ -6,10 +6,10 @@ import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
 import ManageFeeModal from '../../components/ManageFeeModal';
 import ViewFeeModal from '../../components/ViewFeeModal';
-import Preloader from '../../components/Preloader';
 import axios from 'axios';
 import emailjs from '@emailjs/browser';
 import '../../styles/PaymentTabs.css';
+import Preloader from '../../components/Preloader';
 import { usePayment } from '../../context/PaymentContext';
 
 const TreasurerFee = () => {
@@ -238,6 +238,7 @@ const TreasurerFee = () => {
 
     // Update the handleEmailClick function
     const handleEmailClick = async (student) => {
+        setLoading(true);
         try {
             const token = localStorage.getItem('token');
             const response = await axios.get(
@@ -302,6 +303,8 @@ const TreasurerFee = () => {
         } catch (error) {
             console.error('Error sending email:', error);
             setError('Failed to send email. Please try again.');
+        } finally {
+            setLoading(false); 
         }
     };
 
@@ -477,7 +480,7 @@ const TreasurerFee = () => {
 
                                 {/* Table Content */}
                                 {loading ? (
-                                    <Preloader open={loading} />
+                                    <Preloader open={loading} /> 
                                 ) : error ? (
                                     <div className="alert alert-danger">{error}</div>
                                 ) : (
@@ -604,6 +607,7 @@ const TreasurerFee = () => {
                     isOpen={isViewModalOpen}
                     onClose={() => setIsViewModalOpen(false)}
                     student={viewedStudent}
+                    categoryId={selectedCategory}
                 />
             )}
         </div>
