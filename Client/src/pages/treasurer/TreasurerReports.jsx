@@ -14,6 +14,8 @@ import {
     Legend
 } from 'chart.js';
 import Preloader from '../../components/Preloader'; 
+import jsPDF from 'jspdf'; 
+import 'jspdf-autotable';
 import axios from 'axios';
 
 ChartJS.register(
@@ -123,8 +125,8 @@ const TreasurerReports = () => {
         }
     };
 
-     // DOWNLOAD REPORT EXCEL
-     const handleDownloadReport = () => {
+    // DOWNLOAD REPORT AS EXCEL
+    const handleDownloadExcel = () => {
         if (!reportData || reportData.length === 0) {
             alert('No data available to download');
             return;
@@ -138,24 +140,26 @@ const TreasurerReports = () => {
             switch (reportType) {
                 case 'monthly':
                     if (selectedMonth) {
-                        // Single month weekly breakdown
                         const monthData = reportData.find(item => item.month === selectedMonth);
+                        if (!monthData) {
+                            alert('No data found for the selected month');
+                            return;
+                        }
                         fileName += `${selectedMonth}_Weekly_Report`;
                         csvData = [
                             ['Week', 'Total Amount'],
                             ...monthData.weeks.map(week => [
                                 week.week,
-                                `₱${week.total.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`
+                                `₱${week.total.toLocaleString('en-PH', { minimumFractionDigits: 2 })}` // Correctly formatted currency
                             ])
                         ];
                     } else {
-                        // All months summary
                         fileName += 'Monthly_Summary_Report';
                         csvData = [
                             ['Month', 'Total Amount'],
                             ...reportData.map(item => [
                                 item.month,
-                                `₱${item.weeks.reduce((sum, week) => sum + week.total, 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`
+                                `₱${item.weeks.reduce((sum, week) => sum + week.total, 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}` // Correctly formatted currency
                             ])
                         ];
                     }
@@ -166,7 +170,7 @@ const TreasurerReports = () => {
                         ['Category', 'Total Amount'],
                         ...reportData.map(item => [
                             item.category,
-                            `₱${item.total.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`
+                            `₱${item.total.toLocaleString('en-PH', { minimumFractionDigits: 2 })}` // Correctly formatted currency
                         ])
                     ];
                     break;
@@ -176,11 +180,10 @@ const TreasurerReports = () => {
                         ['Program', 'Total Amount'],
                         ...reportData.map(item => [
                             item.program,
-                            `₱${item.total.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`
+                            `₱${item.total.toLocaleString('en-PH', { minimumFractionDigits: 2 })}` // Correctly formatted currency
                         ])
                     ];
                     break;
-    
                 default:
                     throw new Error('Invalid report type');
             }
@@ -195,7 +198,7 @@ const TreasurerReports = () => {
                 return sum + item.total;
             }, 0);
     
-            csvData.push(['Total', `₱${total.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`]);
+            csvData.push(['Total', `₱${total.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`]); // Correctly formatted currency
     
             // Add date to filename
             fileName += `_${new Date().toISOString().split('T')[0]}.csv`;
@@ -205,8 +208,9 @@ const TreasurerReports = () => {
                 .map(row => row.map(cell => `"${cell}"`).join(','))
                 .join('\n');
     
-            // Create and trigger download
-            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            // Add UTF-8 BOM
+            const bom = '\uFEFF';
+            const blob = new Blob([bom + csvString], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
             
@@ -290,14 +294,22 @@ const TreasurerReports = () => {
                                         </div>
                                     )}
 
-                                    <div className="ms-auto">
+                                     <div className="ms-auto">
                                         <button
-                                            className="add-button btn btn-sm"
-                                            onClick={handleDownloadReport}
+                                            className="add-button btn btn-sm me-2"
+                                            onClick={handleDownloadExcel}
                                         >
-                                            <i className="fas fa-download me-2"></i>
-                                            Download Report
+                                            <i className="fas fa-file-excel me-2"></i>
+                                            Download Excel
                                         </button>
+                                        {/* SUPPOSEDLY FOR PDF */}
+                                        {/* <button
+                                            className="add-button btn btn-sm me-2"
+                                            onClick={handleDownloadPDF}
+                                        >
+                                            <i className="fas fa-file-pdf me-2"></i>
+                                            Download PDF
+                                        </button> */}
                                     </div>
                                 </div>
 
