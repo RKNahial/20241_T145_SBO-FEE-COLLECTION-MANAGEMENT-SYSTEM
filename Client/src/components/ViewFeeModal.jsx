@@ -12,10 +12,16 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId }) => {
         const fetchPaymentDetails = async () => {
             if (isOpen && student) {
                 try {
+                    const token = localStorage.getItem('token');
                     const url = categoryId
                         ? `http://localhost:8000/api/payment-fee/details/${student._id}?category=${categoryId}`
                         : `http://localhost:8000/api/payment-fee/details/${student._id}`;
-                    const response = await axios.get(url);
+                    const response = await axios.get(url, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
                     if (response.data.success) {
                         setPaymentDetails(response.data.paymentFee);
                     } else {
@@ -121,8 +127,8 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId }) => {
                             {paymentDetails?.transactions?.length > 0 ? (
                                 <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
                                     {paymentDetails.transactions.map((transaction, index) => (
-                                        <div 
-                                            key={index} 
+                                        <div
+                                            key={index}
                                             className="p-3 mb-2 bg-light rounded"
                                             style={{ fontSize: '0.875rem' }}
                                         >

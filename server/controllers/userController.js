@@ -4,11 +4,12 @@ const jwt = require('jsonwebtoken');
 
 exports.registerUser = async (req, res) => {
     try {
-        const user = await userService.addUser(req.body);
+        const result = await userService.addUser(req.body);
         res.status(201).json({
             success: true,
-            message: `${user.position} added successfully`,
-            data: user
+            message: 'Officer added successfully',
+            temporaryPassword: result.temporaryPassword,
+            user: result.user
         });
     } catch (error) {
         console.error('Error adding user:', error);
@@ -21,34 +22,19 @@ exports.registerUser = async (req, res) => {
 
 exports.addAdmin = async (req, res) => {
     try {
-        if (req.body.position !== 'Admin') {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid position for admin registration'
-            });
-        }
-
-        const { admin, temporaryPassword } = await userService.addAdmin(req.body);
-        
+        const result = await userService.addAdmin(req.body);
         res.status(201).json({
             success: true,
             message: 'Admin added successfully',
             data: {
-                ...admin.toObject(),
-                temporaryPassword
+                ...result.admin.toObject(),
+                temporaryPassword: result.temporaryPassword
             }
         });
     } catch (error) {
-        if (error.code === 11000) {
-            return res.status(400).json({
-                success: false,
-                message: 'Email already exists'
-            });
-        }
         res.status(500).json({
             success: false,
-            message: 'Error adding admin',
-            error: error.message
+            message: error.message || 'Failed to add admin'
         });
     }
 };

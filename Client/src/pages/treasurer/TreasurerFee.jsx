@@ -603,6 +603,7 @@ const TreasurerFee = () => {
                     isOpen={isViewModalOpen}
                     onClose={() => setIsViewModalOpen(false)}
                     student={viewedStudent}
+                    categoryId={selectedCategory}
                 />
             )}
         </div>
