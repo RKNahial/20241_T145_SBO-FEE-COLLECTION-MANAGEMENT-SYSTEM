@@ -19,8 +19,6 @@ import '../../assets/css/calendar.css';
 import { getAnalytics, logEvent } from "firebase/analytics";
 import { app } from '../firebase/firebaseConfig';
 
-
-
 ChartJS.register(
     CategoryScale,
     LinearScale,
