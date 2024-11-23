@@ -3,6 +3,7 @@ import { Modal, Button } from 'react-bootstrap';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane, faKey } from '@fortawesome/free-solid-svg-icons';
+import '../assets/css/OTPVerificationModal.css';
 
 const OTPVerificationModal = ({
     show,
@@ -76,6 +77,19 @@ const OTPVerificationModal = ({
         }
     };
 
+    const handleOTPChange = (index, value) => {
+        if (value.length > 1) value = value[0];
+
+        const newOtp = otpCode.split('');
+        newOtp[index] = value;
+        setOtpCode(newOtp.join(''));
+
+        if (value && index < 5) {
+            const nextInput = document.querySelector(`input[name=otp-${index + 1}]`);
+            if (nextInput) nextInput.focus();
+        }
+    };
+
     return (
         <Modal show={show} onHide={onClose} centered>
             <Modal.Header closeButton>
@@ -110,18 +124,30 @@ const OTPVerificationModal = ({
                     </div>
                 ) : (
                     <div className="form-group">
-                        <label>Enter OTP Code</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Enter OTP"
-                            value={otpCode}
-                            onChange={(e) => setOtpCode(e.target.value)}
-                        />
+                        <label className="text-center d-block mb-4">Enter OTP Code</label>
+                        <div className="otp-container">
+                            {[0, 1, 2, 3, 4, 5].map((index) => (
+                                <input
+                                    key={index}
+                                    type="text"
+                                    maxLength="1"
+                                    name={`otp-${index}`}
+                                    className="otp-input"
+                                    value={otpCode[index] || ''}
+                                    onChange={(e) => handleOTPChange(index, e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                                            const prevInput = document.querySelector(`input[name=otp-${index - 1}]`);
+                                            if (prevInput) prevInput.focus();
+                                        }
+                                    }}
+                                />
+                            ))}
+                        </div>
                         <Button
-                            className="mt-3 w-100 d-flex align-items-center justify-content-center"
+                            className="mt-4 w-100 d-flex align-items-center justify-content-center"
                             onClick={handleVerifyOTP}
-                            disabled={verifying || !otpCode}
+                            disabled={verifying || otpCode.length !== 6}
                         >
                             <FontAwesomeIcon icon={faKey} className="me-2" />
                             {verifying ? 'Verifying...' : 'Verify OTP'}

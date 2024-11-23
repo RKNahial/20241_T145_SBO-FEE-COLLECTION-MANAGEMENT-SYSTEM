@@ -54,6 +54,7 @@ const TreasurerDashboard = () => {
         }
         return shouldShow;
     });
+    const [totalActiveOfficers, setTotalActiveOfficers] = useState(0);
 
     // Add analytics initialization
     const analytics = getAnalytics(app);
@@ -173,6 +174,22 @@ const TreasurerDashboard = () => {
         });
     }, []);
 
+    useEffect(() => {
+        const fetchTotalActiveOfficers = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.get('http://localhost:8000/api/admin/active-officers-count', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setTotalActiveOfficers(response.data.count);
+            } catch (err) {
+                console.error('Error fetching total active officers:', err);
+            }
+        };
+
+        fetchTotalActiveOfficers();
+    }, []);
+
     const formatAmount = (amount) => {
         if (typeof amount !== 'number' || isNaN(amount)) {
             return '₱0.00';
@@ -259,7 +276,7 @@ const TreasurerDashboard = () => {
                                 <div className="card orange-card mb-4">
                                     <div className="card-body d-flex justify-content-between align-items-center">
                                         <div>
-                                            <h2 className="big-text">36</h2>
+                                            <h2 className="big-text">{totalActiveOfficers}</h2>
                                             <h5 className="small-text">Total Officers</h5>
                                         </div>
                                         <i className="fas fa-user-tie big-icon text-white"></i>

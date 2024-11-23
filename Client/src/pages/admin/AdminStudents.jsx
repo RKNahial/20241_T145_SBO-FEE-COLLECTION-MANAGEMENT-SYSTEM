@@ -6,6 +6,7 @@ import AdminSidebar from "./AdminSidebar";
 import AdminNavbar from "./AdminNavbar";
 import { Modal, Button } from 'react-bootstrap';
 import axios from 'axios';
+import LoadingSpinner from '../../components/LoadingSpinner';
 const AdminStudents = () => {
     const navigate = useNavigate();
 
@@ -254,9 +255,16 @@ const AdminStudents = () => {
 
                                 {/* Table Section */}
                                 {loading ? (
-                                    <p>Loading...</p>
+                                    <LoadingSpinner
+                                        text="Loading Students"
+                                        icon="user-graduate"
+                                        subtext="Fetching student records..."
+                                    />
                                 ) : error ? (
-                                    <p>Error: {error}</p>
+                                    <div className="alert alert-danger">
+                                        <i className="fas fa-exclamation-circle me-2"></i>
+                                        {error}
+                                    </div>
                                 ) : (
                                     <>
                                         <div className="table-responsive">

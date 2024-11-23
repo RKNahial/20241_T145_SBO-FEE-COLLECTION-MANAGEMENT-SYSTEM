@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import AdminSidebar from "./AdminSidebar";
 import AdminNavbar from "./AdminNavbar";
 import axios from 'axios';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 const AdminAdmins = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -94,12 +95,16 @@ const AdminAdmins = () => {
         setIsCollapsed(prev => !prev);
     };
 
+    // Add this sorting function after the pagination calculations
+    const sortedItems = [...currentItems].sort((a, b) =>
+        a.name.localeCompare(b.name)
+    );
+
     return (
         <div className="sb-nav-fixed">
             <Helmet>
-                <title>Treasurer | Students</title>
+                <title>Admin | Administrators</title>
             </Helmet>
-            {/* NAVBAR AND SIDEBAR */}
             <AdminNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
                 <AdminSidebar isCollapsed={isCollapsed} />
@@ -112,7 +117,6 @@ const AdminAdmins = () => {
                         marginTop: '3.5rem'
                     }}
                 >
-                    {/* CONTENT */}
                     <div className="container-fluid px-4 mb-5 form-top">
                         <div className="card mb-4">
                             <div className="card-header">
@@ -129,7 +133,8 @@ const AdminAdmins = () => {
                                         {successMessage}
                                     </div>
                                 )}
-                                {/* ADD NEW ADMIN*/}
+
+                                {/* Filters and Add button section */}
                                 <div className="d-flex justify-content-between mb-3 align-items-center">
                                     <div>
                                         <Link to="/admin/admins/add-new" className="btn system-button me-2">
@@ -178,91 +183,104 @@ const AdminAdmins = () => {
                                     </div>
                                 </div>
 
-                                {/* TABLE ADMINS */}
-                                <table className="table table-bordered table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Admin Name</th>
-                                            <th>Employee ID</th>
-                                            <th>Email</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {currentItems.map((admin, index) => (
-                                            <tr key={admin._id}>
-                                                <td>{indexOfFirstItem + index + 1}</td>
-                                                <td>{admin.name}</td>
-                                                <td>{admin.ID}</td>
-                                                <td>{admin.email}</td>
-                                                <td>
-                                                    <span className={`badge ${admin.isArchived ? 'archived-status' : 'active-status'}`}>
-                                                        {admin.isArchived ? 'Archived' : 'Active'}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <Link to={`/admin/admins/edit/${admin._id}`} className="btn btn-edit btn-sm">
-                                                        <i className="fas fa-edit"></i>
-                                                    </Link>
-                                                    <button
-                                                        className={`btn btn-archive btn-sm ${admin.isArchived ? 'btn-open' : ''}`}
-                                                        onClick={() => admin.isArchived ?
-                                                            handleUnarchive(admin._id, admin.name) :
-                                                            handleArchive(admin._id, admin.name)}
-                                                    >
-                                                        <i className={`fas fa-${admin.isArchived ? 'box-open' : 'archive'}`}></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-
-                                {/* SHOWING OF ENTRIES AND PAGINATION */}
-                                <div className="d-flex justify-content-between align-items-center mb-2" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
-                                    <div>
-                                        Showing {indexOfFirstItem + 1} to {indexOfLastItem} of {filteredAdmins.length} entries
+                                {/* Replace the table section with this conditional rendering */}
+                                {loading ? (
+                                    <LoadingSpinner
+                                        text="Loading Administrators"
+                                        icon="user-shield"
+                                        subtext="Fetching administrator records..."
+                                    />
+                                ) : error ? (
+                                    <div className="alert alert-danger">
+                                        <i className="fas fa-exclamation-circle me-2"></i>
+                                        {error}
                                     </div>
-                                    <nav>
-                                        <ul className="pagination mb-0">
-                                            <li className="page-item">
-                                                <button
-                                                    className="page-link"
-                                                    onClick={() => paginate(currentPage - 1)}
-                                                    disabled={currentPage === 1}
-                                                >
-                                                    Previous
-                                                </button>
-                                            </li>
-                                            {Array.from({ length: totalPages }, (_, index) => (
-                                                <li key={index + 1} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
-                                                    <button
-                                                        className="page-link"
-                                                        onClick={() => paginate(index + 1)}
-                                                    >
-                                                        {index + 1}
-                                                    </button>
-                                                </li>
-                                            ))}
-                                            <li className="page-item">
-                                                <button
-                                                    className="page-link page-label"
-                                                    onClick={() => paginate(currentPage + 1)}
-                                                    disabled={currentPage === totalPages}
-                                                >
-                                                    Next
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    </nav>
-                                </div>
+                                ) : (
+                                    <>
+                                        <table className="table table-bordered table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Admin Name</th>
+                                                    <th>Employee ID</th>
+                                                    <th>Email</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {sortedItems.map((admin, index) => (
+                                                    <tr key={admin._id}>
+                                                        <td>{indexOfFirstItem + index + 1}</td>
+                                                        <td>{admin.name}</td>
+                                                        <td>{admin.ID}</td>
+                                                        <td>{admin.email}</td>
+                                                        <td>
+                                                            <span className={`badge ${admin.isArchived ? 'archived-status' : 'active-status'}`}>
+                                                                {admin.isArchived ? 'Archived' : 'Active'}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <Link to={`/admin/admins/edit/${admin._id}`} className="btn btn-edit btn-sm">
+                                                                <i className="fas fa-edit"></i>
+                                                            </Link>
+                                                            <button
+                                                                className={`btn btn-archive btn-sm ${admin.isArchived ? 'btn-open' : ''}`}
+                                                                onClick={() => admin.isArchived ?
+                                                                    handleUnarchive(admin._id, admin.name) :
+                                                                    handleArchive(admin._id, admin.name)}
+                                                            >
+                                                                <i className={`fas fa-${admin.isArchived ? 'box-open' : 'archive'}`}></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
 
+                                        {/* Pagination section */}
+                                        <div className="d-flex justify-content-between align-items-center mb-2">
+                                            <div>
+                                                Showing {indexOfFirstItem + 1} to {indexOfLastItem} of {filteredAdmins.length} entries
+                                            </div>
+                                            <nav>
+                                                <ul className="pagination mb-0">
+                                                    <li className="page-item">
+                                                        <button
+                                                            className="page-link"
+                                                            onClick={() => paginate(currentPage - 1)}
+                                                            disabled={currentPage === 1}
+                                                        >
+                                                            Previous
+                                                        </button>
+                                                    </li>
+                                                    {Array.from({ length: totalPages }, (_, index) => (
+                                                        <li key={index + 1} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
+                                                            <button
+                                                                className="page-link"
+                                                                onClick={() => paginate(index + 1)}
+                                                            >
+                                                                {index + 1}
+                                                            </button>
+                                                        </li>
+                                                    ))}
+                                                    <li className="page-item">
+                                                        <button
+                                                            className="page-link page-label"
+                                                            onClick={() => paginate(currentPage + 1)}
+                                                            disabled={currentPage === totalPages}
+                                                        >
+                                                            Next
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>

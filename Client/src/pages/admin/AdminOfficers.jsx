@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import AdminSidebar from "./AdminSidebar";
 import AdminNavbar from "./AdminNavbar";
 import axios from 'axios';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 const StatusTag = ({ status, onClick }) => {
     let className = status === 'Active' ? 'badge active-status' : 'badge archived-status';
@@ -30,6 +31,7 @@ const AdminOfficers = () => {
     const [statusFilter, setStatusFilter] = useState("Active");
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
+    const [archivingId, setArchivingId] = useState(null);
 
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
@@ -58,27 +60,45 @@ const AdminOfficers = () => {
     // Handle archive/unarchive
     const handleArchive = async (officialId, officialName, type) => {
         try {
+            setArchivingId(officialId);
             const token = localStorage.getItem('token');
             await axios.put(`http://localhost:8000/api/officials/${officialId}/archive?type=${type}`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setSuccessMessage(`${officialName} has been archived successfully`);
             fetchOfficers();
+
+            // Auto-dismiss success message after 3 seconds
+            setTimeout(() => {
+                setSuccessMessage('');
+            }, 3000);
+
         } catch (error) {
             setError('Failed to archive official. Please try again.');
+        } finally {
+            setArchivingId(null);
         }
     };
 
     const handleUnarchive = async (officialId, officialName, type) => {
         try {
+            setArchivingId(officialId);
             const token = localStorage.getItem('token');
             await axios.put(`http://localhost:8000/api/officials/${officialId}/unarchive?type=${type}`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setSuccessMessage(`${officialName} has been unarchived successfully`);
             fetchOfficers();
+
+            // Auto-dismiss success message after 3 seconds
+            setTimeout(() => {
+                setSuccessMessage('');
+            }, 3000);
+
         } catch (error) {
             setError('Failed to unarchive official. Please try again.');
+        } finally {
+            setArchivingId(null);
         }
     };
 
@@ -119,6 +139,11 @@ const AdminOfficers = () => {
         setSearchTerm(e.target.value);
         setCurrentPage(1); // Reset to first page when searching
     };
+
+    // Add this sorting function after the pagination calculations
+    const sortedItems = [...currentItems].sort((a, b) =>
+        a.name.localeCompare(b.name)
+    );
 
     return (
         <div className="sb-nav-fixed">
@@ -207,106 +232,126 @@ const AdminOfficers = () => {
 
                                 {/* Table section */}
                                 {loading ? (
-                                    <div className="text-center py-4">
-                                        <div className="spinner-border text-primary" role="status">
-                                            <span className="visually-hidden">Loading...</span>
-                                        </div>
+                                    <LoadingSpinner
+                                        text="Loading Officers"
+                                        icon="users"
+                                        subtext="Fetching officer records..."
+                                    />
+                                ) : error ? (
+                                    <div className="alert alert-danger">
+                                        <i className="fas fa-exclamation-circle me-2"></i>
+                                        {error}
                                     </div>
                                 ) : (
-                                    <table className="table table-bordered table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Officer ID</th>
-                                                <th>Officer Name</th>
-                                                <th>Position</th>
-                                                <th>Type</th>
-                                                <th>Status</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {currentItems.map((officer, index) => (
-                                                <tr key={officer._id}>
-                                                    <td>{index + indexOfFirstItem + 1}</td>
-                                                    <td>{officer.ID}</td>
-                                                    <td>{officer.name}</td>
-                                                    <td>{officer.position}</td>
-                                                    <td>{officer.type}</td>
-                                                    <td>
-                                                        <StatusTag
-                                                            status={officer.isArchived ? 'Archived' : 'Active'}
-                                                            onClick={() => {
-                                                                if (officer.isArchived) {
-                                                                    handleUnarchive(officer._id, officer.name, officer.type);
-                                                                } else {
-                                                                    handleArchive(officer._id, officer.name, officer.type);
-                                                                }
-                                                            }}
-                                                        />
-                                                    </td>
-                                                    <td>
-                                                        <Link to={`/admin/officers/edit/${officer._id}`} className="btn btn-edit btn-sm">
-                                                            <i className="fas fa-edit"></i>
-                                                        </Link>
-                                                        <button
-                                                            className={`btn btn-archive btn-sm ${officer.isArchived ? 'btn-open' : ''}`}
-                                                            onClick={() => {
-                                                                if (officer.isArchived) {
-                                                                    handleUnarchive(officer._id, officer.name, officer.type);
-                                                                } else {
-                                                                    handleArchive(officer._id, officer.name, officer.type);
-                                                                }
-                                                            }}
-                                                        >
-                                                            <i className={`fas fa-${officer.isArchived ? 'box-open' : 'archive'}`}></i>
-                                                        </button>
-                                                    </td>
+                                    <>
+                                        <table className="table table-bordered table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Officer ID</th>
+                                                    <th>Officer Name</th>
+                                                    <th>Position</th>
+                                                    <th>Type</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                {sortedItems.map((officer, index) => (
+                                                    <tr key={officer._id}>
+                                                        <td>{indexOfFirstItem + index + 1}</td>
+                                                        <td>{officer.ID}</td>
+                                                        <td>{officer.name}</td>
+                                                        <td>{officer.position}</td>
+                                                        <td>{officer.type}</td>
+                                                        <td>
+                                                            <StatusTag
+                                                                status={officer.isArchived ? 'Archived' : 'Active'}
+                                                                onClick={() => {
+                                                                    if (officer.isArchived) {
+                                                                        handleUnarchive(officer._id, officer.name, officer.type);
+                                                                    } else {
+                                                                        handleArchive(officer._id, officer.name, officer.type);
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <Link to={`/admin/officers/edit/${officer._id}`} className="btn btn-edit btn-sm">
+                                                                <i className="fas fa-edit"></i>
+                                                            </Link>
+                                                            <button
+                                                                className={`btn btn-archive btn-sm ${officer.isArchived ? 'btn-open' : ''}`}
+                                                                onClick={() => {
+                                                                    if (officer.isArchived) {
+                                                                        handleUnarchive(officer._id, officer.name, officer.type);
+                                                                    } else {
+                                                                        handleArchive(officer._id, officer.name, officer.type);
+                                                                    }
+                                                                }}
+                                                                disabled={archivingId === officer._id}
+                                                            >
+                                                                {archivingId === officer._id ? (
+                                                                    <div className="spinner-border spinner-border-sm"
+                                                                        role="status"
+                                                                        style={{
+                                                                            width: '14px',
+                                                                            height: '14px',
+                                                                            borderWidth: '2px'
+                                                                        }}
+                                                                    >
+                                                                        <span className="visually-hidden">Loading...</span>
+                                                                    </div>
+                                                                ) : (
+                                                                    <i className={`fas fa-${officer.isArchived ? 'box-open' : 'archive'}`}></i>
+                                                                )}
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+
+                                        {/* Pagination section */}
+                                        <div className="d-flex justify-content-between align-items-center mb-2" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
+                                            <div>
+                                                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredOfficers.length)} of {filteredOfficers.length} entries
+                                            </div>
+                                            <nav>
+                                                <ul className="pagination mb-0">
+                                                    <li className="page-item">
+                                                        <button
+                                                            className="page-link"
+                                                            onClick={() => paginate(currentPage - 1)}
+                                                            disabled={currentPage === 1}
+                                                        >
+                                                            Previous
+                                                        </button>
+                                                    </li>
+                                                    {Array.from({ length: totalPages }, (_, index) => (
+                                                        <li key={index + 1} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
+                                                            <button
+                                                                className="page-link"
+                                                                onClick={() => paginate(index + 1)}
+                                                            >
+                                                                {index + 1}
+                                                            </button>
+                                                        </li>
+                                                    ))}
+                                                    <li className="page-item">
+                                                        <button
+                                                            className="page-link page-label"
+                                                            onClick={() => paginate(currentPage + 1)}
+                                                            disabled={currentPage === totalPages}
+                                                        >
+                                                            Next
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+                                        </div>
+                                    </>
                                 )}
-
-                                {/* SHOWING OF ENTRIES AND PAGINATION */}
-                                <div className="d-flex justify-content-between align-items-center mb-2" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
-                                    <div>
-                                        Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredOfficers.length)} of {filteredOfficers.length} entries
-                                    </div>
-                                    <nav>
-                                        <ul className="pagination mb-0">
-                                            <li className="page-item">
-                                                <button
-                                                    className="page-link"
-                                                    onClick={() => paginate(currentPage - 1)}
-                                                    disabled={currentPage === 1}
-                                                >
-                                                    Previous
-                                                </button>
-                                            </li>
-                                            {Array.from({ length: totalPages }, (_, index) => (
-                                                <li key={index + 1} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
-                                                    <button
-                                                        className="page-link"
-                                                        onClick={() => paginate(index + 1)}
-                                                    >
-                                                        {index + 1}
-                                                    </button>
-                                                </li>
-                                            ))}
-                                            <li className="page-item">
-                                                <button
-                                                    className="page-link page-label"
-                                                    onClick={() => paginate(currentPage + 1)}
-                                                    disabled={currentPage === totalPages}
-                                                >
-                                                    Next
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    </nav>
-                                </div>
-
                             </div>
                         </div>
                     </div>
