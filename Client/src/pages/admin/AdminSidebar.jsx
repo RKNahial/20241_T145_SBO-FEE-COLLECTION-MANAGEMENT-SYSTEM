@@ -37,6 +37,10 @@ const AdminSidebar = ({ isCollapsed }) => {
         }
     };
 
+    const handleManageControls = () => {
+        navigate('/admin/manage-controls');
+    };
+
     return (
         <div className={`sidebar ${isCollapsed ? 'collapsed' : 'expanded'}`}>
             <nav className="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
@@ -77,6 +81,13 @@ const AdminSidebar = ({ isCollapsed }) => {
                             >
                                 <i className="fa-regular fa-calendar-days icon-space"></i>
                                 {!isCollapsed && <span> School Year</span>}
+                            </NavLink>
+                            <NavLink
+                                to="/admin/manage-controls"
+                                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                            >
+                                <i className="fas fa-user-shield icon-space"></i>
+                                {!isCollapsed && <span> Manage Controls</span>}
                             </NavLink>
                             <NavLink
                                 to="/admin/history-logs"

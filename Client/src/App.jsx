@@ -68,6 +68,7 @@ import HistoryLogs from './pages/admin/HistoryLogs';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { PaymentProvider } from './context/PaymentContext';
+import ManageControls from './pages/admin/ManageControls';
 
 // FOR CUSTOMIZED DOCUMENT TITLE
 const App = () => {
@@ -98,6 +99,7 @@ const App = () => {
                                     <Route path="school-year" element={<AdminSchoolYear />} />
                                     <Route path="profile" element={<AdminProfile />} />
                                     <Route path="history-logs" element={<HistoryLogs />} />
+                                    <Route path="manage-controls" element={<ManageControls />} />
                                 </Routes>
                             </ProtectedRoute>
                         } />

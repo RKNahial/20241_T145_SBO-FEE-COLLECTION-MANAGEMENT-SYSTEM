@@ -14,15 +14,18 @@ class OfficialService {
         return [
             ...officers.map(officer => ({
                 ...officer.toObject(),
-                type: 'Officer'
+                type: 'Officer',
+                id: officer.ID || officer._id
             })),
             ...treasurers.map(treasurer => ({
                 ...treasurer.toObject(),
-                type: 'Treasurer'
+                type: 'Treasurer',
+                id: treasurer.ID || treasurer._id
             })),
             ...governors.map(governor => ({
                 ...governor.toObject(),
-                type: 'Governor'
+                type: 'Governor',
+                id: governor.ID || governor._id
             }))
         ];
     }

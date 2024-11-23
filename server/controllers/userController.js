@@ -1,15 +1,19 @@
 // controllers/userController.js
 const userService = require('../services/userService');
 const jwt = require('jsonwebtoken');
+const HistoryLog = require('../models/HistoryLog');
 
 exports.registerUser = async (req, res) => {
     try {
         const result = await userService.addUser(req.body);
         res.status(201).json({
             success: true,
-            message: 'Officer added successfully',
+            message: `${result.position} added successfully`,
             temporaryPassword: result.temporaryPassword,
-            user: result.user
+            data: {
+                ...result.user.toObject(),
+                password: undefined
+            }
         });
     } catch (error) {
         console.error('Error adding user:', error);
@@ -22,19 +26,58 @@ exports.registerUser = async (req, res) => {
 
 exports.addAdmin = async (req, res) => {
     try {
-        const result = await userService.addAdmin(req.body);
+        if (req.body.position !== 'Admin') {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid position for admin registration'
+            });
+        }
+
+        const { admin, temporaryPassword } = await userService.addAdmin(req.body);
+        
+        // Create history log
+        await HistoryLog.create({
+            timestamp: new Date(),
+            userName: req.user.name,
+            userEmail: req.user.email,
+            userPosition: req.user.position,
+            action: 'Add Admin',
+            details: `Added new admin: ${admin.name} (${admin.email})`,
+            status: 'completed'
+        });
+
         res.status(201).json({
             success: true,
             message: 'Admin added successfully',
             data: {
-                ...result.admin.toObject(),
-                temporaryPassword: result.temporaryPassword
+                ...admin.toObject(),
+                temporaryPassword
             }
         });
     } catch (error) {
+        // Create error log if operation fails
+        if (req.user) {
+            await HistoryLog.create({
+                timestamp: new Date(),
+                userName: req.user.name,
+                userEmail: req.user.email,
+                userPosition: req.user.position,
+                action: 'Add Admin',
+                details: `Failed to add admin: ${error.message}`,
+                status: 'failed'
+            });
+        }
+
+        if (error.code === 11000) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email already exists'
+            });
+        }
         res.status(500).json({
             success: false,
-            message: error.message || 'Failed to add admin'
+            message: 'Error adding admin',
+            error: error.message
         });
     }
 };

@@ -114,14 +114,13 @@ class UserService {
         });
 
         await newUser.save();
-        console.log(`Generated password for ${name}: ${password}`);
         return { 
             position, 
             user: newUser,
             temporaryPassword: password 
         };
     }
-}
 
+}
 
 module.exports = new UserService(); 
