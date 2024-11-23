@@ -20,6 +20,7 @@ import { getAnalytics, logEvent } from "firebase/analytics";
 import { app } from '../firebase/firebaseConfig';
 
 
+
 ChartJS.register(
     CategoryScale,
     LinearScale,
@@ -30,7 +31,7 @@ ChartJS.register(
 );
 
 const CALENDAR_ID = 'c_24e4973e704b983a944d5bc4cd1a7e0437d3eb519a1935d01706fb81909b68d3@group.calendar.google.com';
-const CALENDAR_URL = `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(CALENDAR_ID)}&ctz=UTC`;
+const CALENDAR_URL = `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(CALENDAR_ID)}&ctz=UTC&hl=en`;
 
 const TreasurerDashboard = () => {
     // NAV AND SIDEBAR
@@ -319,11 +320,11 @@ const TreasurerDashboard = () => {
                             <h5 className="mb-4 header">Recent Payments</h5>
                             <table className="table table-hover">
                                 <thead>
-                                    <tr>
+                                <tr>
                                         <th>#</th>
                                         <th>Date</th>
-                                        <th>Category ID</th>
-                                        <th>Student ID</th>
+                                        <th>Time</th>
+                                        <th>Category Name</th>
                                         <th>Student Name</th>
                                         <th>Paid Amount</th>
                                     </tr>
@@ -346,8 +347,8 @@ const TreasurerDashboard = () => {
                                             <tr key={payment.id}>
                                                 <td>{index + 1}</td>
                                                 <td>{new Date(payment.date).toLocaleDateString()}</td>
-                                                <td>{payment.categoryId}</td>
-                                                <td>{payment.studentId}</td>
+                                                <td>{payment.paymentTime}</td> 
+                                                <td>{payment.categoryName}</td> 
                                                 <td>{payment.studentName}</td>
                                                 <td>₱{payment.paidAmount.toFixed(2)}</td>
                                             </tr>

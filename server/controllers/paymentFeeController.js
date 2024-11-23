@@ -2,6 +2,7 @@ const PaymentFee = require('../models/PaymentFee');
 const Student = require('../models/studentSchema');
 const PaymentCategory = require('../models/PaymentCategory');
 const HistoryLog = require('../models/HistoryLog');
+const moment = require('moment-timezone');
 
 exports.updatePaymentStatus = async (req, res) => {
     try {
@@ -188,13 +189,27 @@ exports.getRecentPayments = async (req, res) => {
                 $project: {
                     id: '$_id',
                     date: '$paymentDate',
-                    categoryId: '$categoryInfo.categoryId',
+                    categoryName: '$categoryInfo.name',
                     studentId: '$studentInfo.studentId',
                     studentName: '$studentInfo.name',
-                    paidAmount: '$amountPaid'
+                    paidAmount: '$amountPaid',
+                    paymentTime: {
+                        $dateToString: {
+                            format: "%Y-%m-%dT%H:%M:%S.%LZ", 
+                            date: '$paymentDate'
+                        }
+                    }
                 }
             }
         ]);
+
+        // Adjust the payment times to Philippine Time (UTC+8) and format date as hh:mm A
+        recentPayments.forEach(payment => {
+            if (payment.paymentTime) {
+                const utcDate = moment(payment.paymentTime); 
+                payment.paymentTime = utcDate.tz('Asia/Manila').format('hh:mm A'); 
+            }
+        });
 
         res.json({
             success: true,
@@ -205,7 +220,8 @@ exports.getRecentPayments = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error fetching recent payments',
-            error: error.message
+            error: error.message,
+            stack: error.stack // Log the stack trace for more details
         });
     }
 };
