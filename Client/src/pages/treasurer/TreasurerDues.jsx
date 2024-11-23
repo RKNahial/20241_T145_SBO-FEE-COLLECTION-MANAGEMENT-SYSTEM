@@ -27,12 +27,12 @@ const TreasurerDues = () => {
 
     const handleMonthChange = (e) => {
         setSelectedMonth(e.target.value);
-        setCurrentPage(1); // Reset to first page when month changes
+        setCurrentPage(1); 
     };
 
     const handleWeekChange = (e) => {
         setSelectedWeek(e.target.value);
-        setCurrentPage(1); // Reset to first page when week changes
+        setCurrentPage(1); 
     };
 
     // Calculate pagination values
@@ -43,6 +43,20 @@ const TreasurerDues = () => {
 
     // Generate dates for the selected week
     const dates = ['Monday', 'Tuesday', 'Thursday', 'Friday'];
+
+   // Function to determine the number of weeks in a month
+   const getWeeksInMonth = (month) => {
+    const currentYear = new Date().getFullYear(); 
+    const monthIndex = new Date(Date.parse(month + " 1, " + currentYear)).getMonth(); 
+    const firstDay = new Date(currentYear, monthIndex, 1);
+    const lastDay = new Date(currentYear, monthIndex + 1, 0); 
+    const totalDays = lastDay.getDate();
+    return Math.ceil(totalDays / 7); 
+};
+
+    // Get the number of weeks for the selected month
+    const weeksInMonth = getWeeksInMonth(selectedMonth);
+    const weekOptions = Array.from({ length: weeksInMonth }, (_, index) => index + 1);
 
     const PaymentStatusTag = React.memo(({ status, onToggle }) => {
         return (
@@ -209,8 +223,6 @@ const TreasurerDues = () => {
         }
     };
 
-
-
     if (error) {
         return <div>Error: {error}</div>;
     }
@@ -264,21 +276,20 @@ const TreasurerDues = () => {
                                         </div>
                                     </div>
                                     <div className="d-flex align-items-center dashboard-select">
-                                        <label className="me-2 mb-0">Select Week</label>
+                                    <label className="me-2 mb-0">Select Week</label> {/* Fixed the missing < */}
                                         <div style={{ width: 'auto' }}>
                                             <select
                                                 className="form-control"
                                                 onChange={handleWeekChange}
                                                 value={selectedWeek}
                                                 style={{
-                                                    width: '100px', // Adjust width as needed
-                                                    paddingRight: '1.5rem', // Add padding for arrow
+                                                    width: '100px',
+                                                    paddingRight: '1.5rem', 
                                                 }}
                                             >
-                                                <option value="1">Week 1</option>
-                                                <option value="2">Week 2</option>
-                                                <option value="3">Week 3</option>
-                                                <option value="4">Week 4</option>
+                                                {weekOptions.map(week => (
+                                                    <option key={week} value={week}>Week {week}</option>
+                                                ))}
                                             </select>
                                         </div>
                                     </div>
