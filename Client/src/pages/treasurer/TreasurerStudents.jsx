@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { Modal, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import Preloader from '../../components/Preloader';
 import TreasurerSidebar from './TreasurerSidebar';
 import TreasurerNavbar from './TreasurerNavbar';
 import axios from 'axios';
@@ -282,7 +283,7 @@ const TreasurerStudents = () => {
                             <div className="card-header">
                                 <div className="row">
                                     <div className="col col-md-6">
-                                        <i className="fa fa-cog me-2"></i> <strong>Students</strong>
+                                        <i className="far fa-user me-2"></i> <strong>Students</strong>
                                     </div>
                                 </div>
                             </div>
@@ -299,7 +300,7 @@ const TreasurerStudents = () => {
                                     </div>
                                 )}
                                 {loading ? (
-                                    <div>Loading students...</div>
+                                    <Preloader open={loading} />
                                 ) : (
                                     <>
                                         {/* Actions and Filters */}

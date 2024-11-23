@@ -13,6 +13,7 @@ import {
     Tooltip,
     Legend
 } from 'chart.js';
+import Preloader from '../../components/Preloader'; 
 import axios from 'axios';
 
 ChartJS.register(
@@ -122,34 +123,105 @@ const TreasurerReports = () => {
         }
     };
 
-    // -------------------------------------------------------------------------------------------//
-    // DOWNLOAD REPORT (SAMPLE ONLY)
-    const handleDownloadReport = () => {
-        const reportData = [
-            { id: '1901104188', name: 'Mary Joy Alonzo', year: '4th Year', program: 'BSIT' },
-            { id: '2101102924', name: 'Jonathan Cruz', year: '4th Year', program: 'BSIT' },
-            // Add more student data as needed
-        ];
-
-        // Convert to CSV
-        const csvContent = [
-            ["Student ID", "Student Name", "Year Level", "Program"],
-            ...reportData.map(student => [student.id, student.name, student.year, student.program])
-        ]
-            .map(e => e.join(","))
-            .join("\n");
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', 'COT-SBO Report.csv');
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+     // DOWNLOAD REPORT EXCEL
+     const handleDownloadReport = () => {
+        if (!reportData || reportData.length === 0) {
+            alert('No data available to download');
+            return;
+        }
+    
+        try {
+            let csvData = [];
+            let fileName = 'COT-SBO_';
+    
+            // Prepare CSV data based on report type
+            switch (reportType) {
+                case 'monthly':
+                    if (selectedMonth) {
+                        // Single month weekly breakdown
+                        const monthData = reportData.find(item => item.month === selectedMonth);
+                        fileName += `${selectedMonth}_Weekly_Report`;
+                        csvData = [
+                            ['Week', 'Total Amount'],
+                            ...monthData.weeks.map(week => [
+                                week.week,
+                                `₱${week.total.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`
+                            ])
+                        ];
+                    } else {
+                        // All months summary
+                        fileName += 'Monthly_Summary_Report';
+                        csvData = [
+                            ['Month', 'Total Amount'],
+                            ...reportData.map(item => [
+                                item.month,
+                                `₱${item.weeks.reduce((sum, week) => sum + week.total, 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`
+                            ])
+                        ];
+                    }
+                    break;
+                case 'program':
+                    fileName += 'Category_Report';
+                    csvData = [
+                        ['Category', 'Total Amount'],
+                        ...reportData.map(item => [
+                            item.category,
+                            `₱${item.total.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`
+                        ])
+                    ];
+                    break;
+                case 'programTotal':
+                    fileName += 'Program_Report';
+                    csvData = [
+                        ['Program', 'Total Amount'],
+                        ...reportData.map(item => [
+                            item.program,
+                            `₱${item.total.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`
+                        ])
+                    ];
+                    break;
+    
+                default:
+                    throw new Error('Invalid report type');
+            }
+    
+            // Add total row
+            const total = reportData.reduce((sum, item) => {
+                if (reportType === 'monthly') {
+                    return sum + (selectedMonth 
+                        ? item.weeks.reduce((weekSum, week) => weekSum + week.total, 0)
+                        : item.weeks.reduce((weekSum, week) => weekSum + week.total, 0));
+                }
+                return sum + item.total;
+            }, 0);
+    
+            csvData.push(['Total', `₱${total.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`]);
+    
+            // Add date to filename
+            fileName += `_${new Date().toISOString().split('T')[0]}.csv`;
+    
+            // Convert to CSV string
+            const csvString = csvData
+                .map(row => row.map(cell => `"${cell}"`).join(','))
+                .join('\n');
+    
+            // Create and trigger download
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+    
+        } catch (error) {
+            console.error('Error generating CSV:', error);
+            alert('Failed to generate report');
+        }
     };
-    // -------------------------------------------------------------------------------------------//
 
     return (
         <div className="sb-nav-fixed">
@@ -230,7 +302,7 @@ const TreasurerReports = () => {
                                 </div>
 
                                 {loading ? (
-                                    <div className="text-center">Loading...</div>
+                                    <Preloader open={loading} />
                                 ) : error ? (
                                     <div className="alert alert-danger">{error}</div>
                                 ) : (

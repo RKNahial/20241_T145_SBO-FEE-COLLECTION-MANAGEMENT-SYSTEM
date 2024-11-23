@@ -1,6 +1,7 @@
 import { Helmet } from 'react-helmet';
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import Preloader from '../../components/Preloader';
 import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
 import axios from 'axios';
@@ -379,6 +380,8 @@ const TreasurerDues = () => {
                     </div>
                 </div>
             </div>
+            {/* PRELOADER */}
+            <Preloader open={loading} /> 
         </div>
     );
 };

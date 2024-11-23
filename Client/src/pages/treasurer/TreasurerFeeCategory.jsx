@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { Modal, Button } from 'react-bootstrap';
+import Preloader from '../../components/Preloader';
 import TreasurerSidebar from './TreasurerSidebar';
 import TreasurerNavbar from './TreasurerNavbar';
 import axios from 'axios';
@@ -176,7 +177,7 @@ const TreasurerFeeCategory = () => {
                                     </div>
                                 )}
                                 {loading ? (
-                                    <div>Loading categories...</div>
+                                     <Preloader open={loading} />
                                 ) : (
                                     <>
                                         {/* Actions and Filters */}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { Modal, Button } from 'react-bootstrap';
+import Preloader from '../../components/Preloader';
 import TreasurerSidebar from './TreasurerSidebar';
 import TreasurerNavbar from './TreasurerNavbar';
 import axios from 'axios';
@@ -65,10 +66,10 @@ const TreasurerArchivedStud = () => {
             // Filter only archived students before setting the state
             const archivedStudents = data.filter(student => student.isArchived === true);
             setStudents(archivedStudents);
-            setLoading(false); // Make sure to set loading to false here
+            setLoading(false); 
         } catch (err) {
             setError(err.message);
-            setLoading(false); // Also set loading to false in case of error
+            setLoading(false); 
         }
     };
 
@@ -203,7 +204,7 @@ const TreasurerArchivedStud = () => {
                                     </div>
                                 )}
                                 {loading ? (
-                                    <div>Loading students...</div>
+                                    <Preloader open={loading} />
                                 ) : (
                                     <>
                                         {/* Actions and Filters */}

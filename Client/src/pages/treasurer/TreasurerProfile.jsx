@@ -1,6 +1,7 @@
 // src/pages/treasurer/TreasurerProfile.jsx
 import { Helmet } from 'react-helmet';
 import React, { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
 import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
 import axios from 'axios';
@@ -9,7 +10,6 @@ const TreasurerProfile = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [profile, setProfile] = useState({
         name: '',
-        ID: '',
         email: '',
         position: '',
         password: ''
@@ -18,6 +18,9 @@ const TreasurerProfile = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const navigate = useNavigate();
 
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
@@ -39,7 +42,6 @@ const TreasurerProfile = () => {
                     const profileData = response.data.profile;
                     setProfile({
                         name: profileData.name || '',
-                        ID: profileData.ID || '',
                         email: profileData.email || '',
                         position: profileData.position || '',
                         password: ''
@@ -67,15 +69,14 @@ const TreasurerProfile = () => {
         return null;
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        try {
-            if (!profile.ID) {
-                setError('School ID is required');
-                setTimeout(() => setError(null), 3000);
-                return;
-            }
+        setIsModalOpen(true); 
+    };
 
+    const handleConfirmUpdate = async () => {
+        setIsModalOpen(false); 
+        try {
             if (profile.password) {
                 const passwordError = validatePassword(profile.password);
                 if (passwordError) {
@@ -116,20 +117,25 @@ const TreasurerProfile = () => {
             <TreasurerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
                 <TreasurerSidebar isCollapsed={isCollapsed} />
-                <div id="layoutSidenav_content" style={{
-                    marginLeft: isCollapsed ? '5rem' : '15.625rem',
-                    transition: 'margin-left 0.3s',
-                    flexGrow: 1,
-                    marginTop: '3.5rem'
-                }}>
-                    <div className="container-fluid px-4">
-                        <div className="row justify-content-center">
-                            <div className="col-lg-7">
-                                <div className="card shadow-lg border-0 rounded-lg mt-5">
+                <div 
+                    id="layoutSidenav_content" 
+                    style={{ 
+                        marginLeft: isCollapsed ? '5rem' : '15.625rem', 
+                        transition: 'margin-left 0.3s', 
+                        flexGrow: 1,
+                        marginTop: '3.5rem' 
+                    }}
+                >
+                    <div className="container-fluid mb-5 form-top">
+                        <div className="row">
+                            <div className="col-md-6">
+                                <div className="card mb-4">
                                     <div className="card-header">
-                                        <h3 className="text-center font-weight-light my-4">Update Profile</h3>
+                                        <i className="fas fa-user-edit"></i> <span style={{ paddingLeft: '0.50rem', fontWeight: 'bold' }}>Update Profile</span>
                                     </div>
                                     <div className="card-body">
+                                        {error && <div className="alert alert-danger">{error}</div>}
+                                        {successMessage && <div className="alert alert-success">{successMessage}</div>}
                                         <form onSubmit={handleSubmit}>
                                             <div className="mb-3">
                                                 <label className="mb-1">Treasurer Name</label>
@@ -139,10 +145,9 @@ const TreasurerProfile = () => {
                                                     className="form-control system"
                                                     value={profile.name}
                                                     onChange={handleChange}
+                                                    placeholder="Enter your name"
                                                 />
                                             </div>
-
-
                                             <div className="mb-3">
                                                 <label className="mb-1">Email Address</label>
                                                 <input
@@ -186,12 +191,10 @@ const TreasurerProfile = () => {
                                                     Password must contain at least one uppercase letter, one number, and one special character
                                                 </small>
                                             </div>
-                                            <div className="mt-4 mb-0">
-                                                <div className="d-grid">
-                                                    <button type="submit" className="btn system-button update-button">
-                                                        Update Profile
-                                                    </button>
-                                                </div>
+                                            <div className="mb-0">
+                                                <button type="submit" className="btn update-button d-flex align-items-center">
+                                                    <i className="fas fa-pen me-2"></i>Update
+                                                </button>
                                             </div>
                                         </form>
                                     </div>
@@ -201,6 +204,33 @@ const TreasurerProfile = () => {
                     </div>
                 </div>
             </div>
+            {/* Confirmation Modal */}
+            {isModalOpen && (
+                <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Confirm Profile Update</h5>
+                                <button type="button" className="close" onClick={() => setIsModalOpen(false)}>
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                <p>Are you sure you want to update your profile with the following details?</p>
+                                <ul>
+                                    <li><strong>Name:</strong> {profile.name}</li>
+                                    <li><strong>Email:</strong> {profile.email}</li>
+                                    <li><strong>Position:</strong> {profile.position}</li>
+                                </ul>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-confirm" onClick={handleConfirmUpdate}>Confirm</button>
+                                <button type="button" className="btn btn-cancel" onClick={() => setIsModalOpen(false)}>Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

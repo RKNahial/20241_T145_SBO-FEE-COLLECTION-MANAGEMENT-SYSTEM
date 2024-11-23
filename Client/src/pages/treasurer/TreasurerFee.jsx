@@ -6,6 +6,7 @@ import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
 import ManageFeeModal from '../../components/ManageFeeModal';
 import ViewFeeModal from '../../components/ViewFeeModal';
+import Preloader from '../../components/Preloader';
 import axios from 'axios';
 import emailjs from '@emailjs/browser';
 import '../../styles/PaymentTabs.css';
@@ -476,7 +477,7 @@ const TreasurerFee = () => {
 
                                 {/* Table Content */}
                                 {loading ? (
-                                    <div>Loading students...</div>
+                                    <Preloader open={loading} />
                                 ) : error ? (
                                     <div className="alert alert-danger">{error}</div>
                                 ) : (
