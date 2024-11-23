@@ -2,20 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Button, Row, Col, Spinner, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import emailjs from '@emailjs/browser';
+import Preloader from '../components/Preloader';
 
-const ViewFeeModal = ({ isOpen, onClose, student, categoryId }) => {
+const ViewFeeModal = ({ isOpen, onClose, student, categoryId, onEmailSuccess }) => {
     const [paymentDetails, setPaymentDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [sendingEmail, setSendingEmail] = useState(false); 
 
     useEffect(() => {
         const fetchPaymentDetails = async () => {
             if (isOpen && student) {
                 try {
+                    const token = localStorage.getItem('token');
                     const url = categoryId
                         ? `http://localhost:8000/api/payment-fee/details/${student._id}?category=${categoryId}`
                         : `http://localhost:8000/api/payment-fee/details/${student._id}`;
-                    const response = await axios.get(url);
+                    const response = await axios.get(url, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
                     if (response.data.success) {
                         setPaymentDetails(response.data.paymentFee);
                     } else {
@@ -37,6 +45,8 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId }) => {
 
     const handleSendEmail = async () => {
         if (!student.institutionalEmail || !paymentDetails) return;
+
+        setSendingEmail(true); 
 
         const templateParams = {
             from_name: "COT-SBO COLLECTION FEE MANAGEMENT SYSTEM",
@@ -60,11 +70,14 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId }) => {
             );
 
             if (response.status === 200) {
-                alert('Payment details sent successfully to student\'s email');
+                onEmailSuccess("Payment details sent successfully!"); // Call the success callback
+                onClose(); // Close the modal
             }
         } catch (error) {
             console.error('Error sending email:', error);
-            alert('Failed to send email');
+            // Optionally handle the error here (e.g., set an error state)
+        } finally {
+            setSendingEmail(false); 
         }
     };
 
@@ -95,6 +108,7 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId }) => {
                     <Alert variant="danger">{error}</Alert>
                 ) : (
                     <>
+                        {sendingEmail && !error && <Preloader open={sendingEmail} />}
                         <Row className="mb-3">
                             <Col xs={5} className="fw-bold">Student:</Col>
                             <Col>{student.name}</Col>
@@ -121,8 +135,8 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId }) => {
                             {paymentDetails?.transactions?.length > 0 ? (
                                 <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
                                     {paymentDetails.transactions.map((transaction, index) => (
-                                        <div 
-                                            key={index} 
+                                        <div
+                                            key={index}
                                             className="p-3 mb-2 bg-light rounded"
                                             style={{ fontSize: '0.875rem' }}
                                         >
@@ -142,15 +156,17 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId }) => {
 
             <Modal.Footer className="border-0 px-4 pb-4">
                 <Button
-                    variant="success"
+                    variant="btn btn-confirm"
                     onClick={handleSendEmail}
                     className="me-2"
+                    disabled={sendingEmail}
                 >
-                    Send Email
+                    {sendingEmail ? 'Sending...' : 'Send Email'}
                 </Button>
                 <Button
-                    variant="danger"
+                    variant="btn btn-cancel"
                     onClick={onClose}
+                    disabled={sendingEmail}
                 >
                     Close
                 </Button>

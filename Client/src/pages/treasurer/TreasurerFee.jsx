@@ -99,6 +99,13 @@ const TreasurerFee = () => {
         setIsModalOpen(true);
     };
 
+    const handleEmailSuccess = (message) => {
+        setEmailSuccessMessage(message);
+        setTimeout(() => {
+            setEmailSuccessMessage('');
+        }, 3000); 
+    };
+
     const { triggerPaymentUpdate } = usePayment();
 
     const handleSubmit = async (formData) => {
@@ -608,6 +615,7 @@ const TreasurerFee = () => {
                     onClose={() => setIsViewModalOpen(false)}
                     student={viewedStudent}
                     categoryId={selectedCategory}
+                    onEmailSuccess={handleEmailSuccess}
                 />
             )}
         </div>
