@@ -319,7 +319,7 @@ const TreasurerDashboard = () => {
                             <table className="table table-hover">
                                 <thead>
                                 <tr>
-                                        <th>#</th>
+                                        <th className="index-column">#</th>
                                         <th>Date</th>
                                         <th>Time</th>
                                         <th>Category Name</th>

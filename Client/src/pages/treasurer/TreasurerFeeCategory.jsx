@@ -223,7 +223,7 @@ const TreasurerFeeCategory = () => {
                                         <table className="table table-bordered table-hover">
                                             <thead>
                                                 <tr>
-                                                    <th>#</th>
+                                                    <th className="index-column">#</th>
                                                     <th>Payment Category ID</th>
                                                     <th>Payment Category</th>
                                                     <th>Total Price</th>

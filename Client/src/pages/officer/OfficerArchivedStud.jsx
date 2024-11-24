@@ -271,7 +271,7 @@ const OfficerArchivedStud = () => {
                                         <table className="table table-bordered table-hover">
                                             <thead>
                                                 <tr>
-                                                    <th>#</th>
+                                                    <th className="index-column">#</th>
                                                     <th>Student ID</th>
                                                     <th>Student Name</th>
                                                     <th>Year Level</th>

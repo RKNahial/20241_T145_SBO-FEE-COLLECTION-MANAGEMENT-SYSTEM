@@ -396,7 +396,7 @@ const OfficerFee = () => {
                                         <table className="table table-hover">
                                             <thead>
                                                 <tr>
-                                                    <th>#</th>
+                                                    <th className="index-column">#</th>
                                                     <th>Student ID</th>
                                                     <th>Student Name</th>
                                                     <th>Year Level</th>

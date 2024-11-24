@@ -256,8 +256,8 @@ const TreasurerDues = () => {
                                                 onChange={handleMonthChange}
                                                 value={selectedMonth}
                                                 style={{
-                                                    width: '150px', // Adjust width as needed
-                                                    paddingRight: '1.5rem', // Add padding for arrow
+                                                    width: '150px', 
+                                                    paddingRight: '1.5rem',
                                                 }}
                                             >
                                                 <option value="January">January</option>
@@ -276,7 +276,7 @@ const TreasurerDues = () => {
                                         </div>
                                     </div>
                                     <div className="d-flex align-items-center dashboard-select">
-                                    <label className="me-2 mb-0">Select Week</label> {/* Fixed the missing < */}
+                                    <label className="me-2 mb-0">Select Week</label> 
                                         <div style={{ width: 'auto' }}>
                                             <select
                                                 className="form-control"
@@ -298,7 +298,7 @@ const TreasurerDues = () => {
                                 <table className="table table-bordered table-hover">
                                     <thead>
                                         <tr>
-                                            <th>#</th>
+                                            <th className="index-column">#</th>
                                             <th>Officer Name</th>
                                             {dates.map((date, index) => (
                                                 <th key={index}>{date}</th>

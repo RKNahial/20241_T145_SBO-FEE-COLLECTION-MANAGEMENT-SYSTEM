@@ -33,3 +33,8 @@
 .table tbody tr:last-child {
     border-bottom: none;
 }
+
+.index-column {
+    width: 4rem;  
+    text-align: center;
+}
