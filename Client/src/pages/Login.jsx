@@ -39,8 +39,6 @@ const Login = () => {
                 keepSignedIn
             });
 
-            console.log('Server response:', response.data); // Debug log
-
             if (response.data.token) {
                 const expiryTime = new Date().getTime() + (keepSignedIn ? 24 : 1) * 60 * 60 * 1000;
 
@@ -53,35 +51,37 @@ const Login = () => {
                     keepSignedIn: keepSignedIn
                 };
 
-                // Store authentication data
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('userDetails', JSON.stringify(userDetails));
                 setUser(userDetails);
 
-                // Get position and trim/lowercase for consistent comparison
                 const position = (response.data.position || '').toLowerCase().trim();
-                console.log('Position after processing:', position); // Debug log
 
-                // Direct navigation based on position
-                if (position === 'admin') {
-                    navigate('/admin/dashboard');
-                } else if (position === 'treasurer') {
-                    navigate('/treasurer/dashboard');
-                } else if (position === 'governor') {
-                    navigate('/governor/dashboard');
-                    console.log('Navigation attempted');
-
-                } else if (position === 'officer') {
-
-                    navigate('/officer/dashboard');
-                } else {
-                    console.error('Unknown position:', position);
-                    setMessage('Invalid user position');
+                switch (position) {
+                    case 'admin':
+                        navigate('/admin/dashboard');
+                        break;
+                    case 'treasurer':
+                        navigate('/treasurer/dashboard');
+                        break;
+                    case 'governor':
+                        navigate('/governor/dashboard');
+                        break;
+                    case 'officer':
+                        navigate('/officer/dashboard');
+                        break;
+                    default:
+                        setMessage('Invalid user position');
+                        console.error('Unknown position:', position);
                 }
             }
         } catch (error) {
             console.error('Login error:', error);
-            setMessage(error.response?.data?.message || 'Invalid email or password.');
+            if (error.response?.status === 401) {
+                setMessage('Invalid email or password. Please try again.');
+            } else {
+                setMessage(error.response?.data?.message || 'An error occurred during login.');
+            }
         } finally {
             setLoading(false);
         }

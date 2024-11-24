@@ -213,7 +213,7 @@ const HistoryLogs = () => {
                                                         <th>Email</th>
                                                         <th>Position</th>
                                                         <th>Action</th>
-                                                        <th>Details</th>
+                                                        <th style={{ minWidth: '300px' }}>Details</th>
                                                         <th>Status</th>
                                                     </tr>
                                                 </thead>
@@ -226,7 +226,13 @@ const HistoryLogs = () => {
                                                             <td>{log.userEmail}</td>
                                                             <td>{log.userPosition}</td>
                                                             <td>{log.action}</td>
-                                                            <td>{log.details}</td>
+                                                            <td style={{
+                                                                whiteSpace: 'normal',
+                                                                wordBreak: 'break-word',
+                                                                minWidth: '300px'
+                                                            }}>
+                                                                {log.details}
+                                                            </td>
                                                             <td>
                                                                 <Badge bg={log.status === 'completed' ? 'success' : 'warning'}>
                                                                     {log.status}

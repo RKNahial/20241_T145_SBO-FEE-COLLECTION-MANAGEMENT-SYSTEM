@@ -78,7 +78,49 @@ class UserService {
         });
 
         await newAdmin.save();
+        
+        return {
+            admin: newAdmin,
+            temporaryPassword: password
+        };
     }
+
+    async addUser(userData) {
+        const { name, ID, email, position } = userData;
+        const password = Math.random().toString(36).slice(-8);
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        let UserModel;
+        switch (position.toLowerCase()) {
+            case 'officer':
+                UserModel = Officer;
+                break;
+            case 'governor':
+                UserModel = Governor;
+                break;
+            case 'treasurer':
+                UserModel = Treasurer;
+                break;
+            default:
+                throw new Error('Invalid position');
+        }
+
+        const newUser = new UserModel({
+            ID,
+            name,
+            email,
+            password: hashedPassword,
+            position: position.toLowerCase()
+        });
+
+        await newUser.save();
+        return { 
+            position, 
+            user: newUser,
+            temporaryPassword: password 
+        };
+    }
+
 }
 
 module.exports = new UserService(); 

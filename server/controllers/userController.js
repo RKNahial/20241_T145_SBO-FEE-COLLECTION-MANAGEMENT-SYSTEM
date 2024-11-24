@@ -1,14 +1,19 @@
 // controllers/userController.js
 const userService = require('../services/userService');
 const jwt = require('jsonwebtoken');
+const HistoryLog = require('../models/HistoryLog');
 
 exports.registerUser = async (req, res) => {
     try {
-        const user = await userService.addUser(req.body);
+        const result = await userService.addUser(req.body);
         res.status(201).json({
             success: true,
-            message: `${user.position} added successfully`,
-            data: user
+            message: `${result.position} added successfully`,
+            temporaryPassword: result.temporaryPassword,
+            data: {
+                ...result.user.toObject(),
+                password: undefined
+            }
         });
     } catch (error) {
         console.error('Error adding user:', error);
@@ -30,6 +35,17 @@ exports.addAdmin = async (req, res) => {
 
         const { admin, temporaryPassword } = await userService.addAdmin(req.body);
         
+        // Create history log
+        await HistoryLog.create({
+            timestamp: new Date(),
+            userName: req.user.name,
+            userEmail: req.user.email,
+            userPosition: req.user.position,
+            action: 'Add Admin',
+            details: `Added new admin: ${admin.name} (${admin.email})`,
+            status: 'completed'
+        });
+
         res.status(201).json({
             success: true,
             message: 'Admin added successfully',
@@ -39,6 +55,19 @@ exports.addAdmin = async (req, res) => {
             }
         });
     } catch (error) {
+        // Create error log if operation fails
+        if (req.user) {
+            await HistoryLog.create({
+                timestamp: new Date(),
+                userName: req.user.name,
+                userEmail: req.user.email,
+                userPosition: req.user.position,
+                action: 'Add Admin',
+                details: `Failed to add admin: ${error.message}`,
+                status: 'failed'
+            });
+        }
+
         if (error.code === 11000) {
             return res.status(400).json({
                 success: false,

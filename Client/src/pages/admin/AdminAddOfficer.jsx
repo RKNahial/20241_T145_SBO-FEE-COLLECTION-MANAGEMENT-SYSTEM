@@ -17,6 +17,7 @@ const AdminAddOfficer = () => {
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [generatedPassword, setGeneratedPassword] = useState('');
 
     const handleChange = (e) => {
         setFormData({
@@ -29,14 +30,21 @@ const AdminAddOfficer = () => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            await axios.post('http://localhost:8000/api/users/register',
+            const response = await axios.post('http://localhost:8000/api/users/register',
                 { ...formData },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            setSuccess('Officer added successfully');
+
+            if (response.data.temporaryPassword) {
+                setSuccess(`Officer added successfully!\nTemporary Password: ${response.data.temporaryPassword}`);
+            } else {
+                setError('No temporary password received from server');
+                return;
+            }
+
             setTimeout(() => {
                 navigate('/admin/officers');
-            }, 2000);
+            }, 10000);
         } catch (error) {
             setError(error.response?.data?.message || 'Failed to add officer');
         }
@@ -62,7 +70,16 @@ const AdminAddOfficer = () => {
                 }}>
                     <div className="container-fluid px-4 mb-5 form-top">
                         {error && <div className="alert alert-danger">{error}</div>}
-                        {success && <div className="alert alert-success">{success}</div>}
+                        {success && (
+                            <div className="alert alert-success">
+                                <div className="mb-2" style={{ whiteSpace: 'pre-line' }}>{success}</div>
+                                <div className="mt-2 small text-muted">
+                                    Please save this password. It will only be shown once.
+                                    <br />
+                                    Page will redirect in 10 seconds...
+                                </div>
+                            </div>
+                        )}
                         <div className="row">
                             <div className="col-md-6">
                                 <div className="card mb-4">

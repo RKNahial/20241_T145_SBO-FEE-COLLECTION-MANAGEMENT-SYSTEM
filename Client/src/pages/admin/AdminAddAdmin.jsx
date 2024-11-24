@@ -16,6 +16,7 @@ const AdminAddAdmin = () => {
     });
 
     const [message, setMessage] = useState(null);
+    const [generatedPassword, setGeneratedPassword] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const toggleSidebar = () => setIsCollapsed(prev => !prev);
@@ -35,61 +36,40 @@ const AdminAddAdmin = () => {
         setShowModal(false);
         try {
             const token = localStorage.getItem('token');
-            console.log('Current token:', token);
-
-            if (!token) {
-                console.log('No token found in localStorage');
-                setMessage({
-                    type: 'error',
-                    text: 'No authentication token found. Please login again.'
-                });
-                navigate('/login');
-                return;
-            }
-
             const config = {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             };
-            console.log('Request config:', config);
 
             const response = await axios.post(
-                'http://localhost:8000/api/add/admin',
+                'http://localhost:8000/api/users/admin/add',
                 formData,
                 config
             );
 
-            console.log('API response:', response);
-            setMessage({ type: 'success', text: 'Admin added successfully!' });
-
-            setTimeout(() => {
-                navigate('/admin/admins');
-            }, 2000);
-
-        } catch (error) {
-            console.error('Error details:', {
-                status: error.response?.status,
-                statusText: error.response?.statusText,
-                data: error.response?.data,
-                headers: error.response?.headers
-            });
-
-            if (error.response?.status === 401) {
-                const errorMessage = error.response?.data?.message || 'Session expired. Please login again.';
-                console.log('Authentication error:', errorMessage);
+            if (response.data.data?.temporaryPassword) {
                 setMessage({
-                    type: 'error',
-                    text: errorMessage
+                    type: 'success',
+                    text: `Admin added successfully!\nTemporary Password: ${response.data.data.temporaryPassword}`
                 });
-                localStorage.removeItem('token');
+
+                setTimeout(() => {
+                    navigate('/admin/admins');
+                }, 10000);
             } else {
                 setMessage({
                     type: 'error',
-                    text: error.response?.data?.message || 'Failed to add admin. Please try again.'
+                    text: 'No temporary password received from server'
                 });
             }
+        } catch (error) {
+            console.error('Error details:', error);
+            setMessage({
+                type: 'error',
+                text: error.response?.data?.message || 'Failed to add admin. Please try again.'
+            });
         }
     };
 
@@ -139,14 +119,14 @@ const AdminAddAdmin = () => {
                                                 />
                                             </div>
                                             <div className="mb-3">
-                                                <label className="mb-1">Employee ID</label>
+                                                <label className="mb-1">Admin ID</label>
                                                 <input
                                                     type="text"
                                                     name="ID"
                                                     value={formData.ID}
                                                     onChange={handleChange}
                                                     className="form-control system"
-                                                    placeholder="Enter employee ID"
+                                                    placeholder="Enter Admin ID"
                                                     required
                                                 />
                                             </div>
