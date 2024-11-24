@@ -371,3 +371,19 @@
   border-top-right-radius: 0.25rem; 
   border-bottom-right-radius: 0.25rem;
 }
+
+
+.payment-status-tabs .nav-link {
+  color: #ff8c00; 
+  border: none; 
+  transition: color 0.3s ease, border-color 0.3s ease; 
+}
+
+.payment-status-tabs .nav-link.active-tab {
+  color: #e67e00; 
+  border-bottom: 2px solid #e67e00; 
+}
+
+.payment-status-tabs .nav-link:hover {
+  color: #ff8c00 !important; 
+}

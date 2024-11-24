@@ -366,7 +366,7 @@ const OfficerFee = () => {
                                         </button>
                                     </form>
                                 </div>
-                                {/* New Tab Navigation */}
+                               {/* New Tab Navigation */}
                                 <div className="payment-status-tabs">
                                     <ul className="nav nav-tabs">
                                         {['All', 'Fully Paid', 'Partially Paid', 'Not Paid', 'Refunded'].map(status => {
@@ -374,7 +374,7 @@ const OfficerFee = () => {
                                             return (
                                                 <li className="nav-item" key={status}>
                                                     <button
-                                                        className={`nav-link ${activeTab === status ? 'active' : ''}`}
+                                                        className={`nav-link ${activeTab === status ? 'active-tab' : ''}`}
                                                         onClick={() => setActiveTab(status)}
                                                     >
                                                         {status}

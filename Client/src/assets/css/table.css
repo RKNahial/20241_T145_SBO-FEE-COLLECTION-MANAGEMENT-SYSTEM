@@ -9,7 +9,7 @@
 
 .table td {
     border: none;
-    padding: 0.75rem;
+    padding: 0.5rem;
     text-align: center;
     background-color: #FEFEFE;
     color: #333333;
@@ -18,12 +18,12 @@
 
 .table th {
     border: none;
-    padding: 0.75rem;
+    padding: 0; 
     text-align: center;
     background-color: #ffad5d;
     color: #333333;
     font-weight: bold;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease;     
 }
 
 .table tbody tr {
