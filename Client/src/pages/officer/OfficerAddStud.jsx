@@ -39,71 +39,54 @@ const OfficerAddStud = () => {
         e.preventDefault();
         setShowModal(true); // Show the confirmation modal
     };
-    
+
     const confirmSubmit = async () => {
-        setShowModal(false); // Hide the modal
+        setShowModal(false);
         try {
             const token = localStorage.getItem('token');
-            console.log('Current token:', token);
-    
-            if (!token) {
-                console.log('No token found in localStorage');
+            const userDetailsStr = localStorage.getItem('userDetails');
+
+            if (!userDetailsStr) {
                 setMessage({
                     type: 'error',
-                    text: 'No authentication token found. Please login again.'
+                    text: 'Session expired. Please login again.'
                 });
-                navigate('/login');
                 return;
             }
-    
-            // Create config object for better debugging
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            };
-            console.log('Request config:', config); // Debug request configuration
-    
+
+            const userDetails = JSON.parse(userDetailsStr);
+
             const response = await axios.post(
                 'http://localhost:8000/api/add/students',
-                formData,
-                config
+                {
+                    ...formData,
+                    userName: userDetails.name || userDetails.email.split('@')[0],
+                    userEmail: userDetails.email,
+                    userPosition: userDetails.position,
+                    userId: userDetails._id
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
             );
-    
-            console.log('API response:', response);
+
             setMessage({ type: 'success', text: 'Student added successfully!' });
-    
             setTimeout(() => {
                 navigate('/treasurer/students');
             }, 2000);
-    
+
         } catch (error) {
-            console.error('Error details:', {
-                status: error.response?.status,
-                statusText: error.response?.statusText,
-                data: error.response?.data,
-                headers: error.response?.headers
+            console.error('Error adding student:', error);
+            setMessage({
+                type: 'error',
+                text: error.response?.data?.message || 'Failed to add student'
             });
-    
-            if (error.response?.status === 401) {
-                const errorMessage = error.response?.data?.message || 'Session expired. Please login again.';
-                console.log('Authentication error:', errorMessage);
-                setMessage({
-                    type: 'error',
-                    text: errorMessage
-                });
-                // Optionally clear token if it's expired
-                localStorage.removeItem('token');
-            } else {
-                setMessage({
-                    type: 'error',
-                    text: error.response?.data?.message || 'Failed to add student. Please try again.'
-                });
-            }
         }
     };
-    
+
 
     return (
         <div className="sb-nav-fixed">
@@ -231,16 +214,16 @@ const OfficerAddStud = () => {
                     Do you want to add <strong>{formData.name}</strong>?
                 </Modal.Body>
                 <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button 
-                        variant="btn btn-confirm" 
-                        onClick={confirmSubmit} 
+                    <Button
+                        variant="btn btn-confirm"
+                        onClick={confirmSubmit}
                         style={{ flex: 'none' }}
                     >
                         Confirm
                     </Button>
-                    <Button 
-                        variant="btn btn-cancel" 
-                        onClick={() => setShowModal(false)} 
+                    <Button
+                        variant="btn btn-cancel"
+                        onClick={() => setShowModal(false)}
                         style={{ marginRight: '0.5rem', flex: 'none' }}
                     >
                         Cancel

@@ -1,4 +1,4 @@
-// src/pages/treasurer/OfficerFee.jsx
+// src/pages/officer/OfficerFee.jsx
 import { Helmet } from 'react-helmet';
 import React, { useState, useEffect } from "react";
 import { Link } from 'react-router-dom';
@@ -6,10 +6,10 @@ import OfficerSidebar from "./OfficerSidebar";
 import OfficerNavbar from "./OfficerNavbar";
 import ManageFeeModal from '../../components/ManageFeeModal';
 import ViewFeeModal from '../../components/ViewFeeModal';
-import Preloader from '../../components/Preloader';
 import axios from 'axios';
 import emailjs from '@emailjs/browser';
 import '../../styles/PaymentTabs.css';
+import Preloader from '../../components/Preloader';
 import { usePayment } from '../../context/PaymentContext';
 
 const OfficerFee = () => {
@@ -26,21 +26,21 @@ const OfficerFee = () => {
     useEffect(() => {
         const fetchStudents = async () => {
             try {
-                const token = localStorage.getItem('token'); 
+                const token = localStorage.getItem('token');
                 const response = await fetch('http://localhost:8000/api/getAll/students', {
                     headers: {
-                        'Authorization': `Bearer ${token}`, 
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     }
                 });
-    
+
                 if (!response.ok) {
                     if (response.status === 401) {
                         throw new Error('Unauthorized access. Please login again.');
                     }
                     throw new Error('Failed to fetch students');
                 }
-    
+
                 const data = await response.json();
                 const activeStudents = data.filter(student => !student.isArchived);
                 setStudents(activeStudents);
@@ -99,6 +99,13 @@ const OfficerFee = () => {
         setIsModalOpen(true);
     };
 
+    const handleEmailSuccess = (message) => {
+        setEmailSuccessMessage(message);
+        setTimeout(() => {
+            setEmailSuccessMessage('');
+        }, 3000); 
+    };
+
     const { triggerPaymentUpdate } = usePayment();
 
     const handleSubmit = async (formData) => {
@@ -110,7 +117,7 @@ const OfficerFee = () => {
                         : student
                 )
             );
-    
+
             // Update the categoryPayments state immediately
             setCategoryPayments(prev => ({
                 ...prev,
@@ -134,7 +141,7 @@ const OfficerFee = () => {
             // Refresh the data from server
             try {
                 const token = localStorage.getItem('token'); // Get the token
-                
+
                 // Fetch updated students with authorization header
                 const studentsResponse = await fetch('http://localhost:8000/api/getAll/students', {
                     headers: {
@@ -161,7 +168,7 @@ const OfficerFee = () => {
                             }
                         }
                     );
-                    
+
                     if (paymentsResponse.data.success && Array.isArray(paymentsResponse.data.payments)) {
                         const paymentData = {};
                         paymentsResponse.data.payments.forEach(payment => {
@@ -189,7 +196,7 @@ const OfficerFee = () => {
         }
     };
 
-    // VIEW PAYMENT MODAL
+    //  VIEW PAYMENT MODAL
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [viewedStudent, setViewedStudent] = useState(null);
 
@@ -236,19 +243,22 @@ const OfficerFee = () => {
         fetchPaymentCategories();
     }, []);
 
-    const handleEmailSentSuccess = () => {
-        setEmailSuccessMessage('Payment details emailed successfully!');
-        setTimeout(() => setEmailSuccessMessage(''), 3000);
-    };    
-
     // Update the handleEmailClick function
     const handleEmailClick = async (student) => {
-        setLoading(true); // Start loading
+        setLoading(true);
         try {
-            const response = await axios.get(`http://localhost:8000/api/payment-fee/details/${student._id}`);
+            const token = localStorage.getItem('token');
+            const response = await axios.get(
+                `http://localhost:8000/api/payment-fee/details/${student._id}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
+
             if (response.data.success) {
                 const paymentDetails = response.data.paymentFee;
-
                 const templateParams = {
                     from_name: "COT-SBO COLLECTION FEE MANAGEMENT SYSTEM",
                     to_name: student.name,
@@ -262,22 +272,44 @@ const OfficerFee = () => {
                     ).join('\n\n') || 'No transaction history'
                 };
 
+                // Send email first
                 const emailResponse = await emailjs.send(
                     "service_bni941i",
                     "template_x5s32eh",
                     templateParams,
-                    "Nqbgnjhv9ss88DOrk"
+                    "Nqbgnjhv9ss88DOrk" // Your EmailJS public key
                 );
 
                 if (emailResponse.status === 200) {
-                    setEmailSuccessMessage('Payment details emailed successfully!');
-                    setTimeout(() => setEmailSuccessMessage(''), 3000);
+                    // Log the successful email sending
+                    await axios.post(
+                        'http://localhost:8000/api/history-logs/email',
+                        {
+                            studentId: student._id,
+                            studentName: student.name,
+                            studentEmail: student.institutionalEmail,
+                            paymentDetails: {
+                                category: paymentDetails.paymentCategory,
+                                status: student.paymentstatus,
+                                totalPrice: paymentDetails.totalPrice,
+                                amountPaid: paymentDetails.amountPaid
+                            }
+                        },
+                        {
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            }
+                        }
+                    );
+
+                    setSuccessMessage(`Payment details emailed to ${student.name}'s successfully!`);
+                    setTimeout(() => setSuccessMessage(''), 3000);
                 }
             }
         } catch (error) {
             console.error('Error sending email:', error);
-            setError('Failed to send email');
-            setTimeout(() => setError(null), 3000);
+            setError('Failed to send email. Please try again.');
         } finally {
             setLoading(false); 
         }
@@ -353,7 +385,7 @@ const OfficerFee = () => {
     return (
         <div className="sb-nav-fixed">
             <Helmet>
-                <title>Officer | Review Fee</title>
+                <title>Treasurer | Manage Fee</title>
             </Helmet>
             {/* NAVBAR AND SIDEBAR */}
             <OfficerNavbar toggleSidebar={toggleSidebar} />
@@ -396,7 +428,7 @@ const OfficerFee = () => {
                                 <div className="d-flex justify-content-between mb-3 align-items-center">
                                     <div className="d-flex me-auto">
                                         <Link
-                                            to="/treasurer/manage-fee/payment-category"
+                                            to="/officer/manage-fee/payment-category"
                                             className="add-button btn btn-sm me-2"
                                         >
                                             <i className="fas fa-cog me-2"></i>
@@ -582,6 +614,8 @@ const OfficerFee = () => {
                     isOpen={isViewModalOpen}
                     onClose={() => setIsViewModalOpen(false)}
                     student={viewedStudent}
+                    categoryId={selectedCategory}
+                    onEmailSuccess={handleEmailSuccess}
                 />
             )}
         </div>

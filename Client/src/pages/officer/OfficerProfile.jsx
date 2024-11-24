@@ -1,4 +1,4 @@
-// src/pages/treasurer/OfficerProfile.jsx
+// src/pages/officer/OfficerProfile.jsx
 import { Helmet } from 'react-helmet';
 import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
@@ -138,7 +138,7 @@ const OfficerProfile = () => {
                                         {successMessage && <div className="alert alert-success">{successMessage}</div>}
                                         <form onSubmit={handleSubmit}>
                                             <div className="mb-3">
-                                                <label className="mb-1">Treasurer Name</label>
+                                                <label className="mb-1">Officer Name</label>
                                                 <input
                                                     type="text"
                                                     name="name"

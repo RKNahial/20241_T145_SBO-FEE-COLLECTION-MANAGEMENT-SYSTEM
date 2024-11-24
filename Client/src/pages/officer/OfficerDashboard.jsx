@@ -16,7 +16,8 @@ import OfficerSidebar from "./OfficerSidebar";
 import OfficerNavbar from "./OfficerNavbar";
 import { usePayment } from '../../context/PaymentContext';
 import '../../assets/css/calendar.css';
-
+import { getAnalytics, logEvent } from "firebase/analytics";
+import { app } from '../firebase/firebaseConfig';
 
 ChartJS.register(
     CategoryScale,
@@ -52,6 +53,10 @@ const OfficerDashboard = () => {
         }
         return shouldShow;
     });
+    const [totalActiveOfficers, setTotalActiveOfficers] = useState(0);
+
+    // Add analytics initialization
+    const analytics = getAnalytics(app);
 
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
@@ -73,7 +78,7 @@ const OfficerDashboard = () => {
                 setLoading(false);
             }
         };
-
+ 
         fetchRecentPayments();
     }, [paymentUpdate]);
 
@@ -157,6 +162,31 @@ const OfficerDashboard = () => {
         };
 
         fetchReportData();
+    }, []);
+
+    useEffect(() => {
+        logEvent(analytics, 'page_view', {
+            page_title: 'Officer Dashboard',
+            page_location: window.location.href,
+            page_path: window.location.pathname,
+            user_role: 'officer'
+        });
+    }, []);
+
+    useEffect(() => {
+        const fetchTotalActiveOfficers = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.get('http://localhost:8000/api/admin/active-officers-count', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setTotalActiveOfficers(response.data.count);
+            } catch (err) {
+                console.error('Error fetching total active officers:', err);
+            }
+        };
+
+        fetchTotalActiveOfficers();
     }, []);
 
     const formatAmount = (amount) => {
@@ -245,7 +275,7 @@ const OfficerDashboard = () => {
                                 <div className="card orange-card mb-4">
                                     <div className="card-body d-flex justify-content-between align-items-center">
                                         <div>
-                                            <h2 className="big-text">36</h2>
+                                            <h2 className="big-text">{totalActiveOfficers}</h2>
                                             <h5 className="small-text">Total Officers</h5>
                                         </div>
                                         <i className="fas fa-user-tie big-icon text-white"></i>
@@ -288,7 +318,7 @@ const OfficerDashboard = () => {
                             <h5 className="mb-4 header">Recent Payments</h5>
                             <table className="table table-hover">
                                 <thead>
-                                    <tr>
+                                <tr>
                                         <th>#</th>
                                         <th>Date</th>
                                         <th>Time</th>
@@ -298,31 +328,30 @@ const OfficerDashboard = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {loading ? (
-                                        <tr>
-                                            <td colSpan="6" className="text-center">Loading...</td>
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan="6" className="text-center">Loading...</td>
+                                    </tr>
+                                ) : error ? (
+                                    <tr>
+                                        <td colSpan="6" className="text-center text-danger">{error}</td>
+                                    </tr>
+                                ) : recentPayments.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="6" className="text-center">No recent payments found</td>
+                                    </tr>
+                                ) : (
+                                    recentPayments.map((payment, index) => (
+                                        <tr key={payment.id}>
+                                            <td>{index + 1}</td>
+                                            <td>{new Date(payment.date).toLocaleDateString()}</td>
+                                            <td>{payment.paymentTime}</td> 
+                                            <td>{payment.categoryName}</td> 
+                                            <td>{payment.studentName}</td>
+                                            <td>₱{payment.paidAmount.toFixed(2)}</td>
                                         </tr>
-                                    ) : error ? (
-                                        <tr>
-                                            <td colSpan="6" className="text-center text-danger">{error}</td>
-                                        </tr>
-                                    ) : recentPayments.length === 0 ? (
-                                        <tr>
-                                            <td colSpan="6" className="text-center">No recent payments found</td>
-                                        </tr>
-                                    ) : (
-                                        recentPayments.map((payment, index) => (
-                                            <tr key={payment.id}>
-                                                <td>{index + 1}</td>
-                                                <td>{new Date(payment.date).toLocaleDateString()}</td>
-                                                <td>{payment.paymentTime}</td>
-                                                <td>{payment.categoryName}</td> 
-                                                {/* <td>{payment.studentId}</td> */}
-                                                <td>{payment.studentName}</td>
-                                                <td>₱{payment.paidAmount.toFixed(2)}</td>
-                                            </tr>
-                                        ))
-                                    )}
+                                    ))
+                                )}
                                 </tbody>
                             </table>
                         </div>
@@ -403,7 +432,7 @@ const OfficerDashboard = () => {
                                                 className="calendar-iframe"
                                                 frameBorder="0"
                                                 scrolling="no"
-                                                title="Treasurer Calendar"
+                                                title="Officer Calendar"
                                             />
                                         </div>
                                     </div>
@@ -412,6 +441,7 @@ const OfficerDashboard = () => {
                             </div>
                         </div>
                         {/* REPORTS AND CALENDAR END */}
+
 
                     </div>
                 </div>
