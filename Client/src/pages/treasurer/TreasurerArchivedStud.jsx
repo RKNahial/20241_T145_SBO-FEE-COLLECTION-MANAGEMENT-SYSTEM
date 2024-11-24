@@ -1,7 +1,9 @@
+// src//pages/treasurer/TreasurerArchivedStud.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { Modal, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import Preloader from '../../components/Preloader';
 import TreasurerSidebar from './TreasurerSidebar';
 import TreasurerNavbar from './TreasurerNavbar';
@@ -22,6 +24,8 @@ const TreasurerArchivedStud = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [showModal, setShowModal] = useState(false);
     const [modalAction, setModalAction] = useState({ type: '', student: null });
+    const navigate = useNavigate();
+    const [statusFilter, setStatusFilter] = useState("Active");
 
     // STUDENT STATUS TAG
     const StudentStatusTag = ({ status, onClick }) => {
@@ -47,7 +51,7 @@ const TreasurerArchivedStud = () => {
 
     const fetchStudents = async () => {
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('token'); // Get token from localStorage
             const response = await fetch('http://localhost:8000/api/getAll/students', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -63,33 +67,39 @@ const TreasurerArchivedStud = () => {
             }
 
             const data = await response.json();
-            // Filter only archived students before setting the state
-            const archivedStudents = data.filter(student => student.isArchived === true);
-            setStudents(archivedStudents);
-            setLoading(false); 
+            setStudents(data);
         } catch (err) {
             setError(err.message);
-            setLoading(false); 
+            if (err.message.includes('Unauthorized')) {
+                // Handle unauthorized access (e.g., redirect to login)
+                // You might want to implement a redirect here
+            }
+        } finally {
+            setLoading(false);
         }
     };
 
-    const filteredStudents = students.filter(student => {
-        return student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            student.studentId?.toLowerCase().includes(searchTerm.toLowerCase());
-    });
-
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [students, searchTerm]);
-
+    // Use fetchStudents in useEffect
     useEffect(() => {
         fetchStudents();
     }, []);
 
+    // Reset to first page when students or filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [students, searchTerm, statusFilter]);
+
+    const filteredStudents = students.filter(student => {
+        const matchesSearch = student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            student.studentId?.toLowerCase().includes(searchTerm.toLowerCase());
+
+            return student.isArchived && matchesSearch; 
+    });
+
     // Handle archive and unarchive actions
-    const handleArchiveAction = (studentId, studentName) => {
+    const handleArchiveAction = (studentId, studentName, isArchived) => {
         setModalAction({
-            type: 'unarchive',  // Always unarchive
+            type: isArchived ? 'unarchive' : 'archive',
             student: { id: studentId, name: studentName }
         });
         setShowModal(true);
@@ -98,30 +108,45 @@ const TreasurerArchivedStud = () => {
     const confirmAction = async () => {
         try {
             const token = localStorage.getItem('token');
-            const userDetails = JSON.parse(localStorage.getItem('userDetails'));
+            const userDetailsStr = localStorage.getItem('userDetails');
 
-            const response = await fetch(`http://localhost:8000/api/unarchive/${modalAction.student.id}`, {
+            if (!userDetailsStr) {
+                setError('Session expired. Please login again.');
+                return;
+            }
+
+            const userDetails = JSON.parse(userDetailsStr);
+            const isArchiving = modalAction.type === 'archive';
+            const endpoint = isArchiving ? 'archive' : 'unarchive';
+
+            const response = await fetch(`http://localhost:8000/api/${endpoint}/${modalAction.student.id}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    userId: userDetails._id,
-                    userPosition: userDetails.position
+                    userName: userDetails.name || userDetails.email.split('@')[0],
+                    userEmail: userDetails.email,
+                    userPosition: userDetails.position,
+                    userId: userDetails._id
                 })
             });
 
             if (response.ok) {
-                setSuccessMessage(`${modalAction.student.name} has been successfully unarchived!`);
-                // Remove the unarchived student from the list
-                setStudents(prev => prev.filter(s => s._id !== modalAction.student.id));
+                setSuccessMessage(`${modalAction.student.name} has been successfully ${modalAction.type}d!`);
+                setStudents(prev => prev.map(s =>
+                    s._id === modalAction.student.id
+                        ? { ...s, isArchived: isArchiving }
+                        : s
+                ));
             } else {
                 const errorData = await response.json();
-                setError(errorData.error);
+                setError(typeof errorData.message === 'string' ? errorData.message : 'An error occurred');
             }
         } catch (error) {
-            setError('Failed to unarchive student');
+            console.error('Archive error:', error);
+            setError('Failed to perform action. Please try again.');
         } finally {
             setShowModal(false);
             setModalAction({ type: '', student: null });
@@ -164,6 +189,25 @@ const TreasurerArchivedStud = () => {
     const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+    const checkEditLock = async (studentId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(
+                `http://localhost:8000/api/students/${studentId}/check-lock/EDIT`,
+                {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }
+            );
+            return {
+                locked: !response.data.success,
+                userName: response.data.userName
+            };
+        } catch (error) {
+            console.error('Error checking lock:', error);
+            return { locked: false };
+        }
+    };
 
     return (
         <div className="sb-nav-fixed">
@@ -247,7 +291,13 @@ const TreasurerArchivedStud = () => {
                                                         <td>
                                                             <StudentStatusTag
                                                                 status={student.isArchived ? 'Archived' : 'Active'}
-                                                                onClick={() => handleArchiveAction(student._id, student.name, student.isArchived)}
+                                                                onClick={() => {
+                                                                    if (student.isArchived) {
+                                                                        handleUnarchive(student._id, student.name);
+                                                                    } else {
+                                                                        handleArchive(student._id, student.name);
+                                                                    }
+                                                                }}
                                                             />
                                                         </td>
                                                         <td>
@@ -255,14 +305,25 @@ const TreasurerArchivedStud = () => {
                                                                 to={`/treasurer/students/edit/${student._id}`}
                                                                 state={{ studentData: student }}
                                                                 className="btn btn-edit btn-sm"
+                                                                onClick={async (e) => {
+                                                                    e.preventDefault();
+                                                                    const lockStatus = await checkEditLock(student._id);
+                                                                    if (lockStatus.locked) {
+                                                                        setError(`This student is currently being edited by ${lockStatus.userName}`);
+                                                                    } else {
+                                                                        navigate(`/treasurer/students/edit/${student._id}`, {
+                                                                            state: { studentData: student }
+                                                                        });
+                                                                    }
+                                                                }}
                                                             >
                                                                 <i className="fas fa-edit"></i>
                                                             </Link>
                                                             <button
-                                                                className="btn btn-archive btn-open btn-sm"
-                                                                onClick={() => handleArchiveAction(student._id, student.name)}
+                                                                className={`btn btn-archive btn-sm ${student.isArchived ? 'btn-open' : ''}`}
+                                                                onClick={() => handleArchiveAction(student._id, student.name, student.isArchived)}
                                                             >
-                                                                <i className="fas fa-box-open"></i>
+                                                                <i className={`fas fa-${student.isArchived ? 'box-open' : 'archive'}`}></i>
                                                             </button>
                                                         </td>
                                                     </tr>
@@ -319,13 +380,18 @@ const TreasurerArchivedStud = () => {
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>
-                        Unarchive Student
+                        {modalAction.type === 'archive' ? 'Archive' : 'Unarchive'} Student
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <p className="mb-1">
-                        Are you sure you want to unarchive <strong>{modalAction.student?.name}</strong>?
+                        Are you sure you want to {modalAction.type} <strong>{modalAction.student?.name}</strong>?
                     </p>
+                    {modalAction.type === 'archive' && (
+                        <small style={{ color: '#6c757d', fontSize: '0.90rem' }}>
+                            You can still unarchive the student if you change your mind.
+                        </small>
+                    )}
                 </Modal.Body>
                 <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <Button
