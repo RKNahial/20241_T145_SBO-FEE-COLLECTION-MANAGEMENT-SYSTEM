@@ -511,12 +511,12 @@ const TreasurerFee = () => {
                                                         return getStudentPaymentStatus(student._id) === activeTab;
                                                     })
                                                     .map((student, index) => (
-                                                        <tr key={student._id}>
+                                                        <tr key={student._id} >
                                                             <td>{indexOfFirstItem + index + 1}</td>
                                                             <td>{student.studentId}</td>
                                                             <td>{student.name}</td>
                                                             <td>{student.yearLevel}</td>
-                                                            <td>{student.program}</td>
+                                                            <td>{student.program}</td>  
                                                             <td>
                                                                 <PaymentStatusTag
                                                                     status={getStudentPaymentStatus(student._id) || 'Not Paid'}
