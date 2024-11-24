@@ -78,7 +78,7 @@ const TreasurerDashboard = () => {
                 setLoading(false);
             }
         };
-
+ 
         fetchRecentPayments();
     }, [paymentUpdate]);
 
@@ -328,30 +328,30 @@ const TreasurerDashboard = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {loading ? (
-                                        <tr>
-                                            <td colSpan="6" className="text-center">Loading...</td>
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan="6" className="text-center">Loading...</td>
+                                    </tr>
+                                ) : error ? (
+                                    <tr>
+                                        <td colSpan="6" className="text-center text-danger">{error}</td>
+                                    </tr>
+                                ) : recentPayments.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="6" className="text-center">No recent payments found</td>
+                                    </tr>
+                                ) : (
+                                    recentPayments.map((payment, index) => (
+                                        <tr key={payment.id}>
+                                            <td>{index + 1}</td>
+                                            <td>{new Date(payment.date).toLocaleDateString()}</td>
+                                            <td>{payment.paymentTime}</td> 
+                                            <td>{payment.categoryName}</td> 
+                                            <td>{payment.studentName}</td>
+                                            <td>₱{payment.paidAmount.toFixed(2)}</td>
                                         </tr>
-                                    ) : error ? (
-                                        <tr>
-                                            <td colSpan="6" className="text-center text-danger">{error}</td>
-                                        </tr>
-                                    ) : recentPayments.length === 0 ? (
-                                        <tr>
-                                            <td colSpan="6" className="text-center">No recent payments found</td>
-                                        </tr>
-                                    ) : (
-                                        recentPayments.map((payment, index) => (
-                                            <tr key={payment.id}>
-                                                <td>{index + 1}</td>
-                                                <td>{new Date(payment.date).toLocaleDateString()}</td>
-                                                <td>{payment.paymentTime}</td> 
-                                                <td>{payment.categoryName}</td> 
-                                                <td>{payment.studentName}</td>
-                                                <td>₱{payment.paidAmount.toFixed(2)}</td>
-                                            </tr>
-                                        ))
-                                    )}
+                                    ))
+                                )}
                                 </tbody>
                             </table>
                         </div>

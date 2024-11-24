@@ -49,12 +49,12 @@ exports.updatePaymentStatus = async (req, res) => {
             previousStatus,
             newStatus: status
         });
-
+     
         paymentFee.status = status;
         paymentFee.amountPaid = transactionAmount;
         paymentFee.paymentDate = status !== 'Not Paid' ? new Date(paymentDate) : null;
         paymentFee.totalPrice = parseFloat(totalPrice);
-
+     
         await paymentFee.save();
 
         // Create history log
