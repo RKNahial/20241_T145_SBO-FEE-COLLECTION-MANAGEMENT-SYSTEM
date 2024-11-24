@@ -392,7 +392,7 @@ const OfficerFee = () => {
                                 ) : error ? (
                                     <div className="alert alert-danger">{error}</div>
                                 ) : (
-                                    <div className="table-responsive mt-3">
+                                    <div className="table-responsive mt-3 fee-row">
                                         <table className="table table-hover">
                                             <thead>
                                                 <tr>

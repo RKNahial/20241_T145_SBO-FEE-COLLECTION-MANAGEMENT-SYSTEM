@@ -15,10 +15,17 @@
     color: #333333;
     transition: background-color 0.2s ease;
 }
+.fee-row .table td {
+    padding: 0.75rem !important;
+}
 
-.table th {
+.due-row .table td {
+    padding: 0.85rem !important;
+}
+
+
+.table th { 
     border: none;
-    padding: 0; 
     text-align: center;
     background-color: #ffad5d;
     color: #333333;

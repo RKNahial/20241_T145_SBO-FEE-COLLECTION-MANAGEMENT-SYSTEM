@@ -295,57 +295,60 @@ const TreasurerDues = () => {
                                     </div>
                                 </div>
 
-                                <table className="table table-bordered table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th className="index-column">#</th>
-                                            <th className="name-column-2">Officer Name</th>
-                                            {dates.map((date, index) => (
-                                                <th key={index}>{date}</th>
-                                            ))}
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {currentOfficers.map((officer, index) => (
-                                            <tr key={`${officer.userId}-${selectedMonth}-${selectedWeek}`}>
-                                                <td>{indexOfFirstOfficer + index + 1}</td>
-                                                <td>{officer.officerName || 'Name not available'}</td>
-                                                {officer.dues.map((due, dueIndex) => (
-                                                    <td key={`${officer.userId}-${due.day}-${due.status}`}>
-                                                        <PaymentStatusTag
-                                                            status={due.status}
-                                                            onToggle={() => handleStatusToggle(
-                                                                officer.userId,
-                                                                due.day,
-                                                                due.status
-                                                            )}
-                                                        />
-                                                    </td>
+                                <div className="table-responsive mt-3 due-row">
+                                    <table className="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th className="index-column">#</th>
+                                                <th className="name-column-2">Officer Name</th>
+                                                {dates.map((date, index) => (
+                                                    <th key={index}>{date}</th>
                                                 ))}
-                                                <td className="text-center">
-                                                    <button
-                                                        type="button"
-                                                        className="btn pay-button"
-                                                        onClick={() => navigate(`/treasurer/manage-fee/amount/${officer.userId}`,
-                                                            {
-                                                                state: {
-                                                                    officerName: officer.officerName,
-                                                                    userId: officer.userId,
-                                                                    userType: officer.userType
-                                                                }
-                                                            }
-                                                        )}
-                                                    >
-                                                        <i className="fas fa-coins me-1"></i>
-                                                        Pay in Amount
-                                                    </button>
-                                                </td>
+                                                <th>Action</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-
+                                        </thead>
+                                        <tbody>
+                                            {currentOfficers.map((officer, index) => (
+                                                <tr key={`${officer.userId}-${selectedMonth}-${selectedWeek}`}>
+                                                    <td>{indexOfFirstOfficer + index + 1}</td>
+                                                    <td>{officer.officerName || 'Name not available'}</td>
+                                                    {officer.dues.map((due, dueIndex) => (
+                                                        <td key={`${officer.userId}-${due.day}-${due.status}`}>
+                                                            <PaymentStatusTag
+                                                                status={due.status}
+                                                                onToggle={() => handleStatusToggle(
+                                                                    officer.userId,
+                                                                    due.day,
+                                                                    due.status
+                                                                )}
+                                                            />
+                                                        </td>
+                                                    ))}
+                                                    <td className="text-center">
+                                                        <button
+                                                            type="button"
+                                                            className="btn pay-button"
+                                                            onClick={() => navigate(`/treasurer/manage-fee/amount/${officer.userId}`,
+                                                                {
+                                                                    state: {
+                                                                        officerName: officer.officerName,
+                                                                        userId: officer.userId,
+                                                                        userType: officer.userType
+                                                                    }
+                                                                }
+                                                            )}
+                                                        >
+                                                            <i className="fas fa-coins me-1"></i>
+                                                            Pay in Amount
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                        
+                                {/* SHOWING OF ENTRIES AND PAGINATION */}
                                 <div className="d-flex justify-content-between align-items-center mb-2">
                                     <div>
                                         Showing {indexOfFirstOfficer + 1} to {Math.min(indexOfLastOfficer, officers.length)} of {officers.length} entries
