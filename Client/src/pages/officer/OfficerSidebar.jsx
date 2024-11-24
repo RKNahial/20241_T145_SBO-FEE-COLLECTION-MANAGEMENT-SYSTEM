@@ -35,9 +35,6 @@ const OfficerSidebar = ({ isCollapsed }) => {
                             <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/officer/students" end>
                                 <i className="far fa-user icon-space"></i>{!isCollapsed && <span> Students</span>}
                             </NavLink>
-                            <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/officer/events" end>
-                                <i className="fa fa-calendar icon-space"></i>{!isCollapsed && <span> Events</span>}
-                            </NavLink>
                             <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/officer/reports" end>
                                 <i className="far fa-file-alt icon-space"></i>{!isCollapsed && <span> Reports</span>}
                             </NavLink>
