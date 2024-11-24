@@ -126,7 +126,7 @@ const App = () => {
                             <ProtectedRoute allowedRoles={['officer']}>
                                 <Routes>
                                     <Route path="dashboard" element={<OfficerDashboard />} />
-                                    <Route path="manage-fee" element={<OfficerFee />} />
+                                    <Route path="review-fee" element={<OfficerFee />} />
                                     <Route path="students" element={<OfficerStudents />} />
                                     <Route path="students/archived" element={<OfficerArchivedStud />} />
                                     <Route path="students/add-new" element={<OfficerAddStud />} />

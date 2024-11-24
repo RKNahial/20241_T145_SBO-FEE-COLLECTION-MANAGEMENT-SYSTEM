@@ -9,6 +9,7 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId, onEmailSuccess }) 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [sendingEmail, setSendingEmail] = useState(false); 
+    const isTreasurer = localStorage.getItem('userRole') === 'Treasurer';
 
     useEffect(() => {
         const fetchPaymentDetails = async () => {
@@ -155,14 +156,16 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId, onEmailSuccess }) 
             </Modal.Body>
 
             <Modal.Footer className="border-0 px-4 pb-4">
-                <Button
-                    variant="btn btn-confirm"
-                    onClick={handleSendEmail}
-                    className="me-2"
-                    disabled={sendingEmail}
-                >
-                    {sendingEmail ? 'Sending...' : 'Send Email'}
-                </Button>
+                {isTreasurer && (
+                        <Button
+                            variant="btn btn-confirm"
+                            onClick={handleSendEmail}
+                            className="me-2"
+                            disabled={sendingEmail}
+                        >
+                            {sendingEmail ? 'Sending...' : 'Send Email'}
+                        </Button>
+                    )}
                 <Button
                     variant="btn btn-cancel"
                     onClick={onClose}

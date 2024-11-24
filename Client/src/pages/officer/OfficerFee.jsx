@@ -94,18 +94,6 @@ const OfficerFee = () => {
 
     const handleModalToggle = () => setIsModalOpen(!isModalOpen);
 
-    const handleEditClick = (student) => {
-        setSelectedStudent(student);
-        setIsModalOpen(true);
-    };
-
-    const handleEmailSuccess = (message) => {
-        setEmailSuccessMessage(message);
-        setTimeout(() => {
-            setEmailSuccessMessage('');
-        }, 3000); 
-    };
-
     const { triggerPaymentUpdate } = usePayment();
 
     const handleSubmit = async (formData) => {
@@ -243,78 +231,6 @@ const OfficerFee = () => {
         fetchPaymentCategories();
     }, []);
 
-    // Update the handleEmailClick function
-    const handleEmailClick = async (student) => {
-        setLoading(true);
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(
-                `http://localhost:8000/api/payment-fee/details/${student._id}`,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                }
-            );
-
-            if (response.data.success) {
-                const paymentDetails = response.data.paymentFee;
-                const templateParams = {
-                    from_name: "COT-SBO COLLECTION FEE MANAGEMENT SYSTEM",
-                    to_name: student.name,
-                    to_email: student.institutionalEmail,
-                    payment_category: paymentDetails.paymentCategory || 'N/A',
-                    total_price: paymentDetails.totalPrice?.toString() || '0.00',
-                    amount_paid: paymentDetails.amountPaid?.toString() || '0.00',
-                    payment_status: student.paymentstatus,
-                    transaction_history: paymentDetails.transactions?.map(t =>
-                        `• Amount: ₱${t.amount.toFixed(2)}\n  Date: ${t.formattedDate}\n  Status: ${t.previousStatus || 'New'} → ${t.newStatus}`
-                    ).join('\n\n') || 'No transaction history'
-                };
-
-                // Send email first
-                const emailResponse = await emailjs.send(
-                    "service_bni941i",
-                    "template_x5s32eh",
-                    templateParams,
-                    "Nqbgnjhv9ss88DOrk" // Your EmailJS public key
-                );
-
-                if (emailResponse.status === 200) {
-                    // Log the successful email sending
-                    await axios.post(
-                        'http://localhost:8000/api/history-logs/email',
-                        {
-                            studentId: student._id,
-                            studentName: student.name,
-                            studentEmail: student.institutionalEmail,
-                            paymentDetails: {
-                                category: paymentDetails.paymentCategory,
-                                status: student.paymentstatus,
-                                totalPrice: paymentDetails.totalPrice,
-                                amountPaid: paymentDetails.amountPaid
-                            }
-                        },
-                        {
-                            headers: {
-                                'Authorization': `Bearer ${token}`,
-                                'Content-Type': 'application/json'
-                            }
-                        }
-                    );
-
-                    setSuccessMessage(`Payment details emailed to ${student.name}'s successfully!`);
-                    setTimeout(() => setSuccessMessage(''), 3000);
-                }
-            }
-        } catch (error) {
-            console.error('Error sending email:', error);
-            setError('Failed to send email. Please try again.');
-        } finally {
-            setLoading(false); 
-        }
-    };
-
     const [selectedCategory, setSelectedCategory] = useState('');
     const [categoryPayments, setCategoryPayments] = useState({});
 
@@ -385,7 +301,7 @@ const OfficerFee = () => {
     return (
         <div className="sb-nav-fixed">
             <Helmet>
-                <title>Treasurer | Manage Fee</title>
+                <title>Officer | Review Fee</title>
             </Helmet>
             {/* NAVBAR AND SIDEBAR */}
             <OfficerNavbar toggleSidebar={toggleSidebar} />
@@ -406,7 +322,7 @@ const OfficerFee = () => {
                             <div className="card-header">
                                 <div className="row">
                                     <div className="col col-md-6">
-                                        <i className="fas fa-hand-holding-usd me-2"></i> <strong>Manage Fee</strong>
+                                        <i className="fas fa-hand-holding-usd me-2"></i> <strong>Review Fee</strong>
                                     </div>
                                 </div>
                             </div>
@@ -418,23 +334,8 @@ const OfficerFee = () => {
                                         {successMessage}
                                     </div>
                                 )}
-                                {/* EMAIL SENT SUCCESS  */}
-                                {emailSuccessMessage && (
-                                    <div className="alert alert-success" role="alert">
-                                        {emailSuccessMessage}
-                                    </div>
-                                )}
                                 {/* SELECT CATEGORY AND SEARCH STUDENT */}
                                 <div className="d-flex justify-content-between mb-3 align-items-center">
-                                    <div className="d-flex me-auto">
-                                        <Link
-                                            to="/officer/manage-fee/payment-category"
-                                            className="add-button btn btn-sm me-2"
-                                        >
-                                            <i className="fas fa-cog me-2"></i>
-                                            Manage Payment Category
-                                        </Link>
-                                    </div>
                                     <div className="d-flex align-items-center me-3">
                                         <label className="me-2 mb-0">Payment Category</label>
                                         <div className="dashboard-select" style={{ width: 'auto' }}>
@@ -501,7 +402,7 @@ const OfficerFee = () => {
                                                     <th>Year Level</th>
                                                     <th>Program</th>
                                                     <th>Payment Status</th>
-                                                    <th>Actions</th>
+                                                    <th>Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -524,25 +425,11 @@ const OfficerFee = () => {
                                                             </td>
                                                             <td>
                                                                 <button
-                                                                    className="btn btn-edit btn-sm"
-                                                                    onClick={() => handleEditClick(student)}
-                                                                    disabled={!selectedCategory}
-                                                                >
-                                                                    <i className="fas fa-edit btn-edit-mx"></i>
-                                                                </button>
-                                                                <button
                                                                     className="btn btn-view mx-2"
                                                                     onClick={() => handleViewClick(student)}
                                                                     disabled={!selectedCategory}
                                                                 >
                                                                     <i className="fas fa-eye"></i>
-                                                                </button>
-                                                                <button
-                                                                    className="btn btn-email"
-                                                                    onClick={() => handleEmailClick(student)}
-                                                                    disabled={!selectedCategory || getStudentPaymentStatus(student._id) === 'Not Paid'}
-                                                                >
-                                                                    <i className="fa-regular fa-envelope fa-md"></i>
                                                                 </button>
                                                             </td>
                                                         </tr>
@@ -615,7 +502,6 @@ const OfficerFee = () => {
                     onClose={() => setIsViewModalOpen(false)}
                     student={viewedStudent}
                     categoryId={selectedCategory}
-                    onEmailSuccess={handleEmailSuccess}
                 />
             )}
         </div>
