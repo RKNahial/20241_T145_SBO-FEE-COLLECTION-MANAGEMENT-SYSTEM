@@ -320,8 +320,8 @@ const OfficerDashboard = () => {
                                 <thead>
                                 <tr>
                                         <th className="index-column">#</th>
-                                        <th>Date</th>
-                                        <th>Time</th>
+                                        <th className="date-time-column">Date</th>
+                                        <th className="date-time-column">Time</th>
                                         <th>Category Name</th>
                                         <th>Student Name</th>
                                         <th>Paid Amount</th>

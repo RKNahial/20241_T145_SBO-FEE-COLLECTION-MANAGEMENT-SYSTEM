@@ -299,7 +299,7 @@ const TreasurerDues = () => {
                                     <thead>
                                         <tr>
                                             <th className="index-column">#</th>
-                                            <th>Officer Name</th>
+                                            <th className="name-column-2">Officer Name</th>
                                             {dates.map((date, index) => (
                                                 <th key={index}>{date}</th>
                                             ))}

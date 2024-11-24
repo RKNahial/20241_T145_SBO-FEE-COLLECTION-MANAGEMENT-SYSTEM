@@ -497,7 +497,7 @@ const TreasurerFee = () => {
                                                 <tr>
                                                     <th className="index-column">#</th>
                                                     <th>Student ID</th>
-                                                    <th>Student Name</th>
+                                                    <th className="name-column">Student Name</th>
                                                     <th>Year Level</th>
                                                     <th>Program</th>
                                                     <th>Payment Status</th>

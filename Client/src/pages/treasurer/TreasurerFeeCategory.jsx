@@ -224,7 +224,7 @@ const TreasurerFeeCategory = () => {
                                             <thead>
                                                 <tr>
                                                     <th className="index-column">#</th>
-                                                    <th>Payment Category ID</th>
+                                                    <th className="name-column-2">Payment Category ID</th>
                                                     <th>Payment Category</th>
                                                     <th>Total Price</th>
                                                     <th>Status</th>

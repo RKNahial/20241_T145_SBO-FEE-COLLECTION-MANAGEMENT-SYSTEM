@@ -38,3 +38,18 @@
     width: 4rem;  
     text-align: center;
 }
+
+.name-column{
+    width: 20rem;  
+    text-align: center;
+}
+
+.name-column-2{
+    width: 15rem;  
+    text-align: center;
+}
+
+.date-time-column{
+    width: 10rem;  
+    text-align: center;
+}
