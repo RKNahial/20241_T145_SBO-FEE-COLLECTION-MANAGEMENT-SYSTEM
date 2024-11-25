@@ -19,18 +19,18 @@ const LoadingSpinner = ({ text = "Loading", icon = "circle-notch", subtext }) =>
                 return { icon: 'history', color: '#FF8C00', animation: 'history-spin' };
             // COIN
             case 'coin':
-                return { icon: 'coins', color: '#FF8C00', animation: 'spin' }; // Assuming 'coins' is the icon name
+                return { icon: 'coins', color: '#FF8C00', animation: 'coin-pulse' };
             // REPORTS
             case 'reports':
-                return { icon: 'file-alt', color: '#FF8C00', animation: 'spin' }; // Assuming 'file-alt' is the icon name
+                return { icon: 'file-alt', color: '#FF8C00', animation: 'reports-pulse' };
             // CALENDAR
             case 'calendar':
-                return { icon: 'calendar-alt', color: '#FF8C00', animation: 'spin' }; // Assuming 'calendar-alt' is the icon name
+                return { icon: 'calendar-alt', color: '#FF8C00', animation: 'calendar-pulse' };
             // ARCHIVED
             case 'archived':
-                return { icon: 'archive', color: '#FF8C00', animation: 'spin' }; // Assuming 'archive' is the icon name
+                return { icon: 'archive', color: '#FF8C00', animation: 'archive-pulse' };
             default:
-                return { icon: 'circle-notch', color: '#FF8C00', animation: 'spin' };
+                return { icon: 'circle-notch', color: '#FF8C00', animation: 'default-pulse' };
         }
     };
 
