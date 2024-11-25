@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet';
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import Preloader from '../../components/Preloader';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
 import axios from 'axios';
@@ -58,10 +58,40 @@ const TreasurerDues = () => {
     const weeksInMonth = getWeeksInMonth(selectedMonth);
     const weekOptions = Array.from({ length: weeksInMonth }, (_, index) => index + 1);
 
-    const PaymentStatusTag = React.memo(({ status, onToggle }) => {
+    // const PaymentStatusTag = React.memo(({ status, onToggle }) => {
+    //     return (
+    //         <button
+    //             onClick={onToggle}
+    //             className={`btn btn-sm ${status === 'Paid' ? 'paid' : 'not-paid'}`}
+    //             style={{
+    //                 backgroundColor: status === 'Paid' ? '#FF8C00' : '#FFB84D',
+    //                 color: '#EAEAEA',
+    //                 border: 'none',
+    //                 padding: '0.25rem 0.75rem',
+    //                 borderRadius: '0.60rem',
+    //                 fontSize: '0.75rem',
+    //                 fontWeight: 500,
+    //                 display: 'inline-block'
+    //             }}
+    //         >
+    //             {status}
+    //         </button>
+    //     );
+    // });
+
+    // First, modify the PaymentStatusTag component to handle local state
+    const PaymentStatusTag = React.memo(({ initialStatus, onToggle }) => {
+        const [status, setStatus] = useState(initialStatus);
+
+        const handleClick = () => {
+            const newStatus = status === 'Paid' ? 'Not Paid' : 'Paid';
+            setStatus(newStatus);
+            onToggle?.(newStatus);  // Optional callback if you want to keep track in parent
+        };
+
         return (
             <button
-                onClick={onToggle}
+                onClick={handleClick}
                 className={`btn btn-sm ${status === 'Paid' ? 'paid' : 'not-paid'}`}
                 style={{
                     backgroundColor: status === 'Paid' ? '#FF8C00' : '#FFB84D',
@@ -78,6 +108,28 @@ const TreasurerDues = () => {
             </button>
         );
     });
+
+    // Then, modify how you use the PaymentStatusTag in the table
+    {currentOfficers.map((officer, index) => (
+        <tr key={`${officer.userId}-${selectedMonth}-${selectedWeek}`}>
+            <td>{indexOfFirstOfficer + index + 1}</td>
+            <td>{officer.officerName || 'Name not available'}</td>
+            {officer.dues.map((due, dueIndex) => (
+                <td key={`${officer.userId}-${due.day}-${due.status}`}>
+                    <PaymentStatusTag
+                        initialStatus={due.status}
+                        onToggle={(newStatus) => {
+                            // Optional: Handle the status change here if needed
+                            console.log(`Status changed to: ${newStatus}`);
+                        }}
+                    />
+                </td>
+            ))}
+            <td className="text-center">
+                {/* ... rest of your code ... */}
+            </td>
+        </tr>
+    ))}
 
     const refreshData = async () => {
         try {
@@ -227,6 +279,8 @@ const TreasurerDues = () => {
         return <div>Error: {error}</div>;
     }
 
+    
+
     return (
         <div className="sb-nav-fixed">
             <Helmet>
@@ -247,6 +301,17 @@ const TreasurerDues = () => {
                                 <strong><i className="fas fa-coins me-2"></i>Daily Dues</strong>
                             </div>
                             <div className="card-body">
+                            {loading ? (
+                                    <div style={{ 
+                                        display: 'flex', 
+                                        justifyContent: 'center', 
+                                        alignItems: 'center',
+                                        minHeight: '300px'  // Adjust this value as needed
+                                    }}>
+                                        <LoadingSpinner icon="coin" />
+                                    </div>
+                                ) : (
+                                <>
                                 <div className="d-flex justify-content-start mb-3">
                                     <div className="d-flex align-items-center me-3">
                                         <label className="me-2 mb-0">Select Month</label>
@@ -308,7 +373,8 @@ const TreasurerDues = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {currentOfficers.map((officer, index) => (
+                                            {/* ORIGINAL CODE */}
+                                            {/* {currentOfficers.map((officer, index) => (
                                                 <tr key={`${officer.userId}-${selectedMonth}-${selectedWeek}`}>
                                                     <td>{indexOfFirstOfficer + index + 1}</td>
                                                     <td>{officer.officerName || 'Name not available'}</td>
@@ -321,6 +387,22 @@ const TreasurerDues = () => {
                                                                     due.day,
                                                                     due.status
                                                                 )}
+                                                            />
+                                                        </td>
+                                                    ))} */}
+                                            {/* TEMPORARY CODE */}
+                                            {currentOfficers.map((officer, index) => (
+                                                <tr key={`${officer.userId}-${selectedMonth}-${selectedWeek}`}>
+                                                    <td>{indexOfFirstOfficer + index + 1}</td>
+                                                    <td>{officer.officerName || 'Name not available'}</td>
+                                                    {officer.dues.map((due, dueIndex) => (
+                                                        <td key={`${officer.userId}-${due.day}-${due.status}`}>
+                                                            <PaymentStatusTag
+                                                                initialStatus={due.status}
+                                                                onToggle={(newStatus) => {
+                                                                    // Optional: Handle the status change here if needed
+                                                                    console.log(`Status changed to: ${newStatus}`);
+                                                                }}
                                                             />
                                                         </td>
                                                     ))}
@@ -389,13 +471,13 @@ const TreasurerDues = () => {
                                         </ul>
                                     </nav>
                                 </div>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            {/* PRELOADER */}
-            <Preloader open={loading} /> 
         </div>
     );
 };
