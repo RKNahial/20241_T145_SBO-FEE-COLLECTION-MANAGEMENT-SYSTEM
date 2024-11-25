@@ -2,14 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Button, Row, Col, Spinner, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import emailjs from '@emailjs/browser';
-import Preloader from '../components/Preloader';
+import LoadingSpinner from './LoadingSpinner';
 
 const ViewFeeModal = ({ isOpen, onClose, student, categoryId, onEmailSuccess }) => {
     const [paymentDetails, setPaymentDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [sendingEmail, setSendingEmail] = useState(false); 
-    const isTreasurer = localStorage.getItem('userRole') === 'Treasurer';
+    const role = localStorage.getItem('role');
+    const isTreasurer = role === 'treasurer';
+    console.log('Current role:', role);
+    console.log('Is Treasurer:', isTreasurer);
+    console.log('Loading:', loading);
+    console.log('Error:', error);
+    console.log('Payment Details:', paymentDetails);
+
 
     useEffect(() => {
         const fetchPaymentDetails = async () => {
@@ -99,11 +106,14 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId, onEmailSuccess }) 
             </Modal.Header>
 
             <Modal.Body className="px-4">
-                {loading ? (
-                    <div className="text-center">
-                        <Spinner animation="border" role="status">
-                            <span className="visually-hidden">Loading...</span>
-                        </Spinner>
+            {loading ? (
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center',
+                        minHeight: '200px'
+                    }}>
+                        <LoadingSpinner icon="coin" />
                     </div>
                 ) : error ? (
                     <Alert variant="danger">{error}</Alert>
@@ -156,16 +166,16 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId, onEmailSuccess }) 
             </Modal.Body>
 
             <Modal.Footer className="border-0 px-4 pb-4">
-                {isTreasurer && (
-                        <Button
-                            variant="btn btn-confirm"
-                            onClick={handleSendEmail}
-                            className="me-2"
-                            disabled={sendingEmail}
-                        >
-                            {sendingEmail ? 'Sending...' : 'Send Email'}
-                        </Button>
-                    )}
+            {isTreasurer && !loading && !error && (  
+                    <Button
+                        variant="btn btn-confirm"   
+                        onClick={handleSendEmail}
+                        className="me-2"
+                        disabled={sendingEmail}
+                    >
+                        {sendingEmail ? 'Sending...' : 'Send Email'}
+                    </Button>
+                )}
                 <Button
                     variant="btn btn-cancel"
                     onClick={onClose}

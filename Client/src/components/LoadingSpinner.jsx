@@ -5,14 +5,30 @@ const LoadingSpinner = ({ text = "Loading", icon = "circle-notch", subtext }) =>
     // Determine the appropriate icon and color based on the loading context
     const getIconConfig = () => {
         switch (icon) {
+            // OFFICER
             case 'users':
                 return { icon: 'users', color: '#FF8C00', animation: 'users-pulse' };
+            // ADMIN
             case 'user-shield':
                 return { icon: 'user-shield', color: '#FF8C00', animation: 'shield-pulse' };
+            // STUDENT
             case 'user-graduate':
                 return { icon: 'user-graduate', color: '#FF8C00', animation: 'student-pulse' };
+            // HISTORY
             case 'history':
                 return { icon: 'history', color: '#FF8C00', animation: 'history-spin' };
+            // COIN
+            case 'coin':
+                return { icon: 'coins', color: '#FF8C00', animation: 'spin' }; // Assuming 'coins' is the icon name
+            // REPORTS
+            case 'reports':
+                return { icon: 'file-alt', color: '#FF8C00', animation: 'spin' }; // Assuming 'file-alt' is the icon name
+            // CALENDAR
+            case 'calendar':
+                return { icon: 'calendar-alt', color: '#FF8C00', animation: 'spin' }; // Assuming 'calendar-alt' is the icon name
+            // ARCHIVED
+            case 'archived':
+                return { icon: 'archive', color: '#FF8C00', animation: 'spin' }; // Assuming 'archive' is the icon name
             default:
                 return { icon: 'circle-notch', color: '#FF8C00', animation: 'spin' };
         }

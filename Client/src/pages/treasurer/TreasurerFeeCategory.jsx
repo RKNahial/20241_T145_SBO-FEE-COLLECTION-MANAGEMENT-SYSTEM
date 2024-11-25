@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { Modal, Button } from 'react-bootstrap';
-import Preloader from '../../components/Preloader';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import TreasurerSidebar from './TreasurerSidebar';
 import TreasurerNavbar from './TreasurerNavbar';
 import axios from 'axios';
@@ -177,7 +177,14 @@ const TreasurerFeeCategory = () => {
                                     </div>
                                 )}
                                 {loading ? (
-                                     <Preloader open={loading} />
+                                    <div style={{ 
+                                        display: 'flex', 
+                                        justifyContent: 'center', 
+                                        alignItems: 'center',
+                                        minHeight: '300px'  
+                                    }}>
+                                        <LoadingSpinner icon="coin" /> 
+                                    </div>
                                 ) : (
                                     <>
                                         {/* Actions and Filters */}

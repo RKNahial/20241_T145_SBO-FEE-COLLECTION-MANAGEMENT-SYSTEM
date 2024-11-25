@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { Modal, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import Preloader from '../../components/Preloader';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import TreasurerSidebar from './TreasurerSidebar';
 import TreasurerNavbar from './TreasurerNavbar';
 import axios from 'axios';
@@ -301,7 +301,16 @@ const TreasurerStudents = () => {
                                     </div>
                                 )}
                                 {loading ? (
-                                    <Preloader open={loading} />
+                                <div style={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'center', 
+                                    alignItems: 'center',
+                                    minHeight: '300px' 
+                                }}>
+                                    <LoadingSpinner icon="user-graduate" />
+                                </div>
+                                ) : error ? (
+                                    <div className="alert alert-danger">{error}</div>
                                 ) : (
                                     <>
                                         {/* Actions and Filters */}
