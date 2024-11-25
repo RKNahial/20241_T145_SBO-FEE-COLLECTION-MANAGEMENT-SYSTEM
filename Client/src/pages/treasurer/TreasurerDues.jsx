@@ -19,6 +19,10 @@ const TreasurerDues = () => {
     const location = useLocation();
 
     const [token, setToken] = useState(localStorage.getItem('token'));
+    const [userPermissions, setUserPermissions] = useState({
+        toggleDuesPayment: 'denied',
+        duesPayment: 'denied'
+    });
 
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
@@ -48,15 +52,19 @@ const TreasurerDues = () => {
             <button
                 onClick={onToggle}
                 className={`btn btn-sm ${status === 'Paid' ? 'paid' : 'not-paid'}`}
+                disabled={userPermissions.toggleDuesPayment !== 'edit'}
                 style={{
-                    backgroundColor: status === 'Paid' ? '#FF8C00' : '#FFB84D',
-                    color: '#EAEAEA',
+                    backgroundColor: status === 'Paid' ? '#FF8C00' : '#FFD700', // Bold Orange for Paid, Light Orange for Unpaid
+                    color: '#FFFFFF',
                     border: 'none',
                     padding: '0.25rem 0.75rem',
                     borderRadius: '0.60rem',
                     fontSize: '0.75rem',
-                    fontWeight: 500,
-                    display: 'inline-block'
+                    fontWeight: 'bold', // Make the font bold
+                    display: 'inline-block',
+                    cursor: userPermissions.toggleDuesPayment === 'edit' ? 'pointer' : 'not-allowed',
+                    opacity: userPermissions.toggleDuesPayment === 'edit' ? 1 : 0.7,
+                    transition: 'all 0.2s ease-in-out'
                 }}
             >
                 {status}
@@ -94,6 +102,65 @@ const TreasurerDues = () => {
     };
 
     useEffect(() => {
+        const fetchUserPermissions = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const userDetails = JSON.parse(localStorage.getItem('userDetails'));
+
+                const response = await axios.get(
+                    `http://localhost:8000/api/permissions/${userDetails._id}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+
+                if (response.data && response.data.data) {
+                    setUserPermissions({
+                        toggleDuesPayment: response.data.data.toggleDuesPayment || 'denied',
+                        duesPayment: response.data.data.duesPayment || 'denied'
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching user permissions:', error);
+            }
+        };
+
+        fetchUserPermissions();
+    }, []);
+
+    const handleStatusToggle = async (userId, day, currentStatus) => {
+        if (userPermissions.toggleDuesPayment !== 'edit') {
+            setError('You do not have permission to toggle dues payment status');
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:8000/api/daily-dues/${userId}/toggle`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    month: selectedMonth,
+                    week: selectedWeek,
+                    day,
+                    newStatus: currentStatus === 'Paid' ? 'Not Paid' : 'Paid'
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to toggle dues status');
+            }
+
+            // Refresh the data after successful toggle
+            refreshData();
+        } catch (error) {
+            console.error('Error toggling dues status:', error);
+            setError('Failed to toggle dues status. Please try again.');
+        }
+    };
+
+    useEffect(() => {
         let isMounted = true;
         const fetchDues = async () => {
             try {
@@ -117,7 +184,12 @@ const TreasurerDues = () => {
                 const data = await response.json();
 
                 if (isMounted) {
-                    setOfficers(data);
+                    // Filter only active officers, treasurers, and governors
+                    const filteredData = data.filter(user => 
+                        !user.isArchived && 
+                        ['Officer', 'Treasurer', 'Governor'].includes(user.userType)
+                    );
+                    setOfficers(filteredData);
                     setError(null);
                 }
             } catch (err) {
@@ -156,59 +228,6 @@ const TreasurerDues = () => {
             refreshData();
         }
     }, [location.state]);
-
-    const handleStatusToggle = async (userId, day, currentStatus) => {
-        try {
-            const token = localStorage.getItem('token');
-            const newStatus = currentStatus === 'Paid' ? 'Not Paid' : 'Paid';
-
-            const response = await fetch(`http://localhost:8000/api/daily-dues/${userId}/toggle`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    month: selectedMonth,
-                    week: selectedWeek,
-                    day,
-                    newStatus
-                })
-            });
-
-            if (response.ok) {
-                await axios.post(
-                    'http://localhost:8000/api/history-logs/dues-toggle',
-                    {
-                        userId,
-                        duesDetails: {
-                            month: selectedMonth,
-                            week: selectedWeek,
-                            day,
-                            previousStatus: currentStatus,
-                            newStatus
-                        }
-                    },
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        }
-                    }
-                );
-
-                refreshData();
-            } else {
-                const errorData = await response.json();
-                setError(errorData.message || 'Failed to update payment status');
-            }
-        } catch (error) {
-            console.error('Error toggling payment status:', error);
-            setError('Failed to update payment status');
-        }
-    };
-
-
 
     if (error) {
         return <div>Error: {error}</div>;
@@ -312,22 +331,24 @@ const TreasurerDues = () => {
                                                     </td>
                                                 ))}
                                                 <td className="text-center">
-                                                    <button
-                                                        type="button"
-                                                        className="btn pay-button"
-                                                        onClick={() => navigate(`/treasurer/manage-fee/amount/${officer.userId}`,
-                                                            {
-                                                                state: {
-                                                                    officerName: officer.officerName,
-                                                                    userId: officer.userId,
-                                                                    userType: officer.userType
+                                                    {userPermissions.duesPayment === 'edit' && (
+                                                        <button
+                                                            type="button"
+                                                            className="btn pay-button"
+                                                            onClick={() => navigate(`/treasurer/manage-fee/amount/${officer.userId}`,
+                                                                {
+                                                                    state: {
+                                                                        officerName: officer.officerName,
+                                                                        userId: officer.userId,
+                                                                        userType: officer.userType
+                                                                    }
                                                                 }
-                                                            }
-                                                        )}
-                                                    >
-                                                        <i className="fas fa-coins me-1"></i>
-                                                        Pay in Amount
-                                                    </button>
+                                                            )}
+                                                        >
+                                                            <i className="fas fa-coins me-1"></i>
+                                                            Pay in Amount
+                                                        </button>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))}

@@ -1,13 +1,16 @@
 import { Helmet } from 'react-helmet';
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Modal, Button } from 'react-bootstrap';
 import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
 
 const TreasurerAddStud = () => {
-    // State to handle form data
+    const [permissions, setPermissions] = useState({});
+    const navigate = useNavigate();
+    const { id } = useParams(); // Get student ID from URL
+    const [isEditMode, setIsEditMode] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         studentId: '',
@@ -15,6 +18,107 @@ const TreasurerAddStud = () => {
         yearLevel: '',
         program: ''
     });
+
+    useEffect(() => {
+        const checkPermissions = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const userDetails = JSON.parse(localStorage.getItem('userDetails'));
+                const response = await axios.get(
+                    `http://localhost:8000/api/permissions/${userDetails._id}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+
+                const userPermissions = response.data.data || {};
+                setPermissions(userPermissions);
+
+                // Redirect if no permission
+                if ((isEditMode && userPermissions.updateStudent !== 'edit') ||
+                    (!isEditMode && userPermissions.addStudent !== 'edit')) {
+                    navigate('/unauthorized');
+                    return;
+                }
+            } catch (error) {
+                console.error('Error checking permissions:', error);
+                navigate('/unauthorized');
+            }
+        };
+
+        checkPermissions();
+    }, [navigate, isEditMode]);
+
+    // Effect to set edit mode and fetch student data
+    useEffect(() => {
+        // Check if there's an ID in the URL, which indicates edit mode
+        if (id) {
+            setIsEditMode(true);
+            
+            const fetchStudentData = async () => {
+                try {
+                    const token = localStorage.getItem('token');
+                    console.log('Fetching student data for ID:', id);
+                    console.log('Token:', token);
+
+                    // Use axios for more detailed error handling
+                    const response = await axios.get(
+                        `http://localhost:8000/api/update/students/${id}`, 
+                        { 
+                            headers: { 
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            } 
+                        }
+                    );
+
+                    console.log('Full response:', response);
+                    
+                    // Check for successful response
+                    if (response.status === 200 && response.data.success) {
+                        const studentData = response.data.data;
+                        console.log('Received student data:', studentData);
+
+                        // Update form data with fetched student details
+                        setFormData({
+                            name: studentData.name || '',
+                            studentId: studentData.studentId || '',
+                            institutionalEmail: studentData.institutionalEmail || '',
+                            yearLevel: studentData.yearLevel || '',
+                            program: studentData.program || ''
+                        });
+                    } else {
+                        console.error('Failed to fetch student data:', response);
+                        setMessage({
+                            type: 'error',
+                            text: 'Unable to retrieve student information'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error fetching student data:', error);
+                    
+                    // More detailed error logging
+                    if (error.response) {
+                        // The request was made and the server responded with a status code
+                        console.error('Error response data:', error.response.data);
+                        console.error('Error response status:', error.response.status);
+                        console.error('Error response headers:', error.response.headers);
+                    } else if (error.request) {
+                        // The request was made but no response was received
+                        console.error('Error request:', error.request);
+                    } else {
+                        // Something happened in setting up the request
+                        console.error('Error message:', error.message);
+                    }
+
+                    setMessage({
+                        type: 'error',
+                        text: error.response?.data?.message || 'Failed to fetch student data'
+                    });
+                }
+            };
+
+            fetchStudentData();
+        }
+    }, [id]);
 
     // State to handle messages
     const [message, setMessage] = useState(null);
@@ -28,11 +132,14 @@ const TreasurerAddStud = () => {
 
     // Form data change handler
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        console.log(`Updating ${name} with value:`, value);
+        setFormData(prev => {
+            const newData = { ...prev, [name]: value };
+            console.log('New form data:', newData);
+            return newData;
+        });
     };
-
-    // Initialize navigate
-    const navigate = useNavigate();
 
     // Form submission handler
     const handleSubmit = (e) => {
@@ -54,35 +161,57 @@ const TreasurerAddStud = () => {
                 return;
             }
 
-            const userDetails = JSON.parse(userDetailsStr);
+            // Validate form data
+            if (!formData.name || !formData.studentId || !formData.institutionalEmail || !formData.yearLevel || !formData.program) {
+                setMessage({
+                    type: 'error',
+                    text: 'All fields are required'
+                });
+                return;
+            }
 
-            const response = await axios.post(
-                'http://localhost:8000/api/add/students',
-                {
+            const userDetails = JSON.parse(userDetailsStr);
+            console.log('Submitting form data:', formData);
+            console.log('User details:', userDetails);
+
+            const endpoint = isEditMode
+                ? `http://localhost:8000/api/update/students/${id}`
+                : 'http://localhost:8000/api/add/students';
+
+            const method = isEditMode ? 'PUT' : 'POST';
+
+            const response = await axios({
+                method,
+                url: endpoint,
+                data: {
                     ...formData,
                     userName: userDetails.name || userDetails.email.split('@')[0],
                     userEmail: userDetails.email,
                     userPosition: userDetails.position,
                     userId: userDetails._id
                 },
-                {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
-            );
+            });
 
-            setMessage({ type: 'success', text: 'Student added successfully!' });
+            console.log('Server response:', response.data);
+
+            setMessage({
+                type: 'success',
+                text: isEditMode ? 'Student updated successfully!' : 'Student added successfully!'
+            });
+
             setTimeout(() => {
                 navigate('/treasurer/students');
             }, 2000);
 
         } catch (error) {
-            console.error('Error adding student:', error);
+            console.error('Error:', error);
             setMessage({
                 type: 'error',
-                text: error.response?.data?.message || 'Failed to add student'
+                text: error.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'add'} student`
             });
         }
     };
@@ -91,7 +220,7 @@ const TreasurerAddStud = () => {
     return (
         <div className="sb-nav-fixed">
             <Helmet>
-                <title>Treasurer | Add Student</title>
+                <title>Treasurer | {isEditMode ? 'Edit' : 'Add'} Student</title>
             </Helmet>
             <TreasurerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
@@ -111,7 +240,8 @@ const TreasurerAddStud = () => {
                             <div className="col-md-6">
                                 <div className="card mb-4">
                                     <div className="card-header">
-                                        <i className="far fa-plus me-2"></i> <strong>Add New Student</strong>
+                                        <i className={`far fa-${isEditMode ? 'edit' : 'plus'} me-2`}></i>
+                                        <strong>{isEditMode ? 'Edit Student' : 'Add New Student'}</strong>
                                     </div>
                                     <div className="card-body">
                                         {message && (
@@ -135,7 +265,7 @@ const TreasurerAddStud = () => {
                                             <div className="mb-3">
                                                 <label className="mb-1">Student ID</label>
                                                 <input
-                                                    type="number"
+                                                    type="text"
                                                     name="studentId"
                                                     value={formData.studentId}
                                                     onChange={handleChange}
@@ -194,7 +324,8 @@ const TreasurerAddStud = () => {
                                                     type="submit"
                                                     className="btn system-button"
                                                 >
-                                                    <i className="far fa-plus me-1"></i> Add
+                                                    <i className={`far fa-${isEditMode ? 'edit' : 'plus'} me-1`}></i>
+                                                    {isEditMode ? 'Update' : 'Add'}
                                                 </button>
                                             </div>
                                         </form>

@@ -37,6 +37,12 @@ const TreasurerReports = () => {
     const [error, setError] = useState(null);
     const [selectedMonth, setSelectedMonth] = useState('');
 
+    // NEW: Add state for user permissions
+    const [userPermissions, setUserPermissions] = useState({
+        updateStudent: 'denied',
+        archiveStudent: 'denied'
+    });
+
     useEffect(() => {
         const fetchReportData = async () => {
             setLoading(true);
@@ -70,6 +76,56 @@ const TreasurerReports = () => {
 
         fetchReportData();
     }, [reportType]);
+
+    // NEW: Fetch user permissions
+    useEffect(() => {
+        const fetchUserPermissions = async () => {
+            try {
+                const userDetailsString = localStorage.getItem('userDetails');
+                if (!userDetailsString) {
+                    console.warn('No user details found in localStorage');
+                    return;
+                }
+
+                const userDetails = JSON.parse(userDetailsString);
+                if (!userDetails._id) {
+                    console.warn('No user ID found in user details');
+                    return;
+                }
+
+                const token = localStorage.getItem('token');
+                const response = await axios.get(
+                    `http://localhost:8000/api/permissions/${userDetails._id}`,
+                    {
+                        headers: {
+                            Authorization: token ? `Bearer ${token}` : undefined
+                        }
+                    }
+                );
+
+                if (response.data && response.data.data) {
+                    setUserPermissions({
+                        updateStudent: response.data.data.updateStudent || 'denied',
+                        archiveStudent: response.data.data.archiveStudent || 'denied'
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching user permissions:', error);
+                // Set default permissions on error
+                setUserPermissions({
+                    updateStudent: 'denied',
+                    archiveStudent: 'denied'
+                });
+            }
+        };
+
+        fetchUserPermissions();
+    }, []);
+
+    // NEW: Helper method to check if a specific action is allowed
+    const isActionAllowed = (action) => {
+        return userPermissions[action] === 'view' || userPermissions[action] === 'edit';
+    };
 
     const chartData = {
         labels: reportType === 'monthly'

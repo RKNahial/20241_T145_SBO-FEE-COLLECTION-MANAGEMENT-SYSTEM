@@ -10,6 +10,7 @@ import axios from 'axios';
 import emailjs from '@emailjs/browser';
 import '../../styles/PaymentTabs.css';
 import { usePayment } from '../../context/PaymentContext';
+import Unauthorized from '../../components/Unauthorized';
 
 const TreasurerFee = () => {
     // NAV AND SIDEBAR
@@ -101,6 +102,12 @@ const TreasurerFee = () => {
     const { triggerPaymentUpdate } = usePayment();
 
     const handleSubmit = async (formData) => {
+        // Check payment update permission
+        if (userPermissions.paymentUpdate !== 'edit') {
+            setError('You do not have permission to update payments');
+            return;
+        }
+
         try {
             setStudents(prevStudents =>
                 prevStudents.map(student =>
@@ -371,6 +378,164 @@ const TreasurerFee = () => {
         return counts;
     };
 
+    // NEW: Add state for user permissions
+    const [userPermissions, setUserPermissions] = useState({
+        paymentUpdate: 'denied',
+        emailNotifications: 'denied'
+    });
+    const [isUnauthorized, setIsUnauthorized] = useState(false);
+
+    // NEW: Fetch user permissions
+    useEffect(() => {
+        const fetchUserPermissions = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const userDetails = JSON.parse(localStorage.getItem('userDetails'));
+                
+                const response = await axios.get(
+                    `http://localhost:8000/api/permissions/${userDetails._id}`, 
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+
+                if (response.data && response.data.data) {
+                    const permissions = response.data.data;
+                    
+                    setUserPermissions({
+                        paymentUpdate: permissions.paymentUpdate || 'denied',
+                        emailNotifications: permissions.emailNotifications || 'denied'
+                    });
+
+                    // Check if user has at least view permission
+                    if (permissions.paymentUpdate !== 'view' && 
+                        permissions.paymentUpdate !== 'edit') {
+                        setIsUnauthorized(true);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching user permissions:', error);
+                setIsUnauthorized(true);
+            }
+        };
+
+        fetchUserPermissions();
+    }, []);
+
+    // If unauthorized, render the Unauthorized component
+    if (isUnauthorized) {
+        return <Unauthorized />;
+    }
+
+    // Modify email sending logic
+    const sendPaymentReminderEmail = async (student) => {
+        // Check email notification permission
+        if (userPermissions.emailNotifications !== 'edit') {
+            setError('You do not have permission to send email notifications');
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(
+                `http://localhost:8000/api/payment-fee/details/${student._id}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
+
+            if (response.data.success) {
+                const paymentDetails = response.data.paymentFee;
+                const templateParams = {
+                    from_name: "COT-SBO COLLECTION FEE MANAGEMENT SYSTEM",
+                    to_name: student.name,
+                    to_email: student.institutionalEmail,
+                    payment_category: paymentDetails.paymentCategory || 'N/A',
+                    total_price: paymentDetails.totalPrice?.toString() || '0.00',
+                    amount_paid: paymentDetails.amountPaid?.toString() || '0.00',
+                    payment_status: student.paymentstatus,
+                    transaction_history: paymentDetails.transactions?.map(t =>
+                        `• Amount: ₱${t.amount.toFixed(2)}\n  Date: ${t.formattedDate}\n  Status: ${t.previousStatus || 'New'} → ${t.newStatus}`
+                    ).join('\n\n') || 'No transaction history'
+                };
+
+                // Send email first
+                const emailResponse = await emailjs.send(
+                    "service_bni941i",
+                    "template_x5s32eh",
+                    templateParams,
+                    "Nqbgnjhv9ss88DOrk" // Your EmailJS public key
+                );
+
+                if (emailResponse.status === 200) {
+                    // Log the successful email sending
+                    await axios.post(
+                        'http://localhost:8000/api/history-logs/email',
+                        {
+                            studentId: student._id,
+                            studentName: student.name,
+                            studentEmail: student.institutionalEmail,
+                            paymentDetails: {
+                                category: paymentDetails.paymentCategory,
+                                status: student.paymentstatus,
+                                totalPrice: paymentDetails.totalPrice,
+                                amountPaid: paymentDetails.amountPaid
+                            }
+                        },
+                        {
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            }
+                        }
+                    );
+
+                    setSuccessMessage(`Payment details sent to ${student.name}'s email successfully!`);
+                    setTimeout(() => setSuccessMessage(''), 3000);
+                }
+            }
+        } catch (error) {
+            console.error('Error sending email:', error);
+            setError('Failed to send email. Please try again.');
+        }
+    };
+
+    // Modify render logic for action buttons
+    const renderActionButtons = (student) => {
+        return (
+            <div className="btn-group">
+                {/* View button always visible for view and edit permissions */}
+                <button
+                    className="btn btn-view btn-sm me-2"
+                    onClick={() => handleViewClick(student)}
+                    disabled={!selectedCategory}
+                    title="View Details"
+                >
+                    <i className="fas fa-eye"></i>
+                </button>
+
+                {userPermissions.paymentUpdate === 'edit' && (
+                    <button
+                        className="btn btn-edit btn-sm me-2"
+                        onClick={() => handleEditClick(student)}
+                        title="Update Payment"
+                    >
+                        <i className="fas fa-edit"></i>
+                    </button>
+                )}
+                {userPermissions.emailNotifications === 'edit' && (
+                    <button
+                        className="btn btn-email btn-sm"
+                        onClick={() => sendPaymentReminderEmail(student)}
+                        title="Send Payment Reminder"
+                    >
+                        <i className="fas fa-envelope"></i>
+                    </button>
+                )}
+            </div>
+        );
+    };
+
     return (
         <div className="sb-nav-fixed">
             <Helmet>
@@ -512,27 +677,7 @@ const TreasurerFee = () => {
                                                                 />
                                                             </td>
                                                             <td>
-                                                                <button
-                                                                    className="btn btn-edit btn-sm"
-                                                                    onClick={() => handleEditClick(student)}
-                                                                    disabled={!selectedCategory}
-                                                                >
-                                                                    <i className="fas fa-edit btn-edit-mx"></i>
-                                                                </button>
-                                                                <button
-                                                                    className="btn btn-view mx-2"
-                                                                    onClick={() => handleViewClick(student)}
-                                                                    disabled={!selectedCategory}
-                                                                >
-                                                                    <i className="fas fa-eye"></i>
-                                                                </button>
-                                                                <button
-                                                                    className="btn btn-email"
-                                                                    onClick={() => handleEmailClick(student)}
-                                                                    disabled={!selectedCategory || getStudentPaymentStatus(student._id) === 'Not Paid'}
-                                                                >
-                                                                    <i className="fa-regular fa-envelope fa-md"></i>
-                                                                </button>
+                                                                {renderActionButtons(student)}
                                                             </td>
                                                         </tr>
                                                     ))}
@@ -603,7 +748,6 @@ const TreasurerFee = () => {
                     isOpen={isViewModalOpen}
                     onClose={() => setIsViewModalOpen(false)}
                     student={viewedStudent}
-                    categoryId={selectedCategory}
                 />
             )}
         </div>

@@ -15,7 +15,6 @@ const TreasurerEditStud = () => {
     const [successMessage, setSuccessMessage] = useState("");
     const [showModal, setShowModal] = useState(false);
 
-
     // Get the student data passed from the previous page
     const studentData = location.state?.studentData;
 
@@ -28,64 +27,216 @@ const TreasurerEditStud = () => {
         program: ''
     });
 
-    // Set initial form data when component mounts
-    useEffect(() => {
-        if (studentData) {
-            setFormData({
-                studentId: studentData.studentId || '',
-                name: studentData.name || '',
-                institutionalEmail: studentData.institutionalEmail || '',
-                yearLevel: studentData.yearLevel || '',
-                program: studentData.program || ''
-            });
-        }
-    }, [studentData]);
+    // NEW: Add state for user permissions
+    const [userPermissions, setUserPermissions] = useState({
+        updateStudent: 'denied'
+    });
 
     useEffect(() => {
+        let mounted = true;
         let lockTimer;
 
         const acquireLock = async () => {
             try {
                 const token = localStorage.getItem('token');
+                if (!token) {
+                    navigate('/login');
+                    return;
+                }
+
                 const response = await axios.post(
-                    `http://localhost:8000/api/students/${id}/acquire-lock/EDIT`,
-                    {},
+                    `http://localhost:8000/api/students/${id}/acquire-lock/Edit`,
+                    {}, // Empty body
                     {
-                        headers: { 'Authorization': `Bearer ${token}` }
+                        headers: { 
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
                     }
                 );
 
+                if (!mounted) return;
+
                 if (!response.data.success) {
-                    setError(response.data.message);
-                    navigate('/treasurer/students');
-                } else {
-                    // Set timer to show warning when lock is about to expire
-                    lockTimer = setTimeout(() => {
-                        setError('Your edit session will expire in 5 seconds. Please save your changes.');
-                    }, 15000); // Show warning 5 seconds before expiration
+                    // More detailed error handling
+                    const errorMessage = response.data.message || 'Unable to acquire lock';
+                    setError(errorMessage);
+                    
+                    // If lock is already held by another user, navigate away
+                    if (errorMessage.includes('currently being edited')) {
+                        setTimeout(() => {
+                            navigate('/treasurer/students');
+                        }, 2000);
+                    }
+                    return;
                 }
+
+                // Set timer to show warning when lock is about to expire
+                lockTimer = setTimeout(() => {
+                    if (mounted) {
+                        setError('Your edit session will expire in 5 seconds. Please save your changes.');
+                    }
+                }, 55000); // Show warning 5 seconds before expiration
             } catch (error) {
-                setError('Unable to edit student at this time');
-                navigate('/treasurer/students');
+                if (!mounted) return;
+
+                console.error('Lock acquisition error:', error);
+                let errorMessage = 'Unable to edit student at this time';
+
+                if (error.response) {
+                    switch (error.response.status) {
+                        case 401:
+                            errorMessage = 'Your session has expired. Please log in again.';
+                            localStorage.removeItem('token');
+                            navigate('/login');
+                            break;
+                        case 404:
+                            errorMessage = 'Student record not found.';
+                            break;
+                        case 400:
+                            errorMessage = error.response.data.message || 'Invalid request. Please try again.';
+                            break;
+                        case 500:
+                            errorMessage = 'Server error while acquiring lock. Please try again later.';
+                            break;
+                        default:
+                            errorMessage = error.response.data.message || 'Unable to edit student at this time';
+                    }
+                } else if (error.request) {
+                    // Request was made but no response received
+                    errorMessage = 'No response from server. Please check your connection.';
+                } else {
+                    // Something happened in setting up the request
+                    errorMessage = 'Error setting up the request. Please try again.';
+                }
+
+                setError(errorMessage);
+                setTimeout(() => {
+                    navigate('/treasurer/students');
+                }, 2000);
+            }
+        };
+
+        const releaseLock = async () => {
+            if (!mounted) return;
+            
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                await axios.delete(
+                    `http://localhost:8000/api/students/${id}/release-lock/Edit`,
+                    {
+                        headers: { 
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+            } catch (error) {
+                console.error('Error releasing lock:', error);
+                // Don't show error to user since they're likely navigating away
             }
         };
 
         acquireLock();
 
         return () => {
+            mounted = false;
             if (lockTimer) clearTimeout(lockTimer);
-            const releaseLock = async () => {
-                const token = localStorage.getItem('token');
-                await axios.delete(
-                    `http://localhost:8000/api/students/${id}/release-lock/EDIT`,
-                    {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    }
-                );
-            };
             releaseLock();
         };
     }, [id, navigate]);
+
+    // Set initial form data when component mounts
+    useEffect(() => {
+        const fetchStudentData = async () => {
+            try {
+                // First, check if student data was passed through navigation state
+                if (studentData) {
+                    console.log('Using student data from navigation state:', studentData);
+                    setFormData({
+                        studentId: studentData.studentId || '',
+                        name: studentData.name || '',
+                        institutionalEmail: studentData.institutionalEmail || '',
+                        yearLevel: studentData.yearLevel || '',
+                        program: studentData.program || ''
+                    });
+                    return;
+                }
+
+                // If no student data in state, fetch from API
+                const token = localStorage.getItem('token');
+                console.log('Fetching student data for ID:', id);
+                
+                const response = await axios.get(
+                    `http://localhost:8000/api/update/students/${id}`,
+                    { 
+                        headers: { 
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        } 
+                    }
+                );
+
+                console.log('API Response:', response.data);
+
+                if (response.data.success) {
+                    const apiStudentData = response.data.data;
+                    console.log('Setting form data from API:', apiStudentData);
+                    
+                    setFormData({
+                        studentId: apiStudentData.studentId || '',
+                        name: apiStudentData.name || '',
+                        institutionalEmail: apiStudentData.institutionalEmail || '',
+                        yearLevel: apiStudentData.yearLevel || '',
+                        program: apiStudentData.program || ''
+                    });
+                } else {
+                    setError('Failed to fetch student data');
+                }
+            } catch (error) {
+                console.error('Error fetching student data:', error);
+                setError('Unable to retrieve student information');
+            }
+        };
+
+        fetchStudentData();
+    }, [id, studentData]);
+
+    // NEW: Fetch user permissions
+    useEffect(() => {
+        const fetchUserPermissions = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const userDetails = JSON.parse(localStorage.getItem('userDetails'));
+                
+                const response = await axios.get(
+                    `http://localhost:8000/api/permissions/${userDetails._id}`, 
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+
+                if (response.data && response.data.data) {
+                    const updatePermission = response.data.data.updateStudent || 'denied';
+                    setUserPermissions({
+                        updateStudent: updatePermission
+                    });
+
+                    // Instead of redirecting, set an error message
+                    if (updatePermission !== 'edit') {
+                        setError('You do not have permission to edit students');
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching user permissions:', error);
+                setError('Error checking permissions. Please try again.');
+            }
+        };
+
+        fetchUserPermissions();
+    }, [navigate]);
+
+   
 
     const clearError = () => {
         setTimeout(() => {
@@ -93,8 +244,16 @@ const TreasurerEditStud = () => {
         }, 3000);
     };
 
+    // Modify handleSubmit to check permissions
     const handleSubmit = (e) => {
         e.preventDefault();
+        
+        // Check if user has edit permission
+        if (userPermissions.updateStudent !== 'edit') {
+            setError('You do not have permission to edit students');
+            return;
+        }
+
         try {
             // Validate all fields
             if (!formData.studentId || !formData.name || !formData.yearLevel ||
@@ -132,35 +291,35 @@ const TreasurerEditStud = () => {
 
             const userDetails = JSON.parse(userDetailsStr);
 
-            const response = await fetch(`http://localhost:8000/api/students/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
+            const response = await axios.put(
+                `http://localhost:8000/api/update/students/${id}`,
+                {
                     ...formData,
                     userName: userDetails.name || userDetails.email.split('@')[0],
                     userEmail: userDetails.email,
                     userPosition: userDetails.position,
                     userId: userDetails._id,
-                    previousData: studentData // Include previous data for logging changes
-                })
-            });
+                    previousData: studentData
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to update student');
+            if (response.data.success) {
+                setSuccessMessage('Student updated successfully!');
+                setShowModal(false);
+                setTimeout(() => {
+                    navigate('/treasurer/students', {
+                        state: { updateSuccess: true }
+                    });
+                }, 2000);
+            } else {
+                throw new Error(response.data.message || 'Failed to update student');
             }
-
-            setSuccessMessage('Student updated successfully!');
-            setShowModal(false);
-            setTimeout(() => {
-                navigate('/treasurer/students', {
-                    state: { updateSuccess: true }
-                });
-            }, 2000);
         } catch (err) {
             setError(err.message || 'Failed to update student. Please try again.');
             clearError();

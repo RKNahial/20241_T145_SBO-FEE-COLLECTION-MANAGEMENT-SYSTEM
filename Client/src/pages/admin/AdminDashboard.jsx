@@ -1,6 +1,6 @@
 // src/pages/admin/AdminDashboard.jsx
 import { Helmet } from 'react-helmet';
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import AdminNavbar from "./AdminNavbar";
 import AdminSidebar from "./AdminSidebar";
 import axios from 'axios';
@@ -26,6 +26,8 @@ const AdminDashboard = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
+    const [selectedFile, setSelectedFile] = useState(null);
+    const fileInputRef = useRef(null);
 
     const toggleSidebar = useCallback(() => {
         setIsCollapsed(prev => !prev);
@@ -73,10 +75,26 @@ const AdminDashboard = () => {
         }
     };
 
+    // Function to trigger file input click
+    const handleUploadClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    // Separate function to handle file selection
+    const handleFileSelect = (event) => {
+        if (event.target.files && event.target.files.length > 0) {
+            const file = event.target.files[0];
+            setSelectedFile(file);
+            handleFileUpload(file); // Automatically upload when file is selected
+        }
+    };
+
     // Handle file upload
-    const handleFileUpload = async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
+    const handleFileUpload = async (file) => {
+        if (!file) {
+            console.error('No file selected');
+            return;
+        }
 
         const formData = new FormData();
         formData.append('file', file);
@@ -291,21 +309,21 @@ const AdminDashboard = () => {
                                             </h5>
                                             <button
                                                 className="btn btn-primary btn-sm"
-                                                onClick={handleFileUpload}
+                                                onClick={handleUploadClick}
                                                 disabled={loading}
                                             >
                                                 <i className="fas fa-upload me-2"></i>
-                                                Upload
+                                                Upload File
                                             </button>
                                         </div>
                                     </div>
                                     <div className="card-body p-0">
                                         <div className="mb-3">
-                                            <label className="form-label">Choose File</label>
                                             <input
+                                                ref={fileInputRef}
                                                 type="file"
-                                                className="form-control"
-                                                onChange={handleFileUpload}
+                                                style={{ display: 'none' }}
+                                                onChange={handleFileSelect}
                                                 disabled={loading}
                                             />
                                         </div>

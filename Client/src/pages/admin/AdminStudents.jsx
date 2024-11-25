@@ -4,9 +4,10 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import AdminSidebar from "./AdminSidebar";
 import AdminNavbar from "./AdminNavbar";
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import axios from 'axios';
 import LoadingSpinner from '../../components/LoadingSpinner';
+
 const AdminStudents = () => {
     const navigate = useNavigate();
 
@@ -27,6 +28,12 @@ const AdminStudents = () => {
     const [showModal, setShowModal] = useState(false);
     const [modalAction, setModalAction] = useState({ type: '', student: null });
     const [successMessage, setSuccessMessage] = useState("");
+
+    // Utility function to truncate text
+    const truncateText = (text, maxLength = 25) => {
+        if (text.length <= maxLength) return text;
+        return text.substr(0, maxLength) + '...';
+    };
 
     // Fetch students from the server
     const fetchStudents = async () => {
@@ -348,9 +355,48 @@ const AdminStudents = () => {
                                                             </td>
                                                             <td>
                                                                 <div className="d-flex align-items-center justify-content-center">
-                                                                    <div className="text-center">
-                                                                        <h6 className="mb-0">{student.name}</h6>
-                                                                        <small className="text-muted">{student.institutionalEmail}</small>
+                                                                    <div className="text-center" style={{ maxWidth: '250px' }}>
+                                                                        <OverlayTrigger
+                                                                            placement="top"
+                                                                            overlay={
+                                                                                <Tooltip id={`tooltip-name-${student._id}`}>
+                                                                                    {student.name}
+                                                                                </Tooltip>
+                                                                            }
+                                                                        >
+                                                                            <h6 
+                                                                                className="mb-0" 
+                                                                                style={{
+                                                                                    maxWidth: '100%',
+                                                                                    whiteSpace: 'nowrap',
+                                                                                    overflow: 'hidden',
+                                                                                    textOverflow: 'ellipsis'
+                                                                                }}
+                                                                            >
+                                                                                {truncateText(student.name, 30)}
+                                                                            </h6>
+                                                                        </OverlayTrigger>
+                                                                        <OverlayTrigger
+                                                                            placement="top"
+                                                                            overlay={
+                                                                                <Tooltip id={`tooltip-email-${student._id}`}>
+                                                                                    {student.institutionalEmail}
+                                                                                </Tooltip>
+                                                                            }
+                                                                        >
+                                                                            <small 
+                                                                                className="text-muted" 
+                                                                                style={{
+                                                                                    maxWidth: '100%',
+                                                                                    whiteSpace: 'nowrap',
+                                                                                    overflow: 'hidden',
+                                                                                    textOverflow: 'ellipsis',
+                                                                                    display: 'block'
+                                                                                }}
+                                                                            >
+                                                                                {truncateText(student.institutionalEmail, 35)}
+                                                                            </small>
+                                                                        </OverlayTrigger>
                                                                     </div>
                                                                 </div>
                                                             </td>

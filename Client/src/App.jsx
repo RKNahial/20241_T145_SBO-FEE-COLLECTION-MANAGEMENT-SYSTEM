@@ -7,7 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'font-awesome/css/font-awesome.min.css';
 
 // IMPORT CSS
-import './App.css';
+
 import './assets/css/nav-sidebar.css';
 import './assets/css/button.css';
 import './assets/css/table.css';
@@ -69,6 +69,8 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { PaymentProvider } from './context/PaymentContext';
 import ManageControls from './pages/admin/ManageControls';
+import Unauthorized from './components/Unauthorized';
+import PermissionWrapper from './components/PermissionWrapper';
 
 // FOR CUSTOMIZED DOCUMENT TITLE
 const App = () => {
@@ -112,11 +114,15 @@ const App = () => {
                                     <Route path="manage-fee" element={<TreasurerFee />} />
                                     <Route path="manage-fee/amount/:id" element={<TreasurerFeeAmount />} />
                                     <Route path="manage-fee/payment-category" element={<TreasurerFeeCategory />} />
-                                    <Route path="manage-fee/payment-category/add-new" element={<TreasurerAddCategory />} />
+                                    <Route path="manage-fee/payment-category/add-new" element={<PermissionWrapper requiredPermission="addStudent" permissionLevel="edit">
+                                        <TreasurerAddCategory />
+                                    </PermissionWrapper>} />
                                     <Route path="manage-fee/payment-category/edit/:id" element={<TreasurerEditCategory />} />
                                     <Route path="students" element={<TreasurerStudents />} />
                                     <Route path="students/archived" element={<TreasurerArchivedStud />} />
-                                    <Route path="students/add-new" element={<TreasurerAddStud />} />
+                                    <Route path="students/add-new" element={<PermissionWrapper requiredPermission="addStudent" permissionLevel="edit">
+                                        <TreasurerAddStud />
+                                    </PermissionWrapper>} />
                                     <Route path="students/edit/:id" element={<TreasurerEditStud />} />
                                     <Route path="reports" element={<TreasurerReports />} />
                                     <Route path="daily-dues" element={<TreasurerDues />} />
@@ -158,6 +164,8 @@ const App = () => {
                                 </Routes>
                             </ProtectedRoute>
                         } />
+
+                        <Route path="/unauthorized" element={<Unauthorized />} />
 
                         <Route path="*" element={<Navigate to="/sbo-fee-collection" replace />} />
                     </Routes>

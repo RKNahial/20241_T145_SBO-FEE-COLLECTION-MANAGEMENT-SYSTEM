@@ -122,19 +122,67 @@ exports.checkLock = async (req, res) => {
 
 exports.acquireLock = async (req, res) => {
     try {
-        const { id, lockType } = req.params;
+        const { id } = req.params;
+        // Extract lockType from the URL path
+        const lockType = req.path.split('/').pop();
+        
+        // Validate user authentication
+        if (!req.user || !req.user._id || !req.user.name) {
+            return res.status(401).json({
+                success: false,
+                message: 'User authentication required'
+            });
+        }
+
+        // Validate student exists
+        try {
+            const student = await Student.findById(id);
+            if (!student) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Student not found'
+                });
+            }
+        } catch (error) {
+            if (error.name === 'CastError') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid student ID format'
+                });
+            }
+            throw error;
+        }
+
         const lockResult = await resourceLockService.acquireLock(
             id,
             req.user._id,
             req.user.name,
             lockType
         );
+
         res.json(lockResult);
     } catch (error) {
-        console.error('Error acquiring lock:', error);
+        console.error('Error in acquireLock controller:', error);
+        
+        // Handle specific error types
+        if (error.message.includes('Invalid resource ID') ||
+            error.message.includes('Invalid user ID')) {
+            return res.status(400).json({
+                success: false,
+                message: error.message
+            });
+        }
+        
+        if (error.message.includes('Invalid lock type')) {
+            return res.status(400).json({
+                success: false,
+                message: error.message
+            });
+        }
+
         res.status(500).json({ 
             success: false, 
-            message: 'Error acquiring lock' 
+            message: 'Internal server error while acquiring lock'
         });
     }
 };
@@ -143,24 +191,33 @@ exports.releaseLock = async (req, res) => {
     try {
         const { id, lockType } = req.params;
         
-        if (!['EDIT', 'ARCHIVE'].includes(lockType)) {
-            return res.status(400).json({
+        if (!req.user || !req.user._id) {
+            return res.status(401).json({
                 success: false,
-                message: 'Invalid lock type'
+                message: 'User authentication required'
             });
         }
 
-        await resourceLockService.releaseLock(id, req.user._id, lockType);
-        
-        res.json({ 
-            success: true,
-            message: `${lockType.toLowerCase()} lock released successfully`
-        });
+        const result = await resourceLockService.releaseLock(
+            id,
+            req.user._id,
+            lockType
+        );
+
+        res.json(result);
     } catch (error) {
-        console.error('Error releasing lock:', error);
+        console.error('Error in releaseLock controller:', error);
+        
+        if (error.message.includes('Invalid')) {
+            return res.status(400).json({
+                success: false,
+                message: error.message
+            });
+        }
+
         res.status(500).json({ 
             success: false, 
-            message: 'Error releasing lock' 
+            message: 'Internal server error while releasing lock'
         });
     }
 };
@@ -168,16 +225,40 @@ exports.releaseLock = async (req, res) => {
 exports.getStudentById = async (req, res) => {
     try {
         const { id } = req.params;
-        const student = await Student.findById(id);
+        console.log('Received request to fetch student with ID:', id);
+        
+        // Use findById with lean() for better performance and to ensure plain object
+        const student = await Student.findById(id).lean();
+        
+        console.log('Found student:', student);
         
         if (!student) {
+            console.log('Student not found for ID:', id);
             return res.status(404).json({ 
                 success: false, 
                 message: 'Student not found' 
             });
         }
 
-        res.json(student);
+        // Explicitly map the fields to ensure only desired data is returned
+        const studentData = {
+            _id: student._id,
+            name: student.name,
+            studentId: student.studentId,
+            institutionalEmail: student.institutionalEmail,
+            yearLevel: student.yearLevel,
+            program: student.program,
+            status: student.status,
+            isArchived: student.isArchived,
+            paymentstatus: student.paymentstatus
+        };
+
+        console.log('Sending student data:', studentData);
+
+        res.json({
+            success: true,
+            data: studentData
+        });
     } catch (error) {
         console.error('Error fetching student:', error);
         res.status(500).json({ 

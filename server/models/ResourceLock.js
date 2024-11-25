@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const resourceLockSchema = new mongoose.Schema({
+const ResourceLockSchema = new mongoose.Schema({
     resourceId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
@@ -16,14 +16,19 @@ const resourceLockSchema = new mongoose.Schema({
     },
     lockType: {
         type: String,
-        enum: ['EDIT', 'ARCHIVE'],
+        enum: ['Edit', 'View', 'Delete'],
         required: true
     },
     lockedAt: {
         type: Date,
-        default: Date.now,
-        expires: 20 // Lock expires after 20 seconds
+        default: Date.now
     }
 });
 
-module.exports = mongoose.model('ResourceLock', resourceLockSchema);
+// Create a TTL index that expires documents after 60 seconds
+ResourceLockSchema.index({ lockedAt: 1 }, { expireAfterSeconds: 60 });
+
+// Add index for faster queries
+ResourceLockSchema.index({ resourceId: 1, lockType: 1, lockedAt: 1 });
+
+module.exports = mongoose.model('ResourceLock', ResourceLockSchema);

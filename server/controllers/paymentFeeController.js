@@ -273,34 +273,34 @@ exports.getPaymentReports = async (req, res) => {
         ];
 
         const reports = await Promise.all(months.map(async (month, monthIndex) => {
-            // Get all weeks in the month
-            const weeksInMonth = await Promise.all([1, 2, 3, 4].map(async (week) => {
-                // Calculate start and end dates for each week
-                const startDate = new Date(currentYear, monthIndex, (week - 1) * 7 + 1);
-                const endDate = new Date(currentYear, monthIndex, week * 7);
-
-                const total = await PaymentFee.aggregate([
-                    {
-                        $match: {
-                            updatedAt: { 
-                                $gte: startDate, 
-                                $lte: endDate 
-                            },
-                            status: { $in: ['Partially Paid', 'Fully Paid'] }
-                        }
-                    },
-                    {
-                        $group: {
-                            _id: null,
-                            total: { $sum: '$amountPaid' }
-                        }
+            // Get all payments for the month
+            const startOfMonth = new Date(currentYear, monthIndex, 1);
+            const endOfMonth = new Date(currentYear, monthIndex + 1, 0);
+            
+            // Get all payments for the month
+            const monthlyPayments = await PaymentFee.aggregate([
+                {
+                    $match: {
+                        paymentDate: { 
+                            $gte: startOfMonth, 
+                            $lte: endOfMonth 
+                        },
+                        status: { $in: ['Partially Paid', 'Fully Paid'] }
                     }
-                ]);
+                }
+            ]);
 
-                return {
-                    week: `Week ${week}`,
-                    total: total.length > 0 ? total[0].total : 0
-                };
+            // Calculate weeks based on actual payment dates
+            const weeklyTotals = Array(4).fill(0);
+            monthlyPayments.forEach(payment => {
+                const dayOfMonth = new Date(payment.paymentDate).getDate();
+                const weekIndex = Math.min(Math.floor((dayOfMonth - 1) / 7), 3);
+                weeklyTotals[weekIndex] += payment.amountPaid || 0;
+            });
+
+            const weeksInMonth = weeklyTotals.map((total, index) => ({
+                week: `Week ${index + 1}`,
+                total: total
             }));
 
             return {
@@ -314,6 +314,7 @@ exports.getPaymentReports = async (req, res) => {
             data: reports
         });
     } catch (error) {
+        console.error('Error generating payment reports:', error);
         res.status(500).json({
             success: false,
             message: 'Error generating payment reports',
@@ -446,4 +447,3 @@ exports.getPaymentsByProgramTotal = async (req, res) => {
 function getMonthName(month) {
     return new Date(0, parseInt(month) - 1).toLocaleString('en-US', { month: 'long' });
 }
-

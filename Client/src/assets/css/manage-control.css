@@ -89,3 +89,137 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+.role-card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transform: translateY(0);
+    transition: all 0.3s ease;
+}
+
+.role-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.role-card:not(.active):hover {
+    background-color: #f8f9fc !important;
+}
+
+.role-card .icon-circle {
+    transition: all 0.3s ease;
+}
+
+.role-card:hover .icon-circle {
+    transform: scale(1.1);
+}
+
+.search-box input {
+    border-radius: 0.5rem;
+    border: 1px solid #e3e6f0;
+    transition: all 0.3s ease;
+}
+
+.search-box input:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+}
+
+.search-box .fas {
+    transition: all 0.3s ease;
+}
+
+.search-box input:focus + .fas {
+    color: #4e73df !important;
+}
+
+/* Table styles */
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    border-top: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    color: #858796;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.table tbody td {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    vertical-align: middle;
+}
+
+/* Pagination styles */
+.pagination {
+    margin-bottom: 0;
+}
+
+.pagination .page-link {
+    border: none;
+    padding: 0.5rem 0.75rem;
+    margin: 0 0.25rem;
+    border-radius: 0.35rem;
+    color: #858796;
+    transition: all 0.3s ease;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #4e73df;
+    color: white;
+}
+
+.pagination .page-link:hover {
+    background-color: #f8f9fc;
+    color: #4e73df;
+}
+
+/* Modal styles */
+.modal-content {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+.modal-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+}
+
+.modal-footer {
+    border-top: 1px solid #e3e6f0;
+    padding: 1rem;
+}
+
+/* Button styles */
+.btn-outline-primary {
+    border-width: 1px;
+    font-weight: 500;
+}
+
+.btn-outline-primary:hover {
+    background-color: #4e73df;
+    color: white;
+}
+
+/* Badge styles */
+.badge {
+    font-weight: 500;
+    padding: 0.35rem 0.65rem;
+    border-radius: 0.35rem;
+}
+
+/* Form check styles */
+.form-check-input {
+    cursor: pointer;
+}
+
+.form-check-input:checked {
+    background-color: #4e73df;
+    border-color: #4e73df;
+}

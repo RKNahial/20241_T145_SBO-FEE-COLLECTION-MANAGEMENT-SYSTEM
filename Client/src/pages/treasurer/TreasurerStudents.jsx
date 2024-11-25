@@ -1,11 +1,39 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
-import { Modal, Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { Modal, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import TreasurerSidebar from './TreasurerSidebar';
 import TreasurerNavbar from './TreasurerNavbar';
+import Unauthorized from '../../components/Unauthorized';
 import axios from 'axios';
+import '../../styles/LockModal.css';
+
+const renderActionButtons = (student) => {
+    console.log('Rendering buttons with permissions:', permissions);
+    return (
+        <div className="btn-group">
+            {permissions.updateStudent === 'edit' && (
+                <button
+                    className="btn btn-edit btn-sm me-2"
+                    onClick={() => handleEditClick(student)}
+                    title="Edit Student"
+                >
+                    <i className="fas fa-edit"></i>
+                </button>
+            )}
+            {((student.isArchived && permissions.unarchiveStudent === 'edit') ||
+                (!student.isArchived && permissions.archiveStudent === 'edit')) && (
+                    <button
+                        className="btn btn-archive btn-sm"
+                        onClick={() => handleArchiveAction(student._id, student.name, student.isArchived)}
+                        title={student.isArchived ? 'Unarchive Student' : 'Archive Student'}
+                    >
+                        <i className={`fas fa-${student.isArchived ? 'box-open' : 'box-archive'}`}></i>
+                    </button>
+                )}
+        </div>
+    );
+};
 
 const TreasurerStudents = () => {
     // NAV AND SIDEBAR
@@ -22,8 +50,54 @@ const TreasurerStudents = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [showModal, setShowModal] = useState(false);
     const [modalAction, setModalAction] = useState({ type: '', student: null });
+    const [lockMessage, setLockMessage] = useState("");
+    const [showLockModal, setShowLockModal] = useState(false);
     const navigate = useNavigate();
     const [statusFilter, setStatusFilter] = useState("Active");
+    const [permissions, setPermissions] = useState({});
+    const [isAuthorized, setIsAuthorized] = useState(true); // Default to true until we check permissions
+
+    useEffect(() => {
+        const checkPermissions = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const userDetails = JSON.parse(localStorage.getItem('userDetails'));
+
+                if (!token || !userDetails) {
+                    setIsAuthorized(false);
+                    return;
+                }
+
+                const response = await axios.get(
+                    `http://localhost:8000/api/permissions/${userDetails._id}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+
+                const userPermissions = response.data.data || {};
+                
+                // Update permissions state
+                setPermissions({
+                    updateStudent: userPermissions.updateStudent || 'denied',
+                    archiveStudent: userPermissions.archiveStudent || 'denied',
+                    unarchiveStudent: userPermissions.unarchiveStudent || 'denied'
+                });
+
+                // Check if user has either view or edit permission
+                const hasAccess = userPermissions.updateStudent === 'view' || userPermissions.updateStudent === 'edit';
+                setIsAuthorized(hasAccess);
+
+            } catch (error) {
+                console.error('Error checking permissions:', error);
+                setIsAuthorized(false);
+            }
+        };
+
+        checkPermissions();
+    }, [navigate]);
+
+    if (!isAuthorized) {
+        return <Unauthorized />;
+    }
 
     // STUDENT STATUS TAG
     const StudentStatusTag = ({ status, onClick }) => {
@@ -105,6 +179,15 @@ const TreasurerStudents = () => {
 
     // Handle archive and unarchive actions
     const handleArchiveAction = (studentId, studentName, isArchived) => {
+        if (isArchived && permissions.unarchiveStudent !== 'edit') {
+            setError('You do not have permission to unarchive students');
+            return;
+        }
+        if (!isArchived && permissions.archiveStudent !== 'edit') {
+            setError('You do not have permission to archive students');
+            return;
+        }
+
         setModalAction({
             type: isArchived ? 'unarchive' : 'archive',
             student: { id: studentId, name: studentName }
@@ -140,6 +223,8 @@ const TreasurerStudents = () => {
                 })
             });
 
+            const data = await response.json();
+
             if (response.ok) {
                 setSuccessMessage(`${modalAction.student.name} has been successfully ${modalAction.type}d!`);
                 setStudents(prev => prev.map(s =>
@@ -148,8 +233,7 @@ const TreasurerStudents = () => {
                         : s
                 ));
             } else {
-                const errorData = await response.json();
-                setError(typeof errorData.message === 'string' ? errorData.message : 'An error occurred');
+                setError(typeof data.message === 'string' ? data.message : 'An error occurred');
             }
         } catch (error) {
             console.error('Archive error:', error);
@@ -157,7 +241,10 @@ const TreasurerStudents = () => {
         } finally {
             setShowModal(false);
             setModalAction({ type: '', student: null });
-            setTimeout(() => setSuccessMessage(""), 2500);
+            setTimeout(() => {
+                setSuccessMessage("");
+                setError("");
+            }, 2500);
         }
     };
 
@@ -256,12 +343,76 @@ const TreasurerStudents = () => {
             };
         } catch (error) {
             console.error('Error checking lock:', error);
-            return { locked: false };
+            throw error; // Propagate the error to handle it in the calling function
         }
     };
 
+    const handleEditClick = async (student) => {
+        try {
+            const lockStatus = await checkEditLock(student._id);
+            if (lockStatus.locked) {
+                setLockMessage(`This student is currently being edited by ${lockStatus.userName}`);
+                setShowLockModal(true);
+                return;
+            }
+            navigate(`/treasurer/students/edit/${student._id}`, {
+                state: { studentData: student }
+            });
+        } catch (error) {
+            console.error('Error checking edit lock:', error);
+            if (error.response?.status === 404) {
+                setError('Lock service is currently unavailable. Please try again later.');
+            } else {
+                setError('Unable to edit student at this time. Please try again later.');
+            }
+        }
+    };
+
+    const handleArchive = (studentId, studentName) => {
+        if (permissions.archiveStudent !== 'edit') {
+            setError('You do not have permission to archive students');
+            return;
+        }
+        handleArchiveAction(studentId, studentName, false);
+    };
+
+    const handleUnarchive = (studentId, studentName) => {
+        if (permissions.unarchiveStudent !== 'edit') {
+            setError('You do not have permission to unarchive students');
+            return;
+        }
+        handleArchiveAction(studentId, studentName, true);
+    };
+
+    const renderActionButtons = (student) => {
+        console.log('Rendering buttons with permissions:', permissions);
+        return (
+            <div className="btn-group">
+                {permissions.updateStudent === 'edit' && (
+                    <button
+                        className="btn btn-edit btn-sm me-2"
+                        onClick={() => handleEditClick(student)}
+                        title="Edit Student"
+                    >
+                        <i className="fas fa-edit"></i>
+                    </button>
+                )}
+                {((student.isArchived && permissions.unarchiveStudent === 'edit') ||
+                    (!student.isArchived && permissions.archiveStudent === 'edit')) && (
+                        <button
+                            className="btn btn-archive btn-sm"
+                            onClick={() => handleArchiveAction(student._id, student.name, student.isArchived)}
+                            title={student.isArchived ? 'Unarchive Student' : 'Archive Student'}
+                        >
+                            <i className={`fas fa-${student.isArchived ? 'box-open' : 'box-archive'}`}></i>
+                        </button>
+                    )}
+            </div>
+        );
+    };
+
     return (
-        <div className="sb-nav-fixed">
+        <div className={`sb-nav-fixed ${isCollapsed ? 'sb-sidenav-toggled' : ''}`}>
             <Helmet>
                 <title>Treasurer | Students</title>
             </Helmet>
@@ -301,7 +452,7 @@ const TreasurerStudents = () => {
                                 {loading ? (
                                     <div>Loading students...</div>
                                 ) : (
-                                    <>
+                                    < >
                                         {/* Actions and Filters */}
                                         <div className="d-flex justify-content-between mb-3 align-items-center">
                                             <div className="d-flex me-auto">
@@ -382,30 +533,7 @@ const TreasurerStudents = () => {
                                                             />
                                                         </td>
                                                         <td>
-                                                            <Link
-                                                                to={`/treasurer/students/edit/${student._id}`}
-                                                                state={{ studentData: student }}
-                                                                className="btn btn-edit btn-sm"
-                                                                onClick={async (e) => {
-                                                                    e.preventDefault();
-                                                                    const lockStatus = await checkEditLock(student._id);
-                                                                    if (lockStatus.locked) {
-                                                                        setError(`This student is currently being edited by ${lockStatus.userName}`);
-                                                                    } else {
-                                                                        navigate(`/treasurer/students/edit/${student._id}`, {
-                                                                            state: { studentData: student }
-                                                                        });
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <i className="fas fa-edit"></i>
-                                                            </Link>
-                                                            <button
-                                                                className={`btn btn-archive btn-sm ${student.isArchived ? 'btn-open' : ''}`}
-                                                                onClick={() => handleArchiveAction(student._id, student.name, student.isArchived)}
-                                                            >
-                                                                <i className={`fas fa-${student.isArchived ? 'box-open' : 'archive'}`}></i>
-                                                            </button>
+                                                            {renderActionButtons(student)}
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -450,44 +578,68 @@ const TreasurerStudents = () => {
                                                 </ul>
                                             </nav>
                                         </div>
-                                    </>
+                                    </ >
                                 )}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            {/* Lock Modal */}
+            <Modal
+                show={showLockModal}
+                onHide={() => setShowLockModal(false)}
+                centered
+                className="lock-modal"
+            >
+                <Modal.Header closeButton className="border-0 pb-0">
+                    <Modal.Title className="w-100 text-center">
+                        <div className="lock-icon-container mb-2">
+                            <i className="fas fa-lock fa-2x text-warning"></i>
+                        </div>
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="text-center pt-0">
+                    <h5 className="modal-title mb-3">Student Record Locked</h5>
+                    <p className="text-muted mb-4">
+                        {lockMessage}
+                    </p>
+                    <div className="d-flex justify-content-center">
+                        <Button
+                            variant="secondary"
+                            onClick={() => setShowLockModal(false)}
+                            className="px-4"
+                            style={{
+                                backgroundColor: '#6c757d',
+                                border: 'none',
+                                borderRadius: '5px',
+                                padding: '8px 20px'
+                            }}
+                        >
+                            Close
+                        </Button>
+                    </div>
+                </Modal.Body>
+            </Modal>
             {/* Confirmation Modal */}
-            <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal show={showModal} onHide={() => setShowModal(false)} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>
-                        {modalAction.type === 'archive' ? 'Archive' : 'Unarchive'} Student
+                        {modalAction.type === 'archive' ? 'Archive Student' : 'Unarchive Student'}
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <p className="mb-1">
-                        Are you sure you want to {modalAction.type} <strong>{modalAction.student?.name}</strong>?
-                    </p>
-                    {modalAction.type === 'archive' && (
-                        <small style={{ color: '#6c757d', fontSize: '0.90rem' }}>
-                            You can still unarchive the student if you change your mind.
-                        </small>
-                    )}
+                    Are you sure you want to {modalAction.type} {modalAction.student?.name}?
                 </Modal.Body>
-                <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button
-                        variant="btn btn-confirm"
-                        onClick={confirmAction}
-                        style={{ flex: 'none' }}
-                    >
-                        Confirm
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowModal(false)}>
+                        Cancel
                     </Button>
                     <Button
-                        variant="btn btn-cancel"
-                        onClick={() => setShowModal(false)}
-                        style={{ marginRight: '0.5rem', flex: 'none' }}
+                        variant={modalAction.type === 'archive' ? 'danger' : 'success'}
+                        onClick={confirmAction}
                     >
-                        Cancel
+                        Confirm
                     </Button>
                 </Modal.Footer>
             </Modal>

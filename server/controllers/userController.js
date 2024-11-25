@@ -26,7 +26,16 @@ exports.registerUser = async (req, res) => {
 
 exports.addAdmin = async (req, res) => {
     try {
+        console.log('Starting admin addition process:', {
+            requestBody: { ...req.body, password: '[REDACTED]' },
+            timestamp: new Date().toISOString()
+        });
+
         if (req.body.position !== 'Admin') {
+            console.warn('Invalid position for admin registration:', {
+                providedPosition: req.body.position,
+                status: 400
+            });
             return res.status(400).json({
                 success: false,
                 message: 'Invalid position for admin registration'
@@ -35,6 +44,14 @@ exports.addAdmin = async (req, res) => {
 
         const { admin, temporaryPassword } = await userService.addAdmin(req.body);
         
+        console.log('Admin created successfully:', {
+            adminId: admin._id,
+            email: admin.email,
+            name: admin.name,
+            status: 201,
+            timestamp: new Date().toISOString()
+        });
+
         // Create history log
         await HistoryLog.create({
             timestamp: new Date(),
@@ -55,6 +72,13 @@ exports.addAdmin = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error('Admin creation failed:', {
+            error: error.message,
+            stack: error.stack,
+            status: error.code === 11000 ? 400 : 500,
+            timestamp: new Date().toISOString()
+        });
+
         // Create error log if operation fails
         if (req.user) {
             await HistoryLog.create({

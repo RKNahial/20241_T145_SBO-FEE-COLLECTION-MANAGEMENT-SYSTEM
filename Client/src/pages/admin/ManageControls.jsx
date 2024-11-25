@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import AdminSidebar from './AdminSidebar';
 import AdminNavbar from './AdminNavbar';
 import '../../assets/css/manage-control.css';
@@ -24,10 +24,11 @@ const ManageControls = () => {
                 });
                 const data = response.data.data;
 
+                // Convert positions to lowercase for case-insensitive comparison
                 const groupedUsers = {
-                    Governor: data.filter(user => user.position.toLowerCase() === 'governor'),
-                    Treasurer: data.filter(user => user.position.toLowerCase() === 'treasurer'),
-                    Officer: data.filter(user => user.position.toLowerCase() === 'officer')
+                    Governor: data.filter(user => user.position?.toLowerCase() === 'governor'),
+                    Treasurer: data.filter(user => user.position?.toLowerCase() === 'treasurer'),
+                    Officer: data.filter(user => user.position?.toLowerCase() === 'officer')
                 };
 
                 setUsers(groupedUsers);
@@ -40,15 +41,26 @@ const ManageControls = () => {
     }, []);
 
     // Filter users based on selected role and search term
-    const filteredUsers = users[selectedRole]?.filter(user =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    ) || [];
+    const filteredUsers = useMemo(() => {
+        const roleUsers = users[selectedRole] || [];
+        return roleUsers.filter(user => 
+            (user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.email?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+            user.position?.toLowerCase() === selectedRole.toLowerCase()
+        );
+    }, [users, selectedRole, searchTerm]);
 
-    const currentUsers = filteredUsers.slice(
-        (currentPage - 1) * usersPerPage,
-        currentPage * usersPerPage
-    );
+    // Reset current page when changing roles or search term
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [selectedRole, searchTerm]);
+
+    const currentUsers = useMemo(() => {
+        return filteredUsers.slice(
+            (currentPage - 1) * usersPerPage,
+            currentPage * usersPerPage
+        );
+    }, [filteredUsers, currentPage, usersPerPage]);
 
     const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
 
@@ -84,71 +96,187 @@ const ManageControls = () => {
 
     // User Details Modal Component
     const UserDetailsModal = () => {
+        const [permissions, setPermissions] = useState({
+            addStudent: 'denied',
+            addPaymentCategory: 'denied',
+            updateStudent: 'denied',
+            updatePaymentCategory: 'denied',
+            archiveStudent: 'denied',
+            unarchiveStudent: 'denied',
+            toggleDuesPayment: 'denied',
+            duesPayment: 'denied',
+            paymentUpdate: 'denied',
+            archiveCategory: 'denied',
+            unarchiveCategory: 'denied',
+            emailNotifications: 'denied'
+        });
+        const [loading, setLoading] = useState(true);
+        const [savingPermissions, setSavingPermissions] = useState(false);
+        const [unsavedChanges, setUnsavedChanges] = useState(false);
+
+        // Permission labels for better display
+        const permissionLabels = {
+            addStudent: 'Add Student',
+            addPaymentCategory: 'Add Payment Category',
+            updateStudent: 'Update Student',
+            updatePaymentCategory: 'Update Payment Category',
+            archiveStudent: 'Archive Student',
+            unarchiveStudent: 'Unarchive Student',
+            toggleDuesPayment: 'Toggle Dues Payment',
+            duesPayment: 'Dues Payment',
+            paymentUpdate: 'Payment Update',
+            archiveCategory: 'Archive Category',
+            unarchiveCategory: 'Unarchive Category',
+            emailNotifications: 'Email Notifications'
+        };
+
+        useEffect(() => {
+            const fetchPermissions = async () => {
+                if (selectedUser) {
+                    try {
+                        const token = localStorage.getItem('token');
+                        const response = await axios.get(
+                            `http://localhost:8000/api/permissions/${selectedUser._id}`,
+                            { headers: { Authorization: `Bearer ${token}` } }
+                        );
+                        setPermissions(response.data.data || permissions);
+                    } catch (error) {
+                        console.error('Error fetching permissions:', error);
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+            };
+            fetchPermissions();
+        }, [selectedUser]);
+
+        const handlePermissionChange = (module, value) => {
+            const updatedPermissions = {
+                ...permissions,
+                [module]: value
+            };
+            setPermissions(updatedPermissions);
+            setUnsavedChanges(true);
+        };
+
+        const savePermissions = async () => {
+            try {
+                setSavingPermissions(true);
+                const token = localStorage.getItem('token');
+                await axios.put(
+                    `http://localhost:8000/api/permissions/${selectedUser._id}`,
+                    {
+                        userId: selectedUser._id,
+                        userName: selectedUser.name,
+                        position: selectedUser.position,
+                        permissions: permissions
+                    },
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+
+                setUnsavedChanges(false);
+            } catch (error) {
+                console.error('Error updating permissions:', error);
+            } finally {
+                setSavingPermissions(false);
+            }
+        };
+
         return (
-            <Modal show={showUserModal} onHide={() => setShowUserModal(false)} size="lg">
-                <Modal.Header closeButton>
+            <Modal 
+                show={showUserModal} 
+                onHide={() => setShowUserModal(false)} 
+                size="lg"
+                backdrop="static"
+            >
+                <Modal.Header>
                     <Modal.Title>
-                        <i className="fas fa-user-cog me-2 text-primary"></i>
-                        Manage User Access
+                        <i className="fas fa-user-shield me-2 text-primary"></i>
+                        Manage Access Permissions - {selectedUser?.name}
                     </Modal.Title>
+                    {unsavedChanges && (
+                        <Badge bg="warning" className="ms-2">
+                            Unsaved Changes
+                        </Badge>
+                    )}
                 </Modal.Header>
                 <Modal.Body>
-                    {selectedUser && (
-                        <div>
-                            <div className="d-flex align-items-center mb-4">
-                                <div className="role-icon me-3">
-                                    <i className="fas fa-user-circle text-primary"></i>
-                                </div>
-                                <div>
-                                    <h5 className="mb-1">{selectedUser.name}</h5>
-                                    <p className="text-muted mb-0">{selectedUser.email}</p>
-                                </div>
-                            </div>
-                            <div className="border rounded p-3 mb-3">
-                                <h6 className="mb-3">Access Permissions</h6>
-                                <Table bordered>
-                                    <thead className="bg-light">
-                                        <tr>
-                                            <th style={{ width: '200px' }}>Module</th>
-                                            <th className="text-center">View</th>
-                                            <th className="text-center">Edit</th>
-                                            <th className="text-center">Denied</th>
+                    {loading ? (
+                        <div className="text-center py-4">
+                            <i className="fas fa-spinner fa-spin fa-2x"></i>
+                        </div>
+                    ) : (
+                        <div className="table-responsive">
+                            <Table bordered hover>
+                                <thead className="bg-light">
+                                    <tr>
+                                        <th style={{ width: '40%' }}>Module</th>
+                                        <th className="text-center" style={{ width: '20%' }}>View</th>
+                                        <th className="text-center" style={{ width: '20%' }}>Edit</th>
+                                        <th className="text-center" style={{ width: '20%' }}>Denied</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {Object.entries(permissionLabels).map(([key, label]) => (
+                                        <tr key={key}>
+                                            <td>{label}</td>
+                                            <td className="text-center">
+                                                <Form.Check
+                                                    type="radio"
+                                                    name={`${key}-permission`}
+                                                    checked={permissions[key] === 'view'}
+                                                    onChange={() => handlePermissionChange(key, 'view')}
+                                                    inline
+                                                />
+                                            </td>
+                                            <td className="text-center">
+                                                <Form.Check
+                                                    type="radio"
+                                                    name={`${key}-permission`}
+                                                    checked={permissions[key] === 'edit'}
+                                                    onChange={() => handlePermissionChange(key, 'edit')}
+                                                    inline
+                                                />
+                                            </td>
+                                            <td className="text-center">
+                                                <Form.Check
+                                                    type="radio"
+                                                    name={`${key}-permission`}
+                                                    checked={permissions[key] === 'denied'}
+                                                    onChange={() => handlePermissionChange(key, 'denied')}
+                                                    inline
+                                                />
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        {[
-                                            'Add Student',
-                                            'Add Payment Category',
-                                            'Update Student',
-                                            'Update Payment Category',
-                                            'Archive Student',
-                                            'Unarchive Student',
-                                            'Toggle Dues Payment',
-                                            'Dues Payment',
-                                            'Payment Update',
-                                            'Archive Category',
-                                            'Unarchive Category',
-                                            'Email Notifications'
-                                        ].map(module => (
-                                            <tr key={module}>
-                                                <td>{module}</td>
-                                                <td className="text-center">
-                                                    <Form.Check type="radio" name={module} />
-                                                </td>
-                                                <td className="text-center">
-                                                    <Form.Check type="radio" name={module} />
-                                                </td>
-                                                <td className="text-center">
-                                                    <Form.Check type="radio" name={module} />
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </Table>
-                            </div>
+                                    ))}
+                                </tbody>
+                            </Table>
                         </div>
                     )}
                 </Modal.Body>
+                <Modal.Footer>
+                    <Button 
+                        variant="secondary" 
+                        onClick={() => setShowUserModal(false)}
+                        disabled={savingPermissions}
+                    >
+                        Cancel
+                    </Button>
+                    <Button 
+                        variant="primary" 
+                        onClick={savePermissions}
+                        disabled={!unsavedChanges || savingPermissions}
+                    >
+                        {savingPermissions ? (
+                            <>
+                                <i className="fas fa-spinner fa-spin me-2"></i>
+                                Saving...
+                            </>
+                        ) : (
+                            'Save Changes'
+                        )}
+                    </Button>
+                </Modal.Footer>
             </Modal>
         );
     };
@@ -182,21 +310,68 @@ const ManageControls = () => {
                         <Card className="shadow-sm">
                             <Card.Header className="bg-white py-3">
                                 <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                                    <div className="btn-group">
-                                        {['Governor', 'Treasurer', 'Officer'].map(role => (
-                                            <Button
+                                    <div className="role-selector d-flex gap-3">
+                                        {[
+                                            { role: 'Governor', icon: 'fa-user-shield', color: '#4e73df', description: 'Manage governor accounts' },
+                                            { role: 'Treasurer', icon: 'fa-user-tie', color: '#1cc88a', description: 'Manage treasurer accounts' },
+                                            { role: 'Officer', icon: 'fa-user', color: '#f6c23e', description: 'Manage officer accounts' }
+                                        ].map(({ role, icon, color, description }) => (
+                                            <OverlayTrigger
                                                 key={role}
-                                                variant={selectedRole === role ? 'primary' : 'outline-primary'}
-                                                onClick={() => setSelectedRole(role)}
-                                                className="d-flex align-items-center px-4"
-                                                style={{ minWidth: '140px' }}
+                                                placement="top"
+                                                overlay={
+                                                    <Tooltip id={`tooltip-${role}`}>
+                                                        {description}
+                                                    </Tooltip>
+                                                }
                                             >
-                                                <i className={`fas ${role === 'Governor' ? 'fa-user-shield' :
-                                                    role === 'Treasurer' ? 'fa-user-tie' :
-                                                        'fa-user'
-                                                    } me-2`}></i>
-                                                {role}s
-                                            </Button>
+                                                <div
+                                                    onClick={() => setSelectedRole(role)}
+                                                    className={`role-card ${selectedRole === role ? 'active' : ''}`}
+                                                    style={{
+                                                        cursor: 'pointer',
+                                                        padding: '0.75rem 1.5rem',
+                                                        borderRadius: '0.5rem',
+                                                        backgroundColor: selectedRole === role ? color : 'white',
+                                                        border: `1px solid ${selectedRole === role ? color : '#e3e6f0'}`,
+                                                        transition: 'all 0.3s ease',
+                                                        minWidth: '160px',
+                                                    }}
+                                                >
+                                                    <div className="d-flex align-items-center gap-2">
+                                                        <div
+                                                            className="icon-circle"
+                                                            style={{
+                                                                width: '32px',
+                                                                height: '32px',
+                                                                borderRadius: '50%',
+                                                                backgroundColor: selectedRole === role ? 'rgba(255, 255, 255, 0.2)' : `${color}20`,
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center'
+                                                            }}
+                                                        >
+                                                            <i className={`fas ${icon}`} style={{
+                                                                color: selectedRole === role ? 'white' : color
+                                                            }}></i>
+                                                        </div>
+                                                        <div>
+                                                            <h6 className="mb-0" style={{
+                                                                color: selectedRole === role ? 'white' : '#5a5c69',
+                                                                fontWeight: '600'
+                                                            }}>
+                                                                {role}s
+                                                            </h6>
+                                                            <small style={{
+                                                                color: selectedRole === role ? 'rgba(255, 255, 255, 0.8)' : '#858796',
+                                                                fontSize: '0.75rem'
+                                                            }}>
+                                                                {users[role]?.length || 0} members
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </OverlayTrigger>
                                         ))}
                                     </div>
                                     <div className="search-box position-relative">
@@ -241,7 +416,7 @@ const ManageControls = () => {
                                                         </div>
                                                         <div>
                                                             <h6 className="mb-0">{user.name}</h6>
-                                                            <small className="text-muted">{selectedRole}</small>
+                                                            <small className="text-muted">{user.position}</small>
                                                         </div>
                                                     </div>
                                                 </td>

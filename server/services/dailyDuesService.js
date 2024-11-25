@@ -6,9 +6,9 @@ const Governor = require('../models/GovernorSchema');
 class DailyDuesService {
     async getAllUsers() {
         const [officers, governors, treasurers] = await Promise.all([
-            Officer.find({}, 'name ID'),
-            Governor.find({}, 'name ID'),
-            Treasurer.find({}, 'name ID')
+            Officer.find({ isArchived: false }, 'name ID'),
+            Governor.find({ isArchived: false }, 'name ID'),
+            Treasurer.find({ isArchived: false }, 'name ID')
         ]);
 
         return [
@@ -66,18 +66,44 @@ class DailyDuesService {
     }
 
     async toggleDuesStatus(userId, day, month, week) {
-        const record = await DailyDues.findOne({ userId, month, week });
+        // First find the user to get their userType
+        const [officer, governor, treasurer] = await Promise.all([
+            Officer.findById(userId),
+            Governor.findById(userId),
+            Treasurer.findById(userId)
+        ]);
+
+        const user = officer || governor || treasurer;
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        const userType = officer ? 'Officer' : governor ? 'Governor' : 'Treasurer';
+        let record = await DailyDues.findOne({ userId, month, week, userType });
+        
         if (!record) {
-            throw new Error('Dues record not found');
+            record = new DailyDues({
+                userId,
+                userType,
+                month,
+                week,
+                dues: [
+                    { day: 'Monday', status: 'Unpaid', amount: 0 },
+                    { day: 'Tuesday', status: 'Unpaid', amount: 0 },
+                    { day: 'Thursday', status: 'Unpaid', amount: 0 },
+                    { day: 'Friday', status: 'Unpaid', amount: 0 }
+                ]
+            });
         }
 
         record.dues = record.dues.map(due => {
             if (due.day === day) {
+                const newStatus = due.status === 'Paid' ? 'Unpaid' : 'Paid';
                 return {
                     ...due,
-                    status: due.status === 'Paid' ? 'Unpaid' : 'Paid',
-                    amount: due.status === 'Paid' ? 0 : 5,
-                    paymentDate: due.status === 'Paid' ? null : new Date()
+                    status: newStatus,
+                    amount: newStatus === 'Paid' ? 5 : 0,
+                    paymentDate: newStatus === 'Paid' ? new Date() : null
                 };
             }
             return due;

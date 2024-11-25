@@ -49,6 +49,13 @@ const AdminAddAdmin = () => {
                 config
             );
 
+            // Log successful response
+            console.log('Admin Addition Response:', {
+                status: response.status,
+                message: 'Admin added successfully',
+                data: response.data
+            });
+
             if (response.data.data?.temporaryPassword) {
                 setMessage({
                     type: 'success',
@@ -65,7 +72,13 @@ const AdminAddAdmin = () => {
                 });
             }
         } catch (error) {
-            console.error('Error details:', error);
+            // Log error details
+            console.error('Admin Addition Error:', {
+                status: error.response?.status || 500,
+                message: error.response?.data?.message || 'Unknown error occurred',
+                error: error.response?.data || error.message
+            });
+
             setMessage({
                 type: 'error',
                 text: error.response?.data?.message || 'Failed to add admin. Please try again.'

@@ -1,25 +1,10 @@
 const studentArchiveService = require('../services/studentArchiveService');
-const resourceLockService = require('../services/resourceLockService');
 const HistoryLog = require('../models/HistoryLog');
 
 exports.archiveStudent = async (req, res) => {
     const { id } = req.params;
     
     try {
-        // Try to acquire archive lock
-        const lockResult = await resourceLockService.acquireLock(
-            id, 
-            req.user._id, 
-            req.user.name,
-            'ARCHIVE'
-        );
-
-        if (!lockResult.success) {
-            return res.status(423).json({ 
-                message: lockResult.message 
-            });
-        }
-
         const student = await studentArchiveService.updateArchiveStatus(id, true);
 
         // Create history log
@@ -35,36 +20,38 @@ exports.archiveStudent = async (req, res) => {
             }
         });
 
-        // Release the lock after successful operation
-        await resourceLockService.releaseLock(id, req.user._id, 'ARCHIVE');
-
         res.status(200).json({ 
             message: 'Student archived successfully', 
             student 
         });
     } catch (error) {
-        // Make sure to release lock even if operation fails
-        await resourceLockService.releaseLock(id, req.user._id, 'ARCHIVE');
-        
         console.error('Archive error:', error);
-        res.status(error.message === 'Invalid student ID' ? 400 : 500).json({ 
-            message: error.message || 'Server error'
+        if (error.message === 'Invalid student ID') {
+            return res.status(400).json({ message: error.message });
+        }
+        res.status(500).json({ 
+            message: 'Failed to archive student. Please try again later.' 
         });
     }
 };
 
 exports.unarchiveStudent = async (req, res) => {
+    const { id } = req.params;
+    
     try {
-        const { id } = req.params;
         const student = await studentArchiveService.updateArchiveStatus(id, false);
 
+        // Create history log
         await HistoryLog.create({
-            userName: req.body.userName,
-            userEmail: req.body.userEmail,
-            userPosition: req.body.userPosition,
+            userName: req.user.name,
+            userEmail: req.user.email,
+            userPosition: req.user.position,
             action: 'UNARCHIVE_STUDENT',
-            details: `Unarchived student: ${student.name}`,
-            metadata: { studentId: student._id }
+            details: `${req.user.name} (${req.user.position}) unarchived student: ${student.name}`,
+            metadata: { 
+                studentId: student._id,
+                performedBy: req.user._id
+            }
         });
 
         res.status(200).json({ 
@@ -72,9 +59,12 @@ exports.unarchiveStudent = async (req, res) => {
             student 
         });
     } catch (error) {
-        res.status(error.message === 'Invalid student ID' ? 400 : 500).json({ 
-            message: error.message || 'Server error', 
-            error 
+        console.error('Unarchive error:', error);
+        if (error.message === 'Invalid student ID') {
+            return res.status(400).json({ message: error.message });
+        }
+        res.status(500).json({ 
+            message: 'Failed to unarchive student. Please try again later.' 
         });
     }
 };

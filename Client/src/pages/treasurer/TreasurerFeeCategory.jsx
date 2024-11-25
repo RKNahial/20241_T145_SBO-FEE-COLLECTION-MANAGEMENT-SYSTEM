@@ -22,6 +22,11 @@ const TreasurerFeeCategory = () => {
     const [statusFilter, setStatusFilter] = useState("");
     const [showModal, setShowModal] = useState(false);
     const [modalAction, setModalAction] = useState({ type: '', category: null });
+    const [userPermissions, setUserPermissions] = useState({
+        addPaymentCategory: 'denied',
+        updatePaymentCategory: 'denied',
+        archiveCategory: 'denied'
+    });
 
     // CATEGORY STATUS TAG
     const CategoryStatusTag = ({ status }) => {
@@ -64,6 +69,32 @@ const TreasurerFeeCategory = () => {
         fetchCategories();
     }, []);
 
+    useEffect(() => {
+        const fetchUserPermissions = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const userDetails = JSON.parse(localStorage.getItem('userDetails'));
+                
+                const response = await axios.get(
+                    `http://localhost:8000/api/permissions/${userDetails._id}`, 
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+
+                if (response.data && response.data.data) {
+                    setUserPermissions({
+                        addPaymentCategory: response.data.data.addPaymentCategory || 'denied',
+                        updatePaymentCategory: response.data.data.updatePaymentCategory || 'denied',
+                        archiveCategory: response.data.data.archiveCategory || 'denied'
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching user permissions:', error);
+            }
+        };
+
+        fetchUserPermissions();
+    }, []);
+
     const filteredCategories = Array.isArray(categories) ? categories.filter(category => {
         const matchesSearch = category?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             category?.categoryId?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -84,6 +115,11 @@ const TreasurerFeeCategory = () => {
     const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
 
     const handleArchiveAction = (category) => {
+        if (userPermissions.archiveCategory !== 'edit') {
+            setError('You do not have permission to archive/unarchive categories');
+            return;
+        }
+
         setModalAction({
             type: category.isArchived ? 'unarchive' : 'archive',
             category: category
@@ -92,6 +128,11 @@ const TreasurerFeeCategory = () => {
     };
 
     const confirmArchiveAction = async () => {
+        if (userPermissions.archiveCategory !== 'edit') {
+            setError('You do not have permission to archive/unarchive categories');
+            return;
+        }
+
         try {
             const token = localStorage.getItem('token');
             const response = await axios.put(
@@ -140,7 +181,6 @@ const TreasurerFeeCategory = () => {
         }
     };
 
-
     return (
         <div className="sb-nav-fixed">
             <Helmet>
@@ -179,16 +219,19 @@ const TreasurerFeeCategory = () => {
                                     <div>Loading categories...</div>
                                 ) : (
                                     <>
+
                                         {/* Actions and Filters */}
                                         <div className="d-flex justify-content-between mb-3 align-items-center">
                                             <div className="d-flex me-auto">
-                                                <Link
-                                                    to="/treasurer/manage-fee/payment-category/add-new"
-                                                    className="add-button btn btn-sm me-2"
-                                                >
-                                                    <i className="fa fa-plus me-2"></i>
-                                                    Add Payment Category
-                                                </Link>
+                                                {userPermissions.addPaymentCategory === 'edit' && (
+                                                    <Link
+                                                        to="/treasurer/manage-fee/payment-category/add-new"
+                                                        className="add-button btn btn-sm me-2"
+                                                    >
+                                                        <i className="fa fa-plus me-2"></i>
+                                                        Add Payment Category
+                                                    </Link>
+                                                )}
                                             </div>
                                             <div className="d-flex align-items-center me-3">
                                                 <label className="me-2 mb-0">Payment Category Status</label>
@@ -244,18 +287,26 @@ const TreasurerFeeCategory = () => {
                                                         </td>
                                                         <td>
                                                             <div className="btn-group" role="group">
-                                                                <Link
-                                                                    to={`/treasurer/manage-fee/payment-category/edit/${category._id}`}
-                                                                    className="btn btn-edit btn-sm"
-                                                                >
-                                                                    <i className="fas fa-edit"></i>
-                                                                </Link>
-                                                                <button
-                                                                    onClick={() => handleArchiveAction(category)}
-                                                                    className="btn btn-archive btn-sm"
-                                                                >
-                                                                    <i className={`fas fa-${!category.isArchived ? 'box-archive' : 'box-open'}`}></i>
-                                                                </button>
+                                                                {(userPermissions.updatePaymentCategory === 'edit' || userPermissions.archiveCategory === 'edit') && (
+                                                                    <>
+                                                                        {userPermissions.updatePaymentCategory === 'edit' && (
+                                                                            <Link
+                                                                                to={`/treasurer/manage-fee/payment-category/edit/${category._id}`}
+                                                                                className="btn btn-edit btn-sm"
+                                                                            >
+                                                                                <i className="fas fa-edit"></i>
+                                                                            </Link>
+                                                                        )}
+                                                                        {userPermissions.archiveCategory === 'edit' && (
+                                                                            <button
+                                                                                onClick={() => handleArchiveAction(category)}
+                                                                                className="btn btn-archive btn-sm"
+                                                                            >
+                                                                                <i className={`fas fa-${!category.isArchived ? 'box-archive' : 'box-open'}`}></i>
+                                                                            </button>
+                                                                        )}
+                                                                    </>
+                                                                )}
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -302,6 +353,7 @@ const TreasurerFeeCategory = () => {
                                             </nav>
                                         </div>
                                     </>
+
                                 )}
                             </div>
                         </div>
