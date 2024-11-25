@@ -18,6 +18,7 @@ import { usePayment } from '../../context/PaymentContext';
 import '../../assets/css/calendar.css';
 import { getAnalytics, logEvent } from "firebase/analytics";
 import { app } from '../firebase/firebaseConfig';
+import LoadingSpinner from '../../components/LoadingSpinner'; 
 
 ChartJS.register(
     CategoryScale,
@@ -234,6 +235,15 @@ const OfficerDashboard = () => {
         window.open(addEventUrl, '_blank');
     };
 
+    const [calendarLoading, setCalendarLoading] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setCalendarLoading(false);
+        }, 1500); 
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
         <div className="sb-nav-fixed">
             {showCelebration && <LoginCelebration />}
@@ -329,10 +339,19 @@ const OfficerDashboard = () => {
                                 </thead>
                                 <tbody>
                                 {loading ? (
-                                    <tr>
-                                        <td colSpan="6" className="text-center">Loading...</td>
-                                    </tr>
-                                ) : error ? (
+                                        <tr>
+                                            <td colSpan="6" style={{ border: 'none' }}>
+                                                <div style={{ 
+                                                    display: 'flex', 
+                                                    justifyContent: 'center', 
+                                                    alignItems: 'center',
+                                                    minHeight: '200px'  
+                                                }}>
+                                                    <LoadingSpinner icon="coin"/>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : error ? (
                                     <tr>
                                         <td colSpan="6" className="text-center text-danger">{error}</td>
                                     </tr>
@@ -371,12 +390,12 @@ const OfficerDashboard = () => {
                                         <div className="d-flex justify-content-between align-items-center px-3 mb-3">
                                             <h5 className="mb-0 header">Reports by Payment Category</h5>
                                         </div>
-                                        <div style={{ padding: '0 1rem', height: '400px' }}>
-                                            {reportLoading ? (
-                                                <div className="text-center">Loading...</div>
-                                            ) : reportError ? (
-                                                <div className="alert alert-danger">{reportError}</div>
-                                            ) : (
+                                        <div style={{ padding: '0 1rem', height: '400px'}}>
+                                        {reportLoading ? (
+                                            <LoadingSpinner  icon="reports"/> 
+                                        ) : reportError ? (
+                                            <div className="alert alert-danger">{reportError}</div>
+                                        ) : (
                                                 <Bar
                                                     data={{
                                                         labels: reportData.map(item => item.category),
@@ -427,21 +446,25 @@ const OfficerDashboard = () => {
                                             </button>
                                         </div>
                                         <div className="calendar-container">
+                                        {calendarLoading ? (
+                                            <LoadingSpinner icon="calendar"/> 
+                                        ) : (
                                             <iframe
                                                 src={CALENDAR_URL}
                                                 className="calendar-iframe"
                                                 frameBorder="0"
                                                 scrolling="no"
-                                                title="Officer Calendar"
+                                                title="Treasurer Calendar"
+                                                onLoad={() => setCalendarLoading(false)}  // Add this handler
                                             />
-                                        </div>
+                                        )}
+                                       </div>
                                     </div>
                                 </div>
 
                             </div>
                         </div>
                         {/* REPORTS AND CALENDAR END */}
-
 
                     </div>
                 </div>

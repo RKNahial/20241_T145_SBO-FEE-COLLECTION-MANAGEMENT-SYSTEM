@@ -13,7 +13,7 @@ import {
     Tooltip,
     Legend
 } from 'chart.js';
-import Preloader from '../../components/Preloader'; 
+import LoadingSpinner from '../../components/LoadingSpinner';
 import jsPDF from 'jspdf'; 
 import 'jspdf-autotable';
 import axios from 'axios';
@@ -314,9 +314,14 @@ const OfficerReports = () => {
                                 </div>
 
                                 {loading ? (
-                                    <Preloader open={loading} />
-                                ) : error ? (
-                                    <div className="alert alert-danger">{error}</div>
+                                    <div style={{ 
+                                        display: 'flex', 
+                                        justifyContent: 'center', 
+                                        alignItems: 'center',
+                                        minHeight: '300px'  
+                                    }}>
+                                        <LoadingSpinner icon="reports" /> 
+                                    </div>
                                 ) : (
                                     <div style={{ height: '400px' }}>
                                         <Bar data={chartData} options={options} />

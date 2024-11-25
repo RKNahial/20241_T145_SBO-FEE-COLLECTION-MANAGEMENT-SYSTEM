@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { Modal, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import Preloader from '../../components/Preloader';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import OfficerSidebar from './OfficerSidebar';
 import OfficerNavbar from './OfficerNavbar';
 import axios from 'axios';
@@ -299,8 +299,17 @@ const OfficerStudents = () => {
                                         {successMessage}
                                     </div>
                                 )}
-                                {loading ? (
-                                    <Preloader open={loading} />
+                               {loading ? (
+                                <div style={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'center', 
+                                    alignItems: 'center',
+                                    minHeight: '300px' 
+                                }}>
+                                    <LoadingSpinner icon="user-graduate" />
+                                </div>
+                                ) : error ? (
+                                    <div className="alert alert-danger">{error}</div>
                                 ) : (
                                     <>
                                         {/* Actions and Filters */}

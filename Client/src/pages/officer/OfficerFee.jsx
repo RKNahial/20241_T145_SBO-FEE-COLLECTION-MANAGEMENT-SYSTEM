@@ -7,9 +7,8 @@ import OfficerNavbar from "./OfficerNavbar";
 import ManageFeeModal from '../../components/ManageFeeModal';
 import ViewFeeModal from '../../components/ViewFeeModal';
 import axios from 'axios';
-import emailjs from '@emailjs/browser';
 import '../../styles/PaymentTabs.css';
-import Preloader from '../../components/Preloader';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import { usePayment } from '../../context/PaymentContext';
 
 const OfficerFee = () => {
@@ -388,7 +387,14 @@ const OfficerFee = () => {
 
                                 {/* Table Content */}
                                 {loading ? (
-                                    <Preloader open={loading} /> 
+                                <div style={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'center', 
+                                    alignItems: 'center',
+                                    minHeight: '300px' 
+                                }}>
+                                    <LoadingSpinner icon="coin" />
+                                </div>
                                 ) : error ? (
                                     <div className="alert alert-danger">{error}</div>
                                 ) : (

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { Modal, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import Preloader from '../../components/Preloader';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import OfficerSidebar from './OfficerSidebar';
 import OfficerNavbar from './OfficerNavbar';
 import axios from 'axios';
@@ -247,8 +247,15 @@ const OfficerArchivedStud = () => {
                                         {successMessage}
                                     </div>
                                 )}
-                                {loading ? (
-                                    <Preloader open={loading} />
+                                 {loading ? (
+                                    <div style={{ 
+                                        display: 'flex', 
+                                        justifyContent: 'center', 
+                                        alignItems: 'center',
+                                        minHeight: '300px'  
+                                    }}>
+                                        <LoadingSpinner icon="archived" /> 
+                                    </div>
                                 ) : (
                                     <>
                                         {/* Actions and Filters */}

@@ -51,7 +51,7 @@ const TreasurerArchivedStud = () => {
 
     const fetchStudents = async () => {
         try {
-            const token = localStorage.getItem('token'); // Get token from localStorage
+            const token = localStorage.getItem('token'); 
             const response = await fetch('http://localhost:8000/api/getAll/students', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
