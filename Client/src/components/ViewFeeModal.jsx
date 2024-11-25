@@ -9,14 +9,13 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId, onEmailSuccess }) 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [sendingEmail, setSendingEmail] = useState(false); 
-    const role = localStorage.getItem('role');
-    const isTreasurer = role === 'treasurer';
-    console.log('Current role:', role);
+    const userDetails = JSON.parse(localStorage.getItem('userDetails') || '{}');
+    const isTreasurer = userDetails?.position === 'Treasurer';
+    console.log('Current user details:', userDetails);
     console.log('Is Treasurer:', isTreasurer);
     console.log('Loading:', loading);
     console.log('Error:', error);
     console.log('Payment Details:', paymentDetails);
-
 
     useEffect(() => {
         const fetchPaymentDetails = async () => {
@@ -117,9 +116,17 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId, onEmailSuccess }) 
                     </div>
                 ) : error ? (
                     <Alert variant="danger">{error}</Alert>
+                ) : sendingEmail ? (
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center',
+                        minHeight: '200px'
+                    }}>
+                        <LoadingSpinner text="Sending Email" icon="envelope" />
+                    </div>
                 ) : (
                     <>
-                        {sendingEmail && !error && <Preloader open={sendingEmail} />}
                         <Row className="mb-3">
                             <Col xs={5} className="fw-bold">Student:</Col>
                             <Col>{student.name}</Col>
