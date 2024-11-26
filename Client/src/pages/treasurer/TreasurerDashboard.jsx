@@ -240,13 +240,20 @@ const TreasurerDashboard = () => {
     useEffect(() => {
         const timer = setTimeout(() => {
             setCalendarLoading(false);
-        }, 1500); // Adjust this time as needed
+        }, 1500); 
 
         return () => clearTimeout(timer);
     }, []);
 
     return (
         <div className="sb-nav-fixed">
+            <style>
+                {`
+                    .table-hover .no-hover:hover {
+                        background-color: transparent !important;
+                    }
+                `}
+            </style>
             {showCelebration && <LoginCelebration />}
             <Helmet>
                 <title>Treasurer | Dashboard</title>
@@ -340,7 +347,7 @@ const TreasurerDashboard = () => {
                                 </thead>
                                 <tbody>
                                 {loading ? (
-                                        <tr>
+                                        <tr className="no-hover">
                                             <td colSpan="6" style={{ border: 'none' }}>
                                                 <div style={{ 
                                                     display: 'flex', 

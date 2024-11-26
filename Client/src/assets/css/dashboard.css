@@ -387,3 +387,28 @@
 .payment-status-tabs .nav-link:hover {
   color: #ff8c00 !important; 
 }
+
+/* Paid/Unpaid Button Styles */
+.btn-paid {
+    background-color: #FF8C42;  /* Bright orange */
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-paid:hover {
+    background-color: #FF7733;  /* Slightly darker orange */
+    color: white;
+}
+
+.btn-unpaid {
+    background-color: #FFB899;  /* Light coral orange */
+    color: #7D4427;  /* Dark brown for contrast */
+    border: 1px solid #FF8C42;
+    transition: all 0.3s ease;
+}
+
+.btn-unpaid:hover {
+    background-color: #FFCDB2;  /* Lighter coral orange */
+    color: #7D4427;
+}

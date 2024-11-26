@@ -339,7 +339,7 @@ const OfficerDashboard = () => {
                                 </thead>
                                 <tbody>
                                 {loading ? (
-                                        <tr>
+                                        <tr className="no-hover">
                                             <td colSpan="6" style={{ border: 'none' }}>
                                                 <div style={{ 
                                                     display: 'flex', 
