@@ -3,6 +3,7 @@ const HistoryLog = require('../models/HistoryLog');
 
 exports.archiveStudent = async (req, res) => {
     const { id } = req.params;
+    const startTime = new Date();
     
     try {
         const student = await studentArchiveService.updateArchiveStatus(id, true);
@@ -20,18 +21,51 @@ exports.archiveStudent = async (req, res) => {
             }
         });
 
-        res.status(200).json({ 
-            message: 'Student archived successfully', 
-            student 
+        // Calculate response time
+        const endTime = new Date();
+        const responseTime = endTime - startTime;
+
+        // Format response like Thunder Client
+        res.status(200).json({
+            status: "success",
+            statusCode: 200,
+            data: {
+                message: 'Student archived successfully',
+                student: {
+                    id: student._id,
+                    name: student.name,
+                    studentId: student.studentId,
+                    institutionalEmail: student.institutionalEmail,
+                    yearLevel: student.yearLevel,
+                    program: student.program,
+                    isArchived: student.isArchived
+                }
+            },
+            headers: {
+                "content-type": "application/json",
+                "x-response-time": `${responseTime}ms`
+            },
+            size: 0, // This will be calculated by Express
+            time: responseTime
         });
     } catch (error) {
         console.error('Archive error:', error);
-        if (error.message === 'Invalid student ID') {
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ 
-            message: 'Failed to archive student. Please try again later.' 
-        });
+        const errorResponse = {
+            status: "error",
+            statusCode: error.message === 'Invalid student ID' ? 400 : 500,
+            data: {
+                message: error.message === 'Invalid student ID' 
+                    ? error.message 
+                    : 'Failed to archive student. Please try again later.'
+            },
+            headers: {
+                "content-type": "application/json",
+                "x-response-time": `${new Date() - startTime}ms`
+            },
+            size: 0,
+            time: new Date() - startTime
+        };
+        res.status(errorResponse.statusCode).json(errorResponse);
     }
 };
 
