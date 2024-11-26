@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { Modal, Button } from 'react-bootstrap';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import TreasurerSidebar from './TreasurerSidebar';
 import TreasurerNavbar from './TreasurerNavbar';
 import axios from 'axios';
@@ -216,7 +217,14 @@ const TreasurerFeeCategory = () => {
                                     </div>
                                 )}
                                 {loading ? (
-                                    <div>Loading categories...</div>
+                                    <div style={{ 
+                                        display: 'flex', 
+                                        justifyContent: 'center', 
+                                        alignItems: 'center',
+                                        minHeight: '300px'  
+                                    }}>
+                                        <LoadingSpinner icon="coin" /> 
+                                    </div>
                                 ) : (
                                     <>
 
@@ -265,8 +273,8 @@ const TreasurerFeeCategory = () => {
                                         <table className="table table-bordered table-hover">
                                             <thead>
                                                 <tr>
-                                                    <th>#</th>
-                                                    <th>Payment Category ID</th>
+                                                    <th className="index-column">#</th>
+                                                    <th className="name-column-2">Payment Category ID</th>
                                                     <th>Payment Category</th>
                                                     <th>Total Price</th>
                                                     <th>Status</th>

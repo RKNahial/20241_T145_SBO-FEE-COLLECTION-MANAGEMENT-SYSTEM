@@ -32,13 +32,18 @@
 }
 
 .pay-button {
-    color: #EAEAEA;                 
-    background-color: #FF8C00;  
-    border: none;                            
-    border-radius: 0.35rem; 
-    white-space: nowrap; 
-    width: auto; /* Keep as is for auto width */
+    color: #EAEAEA;
+    background-color: #FF8C00;
+    border: none;
+    border-radius: 0.35rem;
+    padding: 0.40rem 1rem; 
+    font-size: 0.875rem; 
+    line-height: 1.25; 
+    white-space: nowrap;
+    width: auto;
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    text-align: center;
+    display: inline-block; 
 }
 
 .pay-button:hover {

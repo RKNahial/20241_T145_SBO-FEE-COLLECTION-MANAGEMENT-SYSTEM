@@ -2,11 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Button, Row, Col, Spinner, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import emailjs from '@emailjs/browser';
+import LoadingSpinner from './LoadingSpinner';
 
-const ViewFeeModal = ({ isOpen, onClose, student, categoryId }) => {
+const ViewFeeModal = ({ isOpen, onClose, student, categoryId, onEmailSuccess }) => {
     const [paymentDetails, setPaymentDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [sendingEmail, setSendingEmail] = useState(false); 
+    const userDetails = JSON.parse(localStorage.getItem('userDetails') || '{}');
+    const isTreasurer = userDetails?.position === 'Treasurer';
+    console.log('Current user details:', userDetails);
+    console.log('Is Treasurer:', isTreasurer);
+    console.log('Loading:', loading);
+    console.log('Error:', error);
+    console.log('Payment Details:', paymentDetails);
 
     useEffect(() => {
         const fetchPaymentDetails = async () => {
@@ -44,6 +53,8 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId }) => {
     const handleSendEmail = async () => {
         if (!student.institutionalEmail || !paymentDetails) return;
 
+        setSendingEmail(true); 
+
         const templateParams = {
             from_name: "COT-SBO COLLECTION FEE MANAGEMENT SYSTEM",
             to_name: student.name,
@@ -66,11 +77,14 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId }) => {
             );
 
             if (response.status === 200) {
-                alert('Payment details sent successfully to student\'s email');
+                onEmailSuccess(`Payment details emailed to ${student.name}'s successfully!`);
+                onClose(); 
             }
         } catch (error) {
             console.error('Error sending email:', error);
-            alert('Failed to send email');
+            // Optionally handle the error here (e.g., set an error state)
+        } finally {
+            setSendingEmail(false); 
         }
     };
 
@@ -91,14 +105,26 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId }) => {
             </Modal.Header>
 
             <Modal.Body className="px-4">
-                {loading ? (
-                    <div className="text-center">
-                        <Spinner animation="border" role="status">
-                            <span className="visually-hidden">Loading...</span>
-                        </Spinner>
+            {loading ? (
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center',
+                        minHeight: '200px'
+                    }}>
+                        <LoadingSpinner icon="coin" />
                     </div>
                 ) : error ? (
                     <Alert variant="danger">{error}</Alert>
+                ) : sendingEmail ? (
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center',
+                        minHeight: '200px'
+                    }}>
+                        <LoadingSpinner text="Sending Email" icon="envelope" />
+                    </div>
                 ) : (
                     <>
                         <Row className="mb-3">
@@ -147,16 +173,20 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId }) => {
             </Modal.Body>
 
             <Modal.Footer className="border-0 px-4 pb-4">
+            {isTreasurer && !loading && !error && (  
+                    <Button
+                        variant="btn btn-confirm"   
+                        onClick={handleSendEmail}
+                        className="me-2"
+                        disabled={sendingEmail}
+                    >
+                        {sendingEmail ? 'Sending...' : 'Send Email'}
+                    </Button>
+                )}
                 <Button
-                    variant="success"
-                    onClick={handleSendEmail}
-                    className="me-2"
-                >
-                    Send Email
-                </Button>
-                <Button
-                    variant="danger"
+                    variant="btn btn-cancel"
                     onClick={onClose}
+                    disabled={sendingEmail}
                 >
                     Close
                 </Button>

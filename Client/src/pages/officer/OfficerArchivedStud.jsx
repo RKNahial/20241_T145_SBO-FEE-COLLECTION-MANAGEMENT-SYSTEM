@@ -1,15 +1,15 @@
-// src//pages/treasurer/TreasurerArchivedStud.jsx
+// src//pages/treasurer/OfficerArchivedStud.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { Modal, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import TreasurerSidebar from './TreasurerSidebar';
-import TreasurerNavbar from './TreasurerNavbar';
+import OfficerSidebar from './OfficerSidebar';
+import OfficerNavbar from './OfficerNavbar';
 import axios from 'axios';
 
-const TreasurerArchivedStud = () => {
+const OfficerArchivedStud = () => {
     // NAV AND SIDEBAR
     const [isCollapsed, setIsCollapsed] = useState(false);
     const toggleSidebar = () => {
@@ -51,7 +51,7 @@ const TreasurerArchivedStud = () => {
 
     const fetchStudents = async () => {
         try {
-            const token = localStorage.getItem('token'); 
+            const token = localStorage.getItem('token'); // Get token from localStorage
             const response = await fetch('http://localhost:8000/api/getAll/students', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -212,11 +212,11 @@ const TreasurerArchivedStud = () => {
     return (
         <div className="sb-nav-fixed">
             <Helmet>
-                <title>Treasurer | Archived Students</title>
+                <title>Officer | Archived Students</title>
             </Helmet>
-            <TreasurerNavbar toggleSidebar={toggleSidebar} />
+            <OfficerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
-                <TreasurerSidebar isCollapsed={isCollapsed} />
+                <OfficerSidebar isCollapsed={isCollapsed} />
                 <div
                     id="layoutSidenav_content"
                     style={{
@@ -247,7 +247,7 @@ const TreasurerArchivedStud = () => {
                                         {successMessage}
                                     </div>
                                 )}
-                                {loading ? (
+                                 {loading ? (
                                     <div style={{ 
                                         display: 'flex', 
                                         justifyContent: 'center', 
@@ -309,7 +309,7 @@ const TreasurerArchivedStud = () => {
                                                         </td>
                                                         <td>
                                                             <Link
-                                                                to={`/treasurer/students/edit/${student._id}`}
+                                                                to={`/officer/students/edit/${student._id}`}
                                                                 state={{ studentData: student }}
                                                                 className="btn btn-edit btn-sm"
                                                                 onClick={async (e) => {
@@ -421,4 +421,4 @@ const TreasurerArchivedStud = () => {
     );
 };
 
-export default TreasurerArchivedStud;
+export default OfficerArchivedStud;

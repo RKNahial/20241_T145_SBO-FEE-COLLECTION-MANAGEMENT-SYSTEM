@@ -18,7 +18,7 @@ import { usePayment } from '../../context/PaymentContext';
 import '../../assets/css/calendar.css';
 import { getAnalytics, logEvent } from "firebase/analytics";
 import { app } from '../firebase/firebaseConfig';
-
+import LoadingSpinner from '../../components/LoadingSpinner'; 
 
 ChartJS.register(
     CategoryScale,
@@ -30,7 +30,7 @@ ChartJS.register(
 );
 
 const CALENDAR_ID = 'c_24e4973e704b983a944d5bc4cd1a7e0437d3eb519a1935d01706fb81909b68d3@group.calendar.google.com';
-const CALENDAR_URL = `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(CALENDAR_ID)}&ctz=UTC`;
+const CALENDAR_URL = `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(CALENDAR_ID)}&ctz=UTC&hl=en`;
 
 const TreasurerDashboard = () => {
     // NAV AND SIDEBAR
@@ -79,7 +79,7 @@ const TreasurerDashboard = () => {
                 setLoading(false);
             }
         };
-
+ 
         fetchRecentPayments();
     }, [paymentUpdate]);
 
@@ -235,8 +235,25 @@ const TreasurerDashboard = () => {
         window.open(addEventUrl, '_blank');
     };
 
+    const [calendarLoading, setCalendarLoading] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setCalendarLoading(false);
+        }, 1500); 
+
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
         <div className="sb-nav-fixed">
+            <style>
+                {`
+                    .table-hover .no-hover:hover {
+                        background-color: transparent !important;
+                    }
+                `}
+            </style>
             {showCelebration && <LoginCelebration />}
             <Helmet>
                 <title>Treasurer | Dashboard</title>
@@ -319,40 +336,49 @@ const TreasurerDashboard = () => {
                             <h5 className="mb-4 header">Recent Payments</h5>
                             <table className="table table-hover">
                                 <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Date</th>
-                                        <th>Category ID</th>
-                                        <th>Student ID</th>
+                                <tr>
+                                        <th className="index-column">#</th>
+                                        <th className="date-time-column">Date</th>
+                                        <th className="date-time-column">Time</th>
+                                        <th>Category Name</th>
                                         <th>Student Name</th>
                                         <th>Paid Amount</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {loading ? (
-                                        <tr>
-                                            <td colSpan="6" className="text-center">Loading...</td>
+                                {loading ? (
+                                        <tr className="no-hover">
+                                            <td colSpan="6" style={{ border: 'none' }}>
+                                                <div style={{ 
+                                                    display: 'flex', 
+                                                    justifyContent: 'center', 
+                                                    alignItems: 'center',
+                                                    minHeight: '200px'  
+                                                }}>
+                                                    <LoadingSpinner icon="coin"/>
+                                                </div>
+                                            </td>
                                         </tr>
                                     ) : error ? (
-                                        <tr>
-                                            <td colSpan="6" className="text-center text-danger">{error}</td>
+                                    <tr>
+                                        <td colSpan="6" className="text-center text-danger">{error}</td>
+                                    </tr>
+                                ) : recentPayments.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="6" className="text-center">No recent payments found</td>
+                                    </tr>
+                                ) : (
+                                    recentPayments.map((payment, index) => (
+                                        <tr key={payment.id}>
+                                            <td>{index + 1}</td>
+                                            <td>{new Date(payment.date).toLocaleDateString()}</td>
+                                            <td>{payment.paymentTime}</td> 
+                                            <td>{payment.categoryName}</td> 
+                                            <td>{payment.studentName}</td>
+                                            <td>₱{payment.paidAmount.toFixed(2)}</td>
                                         </tr>
-                                    ) : recentPayments.length === 0 ? (
-                                        <tr>
-                                            <td colSpan="6" className="text-center">No recent payments found</td>
-                                        </tr>
-                                    ) : (
-                                        recentPayments.map((payment, index) => (
-                                            <tr key={payment.id}>
-                                                <td>{index + 1}</td>
-                                                <td>{new Date(payment.date).toLocaleDateString()}</td>
-                                                <td>{payment.categoryId}</td>
-                                                <td>{payment.studentId}</td>
-                                                <td>{payment.studentName}</td>
-                                                <td>₱{payment.paidAmount.toFixed(2)}</td>
-                                            </tr>
-                                        ))
-                                    )}
+                                    ))
+                                )}
                                 </tbody>
                             </table>
                         </div>
@@ -372,12 +398,12 @@ const TreasurerDashboard = () => {
                                         <div className="d-flex justify-content-between align-items-center px-3 mb-3">
                                             <h5 className="mb-0 header">Reports by Payment Category</h5>
                                         </div>
-                                        <div style={{ padding: '0 1rem', height: '400px' }}>
-                                            {reportLoading ? (
-                                                <div className="text-center">Loading...</div>
-                                            ) : reportError ? (
-                                                <div className="alert alert-danger">{reportError}</div>
-                                            ) : (
+                                        <div style={{ padding: '0 1rem', height: '400px'}}>
+                                        {reportLoading ? (
+                                            <LoadingSpinner  icon="reports"/> 
+                                        ) : reportError ? (
+                                            <div className="alert alert-danger">{reportError}</div>
+                                        ) : (
                                                 <Bar
                                                     data={{
                                                         labels: reportData.map(item => item.category),
@@ -428,14 +454,19 @@ const TreasurerDashboard = () => {
                                             </button>
                                         </div>
                                         <div className="calendar-container">
+                                        {calendarLoading ? (
+                                            <LoadingSpinner icon="calendar"/> 
+                                        ) : (
                                             <iframe
                                                 src={CALENDAR_URL}
                                                 className="calendar-iframe"
                                                 frameBorder="0"
                                                 scrolling="no"
                                                 title="Treasurer Calendar"
+                                                onLoad={() => setCalendarLoading(false)}  // Add this handler
                                             />
-                                        </div>
+                                        )}
+                                       </div>
                                     </div>
                                 </div>
 

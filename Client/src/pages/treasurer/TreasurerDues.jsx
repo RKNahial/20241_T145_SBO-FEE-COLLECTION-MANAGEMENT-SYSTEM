@@ -1,6 +1,7 @@
 import { Helmet } from 'react-helmet';
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import LoadingSpinner from '../../components/LoadingSpinner';
 import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
 import axios from 'axios';
@@ -30,12 +31,12 @@ const TreasurerDues = () => {
 
     const handleMonthChange = (e) => {
         setSelectedMonth(e.target.value);
-        setCurrentPage(1); // Reset to first page when month changes
+        setCurrentPage(1); 
     };
 
     const handleWeekChange = (e) => {
         setSelectedWeek(e.target.value);
-        setCurrentPage(1); // Reset to first page when week changes
+        setCurrentPage(1); 
     };
 
     // Calculate pagination values
@@ -45,12 +46,56 @@ const TreasurerDues = () => {
     const totalPages = Math.ceil(officers.length / itemsPerPage);
 
     // Generate dates for the selected week
-    const dates = ['Monday', 'Tuesday', 'Thursday', 'Friday'];
+    const dates = ['Monday', 'Tuesday', 'Thursday', 'Friday']
 
-    const PaymentStatusTag = React.memo(({ status, onToggle }) => {
+    // Function to determine the number of weeks in a month
+    const getWeeksInMonth = (month) => {
+        const currentYear = new Date().getFullYear(); 
+        const monthIndex = new Date(Date.parse(month + " 1, " + currentYear)).getMonth(); 
+        const firstDay = new Date(currentYear, monthIndex, 1);
+        const lastDay = new Date(currentYear, monthIndex + 1, 0); 
+        const totalDays = lastDay.getDate();
+        return Math.ceil(totalDays / 7); 
+    };
+
+    // Get the number of weeks for the selected month
+    const weeksInMonth = getWeeksInMonth(selectedMonth);
+    const weekOptions = Array.from({ length: weeksInMonth }, (_, index) => index + 1);
+
+    // const PaymentStatusTag = React.memo(({ status, onToggle }) => {
+    //     return (
+    //         <button
+    //             onClick={onToggle}
+    //             className={`btn btn-sm ${status === 'Paid' ? 'paid' : 'not-paid'}`}
+    //             style={{
+    //                 backgroundColor: status === 'Paid' ? '#FF8C00' : '#FFB84D',
+    //                 color: '#EAEAEA',
+    //                 border: 'none',
+    //                 padding: '0.25rem 0.75rem',
+    //                 borderRadius: '0.60rem',
+    //                 fontSize: '0.75rem',
+    //                 fontWeight: 500,
+    //                 display: 'inline-block'
+    //             }}
+    //         >
+    //             {status}
+    //         </button>
+    //     );
+    // });
+
+    // First, modify the PaymentStatusTag component to handle local state
+    const PaymentStatusTag = React.memo(({ initialStatus, onToggle }) => {
+        const [status, setStatus] = useState(initialStatus);
+
+        const handleClick = () => {
+            const newStatus = status === 'Paid' ? 'Not Paid' : 'Paid';
+            setStatus(newStatus);
+            onToggle?.(newStatus);  // Optional callback if you want to keep track in parent
+        };
+
         return (
             <button
-                onClick={onToggle}
+                onClick={handleClick}
                 className={`btn btn-sm ${status === 'Paid' ? 'paid' : 'not-paid'}`}
                 disabled={userPermissions.toggleDuesPayment !== 'edit'}
                 style={{
@@ -71,6 +116,63 @@ const TreasurerDues = () => {
             </button>
         );
     });
+
+    // Then, modify how you use the PaymentStatusTag in the table
+    const handleStatusToggle = async (userId, day, currentStatus) => {
+        if (userPermissions.toggleDuesPayment !== 'edit') {
+            setError('You do not have permission to toggle dues payment status');
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            const newStatus = currentStatus === 'Paid' ? 'Not Paid' : 'Paid';
+
+            const response = await fetch(`http://localhost:8000/api/daily-dues/${userId}/toggle`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    month: selectedMonth,
+                    week: selectedWeek,
+                    day,
+                    newStatus
+                })
+            });
+
+            if (response.ok) {
+                await axios.post(
+                    'http://localhost:8000/api/history-logs/dues-toggle',
+                    {
+                        userId,
+                        duesDetails: {
+                            month: selectedMonth,
+                            week: selectedWeek,
+                            day,
+                            previousStatus: currentStatus,
+                            newStatus
+                        }
+                    },
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+
+                refreshData();
+            } else {
+                const errorData = await response.json();
+                setError(errorData.message || 'Failed to update payment status');
+            }
+        } catch (error) {
+            console.error('Error toggling payment status:', error);
+            setError('Failed to update payment status');
+        }
+    };
 
     const refreshData = async () => {
         try {
@@ -125,40 +227,6 @@ const TreasurerDues = () => {
 
         fetchUserPermissions();
     }, []);
-
-    const handleStatusToggle = async (userId, day, currentStatus) => {
-        if (userPermissions.toggleDuesPayment !== 'edit') {
-            setError('You do not have permission to toggle dues payment status');
-            return;
-        }
-
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:8000/api/daily-dues/${userId}/toggle`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    month: selectedMonth,
-                    week: selectedWeek,
-                    day,
-                    newStatus: currentStatus === 'Paid' ? 'Not Paid' : 'Paid'
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to toggle dues status');
-            }
-
-            // Refresh the data after successful toggle
-            refreshData();
-        } catch (error) {
-            console.error('Error toggling dues status:', error);
-            setError('Failed to toggle dues status. Please try again.');
-        }
-    };
 
     useEffect(() => {
         let isMounted = true;
@@ -253,148 +321,160 @@ const TreasurerDues = () => {
                                 <strong><i className="fas fa-coins me-2"></i>Daily Dues</strong>
                             </div>
                             <div className="card-body">
-                                <div className="d-flex justify-content-start mb-3">
-                                    <div className="d-flex align-items-center me-3">
-                                        <label className="me-2 mb-0">Select Month</label>
-                                        <div className='dashboard-select' style={{ width: 'auto' }}>
-                                            <select
-                                                className="form-control"
-                                                onChange={handleMonthChange}
-                                                value={selectedMonth}
-                                                style={{
-                                                    width: '150px', // Adjust width as needed
-                                                    paddingRight: '1.5rem', // Add padding for arrow
-                                                }}
-                                            >
-                                                <option value="January">January</option>
-                                                <option value="February">February</option>
-                                                <option value="March">March</option>
-                                                <option value="April">April</option>
-                                                <option value="May">May</option>
-                                                <option value="June">June</option>
-                                                <option value="July">July</option>
-                                                <option value="August">August</option>
-                                                <option value="September">September</option>
-                                                <option value="October">October</option>
-                                                <option value="November">November</option>
-                                                <option value="December">December</option>
-                                            </select>
-                                        </div>
+                                {loading ? (
+                                    <div style={{ 
+                                        display: 'flex', 
+                                        justifyContent: 'center', 
+                                        alignItems: 'center',
+                                        minHeight: '300px'
+                                    }}>
+                                        <LoadingSpinner icon="coin" />
                                     </div>
-                                    <div className="d-flex align-items-center dashboard-select">
-                                        <label className="me-2 mb-0">Select Week</label>
-                                        <div style={{ width: 'auto' }}>
-                                            <select
-                                                className="form-control"
-                                                onChange={handleWeekChange}
-                                                value={selectedWeek}
-                                                style={{
-                                                    width: '100px', // Adjust width as needed
-                                                    paddingRight: '1.5rem', // Add padding for arrow
-                                                }}
-                                            >
-                                                <option value="1">Week 1</option>
-                                                <option value="2">Week 2</option>
-                                                <option value="3">Week 3</option>
-                                                <option value="4">Week 4</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <table className="table table-bordered table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Officer Name</th>
-                                            {dates.map((date, index) => (
-                                                <th key={index}>{date}</th>
-                                            ))}
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {currentOfficers.map((officer, index) => (
-                                            <tr key={`${officer.userId}-${selectedMonth}-${selectedWeek}`}>
-                                                <td>{indexOfFirstOfficer + index + 1}</td>
-                                                <td>{officer.officerName || 'Name not available'}</td>
-                                                {officer.dues.map((due, dueIndex) => (
-                                                    <td key={`${officer.userId}-${due.day}-${due.status}`}>
-                                                        <PaymentStatusTag
-                                                            status={due.status}
-                                                            onToggle={() => handleStatusToggle(
-                                                                officer.userId,
-                                                                due.day,
-                                                                due.status
-                                                            )}
-                                                        />
-                                                    </td>
-                                                ))}
-                                                <td className="text-center">
-                                                    {userPermissions.duesPayment === 'edit' && (
-                                                        <button
-                                                            type="button"
-                                                            className="btn pay-button"
-                                                            onClick={() => navigate(`/treasurer/manage-fee/amount/${officer.userId}`,
-                                                                {
-                                                                    state: {
-                                                                        officerName: officer.officerName,
-                                                                        userId: officer.userId,
-                                                                        userType: officer.userType
-                                                                    }
-                                                                }
-                                                            )}
-                                                        >
-                                                            <i className="fas fa-coins me-1"></i>
-                                                            Pay in Amount
-                                                        </button>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-
-                                <div className="d-flex justify-content-between align-items-center mb-2">
-                                    <div>
-                                        Showing {indexOfFirstOfficer + 1} to {Math.min(indexOfLastOfficer, officers.length)} of {officers.length} entries
-                                    </div>
-                                    <nav>
-                                        <ul className="pagination mb-0">
-                                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                                <button
-                                                    className="page-link"
-                                                    onClick={() => setCurrentPage(prev => prev - 1)}
-                                                    disabled={currentPage === 1}
-                                                >
-                                                    Previous
-                                                </button>
-                                            </li>
-                                            {[...Array(totalPages)].map((_, index) => (
-                                                <li
-                                                    key={index + 1}
-                                                    className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}
-                                                >
-                                                    <button
-                                                        className="page-link"
-                                                        onClick={() => setCurrentPage(index + 1)}
+                                ) : (
+                                    <React.Fragment>
+                                        <div className="d-flex justify-content-start mb-3">
+                                            <div className="d-flex align-items-center me-3">
+                                                <label className="me-2 mb-0">Select Month</label>
+                                                <div className='dashboard-select' style={{ width: 'auto' }}>
+                                                    <select
+                                                        className="form-control"
+                                                        onChange={handleMonthChange}
+                                                        value={selectedMonth}
+                                                        style={{
+                                                            width: '150px', 
+                                                            paddingRight: '1.5rem',
+                                                        }}
                                                     >
-                                                        {index + 1}
-                                                    </button>
-                                                </li>
-                                            ))}
-                                            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                                <button
-                                                    className="page-link"
-                                                    onClick={() => setCurrentPage(prev => prev + 1)}
-                                                    disabled={currentPage === totalPages}
-                                                >
-                                                    Next
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    </nav>
-                                </div>
+                                                        <option value="January">January</option>
+                                                        <option value="February">February</option>
+                                                        <option value="March">March</option>
+                                                        <option value="April">April</option>
+                                                        <option value="May">May</option>
+                                                        <option value="June">June</option>
+                                                        <option value="July">July</option>
+                                                        <option value="August">August</option>
+                                                        <option value="September">September</option>
+                                                        <option value="October">October</option>
+                                                        <option value="November">November</option>
+                                                        <option value="December">December</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="d-flex align-items-center dashboard-select">
+                                                <label className="me-2 mb-0">Select Week</label> 
+                                                <div style={{ width: 'auto' }}>
+                                                    <select
+                                                        className="form-control"
+                                                        onChange={handleWeekChange}
+                                                        value={selectedWeek}
+                                                        style={{
+                                                            width: '100px',
+                                                            paddingRight: '1.5rem', 
+                                                        }}
+                                                    >
+                                                        {weekOptions.map(week => (
+                                                            <option key={week} value={week}>Week {week}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="table-responsive mt-3 due-row">
+                                            <table className="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th className="index-column">#</th>
+                                                        <th className="name-column-2">Officer Name</th>
+                                                        {dates.map((date, index) => (
+                                                            <th key={index}>{date}</th>
+                                                        ))}
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {currentOfficers.map((officer, index) => (
+                                                        <tr key={`${officer.userId}-${selectedMonth}-${selectedWeek}`}>
+                                                            <td>{indexOfFirstOfficer + index + 1}</td>
+                                                            <td>{officer.officerName || 'Name not available'}</td>
+                                                            {officer.dues.map((due, dueIndex) => (
+                                                                <td key={`${officer.userId}-${due.day}-${due.status}`}>
+                                                                    <PaymentStatusTag
+                                                                        initialStatus={due.status}
+                                                                        onToggle={(newStatus) => {
+                                                                            handleStatusToggle(officer.userId, due.day, due.status);
+                                                                        }}
+                                                                    />
+                                                                </td>
+                                                            ))}
+                                                            <td className="text-center">
+                                                                {userPermissions.duesPayment === 'edit' && (
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn pay-button"
+                                                                        onClick={() => navigate(`/treasurer/manage-fee/amount/${officer.userId}`,
+                                                                            {
+                                                                                state: {
+                                                                                    officerName: officer.officerName,
+                                                                                    userId: officer.userId,
+                                                                                    userType: officer.userType
+                                                                                }
+                                                                            }
+                                                                        )}
+                                                                    >
+                                                                        <i className="fas fa-coins me-1"></i>
+                                                                        Pay in Amount
+                                                                    </button>
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        
+                                        <div className="d-flex justify-content-between align-items-center mb-2">
+                                            <div>
+                                                Showing {indexOfFirstOfficer + 1} to {Math.min(indexOfLastOfficer, officers.length)} of {officers.length} entries
+                                            </div>
+                                            <nav>
+                                                <ul className="pagination mb-0">
+                                                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                                        <button
+                                                            className="page-link"
+                                                            onClick={() => setCurrentPage(prev => prev - 1)}
+                                                            disabled={currentPage === 1}
+                                                        >
+                                                            Previous
+                                                        </button>
+                                                    </li>
+                                                    {[...Array(totalPages)].map((_, index) => (
+                                                        <li
+                                                            key={index + 1}
+                                                            className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}
+                                                        >
+                                                            <button
+                                                                className="page-link"
+                                                                onClick={() => setCurrentPage(index + 1)}
+                                                            >
+                                                                {index + 1}
+                                                            </button>
+                                                        </li>
+                                                    ))}
+                                                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                                        <button
+                                                            className="page-link"
+                                                            onClick={() => setCurrentPage(prev => prev + 1)}
+                                                            disabled={currentPage === totalPages}
+                                                        >
+                                                            Next
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+                                        </div>
+                                    </React.Fragment>
+                                )}
                             </div>
                         </div>
                     </div>

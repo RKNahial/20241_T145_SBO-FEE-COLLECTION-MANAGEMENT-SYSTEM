@@ -9,21 +9,28 @@
 
 .table td {
     border: none;
-    padding: 0.75rem;
+    padding: 0.5rem;
     text-align: center;
     background-color: #FEFEFE;
     color: #333333;
     transition: background-color 0.2s ease;
 }
+.fee-row .table td {
+    padding: 0.75rem !important;
+}
 
-.table th {
+.due-row .table td {
+    padding: 0.85rem !important;
+}
+
+
+.table th { 
     border: none;
-    padding: 0.75rem;
     text-align: center;
     background-color: #ffad5d;
     color: #333333;
     font-weight: bold;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease;     
 }
 
 .table tbody tr {
@@ -32,4 +39,24 @@
 
 .table tbody tr:last-child {
     border-bottom: none;
+}
+
+.index-column {
+    width: 4rem;  
+    text-align: center;
+}
+
+.name-column{
+    width: 20rem;  
+    text-align: center;
+}
+
+.name-column-2{
+    width: 15rem;  
+    text-align: center;
+}
+
+.date-time-column{
+    width: 10rem;  
+    text-align: center;
 }

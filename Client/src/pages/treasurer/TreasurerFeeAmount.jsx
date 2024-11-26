@@ -261,7 +261,7 @@ const TreasurerFeeAmount = () => {
                                                     className="btn btn-success me-2 system-button"
                                                     disabled={loading || amount <= 0}
                                                 >
-                                                    {loading ? 'Processing...' : 'Save'}
+                                                    {loading ? 'Saving...' : 'Save'}
                                                 </button>
                                                 <button
                                                     type="button"

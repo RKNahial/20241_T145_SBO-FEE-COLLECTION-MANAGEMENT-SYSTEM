@@ -9,6 +9,7 @@ import ViewFeeModal from '../../components/ViewFeeModal';
 import axios from 'axios';
 import emailjs from '@emailjs/browser';
 import '../../styles/PaymentTabs.css';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import { usePayment } from '../../context/PaymentContext';
 import Unauthorized from '../../components/Unauthorized';
 
@@ -97,6 +98,13 @@ const TreasurerFee = () => {
     const handleEditClick = (student) => {
         setSelectedStudent(student);
         setIsModalOpen(true);
+    };
+
+    const handleEmailSuccess = (message) => {
+        setEmailSuccessMessage(message);
+        setTimeout(() => {
+            setEmailSuccessMessage('');
+        }, 3000); 
     };
 
     const { triggerPaymentUpdate } = usePayment();
@@ -244,6 +252,7 @@ const TreasurerFee = () => {
 
     // Update the handleEmailClick function
     const handleEmailClick = async (student) => {
+        setLoading(true);
         try {
             const token = localStorage.getItem('token');
             const response = await axios.get(
@@ -301,13 +310,15 @@ const TreasurerFee = () => {
                         }
                     );
 
-                    setSuccessMessage(`Payment details sent to ${student.name}'s email successfully!`);
+                    setSuccessMessage(`Payment details emailed to ${student.name}'s successfully!`);
                     setTimeout(() => setSuccessMessage(''), 3000);
                 }
             }
         } catch (error) {
             console.error('Error sending email:', error);
             setError('Failed to send email. Please try again.');
+        } finally {
+            setLoading(false); 
         }
     };
 
@@ -619,7 +630,7 @@ const TreasurerFee = () => {
                                         </button>
                                     </form>
                                 </div>
-                                {/* New Tab Navigation */}
+                               {/* New Tab Navigation */}
                                 <div className="payment-status-tabs">
                                     <ul className="nav nav-tabs">
                                         {['All', 'Fully Paid', 'Partially Paid', 'Not Paid', 'Refunded'].map(status => {
@@ -627,7 +638,7 @@ const TreasurerFee = () => {
                                             return (
                                                 <li className="nav-item" key={status}>
                                                     <button
-                                                        className={`nav-link ${activeTab === status ? 'active' : ''}`}
+                                                        className={`nav-link ${activeTab === status ? 'active-tab' : ''}`}
                                                         onClick={() => setActiveTab(status)}
                                                     >
                                                         {status}
@@ -641,17 +652,24 @@ const TreasurerFee = () => {
 
                                 {/* Table Content */}
                                 {loading ? (
-                                    <div>Loading students...</div>
+                                <div style={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'center', 
+                                    alignItems: 'center',
+                                    minHeight: '300px' 
+                                }}>
+                                    <LoadingSpinner icon="coin" />
+                                </div>
                                 ) : error ? (
                                     <div className="alert alert-danger">{error}</div>
                                 ) : (
-                                    <div className="table-responsive mt-3">
+                                    <div className="table-responsive mt-3 fee-row">
                                         <table className="table table-hover">
                                             <thead>
                                                 <tr>
-                                                    <th>#</th>
+                                                    <th className="index-column">#</th>
                                                     <th>Student ID</th>
-                                                    <th>Student Name</th>
+                                                    <th className="name-column">Student Name</th>
                                                     <th>Year Level</th>
                                                     <th>Program</th>
                                                     <th>Payment Status</th>
@@ -665,12 +683,12 @@ const TreasurerFee = () => {
                                                         return getStudentPaymentStatus(student._id) === activeTab;
                                                     })
                                                     .map((student, index) => (
-                                                        <tr key={student._id}>
+                                                        <tr key={student._id} >
                                                             <td>{indexOfFirstItem + index + 1}</td>
                                                             <td>{student.studentId}</td>
                                                             <td>{student.name}</td>
                                                             <td>{student.yearLevel}</td>
-                                                            <td>{student.program}</td>
+                                                            <td>{student.program}</td>  
                                                             <td>
                                                                 <PaymentStatusTag
                                                                     status={getStudentPaymentStatus(student._id) || 'Not Paid'}
@@ -748,6 +766,8 @@ const TreasurerFee = () => {
                     isOpen={isViewModalOpen}
                     onClose={() => setIsViewModalOpen(false)}
                     student={viewedStudent}
+                    categoryId={selectedCategory}
+                    onEmailSuccess={handleEmailSuccess}
                 />
             )}
         </div>

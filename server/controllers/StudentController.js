@@ -189,35 +189,51 @@ exports.acquireLock = async (req, res) => {
 
 exports.releaseLock = async (req, res) => {
     try {
-        const { id, lockType } = req.params;
-        
-        if (!req.user || !req.user._id) {
-            return res.status(401).json({
-                success: false,
-                message: 'User authentication required'
-            });
-        }
+        const { id } = req.params;
+        const { lockType } = req.params;
+        const { userId } = req.body;
 
-        const result = await resourceLockService.releaseLock(
+        console.log('Release Lock Request:', {
             id,
-            req.user._id,
-            lockType
-        );
+            lockType,
+            userId,
+            body: req.body
+        });
 
-        res.json(result);
-    } catch (error) {
-        console.error('Error in releaseLock controller:', error);
-        
-        if (error.message.includes('Invalid')) {
+        if (!id || !lockType) {
             return res.status(400).json({
                 success: false,
-                message: error.message
+                message: 'Missing required parameters: id or lockType'
             });
         }
 
-        res.status(500).json({ 
-            success: false, 
-            message: 'Internal server error while releasing lock'
+        // If userId is not in body, try to get it from auth user
+        const effectiveUserId = userId || (req.user && req.user._id);
+        
+        if (!effectiveUserId) {
+            return res.status(400).json({
+                success: false,
+                message: 'User ID is required'
+            });
+        }
+
+        const result = await resourceLockService.releaseLock(id, effectiveUserId, lockType);
+        console.log('Release Lock Result:', result);
+
+        if (!result.success) {
+            return res.status(400).json(result);
+        }
+
+        res.json({
+            success: true,
+            message: 'Lock released successfully'
+        });
+    } catch (error) {
+        console.error('Error in releaseLock controller:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error while releasing lock',
+            error: error.message
         });
     }
 };

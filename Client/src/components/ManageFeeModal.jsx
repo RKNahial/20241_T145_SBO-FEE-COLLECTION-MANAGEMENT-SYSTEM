@@ -43,12 +43,22 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent,
     const handleStatusChange = (e) => {
         const newStatus = e.target.value;
         setStatus(newStatus);
-
-        // If status is "Fully Paid", set amount to total price
-        if (newStatus === 'Fully Paid') {
-            setAmountPaid(totalPrice.toString());
-        } else if (newStatus === 'Not Paid' || newStatus === 'Refunded') {
-            setAmountPaid('');
+        
+        switch (newStatus) {
+            case 'Fully Paid':
+                setAmountPaid(totalPrice.toString());
+                break;
+            case 'Not Paid':
+                setAmountPaid('0');
+                break;
+            case 'Refunded':
+                setAmountPaid(''); // Reset amount for refund
+                break;
+            case 'Partially Paid':
+                setAmountPaid(''); 
+                break;
+            default:
+                setAmountPaid('');
         }
     };
 
@@ -60,7 +70,7 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent,
     const confirmUpdate = async () => {
         const selectedCategory = paymentCategories.find(cat => cat.name === paymentCategory);
         const token = localStorage.getItem('token');
-
+    
         try {
             const response = await axios.put(
                 `http://localhost:8000/api/payment-fee/update/${selectedStudent._id}`,
@@ -79,7 +89,7 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent,
                     }
                 }
             );
-
+    
             if (response.data.success) {
                 onSave({
                     status,
@@ -168,21 +178,31 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent,
                             </div>
                         </div>
                         <div className="mb-3">
-                            <label className="mb-2">Amount Paid:</label>
-                            <input
-                                type="number"
-                                value={amountPaid}
-                                onChange={(e) => setAmountPaid(e.target.value)}
-                                required={status !== 'Not Paid'}
-                                readOnly={status === 'Not Paid' || status === 'Refunded'}
-                                className="form-control"
-                                style={{
-                                    ...modalStyles.input,
-                                    backgroundColor: status === 'Not Paid' || status === 'Refunded' ? '#cccccc' : 'white',
-                                    color: status === 'Not Paid' || status === 'Refunded' ? '#666666' : 'black',
-                                }}
-                            />
-                        </div>
+                        <label className="mb-2">
+                            {status === 'Refunded' ? 'Amount Refunded:' : 'Amount Paid:'}
+                        </label>
+                        <input
+                            type="number"
+                            value={amountPaid}
+                            onChange={(e) => setAmountPaid(e.target.value)}
+                            required={status !== 'Not Paid'}
+                            readOnly={status === 'Not Paid'}
+                            className="form-control"
+                            style={{
+                                ...modalStyles.input,
+                                backgroundColor: status === 'Not Paid' ? '#cccccc' : 'white',
+                                color: status === 'Not Paid' ? '#666666' : 'black',
+                            }}
+                            min="0"
+                            max={status === 'Refunded' ? totalPrice : undefined} // Set max for refund
+                            step="0.01"
+                        />
+                        {status === 'Refunded' && (
+                            <small className="text-muted">
+                                Enter the amount to be refunded (max: ₱{totalPrice})
+                            </small>
+                        )}
+                    </div>
                     </form>
                 </Modal.Body>
                 <Modal.Footer style={{ border: 'none', padding: '0 1.25rem 1.25rem 1.25rem' }}>
@@ -215,60 +235,62 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent,
                 </Modal.Footer>
             </Modal>
 
-            {/* Confirmation */}
+           {/* Confirmation */}
             <Modal
                 show={showConfirmation}
                 onHide={() => setShowConfirmation(false)}
                 style={{ ...modalStyles.modalTop, zIndex: 1070 }}
             >
-                <Modal.Header closeButton>
-                    <Modal.Title>
-                        <i className="fas fa-exclamation-circle me-2"></i>
-                        Confirm Update
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <p>Are you sure you want to save these changes?</p>
-                    <div className="mb-2">
-                        <strong>Student:</strong> {studentName}
-                    </div>
-                    <div className="mb-2">
-                        <strong>Payment Category:</strong> {paymentCategory}
-                    </div>
-                    <div className="mb-2">
-                        <strong>New Status:</strong> {status}
-                    </div>
-                    <div className="mb-2">
-                        <strong>Amount Paid:</strong> ₱{amountPaid || '0.00'}
-                    </div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <button
-                        type="button"
-                        onClick={confirmUpdate}
-                        style={{
-                            ...modalStyles.buttonStyles,
-                            backgroundColor: hoverSave ? '#E67E22' : '#FF8C00'
-                        }}
-                        onMouseEnter={() => setHoverSave(true)}
-                        onMouseLeave={() => setHoverSave(false)}
-                    >
-                        Confirm
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setShowConfirmation(false)}
-                        style={{
-                            ...modalStyles.buttonStyles,
-                            backgroundColor: hoverCancel ? '#cc0000' : 'red'
-                        }}
-                        onMouseEnter={() => setHoverCancel(true)}
-                        onMouseLeave={() => setHoverCancel(false)}
-                    >
-                        Cancel
-                    </button>
-                </Modal.Footer>
-            </Modal>
+            <Modal.Header closeButton>
+                <Modal.Title>
+                    <i className="fas fa-exclamation-circle me-2"></i>
+                    Confirm Update
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <p>Are you sure you want to save these changes?</p>
+                <div className="mb-2">
+                    <strong>Student:</strong> {studentName}
+                </div>
+                <div className="mb-2">
+                    <strong>Payment Category:</strong> {paymentCategory}
+                </div>
+                <div className="mb-2">
+                    <strong>New Status:</strong> {status}
+                </div>
+                <div className="mb-2">
+                    <strong>
+                        {status === 'Refunded' ? 'Amount Refunded:' : 'Amount Paid:'}
+                    </strong> ₱{amountPaid || '0.00'}
+                </div>
+            </Modal.Body>
+            <Modal.Footer>
+                <button
+                    type="button"
+                    onClick={confirmUpdate}
+                    style={{ 
+                        ...modalStyles.buttonStyles, 
+                        backgroundColor: hoverSave ? '#E67E22' : '#FF8C00'
+                    }}
+                    onMouseEnter={() => setHoverSave(true)}
+                    onMouseLeave={() => setHoverSave(false)}
+                >
+                    Confirm
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setShowConfirmation(false)}
+                    style={{ 
+                        ...modalStyles.buttonStyles, 
+                        backgroundColor: hoverCancel ? '#cc0000' : 'red'
+                    }}
+                    onMouseEnter={() => setHoverCancel(true)}
+                    onMouseLeave={() => setHoverCancel(false)}
+                >
+                    Cancel
+                </button>
+            </Modal.Footer>
+        </Modal>
         </>
     );
 };

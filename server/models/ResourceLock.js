@@ -28,7 +28,7 @@ const ResourceLockSchema = new mongoose.Schema({
 // Create a TTL index that expires documents after 60 seconds
 ResourceLockSchema.index({ lockedAt: 1 }, { expireAfterSeconds: 60 });
 
-// Add index for faster queries
-ResourceLockSchema.index({ resourceId: 1, lockType: 1, lockedAt: 1 });
+// Add compound index for resourceId and lockType to prevent duplicate locks
+ResourceLockSchema.index({ resourceId: 1, lockType: 1 }, { unique: true });
 
 module.exports = mongoose.model('ResourceLock', ResourceLockSchema);

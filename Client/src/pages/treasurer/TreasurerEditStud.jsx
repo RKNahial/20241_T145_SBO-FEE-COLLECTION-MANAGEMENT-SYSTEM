@@ -14,6 +14,8 @@ const TreasurerEditStud = () => {
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState("");
     const [showModal, setShowModal] = useState(false);
+    const [showExitModal, setShowExitModal] = useState(false);
+    const [isLocked, setIsLocked] = useState(false);
 
     // Get the student data passed from the previous page
     const studentData = location.state?.studentData;
@@ -34,7 +36,6 @@ const TreasurerEditStud = () => {
 
     useEffect(() => {
         let mounted = true;
-        let lockTimer;
 
         const acquireLock = async () => {
             try {
@@ -58,11 +59,9 @@ const TreasurerEditStud = () => {
                 if (!mounted) return;
 
                 if (!response.data.success) {
-                    // More detailed error handling
                     const errorMessage = response.data.message || 'Unable to acquire lock';
                     setError(errorMessage);
                     
-                    // If lock is already held by another user, navigate away
                     if (errorMessage.includes('currently being edited')) {
                         setTimeout(() => {
                             navigate('/treasurer/students');
@@ -71,12 +70,7 @@ const TreasurerEditStud = () => {
                     return;
                 }
 
-                // Set timer to show warning when lock is about to expire
-                lockTimer = setTimeout(() => {
-                    if (mounted) {
-                        setError('Your edit session will expire in 5 seconds. Please save your changes.');
-                    }
-                }, 55000); // Show warning 5 seconds before expiration
+                setIsLocked(true);
             } catch (error) {
                 if (!mounted) return;
 
@@ -103,10 +97,8 @@ const TreasurerEditStud = () => {
                             errorMessage = error.response.data.message || 'Unable to edit student at this time';
                     }
                 } else if (error.request) {
-                    // Request was made but no response received
                     errorMessage = 'No response from server. Please check your connection.';
                 } else {
-                    // Something happened in setting up the request
                     errorMessage = 'Error setting up the request. Please try again.';
                 }
 
@@ -117,44 +109,26 @@ const TreasurerEditStud = () => {
             }
         };
 
-        const releaseLock = async () => {
-            if (!mounted) return;
-            
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) return;
-
-                await axios.delete(
-                    `http://localhost:8000/api/students/${id}/release-lock/Edit`,
-                    {
-                        headers: { 
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        }
-                    }
-                );
-            } catch (error) {
-                console.error('Error releasing lock:', error);
-                // Don't show error to user since they're likely navigating away
+        // Handle browser back button
+        window.addEventListener('popstate', (e) => {
+            if (isLocked) {
+                e.preventDefault();
+                setShowExitModal(true);
             }
-        };
+        });
 
         acquireLock();
 
         return () => {
             mounted = false;
-            if (lockTimer) clearTimeout(lockTimer);
-            releaseLock();
         };
-    }, [id, navigate]);
+    }, [id, navigate, isLocked]);
 
     // Set initial form data when component mounts
     useEffect(() => {
         const fetchStudentData = async () => {
             try {
-                // First, check if student data was passed through navigation state
                 if (studentData) {
-                    console.log('Using student data from navigation state:', studentData);
                     setFormData({
                         studentId: studentData.studentId || '',
                         name: studentData.name || '',
@@ -165,10 +139,7 @@ const TreasurerEditStud = () => {
                     return;
                 }
 
-                // If no student data in state, fetch from API
                 const token = localStorage.getItem('token');
-                console.log('Fetching student data for ID:', id);
-                
                 const response = await axios.get(
                     `http://localhost:8000/api/update/students/${id}`,
                     { 
@@ -179,12 +150,8 @@ const TreasurerEditStud = () => {
                     }
                 );
 
-                console.log('API Response:', response.data);
-
                 if (response.data.success) {
                     const apiStudentData = response.data.data;
-                    console.log('Setting form data from API:', apiStudentData);
-                    
                     setFormData({
                         studentId: apiStudentData.studentId || '',
                         name: apiStudentData.name || '',
@@ -204,7 +171,6 @@ const TreasurerEditStud = () => {
         fetchStudentData();
     }, [id, studentData]);
 
-    // NEW: Fetch user permissions
     useEffect(() => {
         const fetchUserPermissions = async () => {
             try {
@@ -222,7 +188,6 @@ const TreasurerEditStud = () => {
                         updateStudent: updatePermission
                     });
 
-                    // Instead of redirecting, set an error message
                     if (updatePermission !== 'edit') {
                         setError('You do not have permission to edit students');
                     }
@@ -234,9 +199,20 @@ const TreasurerEditStud = () => {
         };
 
         fetchUserPermissions();
-    }, [navigate]);
+    }, []);
 
-   
+    const handleExit = () => {
+        setShowExitModal(true);
+    };
+
+    const handleConfirmExit = () => {
+        setShowExitModal(false);
+        navigate('/treasurer/students');
+    };
+
+    const handleCancelExit = () => {
+        setShowExitModal(false);
+    };
 
     const clearError = () => {
         setTimeout(() => {
@@ -244,18 +220,15 @@ const TreasurerEditStud = () => {
         }, 3000);
     };
 
-    // Modify handleSubmit to check permissions
     const handleSubmit = (e) => {
         e.preventDefault();
         
-        // Check if user has edit permission
         if (userPermissions.updateStudent !== 'edit') {
             setError('You do not have permission to edit students');
             return;
         }
 
         try {
-            // Validate all fields
             if (!formData.studentId || !formData.name || !formData.yearLevel ||
                 !formData.program || !formData.institutionalEmail) {
                 setError('All fields are required');
@@ -263,14 +236,12 @@ const TreasurerEditStud = () => {
                 return;
             }
 
-            // Validate email format
             if (!formData.institutionalEmail.endsWith('@student.buksu.edu.ph')) {
                 setError('Email must be a valid BukSU student email');
                 clearError();
                 return;
             }
 
-            // If validation passes, show modal
             setShowModal(true);
         } catch (err) {
             setError(err.message || 'Failed to update student. Please try again.');
@@ -278,7 +249,6 @@ const TreasurerEditStud = () => {
         }
     };
 
-    // Also update your confirmUpdate function
     const confirmUpdate = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -310,6 +280,22 @@ const TreasurerEditStud = () => {
             );
 
             if (response.data.success) {
+                // Release the lock after successful update
+                try {
+                    await axios.delete(
+                        `http://localhost:8000/api/students/${id}/release-lock/Edit`,
+                        {
+                            headers: { 
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            }
+                        }
+                    );
+                    setIsLocked(false);
+                } catch (lockError) {
+                    console.error('Error releasing lock:', lockError);
+                }
+
                 setSuccessMessage('Student updated successfully!');
                 setShowModal(false);
                 setTimeout(() => {
@@ -401,15 +387,15 @@ const TreasurerEditStud = () => {
                                                 />
                                             </div>
                                             <div className="mb-4">
-                                                <label className="mb-1">Choose Year Level</label>
+                                                <label className="mb-1">Year Level</label>
                                                 <select
                                                     name="yearLevel"
                                                     value={formData.yearLevel}
                                                     onChange={handleChange}
-                                                    className="form-control form-select"
+                                                    className="form-select"
                                                     required
                                                 >
-                                                    <option value="" disabled>Select a year level</option>
+                                                    <option value="">Select Year Level</option>
                                                     <option value="1st Year">1st Year</option>
                                                     <option value="2nd Year">2nd Year</option>
                                                     <option value="3rd Year">3rd Year</option>
@@ -417,25 +403,24 @@ const TreasurerEditStud = () => {
                                                 </select>
                                             </div>
                                             <div className="mb-4">
-                                                <label className="mb-1">Choose Program</label>
-                                                <select
+                                                <label className="mb-1">Program</label>
+                                                <input
+                                                    type="text"
                                                     name="program"
                                                     value={formData.program}
                                                     onChange={handleChange}
-                                                    className="form-control form-select"
+                                                    className="form-control"
+                                                    placeholder="Enter program"
                                                     required
-                                                >
-                                                    <option value="" disabled>Select a program</option>
-                                                    <option value="BSIT">BSIT</option>
-                                                    <option value="BSEMC">BSEMC</option>
-                                                    <option value="BSET">BSET</option>
-                                                    <option value="BSAT">BSAT</option>
-                                                    <option value="BSFT">BSFT</option>
-                                                </select>
+                                                />
                                             </div>
-                                            <div className="mb-0">
-                                                <button type="submit" className="btn system-button update-button">
-                                                    <i className="fa-solid fa-pen me-1"></i> Update
+                                            <div className="d-grid mt-4">
+                                                <button
+                                                    type="submit"
+                                                    className="btn btn-primary"
+                                                    disabled={!userPermissions.updateStudent === 'edit'}
+                                                >
+                                                    Update Student
                                                 </button>
                                             </div>
                                         </form>
@@ -446,28 +431,64 @@ const TreasurerEditStud = () => {
                     </div>
                 </div>
             </div>
-            {/* Update Confirmation Modal */}
-            <Modal show={showModal} onHide={() => setShowModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Confirm Update Student</Modal.Title>
+
+            {/* Confirmation Modal */}
+            <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+                <Modal.Header closeButton className="bg-light">
+                    <Modal.Title className="fw-bold text-primary">Confirm Student Information Update</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
-                    Do you want to update <strong>{formData.name}</strong>?
+                <Modal.Body className="text-center">
+                    <div className="mb-3">
+                        <p className="lead">You are about to update the following student's information:</p>
+                        <ul className="list-unstyled">
+                            <li><strong>Name:</strong> {formData.name}</li>
+                            <li><strong>Student ID:</strong> {formData.studentId}</li>
+                            <li><strong>Program:</strong> {formData.program}</li>
+                        </ul>
+                    </div>
+                    <p className="text-muted">
+                        <i className="bi bi-info-circle me-2"></i>
+                        Please review the details carefully before confirming.
+                    </p>
                 </Modal.Body>
-                <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button
-                        variant="btn btn-confirm"
-                        onClick={confirmUpdate}
-                        style={{ flex: 'none' }}
-                    >
-                        Confirm
-                    </Button>
-                    <Button
-                        variant="btn btn-cancel"
-                        onClick={() => setShowModal(false)}
-                        style={{ marginRight: '0.5rem', flex: 'none' }}
-                    >
+                <Modal.Footer>
+                    <Button variant="outline-secondary" onClick={() => setShowModal(false)}>
                         Cancel
+                    </Button>
+                    <Button variant="primary" onClick={confirmUpdate}>
+                        <i className="bi bi-check-circle me-2"></i>
+                        Confirm Update
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            {/* Exit Confirmation Modal */}
+            <Modal show={showExitModal} onHide={handleCancelExit} centered>
+                <Modal.Header closeButton className="bg-warning">
+                    <Modal.Title className="fw-bold text-white">Unsaved Changes</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="text-center">
+                    <div className="mb-3">
+                        <p className="lead">
+                            <i className="bi bi-exclamation-triangle me-2 text-warning"></i>
+                            You have unsaved changes
+                        </p>
+                        <p>
+                            The student information for <strong>{formData.name}</strong> has been modified 
+                            but not yet saved. Are you sure you want to leave this page?
+                        </p>
+                    </div>
+                    <p className="text-muted small">
+                        Leaving now will discard all recent changes.
+                    </p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="outline-secondary" onClick={handleCancelExit}>
+                        Stay on Page
+                    </Button>
+                    <Button variant="danger" onClick={handleConfirmExit}>
+                        <i className="bi bi-box-arrow-right me-2"></i>
+                        Leave Page
                     </Button>
                 </Modal.Footer>
             </Modal>

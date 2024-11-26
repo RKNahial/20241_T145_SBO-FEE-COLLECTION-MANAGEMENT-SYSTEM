@@ -20,11 +20,9 @@ import Login from './pages/Login';
 import OfficerDashboard from './pages/officer/OfficerDashboard';
 import OfficerFee from './pages/officer/OfficerFee';
 import OfficerStudents from './pages/officer/OfficerStudents';
+import OfficerArchivedStud from './pages/officer/OfficerArchivedStud';
 import OfficerAddStud from './pages/officer/OfficerAddStud';
 import OfficerEditStud from './pages/officer/OfficerEditStud';
-import OfficerEvents from './pages/officer/OfficerEvents';
-import OfficerAddEvent from './pages/officer/OfficerAddEvent';
-import OfficerEditEvent from './pages/officer/OfficerEditEvent';
 import OfficerReports from './pages/officer/OfficerReports';
 import OfficerProfile from './pages/officer/OfficerProfile';
 
@@ -35,12 +33,12 @@ import TreasurerFeeCategory from './pages/treasurer/TreasurerFeeCategory';
 import TreasurerAddCategory from './pages/treasurer/TreasurerAddCategory';
 import TreasurerEditCategory from './pages/treasurer/TreasurerEditCategory';
 import TreasurerStudents from './pages/treasurer/TreasurerStudents';
+import TreasurerArchivedStud from './pages/treasurer/TreasurerArchivedStud';
 import TreasurerAddStud from './pages/treasurer/TreasurerAddStud';
 import TreasurerEditStud from './pages/treasurer/TreasurerEditStud';
 import TreasurerReports from './pages/treasurer/TreasurerReports';
 import TreasurerDues from './pages/treasurer/TreasurerDues';
 import TreasurerProfile from './pages/treasurer/TreasurerProfile';
-import TreasurerArchivedStud from './pages/treasurer/TreasurerArchivedStud';
 
 import GovDashboard from './pages/governor/GovDashboard';
 import GovStudents from './pages/governor/GovStudents';
@@ -136,13 +134,11 @@ const App = () => {
                             <ProtectedRoute allowedRoles={['officer']}>
                                 <Routes>
                                     <Route path="dashboard" element={<OfficerDashboard />} />
-                                    <Route path="manage-fee" element={<OfficerFee />} />
+                                    <Route path="review-fee" element={<OfficerFee />} />
                                     <Route path="students" element={<OfficerStudents />} />
+                                    <Route path="students/archived" element={<OfficerArchivedStud />} />
                                     <Route path="students/add-new" element={<OfficerAddStud />} />
                                     <Route path="students/edit/:id" element={<OfficerEditStud />} />
-                                    <Route path="events" element={<OfficerEvents />} />
-                                    <Route path="events/add-new" element={<OfficerAddEvent />} />
-                                    <Route path="events/edit/:id" element={<OfficerEditEvent />} />
                                     <Route path="reports" element={<OfficerReports />} />
                                     <Route path="profile" element={<OfficerProfile />} />
                                 </Routes>

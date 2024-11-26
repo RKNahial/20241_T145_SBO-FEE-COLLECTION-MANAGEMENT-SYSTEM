@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
-import { Modal, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Modal, Button } from 'react-bootstrap';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import TreasurerSidebar from './TreasurerSidebar';
 import TreasurerNavbar from './TreasurerNavbar';
 import Unauthorized from '../../components/Unauthorized';
@@ -433,7 +434,7 @@ const TreasurerStudents = () => {
                             <div className="card-header">
                                 <div className="row">
                                     <div className="col col-md-6">
-                                        <i className="fa fa-cog me-2"></i> <strong>Students</strong>
+                                        <i className="far fa-user me-2"></i> <strong>Students</strong>
                                     </div>
                                 </div>
                             </div>
@@ -450,7 +451,16 @@ const TreasurerStudents = () => {
                                     </div>
                                 )}
                                 {loading ? (
-                                    <div>Loading students...</div>
+                                <div style={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'center', 
+                                    alignItems: 'center',
+                                    minHeight: '300px' 
+                                }}>
+                                    <LoadingSpinner icon="user-graduate" />
+                                </div>
+                                ) : error ? (
+                                    <div className="alert alert-danger">{error}</div>
                                 ) : (
                                     < >
                                         {/* Actions and Filters */}
@@ -503,9 +513,9 @@ const TreasurerStudents = () => {
                                         <table className="table table-bordered table-hover">
                                             <thead>
                                                 <tr>
-                                                    <th>#</th>
+                                                    <th className="index-column">#</th>
                                                     <th>Student ID</th>
-                                                    <th>Student Name</th>
+                                                    <th className="name-column">Student Name</th>
                                                     <th>Year Level</th>
                                                     <th>Program</th>
                                                     <th>Status</th>
@@ -579,7 +589,7 @@ const TreasurerStudents = () => {
                                             </nav>
                                         </div>
                                     </ >
-                                )}
+                                )} 
                             </div>
                         </div>
                     </div>

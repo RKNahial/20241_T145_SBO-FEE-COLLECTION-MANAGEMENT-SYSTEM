@@ -1,12 +1,14 @@
 // src//pages/treasurer/TreasurerSidebar.jsx
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { auth } from '../firebase/firebaseConfig';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../../context/AuthContext';
 
 const TreasurerSidebar = ({ isCollapsed }) => {
+    const location = useLocation();
+    const navigate = useNavigate();
     const { setUser } = useAuth();
 
     const handleLogout = async () => {
@@ -51,27 +53,77 @@ const TreasurerSidebar = ({ isCollapsed }) => {
         }
     };
 
+    const handleNavigation = async (path) => {
+        // Check if we're currently in the edit student page
+        const currentPath = location.pathname;
+        const isEditingStudent = currentPath.includes('/treasurer/edit-student/');
+        
+        if (isEditingStudent) {
+            try {
+                // Extract student ID from the current path
+                const studentId = currentPath.split('/').pop();
+                const token = localStorage.getItem('token');
+                const userDetailsStr = localStorage.getItem('userDetails');
+                
+                if (!token || !userDetailsStr) {
+                    console.error('Missing authentication details');
+                    navigate('/login');
+                    return;
+                }
+
+                const userDetails = JSON.parse(userDetailsStr);
+
+                // Release the lock
+                const response = await axios({
+                    method: 'delete',
+                    url: `http://localhost:8000/api/students/${studentId}/release-lock/Edit`,
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    data: {
+                        userId: userDetails._id
+                    }
+                });
+
+                if (response.data && response.data.success) {
+                    console.log('Lock released successfully');
+                } else {
+                    console.error('Failed to release lock:', response.data?.message);
+                }
+            } catch (error) {
+                console.error('Error releasing lock:', error.response?.data || error.message);
+            } finally {
+                // Navigate regardless of lock release success
+                navigate(path);
+            }
+        } else {
+            // If not on edit page, just navigate
+            navigate(path);
+        }
+    };
+
     return (
         <div className={`sidebar ${isCollapsed ? 'collapsed' : 'expanded'}`}>
             <nav className="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div className="sb-sidenav-menu">
                     <div className="nav" style={{ marginTop: '-0.55rem' }}>
                         <div>
-                            <NavLink className={({ isActive }) => `nav-link mt-4 ${isActive ? 'active' : ''}`} to="/treasurer/dashboard" end>
+                            <div onClick={() => handleNavigation('/treasurer/dashboard')} className={`nav-link ${location.pathname === '/treasurer/dashboard' ? 'active' : ''}`} role="button">
                                 <i className="fas fa-home icon-space"></i>{!isCollapsed && <span> Dashboard</span>}
-                            </NavLink>
-                            <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/treasurer/manage-fee" end>
+                            </div>
+                            <div onClick={() => handleNavigation('/treasurer/manage-fee')} className={`nav-link ${location.pathname === '/treasurer/manage-fee' ? 'active' : ''}`} role="button">
                                 <i className="fas fa-hand-holding-usd icon-space"></i>{!isCollapsed && <span> Manage Fee</span>}
-                            </NavLink>
-                            <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/treasurer/students" end>
+                            </div>
+                            <div onClick={() => handleNavigation('/treasurer/students')} className={`nav-link ${location.pathname === '/treasurer/students' ? 'active' : ''}`} role="button">
                                 <i className="far fa-user icon-space"></i>{!isCollapsed && <span> Students</span>}
-                            </NavLink>
-                            <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/treasurer/reports" end>
+                            </div>
+                            <div onClick={() => handleNavigation('/treasurer/reports')} className={`nav-link ${location.pathname === '/treasurer/reports' ? 'active' : ''}`} role="button">
                                 <i className="far fa-file-alt icon-space"></i>{!isCollapsed && <span> Reports</span>}
-                            </NavLink>
-                            <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/treasurer/daily-dues" end>
+                            </div>
+                            <div onClick={() => handleNavigation('/treasurer/daily-dues')} className={`nav-link ${location.pathname === '/treasurer/daily-dues' ? 'active' : ''}`} role="button">
                                 <i className="fas fa-coins icon-space"></i>{!isCollapsed && <span> Daily Dues</span>}
-                            </NavLink>
+                            </div>
                         </div>
                         <button
                             className="nav-link logout-link"
