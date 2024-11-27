@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const Admin = require('../models/AdminSchema');
 const Treasurer = require('../models/TreasurerSchema');
 const Officer = require('../models/OfficerSchema');
+const Governor = require('../models/GovernorSchema');
 
 const auth = async (req, res, next) => {
     try {
@@ -13,7 +14,8 @@ const auth = async (req, res, next) => {
         const Model = {
             'Admin': Admin,
             'Treasurer': Treasurer,
-            'Officer': Officer
+            'Officer': Officer,
+            'Governor': Governor
         }[userModel];
 
         if (!Model) {

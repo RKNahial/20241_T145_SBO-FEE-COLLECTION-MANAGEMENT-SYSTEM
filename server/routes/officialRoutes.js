@@ -16,4 +16,8 @@ router.put('/officials/:id', authMiddleware, officialController.updateOfficial);
 router.put('/officials/:id/archive', authMiddleware, officialController.toggleArchiveStatus);
 router.put('/officials/:id/unarchive', authMiddleware, officialController.toggleArchiveStatus);
 
-module.exports = router; 
+// Profile routes
+router.get('/governor/profile', authMiddleware, officialController.getGovernorProfile);
+router.put('/governor/profile/update', authMiddleware, officialController.updateGovernorProfile);
+
+module.exports = router;

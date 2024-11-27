@@ -1,245 +1,132 @@
 // src/pages/Gov/GovOfficers.jsx
 import { Helmet } from 'react-helmet';
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from 'react-router-dom';
 import GovSidebar from "./GovSidebar"; 
 import GovNavbar from "./GovNavbar";
+import axios from 'axios';
+import LoadingSpinner from '../../components/LoadingSpinner';
+
+// Status Tag Component
+const StatusTag = ({ status, onClick }) => {
+    let className = status === 'Active' ? 'badge active-status' : 'badge archived-status';
+    return (
+        <span
+            className={className}
+            onClick={onClick}
+            style={{ cursor: 'pointer' }}
+        >
+            {status}
+        </span>
+    );
+};
 
 const GovOfficers = () => {
-    // NAV AND SIDEBAR
+    // State management
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [officers, setOfficers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState("");
+    const [searchTerm, setSearchTerm] = useState("");
+    const [statusFilter, setStatusFilter] = useState("Active");
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+    const [archivingId, setArchivingId] = useState(null);
+
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
     };
 
-    // Sample data for demonstration only
-    const sampleStud = [
-        {
-            id_no: '1901104188',
-            name: 'Mary Joy Alonzo',
-            year_level: '4th Year',
-            program: 'BSIT',
-            position: 'Treasurer',
-            status: 'Active'
-        },
-        {
-            id_no: '2101102924',
-            name: 'Jonathan Cruz',
-            year_level: '4th Year',
-            program: 'BSIT',
-            position: 'Governor',
-            status: 'Active'
-        },
-        {
-            id_no: '1901102046',
-            name: 'Reena Dela Cruz',
-            year_level: '3rd Year',
-            program: 'BSIT',
-            position: 'P.I.O',
-            status: 'Archived'
-        },
-        {
-            id_no: '2101101354',
-            name: 'Peter John Garcia',
-            year_level: '4th Year',
-            program: 'BSIT',
-            position: 'Secretary',
-            status: 'Active'
-        },
-        {
-            id_no: '1901103113',
-            name: 'Jessa Mae Javier',
-            year_level: '2nd Year',
-            program: 'BSIT',
-            position: '2nd Year Representative',
-            status: 'Active'
-        },
-        {
-            id_no: '2101101979',
-            name: 'Mark Anton Lim',
-            year_level: '1st Year',
-            program: 'BSIT',
-            position: '1st Year Representative',
-            status: 'Archived'
-        },
-        {
-            id_no: '2101103848',
-            name: 'Anna Marie Mendoza',
-            year_level: '4th Year',
-            program: 'BSIT',
-            position: 'Treasurer',
-            status: 'Active'
-        },            
-        {
-            id_no: '1901104713',
-            name: 'Liza Reyes',
-            year_level: '4th Year',
-            program: 'BSIT',
-            position: 'Governor',
-            status: 'Archived'
-        },            
-        {
-            id_no: '1901104188',
-            name: 'Samuel Santos',
-            year_level: '4th Year',
-            program: 'BSIT',
-            position: 'P.I.O',
-            status: 'Active'
-        },
-        {
-            id_no: '1901104235',
-            name: 'Mary Joy Alonzo',
-            year_level: '3rd Year',
-            program: 'BSIT',
-            position: '3rd Year Representative',
-            status: 'Active'
-        },
-        {
-            id_no: '1901104188',
-            name: 'I AM',
-            year_level: '4th Year',
-            program: 'BSIT',
-            position: 'Secretary',
-            status: 'Archived'
-        },
-        {
-            id_no: '2101102924',
-            name: 'ONLY TESTING',
-            year_level: '4th Year',
-            program: 'BSIT',
-            position: 'Governor',
-            status: 'Active'
-        },
-        {
-            id_no: '1901102046',
-            name: 'IF THE PAGINATION',
-            year_level: '3rd Year',
-            program: 'BSIT',
-            position: '3rd Year Representative',
-            status: 'Archived'
-        },
-        {
-            id_no: '2101101354',
-            name: 'IS WORKING',
-            year_level: '4th Year',
-            program: 'BSIT',
-            position: 'P.I.O',
-            status: 'Active'
-        },
-        {
-            id_no: '1901103113',
-            name: 'BLAH BLAH BLAH',
-            year_level: '2nd Year',
-            program: 'BSIT',
-            position: '2nd Year Representative',
-            status: 'Archived'
-        },
-        {
-            id_no: '2101101979',
-            name: 'PROPER NAME',
-            year_level: '1st Year',
-            program: 'BSIT',
-            position: '1st Year Representative',
-            status: 'Active'
-        },
-        {
-            id_no: '2101103848',
-            name: 'PLACE NAME',
-            year_level: '4th Year',
-            program: 'BSIT',
-            position: 'Secretary',
-            status: 'Archived'
-        },            
-        {
-            id_no: '1901104713',
-            name: 'BACKSTORY STUFF',
-            year_level: '4th Year',
-            program: 'BSIT',
-            position: 'Governor',
-            status: 'Active'
-        },            
-        {
-            id_no: '1901104188',
-            name: 'Samuel Santos',
-            year_level: '4th Year',
-            program: 'BSIT',
-            position: 'P.I.O',
-            status: 'Active'
-        },
-        {
-            id_no: '1901104235',
-            name: 'Mary Joy Alonzo',
-            year_level: '3rd Year',
-            program: 'BSIT',
-            position: '3rd Year Representative',
-            status: 'Archived'
-        }
-    ];
-
-    // HANDLE ARCHIVE
-    const [successMessage, setSuccessMessage] = useState("");
-    const handleArchive = (studentName) => {
-        const confirmArchive = window.confirm(`Are you sure you want to archive ${studentName}?`);
-        if (confirmArchive) {
-            // Perform the archive action, e.g., make an API call
-            console.log(`${studentName} has been archived.`);
-            setSuccessMessage(`${studentName} has been successfully archived!`);
-            
-            setTimeout(() => {
-                setSuccessMessage("");
-            }, 2500);
+    // Fetch officers
+    const fetchOfficers = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get('http://localhost:8000/api/officials', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setOfficers(response.data.data);
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching officials:', error);
+            setError('Failed to fetch officials. Please try again later.');
+            setLoading(false);
         }
     };
 
-    // HANDLE UNARCHIVE
-    const handleUnarchive = (studentName) => {
-        const confirmUnarchive = window.confirm(`Are you sure you want to unarchive ${studentName}?`);
-        if (confirmUnarchive) {
-            // Perform the unarchive action, e.g., make an API call
-            console.log(`${studentName} has been unarchived.`);
-            setSuccessMessage(`${studentName} has been successfully unarchived!`);
-            
-            setTimeout(() => {
-                setSuccessMessage("");
-            }, 2500);
+    useEffect(() => {
+        fetchOfficers();
+    }, []);
+
+    // Handle archive/unarchive
+    const handleArchive = async (officialId, officialName, type) => {
+        try {
+            setArchivingId(officialId);
+            const token = localStorage.getItem('token');
+            await axios.put(`http://localhost:8000/api/officials/${officialId}/archive?type=${type}`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setSuccessMessage(`${officialName} has been archived successfully`);
+            fetchOfficers();
+            setTimeout(() => setSuccessMessage(''), 3000);
+        } catch (error) {
+            setError('Failed to archive official. Please try again.');
+        } finally {
+            setArchivingId(null);
         }
     };
-    
 
-    // IMPORT EXCEL
-    const fileInputRef = useRef(null);
-    const handleImportClick = () => {
-        fileInputRef.current.click();
-    };
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        // Handle the file upload logic here
-        console.log(file);
-    };
-
-    // HANDLE GOOGLE NOTES
-    const handleOpenGoogleNotes = (studentId) => {
-        const noteTitle = `Notes for ${studentId}`;
-        const noteContent = `Add your notes for student ${studentId} here.`;
-        
-        // Construct the Google Keep URL
-        const googleKeepUrl = `https://keep.google.com/#NOTE&title=${encodeURIComponent(noteTitle)}&text=${encodeURIComponent(noteContent)}`;
-    
-        // Open in a new tab
-        window.open(googleKeepUrl, '_blank');
+    const handleUnarchive = async (officialId, officialName, type) => {
+        try {
+            setArchivingId(officialId);
+            const token = localStorage.getItem('token');
+            await axios.put(`http://localhost:8000/api/officials/${officialId}/unarchive?type=${type}`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setSuccessMessage(`${officialName} has been unarchived successfully`);
+            fetchOfficers();
+            setTimeout(() => setSuccessMessage(''), 3000);
+        } catch (error) {
+            setError('Failed to unarchive official. Please try again.');
+        } finally {
+            setArchivingId(null);
+        }
     };
 
-    // PAGINATION
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10; 
+    // Filter and search functionality
+    const filteredOfficers = officers.filter(officer => {
+        const searchableFields = [
+            officer.ID?.toLowerCase() || '',
+            officer.name?.toLowerCase() || '',
+            officer.position?.toLowerCase() || '',
+            officer.email?.toLowerCase() || ''
+        ];
+
+        const searchTermLower = searchTerm.toLowerCase();
+        const matchesSearch = searchableFields.some(field =>
+            field.includes(searchTermLower)
+        );
+
+        if (statusFilter === "All") return matchesSearch;
+        return matchesSearch &&
+            (statusFilter === "Active" ? !officer.isArchived : officer.isArchived);
+    });
+
+    // Pagination
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = sampleStud.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(sampleStud.length / itemsPerPage);
-    const paginate = (pageNumber) => setCurrentPage(pageNumber);
-    const showingStart = indexOfFirstItem + 1;
-    const showingEnd = Math.min(indexOfLastItem, sampleStud.length);
-    const totalEntries = sampleStud.length;
+    const currentItems = filteredOfficers.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredOfficers.length / itemsPerPage);
+
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+        setCurrentPage(1);
+    };
+
+    // Sort items by name
+    const sortedItems = [...currentItems].sort((a, b) =>
+        a.name.localeCompare(b.name)
+    );
 
     return (
         <div className="sb-nav-fixed">
@@ -271,11 +158,17 @@ const GovOfficers = () => {
                             </div>
 
                             <div className="card-body">
-                                {successMessage && (  
+                                {error && (
+                                        <div className="alert alert-danger" role="alert">
+                                            {error}
+                                        </div>
+                                    )}
+                                {successMessage && (
                                         <div className="alert alert-success" role="alert">
                                             {successMessage}
                                         </div>
                                     )}
+
                                 {/* ADD NEW OFFICER*/}
                                 <div className="d-flex justify-content-between mb-3 align-items-center">
                                     <div className="d-flex me-auto">
@@ -287,104 +180,154 @@ const GovOfficers = () => {
                                     <div className="d-flex align-items-center me-3"> 
                                         <label className="me-2 mb-0">Officer Status</label>
                                         <div className="dashboard-select" style={{ width: 'auto' }}>
-                                            <select className="form-control" defaultValue="">
-                                                <option value="" disabled>Select status</option>
+                                            <select 
+                                                className="form-control" 
+                                                value={statusFilter}
+                                                onChange={(e) => setStatusFilter(e.target.value)}
+                                            >
+                                                <option value="All">All</option>
                                                 <option value="Active">Active</option>
                                                 <option value="Archived">Archived</option>
                                             </select>
                                         </div>
                                     </div>
-                                    <form method="get" className="search-bar ">
-                                        <input type="text" placeholder="Search officer" className="search-input" />
-                                        <button type="submit" className="search">
+                                    <div className="search-bar">
+                                        <input 
+                                            type="text" 
+                                            placeholder="Search officer" 
+                                            className="form-control search-input" 
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                        />
+                                        <button type="button" className="search">
                                             <i className="fas fa-search"></i>
                                         </button>
-                                    </form>
-                                </div>
-
-                                {/* TABLE OFFICERS*/}
-                                <table className="table table-bordered table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Officer ID</th>
-                                            <th>Officer Name</th>
-                                            <th>Position</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {currentItems.map((student, index) => (
-                                            <tr key={student.id_no}>
-                                                <td>{index + indexOfFirstItem + 1}</td> 
-                                                <td>{student.id_no}</td>
-                                                <td>{student.name}</td>
-                                                <td>{student.position}</td>
-                                                <td>{student.status}</td>
-                                                <td>
-                                                    <Link to={`/governor/officers/edit/${student.id_no}`} className="btn btn-edit btn-sm">
-                                                        <i className="fas fa-edit"></i>
-                                                    </Link>
-                                                    <button 
-                                                        className={`btn btn-archive btn-sm ${student.status === 'Archived' ? 'btn-open' : ''}`} 
-                                                        onClick={() => {
-                                                            if (student.status === 'Active') {
-                                                                handleArchive(student.name);
-                                                            } else {
-                                                                // Handle unarchive action
-                                                                handleUnarchive(student.name);
-                                                                // Update student status logic here if necessary
-                                                            }
-                                                        }}
-                                                    >
-                                                        <i className={`fas fa-${student.status === 'Active' ? 'archive' : 'box-open'}`}></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-
-                                {/* SHOWING OF ENTRIES AND PAGINATION */}
-                                <div className="d-flex justify-content-between align-items-center mb-2" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
-                                    <div>
-                                        Showing {showingStart} to {showingEnd} of {totalEntries} entries
                                     </div>
-                                    <nav>
-                                        <ul className="pagination mb-0">
-                                            <li className="page-item">
-                                                <button 
-                                                    className="page-link" 
-                                                    onClick={() => paginate(currentPage - 1)} 
-                                                    disabled={currentPage === 1}
-                                                >
-                                                    Previous
-                                                </button>
-                                            </li>
-                                            {Array.from({ length: totalPages }, (_, index) => (
-                                                <li key={index + 1} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
-                                                    <button 
-                                                        className="page-link" 
-                                                        onClick={() => paginate(index + 1)}
-                                                    >
-                                                        {index + 1}
-                                                    </button>
-                                                </li>
-                                            ))}
-                                            <li className="page-item">
-                                                <button 
-                                                    className="page-link page-label" 
-                                                    onClick={() => paginate(currentPage + 1)} 
-                                                    disabled={currentPage === totalPages}
-                                                >
-                                                    Next
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    </nav>
                                 </div>
 
+                                {/* Table section */}
+                                {loading ? (
+                                    <LoadingSpinner
+                                        text="Loading Officers"
+                                        icon="users"
+                                        subtext="Fetching officer records..."
+                                    />
+                                ) : error ? (
+                                    <div className="alert alert-danger">
+                                        <i className="fas fa-exclamation-circle me-2"></i>
+                                        {error}
+                                    </div>
+                                ) : (
+                                    <>
+                                        <table className="table table-bordered table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Officer ID</th>
+                                                    <th>Officer Name</th>
+                                                    <th>Position</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {sortedItems.map((officer, index) => (
+                                                    <tr key={officer._id}>
+                                                        <td>{indexOfFirstItem + index + 1}</td>
+                                                        <td>{officer.ID}</td>
+                                                        <td>{officer.name}</td>
+                                                        <td>{officer.position}</td>
+                                                        <td>
+                                                            <StatusTag
+                                                                status={officer.isArchived ? 'Archived' : 'Active'}
+                                                                onClick={() => {
+                                                                    if (officer.isArchived) {
+                                                                        handleUnarchive(officer._id, officer.name, officer.type);
+                                                                    } else {
+                                                                        handleArchive(officer._id, officer.name, officer.type);
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <div className="btn-group">
+                                                                <Link
+                                                                    to={`/governor/officers/edit/${officer._id}`}
+                                                                    className="btn btn-edit btn-sm"
+                                                                >
+                                                                    <i className="fas fa-edit"></i>
+                                                                </Link>
+                                                                <button
+                                                                    className={`btn btn-archive btn-sm ${officer.isArchived ? 'btn-open' : ''}`}
+                                                                    onClick={() => {
+                                                                        if (officer.isArchived) {
+                                                                            handleUnarchive(officer._id, officer.name, officer.type);
+                                                                        } else {
+                                                                            handleArchive(officer._id, officer.name, officer.type);
+                                                                        }
+                                                                    }}
+                                                                    disabled={archivingId === officer._id}
+                                                                >
+                                                                    {archivingId === officer._id ? (
+                                                                        <div className="spinner-border spinner-border-sm"
+                                                                            role="status"
+                                                                            style={{
+                                                                                width: '14px',
+                                                                                height: '14px',
+                                                                                borderWidth: '2px'
+                                                                            }}
+                                                                        >
+                                                                            <span className="visually-hidden">Loading...</span>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <i className={`fas fa-${officer.isArchived ? 'box-open' : 'archive'}`}></i>
+                                                                    )}
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+
+                                        {/* Pagination */}
+                                        <div className="d-flex justify-content-between align-items-center mt-4">
+                                            <div>
+                                                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredOfficers.length)} of {filteredOfficers.length} entries
+                                            </div>
+                                            <nav>
+                                                <ul className="pagination mb-0">
+                                                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                                        <button
+                                                            className="page-link"
+                                                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                                        >
+                                                            Previous
+                                                        </button>
+                                                    </li>
+                                                    {[...Array(totalPages)].map((_, i) => (
+                                                        <li key={i + 1} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
+                                                            <button
+                                                                className="page-link"
+                                                                onClick={() => setCurrentPage(i + 1)}
+                                                            >
+                                                                {i + 1}
+                                                            </button>
+                                                        </li>
+                                                    ))}
+                                                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                                        <button
+                                                            className="page-link"
+                                                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                                        >
+                                                            Next
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>

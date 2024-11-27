@@ -8,7 +8,7 @@ const logSchema = new mongoose.Schema({
     userModel: {
         type: String,
         required: true,
-        enum: ['Admin', 'Treasurer', 'Officer']
+        enum: ['Admin', 'Treasurer', 'Officer', 'Governor']
     },
     email: {
         type: String,

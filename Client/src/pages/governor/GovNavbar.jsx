@@ -4,7 +4,15 @@ import { Link } from "react-router-dom";
 
 const GovNavbar = ({ toggleSidebar }) => {
     return (
-        <nav className="sb-topnav navbar navbar-expand navbar navbar-padding">
+        <nav className="sb-topnav navbar navbar-expand navbar navbar-padding" style={{
+            position: 'fixed',
+            top: 0,
+            right: 0,
+            left: 0,
+            zIndex: 1030,
+            backgroundColor: '#fff',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}>
             <button 
                 className="btn btn-link btn-sm me-2" 
                 id="sidebarToggle" 
