@@ -116,43 +116,11 @@ const AdminStudents = () => {
 
     // Handle archive and unarchive actions
     const handleArchiveAction = async (studentId, studentName, isArchived) => {
-        try {
-            const token = localStorage.getItem('token');
-            const lockStatus = await axios.get(
-                `http://localhost:8000/api/students/${studentId}/check-lock/ARCHIVE`,
-                {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                }
-            );
-
-            if (!lockStatus.data.success) {
-                setError(`This student is currently being ${isArchived ? 'unarchived' : 'archived'} by ${lockStatus.data.userName}`);
-                return;
-            }
-
-            // Acquire lock before proceeding
-            const acquireLock = await axios.post(
-                `http://localhost:8000/api/students/${studentId}/acquire-lock/ARCHIVE`,
-                {},
-                {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                }
-            );
-
-            if (!acquireLock.data.success) {
-                setError(acquireLock.data.message);
-                return;
-            }
-
-            setModalAction({
-                type: isArchived ? 'unarchive' : 'archive',
-                student: { id: studentId, name: studentName }
-            });
-            setShowModal(true);
-        } catch (error) {
-            console.error('Error checking/acquiring lock:', error);
-            setError('Failed to perform action. Please try again.');
-        }
+        setModalAction({
+            type: isArchived ? 'unarchive' : 'archive',
+            student: { id: studentId, name: studentName }
+        });
+        setShowModal(true);
     };
 
     const confirmAction = async () => {
@@ -177,14 +145,6 @@ const AdminStudents = () => {
             await fetchStudents();
             setShowModal(false);
             setSuccessMessage(`Student ${modalAction.type}d successfully`);
-
-            // Release the lock
-            await axios.delete(
-                `http://localhost:8000/api/students/${modalAction.student.id}/release-lock/ARCHIVE`,
-                {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                }
-            );
 
             setTimeout(() => {
                 setSuccessMessage("");
