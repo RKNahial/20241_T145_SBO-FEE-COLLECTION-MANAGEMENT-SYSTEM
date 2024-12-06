@@ -28,6 +28,8 @@ const AdminStudents = () => {
     const [showModal, setShowModal] = useState(false);
     const [modalAction, setModalAction] = useState({ type: '', student: null });
     const [successMessage, setSuccessMessage] = useState("");
+    const [showLockModal, setShowLockModal] = useState(false);
+    const [lockMessage, setLockMessage] = useState("");
 
     // Utility function to truncate text
     const truncateText = (text, maxLength = 25) => {
@@ -200,21 +202,12 @@ const AdminStudents = () => {
         window.open(googleDocsUrl, '_blank');
     };
 
-    // Reset to first page when students or filters change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [students, searchTerm, statusFilter]);
-
-    // Add this sorting function after the state declarations
-    const sortedItems = [...currentItems].sort((a, b) =>
-        a.name.localeCompare(b.name)
-    );
-
+    // Check if student is being edited
     const checkEditLock = async (studentId) => {
         try {
             const token = localStorage.getItem('token');
             const response = await axios.get(
-                `http://localhost:8000/api/students/${studentId}/check-lock/EDIT`,
+                `http://localhost:8000/api/students/${studentId}/check-lock/Edit`,
                 {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }
@@ -224,11 +217,41 @@ const AdminStudents = () => {
                 userName: response.data.userName
             };
         } catch (error) {
-            console.error('Error checking edit lock:', error);
-            setError('Error checking edit lock status');
-            return { locked: true };
+            console.error('Error checking lock:', error);
+            throw error;
         }
     };
+
+    const handleEditClick = async (student) => {
+        try {
+            const lockStatus = await checkEditLock(student._id);
+            if (lockStatus.locked) {
+                setLockMessage(`This student is currently being edited by ${lockStatus.userName}`);
+                setShowLockModal(true);
+                return;
+            }
+            navigate(`/admin/students/edit/${student._id}`, {
+                state: { studentData: student }
+            });
+        } catch (error) {
+            console.error('Error checking edit lock:', error);
+            if (error.response?.status === 404) {
+                setError('Lock service is currently unavailable. Please try again later.');
+            } else {
+                setError('Unable to edit student at this time. Please try again later.');
+            }
+        }
+    };
+
+    // Reset to first page when students or filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [students, searchTerm, statusFilter]);
+
+    // Add this sorting function after the state declarations
+    const sortedItems = [...currentItems].sort((a, b) =>
+        a.name.localeCompare(b.name)
+    );
 
     return (
         <div className={`sb-nav-fixed ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
@@ -412,14 +435,9 @@ const AdminStudents = () => {
                                                                 <Link
                                                                     to={`/admin/students/edit/${student._id}`}
                                                                     className="btn btn-edit btn-sm"
-                                                                    onClick={async (e) => {
+                                                                    onClick={(e) => {
                                                                         e.preventDefault();
-                                                                        const lockStatus = await checkEditLock(student._id);
-                                                                        if (lockStatus.locked) {
-                                                                            setError(`This student is currently being edited by ${lockStatus.userName}`);
-                                                                        } else {
-                                                                            navigate(`/admin/students/edit/${student._id}`);
-                                                                        }
+                                                                        handleEditClick(student);
                                                                     }}
                                                                 >
                                                                     <i className="fas fa-edit"></i>
@@ -517,6 +535,36 @@ const AdminStudents = () => {
                         Cancel
                     </Button>
                 </Modal.Footer>
+            </Modal>
+
+            {/* Lock Modal */}
+            <Modal
+                show={showLockModal}
+                onHide={() => setShowLockModal(false)}
+                centered
+                className="lock-modal"
+            >
+                <Modal.Header closeButton className="border-0 pb-0">
+                    <Modal.Title className="w-100 text-center">
+                        <div className="lock-icon-container mb-2">
+                            <i className="fas fa-lock fa-2x text-warning"></i>
+                        </div>
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="text-center pt-0">
+                    <h5 className="modal-title mb-3">Student Record Locked</h5>
+                    <p className="text-muted mb-4">
+                        {lockMessage}
+                    </p>
+                    <div className="d-flex justify-content-center">
+                        <Button
+                            variant="secondary"
+                            onClick={() => setShowLockModal(false)}
+                        >
+                            Close
+                        </Button>
+                    </div>
+                </Modal.Body>
             </Modal>
         </div>
     );
