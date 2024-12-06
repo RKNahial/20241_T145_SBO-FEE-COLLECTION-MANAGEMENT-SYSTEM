@@ -3,6 +3,7 @@ const Student = require('../models/studentSchema');
 const PaymentCategory = require('../models/PaymentCategory');
 const HistoryLog = require('../models/HistoryLog');
 const moment = require('moment-timezone');
+const resourceLockService = require('../services/resourceLockService'); // Assuming this service is defined elsewhere
 
 exports.updatePaymentStatus = async (req, res) => {
     try {
@@ -463,3 +464,121 @@ exports.getPaymentsByProgramTotal = async (req, res) => {
 function getMonthName(month) {
     return new Date(0, parseInt(month) - 1).toLocaleString('en-US', { month: 'long' });
 }
+
+exports.checkLock = async (req, res) => {
+    try {
+        const { id, lockType } = req.params;
+        
+        if (!['Edit', 'View', 'Delete'].includes(lockType)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid lock type'
+            });
+        }
+
+        const lockStatus = await resourceLockService.checkLock(id, lockType);
+        res.json(lockStatus);
+    } catch (error) {
+        console.error('Error checking lock:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error checking lock status' 
+        });
+    }
+};
+
+exports.acquireLock = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { lockType } = req.body;
+        
+        // Validate user authentication
+        if (!req.user || !req.user._id || !req.user.name) {
+            return res.status(401).json({
+                success: false,
+                message: 'User authentication required'
+            });
+        }
+
+        // Validate lock type
+        const validLockTypes = ['Edit', 'View', 'Delete'];
+        if (!validLockTypes.includes(lockType)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid lock type'
+            });
+        }
+
+        const lockResult = await resourceLockService.acquireLock(
+            id,
+            req.user._id,
+            req.user.name,
+            lockType
+        );
+
+        if (!lockResult.success) {
+            return res.status(409).json(lockResult); // 409 Conflict
+        }
+
+        res.json(lockResult);
+    } catch (error) {
+        console.error('Error in acquireLock controller:', error);
+        
+        if (error.message.includes('Invalid resource ID') ||
+            error.message.includes('Invalid user ID') ||
+            error.message.includes('Invalid lock type')) {
+            return res.status(400).json({
+                success: false,
+                message: error.message
+            });
+        }
+        
+        res.status(500).json({ 
+            success: false, 
+            message: 'Internal server error while acquiring lock'
+        });
+    }
+};
+
+exports.releaseLock = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { lockType } = req.params;
+        const { userId } = req.body;
+
+        if (!id || !lockType) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required parameters: id or lockType'
+            });
+        }
+
+        // If userId is not in body, try to get it from auth user
+        const effectiveUserId = userId || (req.user && req.user._id);
+        
+        if (!effectiveUserId) {
+            return res.status(400).json({
+                success: false,
+                message: 'User ID is required'
+            });
+        }
+
+        const result = await resourceLockService.releaseLock(id, effectiveUserId, lockType);
+
+        if (!result.success) {
+            return res.status(400).json(result);
+        }
+
+        res.json({
+            success: true,
+            message: 'Lock released successfully'
+        });
+    } catch (error) {
+        console.error('Error in releaseLock controller:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error while releasing lock',
+            error: error.message
+        });
+    }
+};

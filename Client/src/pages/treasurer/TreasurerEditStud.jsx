@@ -47,7 +47,10 @@ const TreasurerEditStud = () => {
 
                 const response = await axios.post(
                     `http://localhost:8000/api/students/${id}/acquire-lock/Edit`,
-                    {}, // Empty body
+                    { 
+                        lockType: 'Edit',
+                        userId: localStorage.getItem('userId')
+                    },
                     {
                         headers: { 
                             'Authorization': `Bearer ${token}`,
@@ -59,14 +62,10 @@ const TreasurerEditStud = () => {
                 if (!mounted) return;
 
                 if (!response.data.success) {
-                    const errorMessage = response.data.message || 'Unable to acquire lock';
-                    setError(errorMessage);
-                    
-                    if (errorMessage.includes('currently being edited')) {
-                        setTimeout(() => {
-                            navigate('/treasurer/students');
-                        }, 2000);
-                    }
+                    setError(response.data.message);
+                    setTimeout(() => {
+                        navigate('/treasurer/students');
+                    }, 3000);
                     return;
                 }
 
@@ -87,6 +86,9 @@ const TreasurerEditStud = () => {
                         case 404:
                             errorMessage = 'Student record not found.';
                             break;
+                        case 409:
+                            errorMessage = error.response.data.message || 'This student is currently being edited by another user.';
+                            break;
                         case 400:
                             errorMessage = error.response.data.message || 'Invalid request. Please try again.';
                             break;
@@ -105,24 +107,46 @@ const TreasurerEditStud = () => {
                 setError(errorMessage);
                 setTimeout(() => {
                     navigate('/treasurer/students');
-                }, 2000);
+                }, 3000);
             }
         };
 
         // Handle browser back button
-        window.addEventListener('popstate', (e) => {
+        const handlePopState = (e) => {
             if (isLocked) {
                 e.preventDefault();
                 setShowExitModal(true);
             }
-        });
+        };
 
+        window.addEventListener('popstate', handlePopState);
         acquireLock();
 
         return () => {
             mounted = false;
+            window.removeEventListener('popstate', handlePopState);
+            // Release lock if component unmounts while locked
+            if (isLocked) {
+                releaseLock();
+            }
         };
     }, [id, navigate, isLocked]);
+
+    useEffect(() => {
+        return () => {
+            // Call release lock when the component unmounts
+            releaseLock();
+        };
+    }, []);
+
+    const releaseLock = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        await axios.delete(`http://localhost:8000/api/students/${id}/release-lock/Edit`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+    };
 
     // Set initial form data when component mounts
     useEffect(() => {

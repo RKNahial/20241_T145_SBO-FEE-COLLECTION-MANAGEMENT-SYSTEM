@@ -12,6 +12,8 @@ import '../../styles/PaymentTabs.css';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { usePayment } from '../../context/PaymentContext';
 import Unauthorized from '../../components/Unauthorized';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 
 const TreasurerFee = () => {
     // NAV AND SIDEBAR
@@ -95,9 +97,24 @@ const TreasurerFee = () => {
 
     const handleModalToggle = () => setIsModalOpen(!isModalOpen);
 
-    const handleEditClick = (student) => {
-        setSelectedStudent(student);
-        setIsModalOpen(true);
+    const handleEditClick = async (student) => {
+        try {
+            const lockStatus = await checkEditLock(student._id);
+            if (lockStatus.locked) {
+                setLockMessage(`This payment is currently being edited by ${lockStatus.userName}`);
+                setShowLockModal(true);
+                return;
+            }
+            setSelectedStudent(student);
+            setIsModalOpen(true);
+        } catch (error) {
+            console.error('Error checking edit lock:', error);
+            if (error.response?.status === 404) {
+                setError('Lock service is currently unavailable. Please try again later.');
+            } else {
+                setError('Unable to edit payment at this time. Please try again later.');
+            }
+        }
     };
 
     const handleEmailSuccess = (message) => {
@@ -431,6 +448,29 @@ const TreasurerFee = () => {
         fetchUserPermissions();
     }, []);
 
+    // Lock modal state
+    const [showLockModal, setShowLockModal] = useState(false);
+    const [lockMessage, setLockMessage] = useState("");
+
+    const checkEditLock = async (studentId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(
+                `http://localhost:8000/api/payment-fee/${studentId}/check-lock/Edit`,
+                {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }
+            );
+            return {
+                locked: !response.data.success,
+                userName: response.data.userName
+            };
+        } catch (error) {
+            console.error('Error checking lock:', error);
+            throw error;
+        }
+    };
+
     // If unauthorized, render the Unauthorized component
     if (isUnauthorized) {
         return <Unauthorized />;
@@ -548,7 +588,7 @@ const TreasurerFee = () => {
     };
 
     return (
-        <div className="sb-nav-fixed">
+        <div className={`sb-nav-fixed ${isCollapsed ? 'sb-sidenav-toggled' : ''}`}>
             <Helmet>
                 <title>Treasurer | Manage Fee</title>
             </Helmet>
@@ -748,26 +788,44 @@ const TreasurerFee = () => {
 
                 </div>
             </div>
+            {/* Lock Modal */}
+            <Modal
+                show={showLockModal}
+                onHide={() => setShowLockModal(false)}
+                centered
+                className="lock-modal"
+            >
+                <Modal.Header closeButton className="border-0 pb-0">
+                    <Modal.Title className="w-100 text-center">
+                        <div className="lock-icon-container mb-2">
+                            <i className="fas fa-lock fa-2x text-warning"></i>
+                        </div>
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="text-center pt-0">
+                    <h5 className="modal-title mb-3">Payment Record Locked</h5>
+                    <p className="text-muted mb-4">
+                        {lockMessage}
+                    </p>
+                    <div className="d-flex justify-content-center">
+                        <Button
+                            variant="secondary"
+                            onClick={() => setShowLockModal(false)}
+                        >
+                            Close
+                        </Button>
+                    </div>
+                </Modal.Body>
+            </Modal>
+
             {/* MODAL FOR UPDATING STUDENT PAYMENT */}
             {isModalOpen && selectedStudent && (
                 <ManageFeeModal
                     isOpen={isModalOpen}
                     onClose={handleModalToggle}
+                    onSave={handleEmailSuccess}
                     studentName={selectedStudent.name}
                     selectedStudent={selectedStudent}
-                    onSave={handleSubmit}
-                    initialPaymentCategory={getSelectedCategoryName()}
-                />
-            )}
-
-            {/* MODAL FOR VIEWING STUDENT FEE */}
-            {isViewModalOpen && viewedStudent && (
-                <ViewFeeModal
-                    isOpen={isViewModalOpen}
-                    onClose={() => setIsViewModalOpen(false)}
-                    student={viewedStudent}
-                    categoryId={selectedCategory}
-                    onEmailSuccess={handleEmailSuccess}
                 />
             )}
         </div>

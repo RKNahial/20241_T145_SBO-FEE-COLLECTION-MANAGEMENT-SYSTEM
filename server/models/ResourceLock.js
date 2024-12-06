@@ -16,7 +16,7 @@ const ResourceLockSchema = new mongoose.Schema({
     },
     lockType: {
         type: String,
-        enum: ['Edit', 'View', 'Delete'],
+        enum: ['Edit', 'View', 'Delete', 'Archive'],
         required: true
     },
     lockedAt: {

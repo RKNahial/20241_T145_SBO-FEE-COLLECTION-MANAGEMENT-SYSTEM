@@ -30,7 +30,7 @@ const AdminEditStud = () => {
             try {
                 const token = localStorage.getItem('token');
                 const response = await axios.get(
-                    `http://localhost:8000/api/students/${id}`,
+                    `http://localhost:8000/api/getAll/students/${id}`,
                     {
                         headers: {
                             'Authorization': `Bearer ${token}`,
@@ -39,8 +39,8 @@ const AdminEditStud = () => {
                     }
                 );
 
-                if (response.data) {
-                    setStudentData(response.data);
+                if (response.data && response.data.data) {
+                    setStudentData(response.data.data);
                 }
             } catch (error) {
                 console.error('Error fetching student:', error);
@@ -64,18 +64,44 @@ const AdminEditStud = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError(null);
+        setSuccessMessage('');
+
         try {
+            // Validate required fields
+            if (!studentData.name || !studentData.studentId || !studentData.institutionalEmail || 
+                !studentData.yearLevel || !studentData.program) {
+                setError('All fields are required');
+                return;
+            }
+
+            // Validate email format
+            if (!studentData.institutionalEmail.endsWith('@student.buksu.edu.ph')) {
+                setError('Institutional email must end with @student.buksu.edu.ph');
+                return;
+            }
+
             const token = localStorage.getItem('token');
             const previousData = { ...studentData };
+            
+            // Remove any extra fields that shouldn't be sent
+            const updateData = {
+                name: studentData.name,
+                studentId: studentData.studentId,
+                institutionalEmail: studentData.institutionalEmail,
+                yearLevel: studentData.yearLevel,
+                program: studentData.program,
+                previousData
+            };
 
             const response = await axios.put(
-                `http://localhost:8000/api/students/${id}`,
+                `http://localhost:8000/api/update/students/${id}`,
+                updateData,
                 {
-                    ...studentData,
-                    previousData
-                },
-                {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
                 }
             );
 
@@ -87,7 +113,9 @@ const AdminEditStud = () => {
             }
         } catch (error) {
             console.error('Error updating student:', error);
-            setError('Failed to update student');
+            const errorMessage = error.response?.data?.message || 'Failed to update student';
+            setError(errorMessage);
+            window.scrollTo(0, 0); // Scroll to top to show error message
         }
     };
 

@@ -72,6 +72,13 @@ const AdminEditOfficer = () => {
             }
 
             const token = localStorage.getItem('token');
+            
+            // Map position to correct type
+            let officialType = formData.type; // Keep original type by default
+            if (['Officer', 'Treasurer', 'Governor'].includes(formData.position)) {
+                officialType = formData.position;
+            }
+
             const response = await axios.put(
                 `http://localhost:8000/api/officials/${id}`,
                 {
@@ -79,7 +86,7 @@ const AdminEditOfficer = () => {
                     ID: formData.ID,
                     email: formData.email,
                     position: formData.position,
-                    type: formData.position // Set type to match the selected position
+                    type: officialType
                 },
                 {
                     headers: {

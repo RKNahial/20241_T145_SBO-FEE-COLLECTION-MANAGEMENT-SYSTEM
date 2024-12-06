@@ -102,7 +102,8 @@ exports.checkLock = async (req, res) => {
     try {
         const { id, lockType } = req.params;
         
-        if (!['EDIT', 'ARCHIVE'].includes(lockType)) {
+        // Update valid lock types to include Archive
+        if (!['Edit', 'View', 'Delete', 'Archive'].includes(lockType)) {
             return res.status(400).json({
                 success: false,
                 message: 'Invalid lock type'
@@ -123,14 +124,22 @@ exports.checkLock = async (req, res) => {
 exports.acquireLock = async (req, res) => {
     try {
         const { id } = req.params;
-        // Extract lockType from the URL path
-        const lockType = req.path.split('/').pop();
+        const { lockType } = req.body;
         
         // Validate user authentication
         if (!req.user || !req.user._id || !req.user.name) {
             return res.status(401).json({
                 success: false,
                 message: 'User authentication required'
+            });
+        }
+
+        // Validate lock type
+        const validLockTypes = ['Edit', 'View', 'Delete', 'Archive'];
+        if (!validLockTypes.includes(lockType)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid lock type'
             });
         }
 
@@ -160,26 +169,23 @@ exports.acquireLock = async (req, res) => {
             lockType
         );
 
+        if (!lockResult.success) {
+            return res.status(409).json(lockResult); // 409 Conflict
+        }
+
         res.json(lockResult);
     } catch (error) {
         console.error('Error in acquireLock controller:', error);
         
-        // Handle specific error types
         if (error.message.includes('Invalid resource ID') ||
-            error.message.includes('Invalid user ID')) {
+            error.message.includes('Invalid user ID') ||
+            error.message.includes('Invalid lock type')) {
             return res.status(400).json({
                 success: false,
                 message: error.message
             });
         }
         
-        if (error.message.includes('Invalid lock type')) {
-            return res.status(400).json({
-                success: false,
-                message: error.message
-            });
-        }
-
         res.status(500).json({ 
             success: false, 
             message: 'Internal server error while acquiring lock'
@@ -284,3 +290,105 @@ exports.getStudentById = async (req, res) => {
         });
     }
 }; 
+
+exports.archive = async (req, res) => {
+    try {
+        const studentId = req.params.id;
+        
+        // Verify the student exists
+        const student = await Student.findById(studentId);
+        if (!student) {
+            return res.status(404).json({
+                status: "error",
+                data: {
+                    message: "Student not found"
+                }
+            });
+        }
+
+        // Check if student is already archived
+        if (student.isArchived) {
+            return res.status(400).json({
+                status: "error",
+                data: {
+                    message: "Student is already archived"
+                }
+            });
+        }
+
+        // Update the student's archived status
+        student.isArchived = true;
+        await student.save();
+
+        return res.status(200).json({
+            status: "success",
+            data: {
+                message: "Student archived successfully",
+                student: {
+                    id: student._id,
+                    name: student.name,
+                    isArchived: student.isArchived
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error in archive:', error);
+        return res.status(500).json({
+            status: "error",
+            data: {
+                message: "Failed to archive student"
+            }
+        });
+    }
+};
+
+exports.unarchive = async (req, res) => {
+    try {
+        const studentId = req.params.id;
+        
+        // Verify the student exists
+        const student = await Student.findById(studentId);
+        if (!student) {
+            return res.status(404).json({
+                status: "error",
+                data: {
+                    message: "Student not found"
+                }
+            });
+        }
+
+        // Check if student is already unarchived
+        if (!student.isArchived) {
+            return res.status(400).json({
+                status: "error",
+                data: {
+                    message: "Student is not archived"
+                }
+            });
+        }
+
+        // Update the student's archived status
+        student.isArchived = false;
+        await student.save();
+
+        return res.status(200).json({
+            status: "success",
+            data: {
+                message: "Student unarchived successfully",
+                student: {
+                    id: student._id,
+                    name: student.name,
+                    isArchived: student.isArchived
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error in unarchive:', error);
+        return res.status(500).json({
+            status: "error",
+            data: {
+                message: "Failed to unarchive student"
+            }
+        });
+    }
+};

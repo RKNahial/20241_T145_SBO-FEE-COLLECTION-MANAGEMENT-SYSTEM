@@ -3,6 +3,12 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const paymentFeeController = require('../controllers/paymentFeeController');
 
+// Lock-related routes
+router.get('/payment-fee/:id/check-lock/:lockType', auth, paymentFeeController.checkLock);
+router.post('/payment-fee/:id/acquire-lock/:lockType', auth, paymentFeeController.acquireLock);
+router.delete('/payment-fee/:id/release-lock/:lockType', auth, paymentFeeController.releaseLock);
+
+// Payment fee routes
 router.put('/payment-fee/update/:studentId', auth, paymentFeeController.updatePaymentStatus);
 router.get('/payment-fee/details/:studentId', auth, paymentFeeController.getPaymentDetails);
 router.get('/payment-fee/by-category/:categoryId', paymentFeeController.getPaymentsByCategory);
