@@ -1,6 +1,6 @@
 // src/pages/treasurer/TreasurerDashboard.jsx
 import { Helmet } from 'react-helmet';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import axios from 'axios';
 import { Bar } from 'react-chartjs-2';
 import {
@@ -56,12 +56,89 @@ const TreasurerDashboard = () => {
     });
     const [totalActiveOfficers, setTotalActiveOfficers] = useState(0);
 
+    // File management states
+    const [files, setFiles] = useState([]);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+    const [selectedFile, setSelectedFile] = useState(null);
+    const fileInputRef = useRef(null);
+
     // Add analytics initialization
     const analytics = getAnalytics(app);
 
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
     };
+
+    // File management functions
+    const fetchFiles = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get('http://localhost:8000/api/drive/files', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setFiles(response.data.files);
+        } catch (error) {
+            console.error('Error fetching files:', error);
+        }
+    };
+
+    const handleUploadClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileSelect = (event) => {
+        if (event.target.files && event.target.files.length > 0) {
+            const file = event.target.files[0];
+            setSelectedFile(file);
+            handleFileUpload(file);
+        }
+    };
+
+    const handleFileUpload = async (file) => {
+        if (!file) {
+            console.error('No file selected');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('token');
+            await axios.post('http://localhost:8000/api/drive/upload', formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
+                },
+                onUploadProgress: (progressEvent) => {
+                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setUploadProgress(progress);
+                }
+            });
+            fetchFiles();
+            setUploadProgress(0);
+        } catch (error) {
+            console.error('Error uploading file:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const formatFileSize = (bytes) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
+
+    useEffect(() => {
+        fetchFiles();
+    }, []);
 
     useEffect(() => {
         const fetchRecentPayments = async () => {
@@ -244,6 +321,17 @@ const TreasurerDashboard = () => {
 
         return () => clearTimeout(timer);
     }, []);
+
+    // Filter files based on search
+    const filteredFiles = files.filter(file =>
+        file.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    // Calculate pagination
+    const indexOfLastFile = currentPage * itemsPerPage;
+    const indexOfFirstFile = indexOfLastFile - itemsPerPage;
+    const currentFiles = filteredFiles.slice(indexOfFirstFile, indexOfLastFile);
+    const totalPages = Math.ceil(filteredFiles.length / itemsPerPage);
 
     return (
         <div className="sb-nav-fixed">
@@ -474,6 +562,112 @@ const TreasurerDashboard = () => {
                         </div>
                         {/* REPORTS AND CALENDAR END */}
 
+                        {/* FILE MANAGEMENT */}
+                        <div className="card-body">
+                            <h5 className="mb-4 header">File Management</h5>
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Search files"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={handleUploadClick}
+                                >
+                                    Upload File
+                                </button>
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={handleFileSelect}
+                                    style={{ display: 'none' }}
+                                />
+                            </div>
+                            <table className="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th className="index-column">#</th>
+                                    <th>File Name</th>
+                                    <th>File Size</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {files.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="4" className="text-center">No files found</td>
+                                    </tr>
+                                ) : (
+                                    currentFiles.map((file, index) => (
+                                        <tr key={file.id}>
+                                            <td>{index + 1}</td>
+                                            <td>{file.name}</td>
+                                            <td>{formatFileSize(file.size)}</td>
+                                            <td>
+                                                <div className="d-flex gap-2">
+                                                    <a
+                                                        href={file.webViewLink}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="btn btn-primary"
+                                                        style={{
+                                                            width: '36px',
+                                                            height: '36px',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            padding: 0,
+                                                            lineHeight: '1'
+                                                        }}
+                                                    >
+                                                        <i className="fas fa-eye" style={{ fontSize: '16px' }}></i>
+                                                    </a>
+                                                    <a
+                                                        href={file.webContentLink}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="btn btn-success"
+                                                        style={{
+                                                            width: '36px',
+                                                            height: '36px',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            padding: 0,
+                                                            lineHeight: '1'
+                                                        }}
+                                                    >
+                                                        <i className="fas fa-download" style={{ fontSize: '16px' }}></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                                </tbody>
+                            </table>
+                            <div className="d-flex justify-content-between align-items-center">
+                                <button
+                                    className="btn btn-secondary"
+                                    onClick={() => setCurrentPage(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                >
+                                    Previous
+                                </button>
+                                <span className="mx-2">Page {currentPage} of {totalPages}</span>
+                                <button
+                                    className="btn btn-secondary"
+                                    onClick={() => setCurrentPage(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                        {/* FILE MANAGEMENT END */}
 
                     </div>
                 </div>

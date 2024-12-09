@@ -1,6 +1,6 @@
 // src/pages/officer/OfficerDashboard.jsx
 import { Helmet } from 'react-helmet';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import axios from 'axios';
 import { Bar } from 'react-chartjs-2';
 import {
@@ -55,6 +55,15 @@ const OfficerDashboard = () => {
         return shouldShow;
     });
     const [totalActiveOfficers, setTotalActiveOfficers] = useState(0);
+
+    // File management states
+    const [files, setFiles] = useState([]);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+    const [selectedFile, setSelectedFile] = useState(null);
+    const fileInputRef = useRef(null);
 
     // Add analytics initialization
     const analytics = getAnalytics(app);
@@ -190,6 +199,73 @@ const OfficerDashboard = () => {
         fetchTotalActiveOfficers();
     }, []);
 
+    useEffect(() => {
+        const fetchFiles = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.get('http://localhost:8000/api/drive/files', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setFiles(response.data.files);
+            } catch (error) {
+                console.error('Error fetching files:', error);
+            }
+        };
+
+        fetchFiles();
+    }, []);
+
+    const handleUploadClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileSelect = (event) => {
+        if (event.target.files && event.target.files.length > 0) {
+            const file = event.target.files[0];
+            setSelectedFile(file);
+            handleFileUpload(file);
+        }
+    };
+
+    const handleFileUpload = async (file) => {
+        if (!file) {
+            console.error('No file selected');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('token');
+            await axios.post('http://localhost:8000/api/drive/upload', formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
+                },
+                onUploadProgress: (progressEvent) => {
+                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setUploadProgress(progress);
+                }
+            });
+            fetchFiles();
+            setUploadProgress(0);
+        } catch (error) {
+            console.error('Error uploading file:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const formatFileSize = (bytes) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
+
     const formatAmount = (amount) => {
         if (typeof amount !== 'number' || isNaN(amount)) {
             return '₱0.00';
@@ -243,6 +319,17 @@ const OfficerDashboard = () => {
         }, 1500); 
         return () => clearTimeout(timer);
     }, []);
+
+    // Filter files based on search
+    const filteredFiles = files.filter(file =>
+        file.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    // Calculate pagination
+    const indexOfLastFile = currentPage * itemsPerPage;
+    const indexOfFirstFile = indexOfLastFile - itemsPerPage;
+    const currentFiles = filteredFiles.slice(indexOfFirstFile, indexOfLastFile);
+    const totalPages = Math.ceil(filteredFiles.length / itemsPerPage);
 
     return (
         <div className="sb-nav-fixed">
@@ -465,6 +552,117 @@ const OfficerDashboard = () => {
                             </div>
                         </div>
                         {/* REPORTS AND CALENDAR END */}
+
+                        {/* FILE MANAGEMENT */}
+                        <div className="card-body">
+                            <div className="d-flex justify-content-between align-items-center px-3 mb-3">
+                                <h5 className="mb-0 header">File Management</h5>
+                                <button
+                                    className="calendar-add-button"
+                                    onClick={handleUploadClick}
+                                >
+                                    <i className="fas fa-plus me-2"></i>
+                                    Upload File
+                                </button>
+                            </div>
+                            <div style={{ padding: '0 1rem' }}>
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={handleFileSelect}
+                                    style={{ display: 'none' }}
+                                />
+                                {selectedFile && (
+                                    <div>
+                                        <p>Selected File: {selectedFile.name}</p>
+                                        <p>Upload Progress: {uploadProgress}%</p>
+                                    </div>
+                                )}
+                                <table className="table table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th className="index-column">#</th>
+                                        <th>File Name</th>
+                                        <th>File Size</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {files.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="4" className="text-center">No files found</td>
+                                        </tr>
+                                    ) : (
+                                        currentFiles.map((file, index) => (
+                                            <tr key={file.id}>
+                                                <td>{index + 1}</td>
+                                                <td>{file.name}</td>
+                                                <td>{formatFileSize(file.size)}</td>
+                                                <td>
+                                                    <div className="d-flex gap-2">
+                                                        <a
+                                                            href={file.webViewLink}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="btn btn-primary"
+                                                            style={{
+                                                                width: '36px',
+                                                                height: '36px',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                padding: 0,
+                                                                lineHeight: '1'
+                                                            }}
+                                                        >
+                                                            <i className="fas fa-eye" style={{ fontSize: '16px' }}></i>
+                                                        </a>
+                                                        <a
+                                                            href={file.webContentLink}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="btn btn-success"
+                                                            style={{
+                                                                width: '36px',
+                                                                height: '36px',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                padding: 0,
+                                                                lineHeight: '1'
+                                                            }}
+                                                        >
+                                                            <i className="fas fa-download" style={{ fontSize: '16px' }}></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                    </tbody>
+                                </table>
+                                <div className="pagination">
+                                    <button
+                                        className="pagination-button"
+                                        onClick={() => setCurrentPage(currentPage - 1)}
+                                        disabled={currentPage === 1}
+                                    >
+                                        Previous
+                                    </button>
+                                    <span className="pagination-text">
+                                        Page {currentPage} of {totalPages}
+                                    </span>
+                                    <button
+                                        className="pagination-button"
+                                        onClick={() => setCurrentPage(currentPage + 1)}
+                                        disabled={currentPage === totalPages}
+                                    >
+                                        Next
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {/* FILE MANAGEMENT END */}
 
                     </div>
                 </div>
