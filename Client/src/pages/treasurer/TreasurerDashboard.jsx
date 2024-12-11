@@ -333,12 +333,29 @@ const TreasurerDashboard = () => {
     const currentFiles = filteredFiles.slice(indexOfFirstFile, indexOfLastFile);
     const totalPages = Math.ceil(filteredFiles.length / itemsPerPage);
 
+    const actionButtonStyle = {
+        width: '35px',
+        height: '35px',
+        padding: '0',
+        margin: '0 4px',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: '4px',
+        border: 'none',
+        transition: 'all 0.2s ease',
+    };
+
     return (
         <div className="sb-nav-fixed">
             <style>
                 {`
                     .table-hover .no-hover:hover {
                         background-color: transparent !important;
+                    }
+                    .pagination .page-item.active .page-link {
+                        background-color: #ff7f00 !important; /* Set to orange */
+                        border-color: #ff7f00 !important;
                     }
                 `}
             </style>
@@ -563,108 +580,144 @@ const TreasurerDashboard = () => {
                         {/* REPORTS AND CALENDAR END */}
 
                         {/* FILE MANAGEMENT */}
-                        <div className="card-body">
-                            <h5 className="mb-4 header">File Management</h5>
-                            <div className="d-flex justify-content-between align-items-center mb-3">
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    placeholder="Search files"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                                <button
-                                    className="btn btn-primary"
-                                    onClick={handleUploadClick}
-                                >
-                                    Upload File
-                                </button>
-                                <input
-                                    type="file"
-                                    ref={fileInputRef}
-                                    onChange={handleFileSelect}
-                                    style={{ display: 'none' }}
-                                />
+                        <div className="card mb-4">
+                            <div className="card-header bg-white border-0 py-3">
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <h5 className="mb-0">
+                                        <i className="fas fa-file me-2 text-primary"></i>
+                                        File Management
+                                    </h5>
+                                    <div className="d-flex gap-3 align-items-center">
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Search files"
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            style={{
+                                                borderRadius: '20px',
+                                                padding: '8px 15px',
+                                                border: '1px solid #ced4da'
+                                            }}
+                                        />
+                                        <button
+                                            className="btn btn-primary"
+                                            onClick={handleUploadClick}
+                                            disabled={loading}
+                                            style={{
+                                                borderRadius: '20px',
+                                                padding: '8px 20px'
+                                            }}
+                                        >
+                                            <i className="fas fa-upload me-2"></i>
+                                            Upload File
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                            <table className="table table-hover">
-                                <thead>
-                                <tr>
-                                    <th className="index-column">#</th>
-                                    <th>File Name</th>
-                                    <th>File Size</th>
-                                    <th>Actions</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {files.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="4" className="text-center">No files found</td>
-                                    </tr>
-                                ) : (
-                                    currentFiles.map((file, index) => (
-                                        <tr key={file.id}>
-                                            <td>{index + 1}</td>
-                                            <td>{file.name}</td>
-                                            <td>{formatFileSize(file.size)}</td>
-                                            <td>
-                                                <div className="d-flex gap-2">
-                                                    <a
-                                                        href={file.webViewLink}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="btn btn-primary"
-                                                        style={{
-                                                            width: '36px',
-                                                            height: '36px',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            padding: 0,
-                                                            lineHeight: '1'
-                                                        }}
-                                                    >
-                                                        <i className="fas fa-eye" style={{ fontSize: '16px' }}></i>
-                                                    </a>
-                                                    <a
-                                                        href={file.webContentLink}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="btn btn-success"
-                                                        style={{
-                                                            width: '36px',
-                                                            height: '36px',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            padding: 0,
-                                                            lineHeight: '1'
-                                                        }}
-                                                    >
-                                                        <i className="fas fa-download" style={{ fontSize: '16px' }}></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                                </tbody>
-                            </table>
-                            <div className="d-flex justify-content-between align-items-center">
-                                <button
-                                    className="btn btn-secondary"
-                                    onClick={() => setCurrentPage(currentPage - 1)}
-                                    disabled={currentPage === 1}
-                                >
-                                    Previous
-                                </button>
-                                <span className="mx-2">Page {currentPage} of {totalPages}</span>
-                                <button
-                                    className="btn btn-secondary"
-                                    onClick={() => setCurrentPage(currentPage + 1)}
-                                    disabled={currentPage === totalPages}
-                                >
-                                    Next
-                                </button>
+                            <div className="card-body">
+                                <div className="mb-3">
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        style={{ display: 'none' }}
+                                        onChange={handleFileSelect}
+                                        disabled={loading}
+                                    />
+                                    {uploadProgress > 0 && (
+                                        <div className="progress mb-3" style={{ height: '6px' }}>
+                                            <div
+                                                className="progress-bar bg-primary"
+                                                role="progressbar"
+                                                style={{ 
+                                                    width: `${uploadProgress}%`,
+                                                    transition: 'width 0.3s ease'
+                                                }}
+                                                aria-valuenow={uploadProgress}
+                                                aria-valuemin="0"
+                                                aria-valuemax="100"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                <div className="table-responsive">
+                                    <table className="table table-hover">
+                                        <thead className="table-light">
+                                            <tr>
+                                                <th>File Name</th>
+                                                <th>Size</th>
+                                                <th className="text-center">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {currentFiles.map((file, index) => (
+                                                <tr key={index}>
+                                                    <td className="align-middle">{file.name}</td>
+                                                    <td className="align-middle">{formatFileSize(file.size)}</td>
+                                                    <td className="text-center align-middle">
+                                                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+                                                            <button 
+                                                                onClick={() => window.open(file.webViewLink, '_blank')}
+                                                                className="btn btn-primary"
+                                                                style={{
+                                                                    width: '36px',
+                                                                    height: '36px',
+                                                                    padding: 0,
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    borderRadius: '4px',
+                                                                    margin: '0 2px'
+                                                                }}
+                                                            >
+                                                                <i className="fas fa-eye" style={{ fontSize: '16px' }}></i>
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => window.open(file.webContentLink, '_blank')}
+                                                                className="btn btn-success"
+                                                                style={{
+                                                                    width: '36px',
+                                                                    height: '36px',
+                                                                    padding: 0,
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    borderRadius: '4px',
+                                                                    margin: '0 2px'
+                                                                }}
+                                                            >
+                                                                <i className="fas fa-download" style={{ fontSize: '16px' }}></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Pagination */}
+                                <div className="d-flex justify-content-between align-items-center mt-4">
+                                    <div className="text-muted">
+                                        Showing {indexOfFirstFile + 1} to {Math.min(indexOfLastFile, filteredFiles.length)} of {filteredFiles.length} entries
+                                    </div>
+                                    <nav>
+                                        <ul className="pagination pagination-sm mb-0">
+                                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                                <button className="page-link" onClick={() => setCurrentPage(currentPage - 1)}>Previous</button>
+                                            </li>
+                                            {[...Array(totalPages)].map((_, i) => (
+                                                <li key={i} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
+                                                    <button className="page-link" onClick={() => setCurrentPage(i + 1)}>{i + 1}</button>
+                                                </li>
+                                            ))}
+                                            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                                <button className="page-link" onClick={() => setCurrentPage(currentPage + 1)}>Next</button>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
                             </div>
                         </div>
                         {/* FILE MANAGEMENT END */}

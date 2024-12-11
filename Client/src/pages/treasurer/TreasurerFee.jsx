@@ -551,6 +551,10 @@ const TreasurerFee = () => {
         }
     };
 
+    const isReminderDisabled = (status) => {
+        return status === 'Not Paid';
+    };
+
     // Modify render logic for action buttons
     const renderActionButtons = (student) => {
         return (
@@ -578,6 +582,7 @@ const TreasurerFee = () => {
                     <button
                         className="btn btn-email btn-sm"
                         onClick={() => sendPaymentReminderEmail(student)}
+                        disabled={isReminderDisabled(getStudentPaymentStatus(student._id))}
                         title="Send Payment Reminder"
                     >
                         <i className="fas fa-envelope"></i>
@@ -829,6 +834,14 @@ const TreasurerFee = () => {
                     initialPaymentCategory={selectedCategory}
                 />
             )}
+            <style>
+                {`
+                    .pagination .page-item.active .page-link {
+                        background-color: #ff7f00 !important; /* Set to orange */
+                        border-color: #ff7f00 !important;
+                    }
+                `}
+            </style>
         </div>
 
     );
