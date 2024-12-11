@@ -24,10 +24,15 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent,
                 const response = await axios.get('http://localhost:8000/api/payment-categories');
                 const activeCategories = response.data.categories.filter(category => !category.isArchived);
                 setPaymentCategories(activeCategories);
+                
+                // Set payment category based on initialPaymentCategory or first available category
                 if (initialPaymentCategory) {
-                    setPaymentCategory(initialPaymentCategory);
+                    const category = activeCategories.find(cat => cat._id === initialPaymentCategory);
+                    if (category) {
+                        setPaymentCategory(category._id);
+                    }
                 } else if (activeCategories.length > 0) {
-                    setPaymentCategory(activeCategories[0].name);
+                    setPaymentCategory(activeCategories[0]._id);
                 }
             } catch (err) {
                 console.error('Failed to fetch payment categories:', err);
@@ -142,7 +147,7 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent,
     };
 
     const confirmUpdate = async () => {
-        const selectedCategory = paymentCategories.find(cat => cat.name === paymentCategory);
+        const selectedCategory = paymentCategories.find(cat => cat._id === paymentCategory);
         const token = localStorage.getItem('token');
     
         try {
@@ -184,7 +189,7 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent,
         }
     };
 
-    const totalPrice = paymentCategories.find(cat => cat.name === paymentCategory)?.totalPrice || 0;
+    const totalPrice = paymentCategories.find(cat => cat._id === paymentCategory)?.totalPrice || 0;
 
     const handleClose = async () => {
         if (isLocked) {
@@ -284,7 +289,7 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent,
                                     }}
                                 >
                                     {paymentCategories.map(category => (
-                                        <option key={category._id} value={category.name}>
+                                        <option key={category._id} value={category._id}>
                                             {category.name}
                                         </option>
                                     ))}
@@ -390,7 +395,7 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent,
                         <strong>Student:</strong> {studentName}
                     </div>
                     <div className="mb-2">
-                        <strong>Payment Category:</strong> {paymentCategory}
+                        <strong>Payment Category:</strong> {paymentCategories.find(cat => cat._id === paymentCategory)?.name}
                     </div>
                     <div className="mb-2">
                         <strong>New Status:</strong> {status}

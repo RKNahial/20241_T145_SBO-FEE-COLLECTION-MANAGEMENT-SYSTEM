@@ -822,10 +822,11 @@ const TreasurerFee = () => {
             {isModalOpen && selectedStudent && (
                 <ManageFeeModal
                     isOpen={isModalOpen}
-                    onClose={handleModalToggle}
-                    onSave={handleEmailSuccess}
-                    studentName={selectedStudent.name}
+                    onClose={() => setIsModalOpen(false)}
+                    onSave={handleSubmit}
+                    studentName={selectedStudent?.name}
                     selectedStudent={selectedStudent}
+                    initialPaymentCategory={selectedCategory}
                 />
             )}
         </div>
