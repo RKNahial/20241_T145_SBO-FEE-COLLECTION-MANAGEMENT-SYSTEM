@@ -124,6 +124,9 @@ const TreasurerSidebar = ({ isCollapsed }) => {
                             <div onClick={() => handleNavigation('/treasurer/daily-dues')} className={`nav-link ${location.pathname === '/treasurer/daily-dues' ? 'active' : ''}`} role="button">
                                 <i className="fas fa-coins icon-space"></i>{!isCollapsed && <span> Daily Dues</span>}
                             </div>
+                            <NavLink to="/treasurer/file-upload" className={`nav-link ${location.pathname === '/treasurer/file-upload' ? 'active' : ''}`}>
+                                <i className="fas fa-file-upload icon-space"></i>{!isCollapsed && <span> File Upload</span>}
+                            </NavLink>
                         </div>
                         <button
                             className="nav-link logout-link"

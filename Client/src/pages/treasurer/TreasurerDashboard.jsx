@@ -56,89 +56,12 @@ const TreasurerDashboard = () => {
     });
     const [totalActiveOfficers, setTotalActiveOfficers] = useState(0);
 
-    // File management states
-    const [files, setFiles] = useState([]);
-    const [uploadProgress, setUploadProgress] = useState(0);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
-    const [selectedFile, setSelectedFile] = useState(null);
-    const fileInputRef = useRef(null);
-
     // Add analytics initialization
     const analytics = getAnalytics(app);
 
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
     };
-
-    // File management functions
-    const fetchFiles = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:8000/api/drive/files', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setFiles(response.data.files);
-        } catch (error) {
-            console.error('Error fetching files:', error);
-        }
-    };
-
-    const handleUploadClick = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleFileSelect = (event) => {
-        if (event.target.files && event.target.files.length > 0) {
-            const file = event.target.files[0];
-            setSelectedFile(file);
-            handleFileUpload(file);
-        }
-    };
-
-    const handleFileUpload = async (file) => {
-        if (!file) {
-            console.error('No file selected');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            setLoading(true);
-            const token = localStorage.getItem('token');
-            await axios.post('http://localhost:8000/api/drive/upload', formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data'
-                },
-                onUploadProgress: (progressEvent) => {
-                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                    setUploadProgress(progress);
-                }
-            });
-            fetchFiles();
-            setUploadProgress(0);
-        } catch (error) {
-            console.error('Error uploading file:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const formatFileSize = (bytes) => {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    };
-
-    useEffect(() => {
-        fetchFiles();
-    }, []);
 
     useEffect(() => {
         const fetchRecentPayments = async () => {
@@ -322,17 +245,6 @@ const TreasurerDashboard = () => {
         return () => clearTimeout(timer);
     }, []);
 
-    // Filter files based on search
-    const filteredFiles = files.filter(file =>
-        file.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    // Calculate pagination
-    const indexOfLastFile = currentPage * itemsPerPage;
-    const indexOfFirstFile = indexOfLastFile - itemsPerPage;
-    const currentFiles = filteredFiles.slice(indexOfFirstFile, indexOfLastFile);
-    const totalPages = Math.ceil(filteredFiles.length / itemsPerPage);
-
     const actionButtonStyle = {
         width: '35px',
         height: '35px',
@@ -383,54 +295,112 @@ const TreasurerDashboard = () => {
 
                         {/* ORANGE CARDS */}
                         <div className="row">
-                            <div className="col-xl-3 col-md-6">
-                                <div className="card orange-card mb-4">
-                                    <div className="card-body d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h2 className="big-text">{totalActiveStudents}</h2>
-                                            <h5 className="small-text">Active Students</h5>
+                            <div className="col-xl-3 col-md-6 mb-3">
+                                <div className="card border-0" style={{
+                                    borderRadius: '15px',
+                                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+                                }}>
+                                    <div className="card-body d-flex align-items-center justify-content-center py-3"
+                                        style={{
+                                            backgroundColor: '#FF8C00',
+                                            borderRadius: '15px'
+                                        }}>
+                                        <div className="text-center">
+                                            <div className="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
+                                                style={{
+                                                    width: '45px',
+                                                    height: '45px',
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
+                                                }}>
+                                                <i className="fas fa-user-graduate fa-lg text-white"></i>
+                                            </div>
+                                            <h5 className="mb-1 fw-bold text-white">{totalActiveStudents}</h5>
+                                            <p className="mb-0 text-white">Active Students</p>
                                         </div>
-                                        <i className="fas fa-user-graduate big-icon text-white"></i>
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-xl-3 col-md-6">
-                                <div className="card orange-card mb-4">
-                                    <div className="card-body d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h2 className="big-text">{totalActiveOfficers}</h2>
-                                            <h5 className="small-text">Total Officers</h5>
+
+                            <div className="col-xl-3 col-md-6 mb-3">
+                                <div className="card border-0" style={{
+                                    borderRadius: '15px',
+                                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+                                }}>
+                                    <div className="card-body d-flex align-items-center justify-content-center py-3"
+                                        style={{
+                                            backgroundColor: '#FF8C00',
+                                            borderRadius: '15px'
+                                        }}>
+                                        <div className="text-center">
+                                            <div className="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
+                                                style={{
+                                                    width: '45px',
+                                                    height: '45px',
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
+                                                }}>
+                                                <i className="fas fa-user-tie fa-lg text-white"></i>
+                                            </div>
+                                            <h5 className="mb-1 fw-bold text-white">{totalActiveOfficers}</h5>
+                                            <p className="mb-0 text-white">Total Officers</p>
                                         </div>
-                                        <i className="fas fa-user-tie big-icon text-white"></i>
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-xl-3 col-md-6">
-                                <div className="card orange-card mb-4">
-                                    <div className="card-body d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h2 className="big-text">{activeCategories}</h2>
-                                            <h5 className="small-text">Payment Categories</h5>
+
+                            <div className="col-xl-3 col-md-6 mb-3">
+                                <div className="card border-0" style={{
+                                    borderRadius: '15px',
+                                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+                                }}>
+                                    <div className="card-body d-flex align-items-center justify-content-center py-3"
+                                        style={{
+                                            backgroundColor: '#FF8C00',
+                                            borderRadius: '15px'
+                                        }}>
+                                        <div className="text-center">
+                                            <div className="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
+                                                style={{
+                                                    width: '45px',
+                                                    height: '45px',
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
+                                                }}>
+                                                <i className="fas fa-list-alt fa-lg text-white"></i>
+                                            </div>
+                                            <h5 className="mb-1 fw-bold text-white">{activeCategories}</h5>
+                                            <p className="mb-0 text-white">Payment Categories</p>
                                         </div>
-                                        <i className="fas fa-wallet big-icon text-white"></i>
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-xl-3 col-md-6">
-                                <div className="card orange-card mb-4">
-                                    <div className="card-body d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h2 className="big-text"
-                                                // onClick={() => setShowFullAmount(!showFullAmount)}
-                                                style={{ cursor: 'pointer' }}>
-                                                <span style={{
-                                                    fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif'
-                                                }}></span>
+
+                            <div className="col-xl-3 col-md-6 mb-3">
+                                <div className="card border-0" style={{
+                                    borderRadius: '15px',
+                                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+                                }}>
+                                    <div className="card-body d-flex align-items-center justify-content-center py-3"
+                                        style={{
+                                            backgroundColor: '#FF8C00',
+                                            borderRadius: '15px'
+                                        }}>
+                                        <div className="text-center">
+                                            <div className="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
+                                                style={{
+                                                    width: '45px',
+                                                    height: '45px',
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
+                                                }}>
+                                                <i className="fas fa-money-bill-wave fa-lg text-white"></i>
+                                            </div>
+                                            <h5 className="mb-1 fw-bold text-white" onClick={() => setShowFullAmount(!showFullAmount)} style={{ cursor: 'pointer' }}>
                                                 {formatAmount(totalFees)}
-                                            </h2>
-                                            <h5 className="small-text">Total Fees Received</h5>
+                                            </h5>
+                                            <p className="mb-0 text-white">Total Fees</p>
                                         </div>
-                                        <i className="fas fa-money-bill-wave big-icon text-white"></i>
                                     </div>
                                 </div>
                             </div>
@@ -578,150 +548,6 @@ const TreasurerDashboard = () => {
                             </div>
                         </div>
                         {/* REPORTS AND CALENDAR END */}
-
-                        {/* FILE MANAGEMENT */}
-                        <div className="card mb-4">
-                            <div className="card-header bg-white border-0 py-3">
-                                <div className="d-flex justify-content-between align-items-center">
-                                    <h5 className="mb-0">
-                                        <i className="fas fa-file me-2 text-primary"></i>
-                                        File Management
-                                    </h5>
-                                    <div className="d-flex gap-3 align-items-center">
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            placeholder="Search files"
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                            style={{
-                                                borderRadius: '20px',
-                                                padding: '8px 15px',
-                                                border: '1px solid #ced4da'
-                                            }}
-                                        />
-                                        <button
-                                            className="btn btn-primary"
-                                            onClick={handleUploadClick}
-                                            disabled={loading}
-                                            style={{
-                                                borderRadius: '20px',
-                                                padding: '8px 20px'
-                                            }}
-                                        >
-                                            <i className="fas fa-upload me-2"></i>
-                                            Upload File
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="card-body">
-                                <div className="mb-3">
-                                    <input
-                                        ref={fileInputRef}
-                                        type="file"
-                                        style={{ display: 'none' }}
-                                        onChange={handleFileSelect}
-                                        disabled={loading}
-                                    />
-                                    {uploadProgress > 0 && (
-                                        <div className="progress mb-3" style={{ height: '6px' }}>
-                                            <div
-                                                className="progress-bar bg-primary"
-                                                role="progressbar"
-                                                style={{ 
-                                                    width: `${uploadProgress}%`,
-                                                    transition: 'width 0.3s ease'
-                                                }}
-                                                aria-valuenow={uploadProgress}
-                                                aria-valuemin="0"
-                                                aria-valuemax="100"
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                                
-                                <div className="table-responsive">
-                                    <table className="table table-hover">
-                                        <thead className="table-light">
-                                            <tr>
-                                                <th>File Name</th>
-                                                <th>Size</th>
-                                                <th className="text-center">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {currentFiles.map((file, index) => (
-                                                <tr key={index}>
-                                                    <td className="align-middle">{file.name}</td>
-                                                    <td className="align-middle">{formatFileSize(file.size)}</td>
-                                                    <td className="text-center align-middle">
-                                                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-                                                            <button 
-                                                                onClick={() => window.open(file.webViewLink, '_blank')}
-                                                                className="btn btn-primary"
-                                                                style={{
-                                                                    width: '36px',
-                                                                    height: '36px',
-                                                                    padding: 0,
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    justifyContent: 'center',
-                                                                    borderRadius: '4px',
-                                                                    margin: '0 2px'
-                                                                }}
-                                                            >
-                                                                <i className="fas fa-eye" style={{ fontSize: '16px' }}></i>
-                                                            </button>
-                                                            <button 
-                                                                onClick={() => window.open(file.webContentLink, '_blank')}
-                                                                className="btn btn-success"
-                                                                style={{
-                                                                    width: '36px',
-                                                                    height: '36px',
-                                                                    padding: 0,
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    justifyContent: 'center',
-                                                                    borderRadius: '4px',
-                                                                    margin: '0 2px'
-                                                                }}
-                                                            >
-                                                                <i className="fas fa-download" style={{ fontSize: '16px' }}></i>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                {/* Pagination */}
-                                <div className="d-flex justify-content-between align-items-center mt-4">
-                                    <div className="text-muted">
-                                        Showing {indexOfFirstFile + 1} to {Math.min(indexOfLastFile, filteredFiles.length)} of {filteredFiles.length} entries
-                                    </div>
-                                    <nav>
-                                        <ul className="pagination pagination-sm mb-0">
-                                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                                <button className="page-link" onClick={() => setCurrentPage(currentPage - 1)}>Previous</button>
-                                            </li>
-                                            {[...Array(totalPages)].map((_, i) => (
-                                                <li key={i} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
-                                                    <button className="page-link" onClick={() => setCurrentPage(i + 1)}>{i + 1}</button>
-                                                </li>
-                                            ))}
-                                            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                                <button className="page-link" onClick={() => setCurrentPage(currentPage + 1)}>Next</button>
-                                            </li>
-                                        </ul>
-                                    </nav>
-                                </div>
-                            </div>
-                        </div>
-                        {/* FILE MANAGEMENT END */}
-
                     </div>
                 </div>
             </div>

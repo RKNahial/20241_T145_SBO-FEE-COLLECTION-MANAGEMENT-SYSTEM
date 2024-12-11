@@ -303,6 +303,15 @@ const TreasurerDues = () => {
 
     return (
         <div className="sb-nav-fixed">
+            <style>
+                {`
+                    .pagination .page-item.active .page-link {
+                        background-color: #ff7f00 !important;
+                        border-color: #ff7f00 !important;
+                        color: white !important;
+                    }
+                `}
+            </style>
             <Helmet>
                 <title>Treasurer | Daily Dues</title>
             </Helmet>

@@ -126,74 +126,109 @@ const TreasurerProfile = () => {
                         marginTop: '3.5rem' 
                     }}
                 >
-                    <div className="container-fluid mb-5 form-top">
-                        <div className="row">
-                            <div className="col-md-6">
-                                <div className="card mb-4">
-                                    <div className="card-header">
-                                        <i className="fas fa-user-edit"></i> <span style={{ paddingLeft: '0.50rem', fontWeight: 'bold' }}>Update Profile</span>
-                                    </div>
-                                    <div className="card-body">
-                                        {error && <div className="alert alert-danger">{error}</div>}
-                                        {successMessage && <div className="alert alert-success">{successMessage}</div>}
-                                        <form onSubmit={handleSubmit}>
-                                            <div className="mb-3">
-                                                <label className="mb-1">Treasurer Name</label>
-                                                <input
-                                                    type="text"
-                                                    name="name"
-                                                    className="form-control system"
-                                                    value={profile.name}
-                                                    onChange={handleChange}
-                                                    placeholder="Enter your name"
-                                                />
+                    <div className="container-fluid px-4 py-4">
+                        <div className="row justify-content-center">
+                            <div className="col-lg-8">
+                                <div className="card border-0 shadow-sm">
+                                    <div className="card-header bg-white py-3 border-0">
+                                        <div className="d-flex align-items-center">
+                                            <div className="rounded-circle bg-primary bg-opacity-10 p-3">
+                                                <i className="fas fa-user-edit text-primary"></i>
                                             </div>
-                                            <div className="mb-3">
-                                                <label className="mb-1">Email Address</label>
-                                                <input
-                                                    type="email"
-                                                    name="email"
-                                                    className="form-control"
-                                                    value={profile.email}
-                                                    readOnly
-                                                />
+                                            <h5 className="mb-0 ms-3 fw-bold">Profile Settings</h5>
+                                        </div>
+                                    </div>
+                                    <div className="card-body p-4">
+                                        {error && (
+                                            <div className="alert alert-danger d-flex align-items-center" role="alert">
+                                                <i className="fas fa-exclamation-circle me-2"></i>
+                                                {error}
+                                            </div>
+                                        )}
+                                        {successMessage && (
+                                            <div className="alert alert-success d-flex align-items-center" role="alert">
+                                                <i className="fas fa-check-circle me-2"></i>
+                                                {successMessage}
+                                            </div>
+                                        )}
+                                        <form onSubmit={handleSubmit}>
+                                            <div className="mb-4">
+                                                <label className="form-label fw-semibold">Treasurer Name</label>
+                                                <div className="input-group">
+                                                    <span className="input-group-text bg-light border-0">
+                                                        <i className="fas fa-user text-muted"></i>
+                                                    </span>
+                                                    <input
+                                                        type="text"
+                                                        name="name"
+                                                        className="form-control border-0 bg-light ps-2"
+                                                        value={profile.name}
+                                                        onChange={handleChange}
+                                                        placeholder="Enter your name"
+                                                    />
+                                                </div>
                                             </div>
                                             <div className="mb-4">
-                                                <label className="mb-1">Position</label>
-                                                <input
-                                                    type="text"
-                                                    name="position"
-                                                    className="form-control"
-                                                    value={profile.position}
-                                                    readOnly
-                                                />
-                                            </div>
-                                            <div className="mb-3">
-                                                <label className="mb-1">Password</label>
+                                                <label className="form-label fw-semibold">Email Address</label>
                                                 <div className="input-group">
+                                                    <span className="input-group-text bg-light border-0">
+                                                        <i className="fas fa-envelope text-muted"></i>
+                                                    </span>
+                                                    <input
+                                                        type="email"
+                                                        name="email"
+                                                        className="form-control border-0 bg-light ps-2"
+                                                        value={profile.email}
+                                                        readOnly
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="mb-4">
+                                                <label className="form-label fw-semibold">Position</label>
+                                                <div className="input-group">
+                                                    <span className="input-group-text bg-light border-0">
+                                                        <i className="fas fa-briefcase text-muted"></i>
+                                                    </span>
+                                                    <input
+                                                        type="text"
+                                                        name="position"
+                                                        className="form-control border-0 bg-light ps-2"
+                                                        value={profile.position}
+                                                        readOnly
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="mb-4">
+                                                <label className="form-label fw-semibold">Password</label>
+                                                <div className="input-group">
+                                                    <span className="input-group-text bg-light border-0">
+                                                        <i className="fas fa-lock text-muted"></i>
+                                                    </span>
                                                     <input
                                                         type={showPassword ? "text" : "password"}
                                                         name="password"
-                                                        className="form-control system"
+                                                        className="form-control border-0 bg-light ps-2"
                                                         value={profile.password}
                                                         onChange={handleChange}
                                                         placeholder="Enter new password (leave empty to keep current)"
                                                     />
                                                     <button
                                                         type="button"
-                                                        className="btn btn-outline-secondary"
+                                                        className="btn btn-light border-0"
                                                         onClick={() => setShowPassword(!showPassword)}
                                                     >
-                                                        <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                                                        <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'} text-muted`}></i>
                                                     </button>
                                                 </div>
-                                                <small className="text-muted">
+                                                <div className="form-text mt-2">
+                                                    <i className="fas fa-info-circle me-1"></i>
                                                     Password must contain at least one uppercase letter, one number, and one special character
-                                                </small>
+                                                </div>
                                             </div>
-                                            <div className="mb-0">
-                                                <button type="submit" className="btn update-button d-flex align-items-center">
-                                                    <i className="fas fa-pen me-2"></i>Update
+                                            <div className="d-grid">
+                                                <button type="submit" className="btn btn-primary py-2 fw-semibold">
+                                                    <i className="fas fa-save me-2"></i>
+                                                    Save Changes
                                                 </button>
                                             </div>
                                         </form>
@@ -202,35 +237,39 @@ const TreasurerProfile = () => {
                             </div>
                         </div>
                     </div>
+
+                    {/* Confirmation Modal */}
+                    {isModalOpen && (
+                        <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
+                            <div className="modal-dialog modal-dialog-centered">
+                                <div className="modal-content border-0 shadow">
+                                    <div className="modal-header border-0">
+                                        <h5 className="modal-title fw-bold">Confirm Update</h5>
+                                        <button type="button" className="btn-close" onClick={() => setIsModalOpen(false)}></button>
+                                    </div>
+                                    <div className="modal-body">
+                                        <div className="text-center mb-4">
+                                            <div className="rounded-circle bg-warning bg-opacity-10 p-3 d-inline-block">
+                                                <i className="fas fa-exclamation-triangle text-warning fs-4"></i>
+                                            </div>
+                                            <p className="mt-3 mb-0">Are you sure you want to update your profile?</p>
+                                        </div>
+                                    </div>
+                                    <div className="modal-footer border-0">
+                                        <button type="button" className="btn btn-light fw-semibold" onClick={() => setIsModalOpen(false)}>
+                                            Cancel
+                                        </button>
+                                        <button type="button" className="btn btn-primary fw-semibold" onClick={handleConfirmUpdate}>
+                                            Confirm Update
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="modal-backdrop fade show"></div>
+                        </div>
+                    )}
                 </div>
             </div>
-            {/* Confirmation Modal */}
-            {isModalOpen && (
-                <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-                    <div className="modal-dialog">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">Confirm Profile Update</h5>
-                                <button type="button" className="close" onClick={() => setIsModalOpen(false)}>
-                                    <span>&times;</span>
-                                </button>
-                            </div>
-                            <div className="modal-body">
-                                <p>Are you sure you want to update your profile with the following details?</p>
-                                <ul>
-                                    <li><strong>Name:</strong> {profile.name}</li>
-                                    <li><strong>Email:</strong> {profile.email}</li>
-                                    <li><strong>Position:</strong> {profile.position}</li>
-                                </ul>
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-confirm" onClick={handleConfirmUpdate}>Confirm</button>
-                                <button type="button" className="btn btn-cancel" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

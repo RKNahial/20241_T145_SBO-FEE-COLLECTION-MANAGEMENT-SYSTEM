@@ -39,6 +39,7 @@ import TreasurerEditStud from './pages/treasurer/TreasurerEditStud';
 import TreasurerReports from './pages/treasurer/TreasurerReports';
 import TreasurerDues from './pages/treasurer/TreasurerDues';
 import TreasurerProfile from './pages/treasurer/TreasurerProfile';
+import TreasurerFileUpload from './pages/treasurer/TreasurerFileUpload';
 
 import GovDashboard from './pages/governor/GovDashboard';
 import GovStudents from './pages/governor/GovStudents';
@@ -125,6 +126,7 @@ const App = () => {
                                     <Route path="reports" element={<TreasurerReports />} />
                                     <Route path="daily-dues" element={<TreasurerDues />} />
                                     <Route path="profile" element={<TreasurerProfile />} />
+                                    <Route path="file-upload" element={<TreasurerFileUpload />} />
                                 </Routes>
                             </ProtectedRoute>
                         } />
