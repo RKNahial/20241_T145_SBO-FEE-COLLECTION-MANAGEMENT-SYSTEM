@@ -6,6 +6,7 @@ import AdminSidebar from "./AdminSidebar";
 import AdminNavbar from "./AdminNavbar";
 import axios from 'axios';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { Modal, Button } from 'react-bootstrap';
 
 const StatusTag = ({ status, onClick }) => {
     let className = status === 'Active' ? 'badge active-status' : 'badge archived-status';
@@ -32,6 +33,8 @@ const AdminOfficers = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
     const [archivingId, setArchivingId] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [modalAction, setModalAction] = useState({ type: '', officer: null });
 
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
@@ -100,6 +103,15 @@ const AdminOfficers = () => {
         } finally {
             setArchivingId(null);
         }
+    };
+
+    const confirmAction = async () => {
+        if (modalAction.type === 'archive') {
+            await handleArchive(modalAction.officer._id, modalAction.officer.name, modalAction.officer.type);
+        } else {
+            await handleUnarchive(modalAction.officer._id, modalAction.officer.name, modalAction.officer.type);
+        }
+        setShowModal(false);
     };
 
     // Filter and search functionality
@@ -269,9 +281,11 @@ const AdminOfficers = () => {
                                                                 status={officer.isArchived ? 'Archived' : 'Active'}
                                                                 onClick={() => {
                                                                     if (officer.isArchived) {
-                                                                        handleUnarchive(officer._id, officer.name, officer.type);
+                                                                        setModalAction({ type: 'unarchive', officer });
+                                                                        setShowModal(true);
                                                                     } else {
-                                                                        handleArchive(officer._id, officer.name, officer.type);
+                                                                        setModalAction({ type: 'archive', officer });
+                                                                        setShowModal(true);
                                                                     }
                                                                 }}
                                                             />
@@ -284,9 +298,11 @@ const AdminOfficers = () => {
                                                                 className={`btn btn-archive btn-sm ${officer.isArchived ? 'btn-open' : ''}`}
                                                                 onClick={() => {
                                                                     if (officer.isArchived) {
-                                                                        handleUnarchive(officer._id, officer.name, officer.type);
+                                                                        setModalAction({ type: 'unarchive', officer });
+                                                                        setShowModal(true);
                                                                     } else {
-                                                                        handleArchive(officer._id, officer.name, officer.type);
+                                                                        setModalAction({ type: 'archive', officer });
+                                                                        setShowModal(true);
                                                                     }
                                                                 }}
                                                                 disabled={archivingId === officer._id}
@@ -358,6 +374,21 @@ const AdminOfficers = () => {
 
                 </div>
             </div>
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>{modalAction.type === 'archive' ? 'Archive' : 'Unarchive'} Officer</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p className="mb-1">
+                        Are you sure you want to {modalAction.type} <strong>{modalAction.officer?.name}</strong>?
+                    </p>
+                    {modalAction.type === 'archive' && <small style={{ color: '#6c757d', fontSize: '0.90rem' }}>You can still unarchive the officer if you change your mind.</small>}
+                </Modal.Body>
+                <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button variant="btn btn-confirm" onClick={confirmAction} style={{ flex: 'none' }}>Confirm</Button>
+                    <Button variant="btn btn-cancel" onClick={() => setShowModal(false)} style={{ marginRight: '0.5rem', flex: 'none' }}>Cancel</Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

@@ -145,6 +145,16 @@ exports.login = async (req, res) => {
             req.headers['user-agent']
         );
 
+        const loginHistoryLog = await HistoryLog.create({
+            timestamp: new Date(),
+            userName: user.name,
+            userEmail: user.email,
+            userPosition: position,
+            action: 'LOGIN',
+            details: `User logged in: ${user.email}`,
+            status: 'completed'
+        });
+
         const token = jwt.sign(
             { userId: user._id, position },
             process.env.JWT_SECRET,
@@ -207,4 +217,3 @@ exports.getSessionHistory = async (req, res) => {
         });
     }
 };
-

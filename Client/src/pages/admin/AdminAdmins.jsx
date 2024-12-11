@@ -6,6 +6,8 @@ import AdminSidebar from "./AdminSidebar";
 import AdminNavbar from "./AdminNavbar";
 import axios from 'axios';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 
 const AdminAdmins = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -17,6 +19,8 @@ const AdminAdmins = () => {
     const [statusFilter, setStatusFilter] = useState("Active");
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
+    const [showModal, setShowModal] = useState(false);
+    const [modalAction, setModalAction] = useState({ type: '', admin: null });
 
     // Fetch admins
     const fetchAdmins = async () => {
@@ -46,6 +50,9 @@ const AdminAdmins = () => {
             });
             setSuccessMessage(`${adminName} has been archived successfully`);
             fetchAdmins();
+            setTimeout(() => {
+                setSuccessMessage('');
+            }, 3000);
         } catch (error) {
             setError('Failed to archive admin');
         }
@@ -59,9 +66,21 @@ const AdminAdmins = () => {
             });
             setSuccessMessage(`${adminName} has been unarchived successfully`);
             fetchAdmins();
+            setTimeout(() => {
+                setSuccessMessage('');
+            }, 3000);
         } catch (error) {
             setError('Failed to unarchive admin');
         }
+    };
+
+    const confirmAction = async () => {
+        if (modalAction.type === 'archive') {
+            await handleArchive(modalAction.admin._id, modalAction.admin.name);
+        } else {
+            await handleUnarchive(modalAction.admin._id, modalAction.admin.name);
+        }
+        setShowModal(false);
     };
 
     // Filter and search functionality
@@ -202,7 +221,7 @@ const AdminAdmins = () => {
                                                 <tr>
                                                     <th>#</th>
                                                     <th>Admin Name</th>
-                                                    <th>Employee ID</th>
+                                                    <th>Admin ID</th>
                                                     <th>Email</th>
                                                     <th>Status</th>
                                                     <th>Actions</th>
@@ -226,9 +245,13 @@ const AdminAdmins = () => {
                                                             </Link>
                                                             <button
                                                                 className={`btn btn-archive btn-sm ${admin.isArchived ? 'btn-open' : ''}`}
-                                                                onClick={() => admin.isArchived ?
-                                                                    handleUnarchive(admin._id, admin.name) :
-                                                                    handleArchive(admin._id, admin.name)}
+                                                                onClick={() => {
+                                                                    setModalAction({
+                                                                        type: admin.isArchived ? 'unarchive' : 'archive',
+                                                                        admin
+                                                                    });
+                                                                    setShowModal(true);
+                                                                }}
                                                             >
                                                                 <i className={`fas fa-${admin.isArchived ? 'box-open' : 'archive'}`}></i>
                                                             </button>
@@ -283,6 +306,21 @@ const AdminAdmins = () => {
                     </div>
                 </div>
             </div>
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>{modalAction.type === 'archive' ? 'Archive' : 'Unarchive'} Admin</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p className="mb-1">
+                        Are you sure you want to {modalAction.type} <strong>{modalAction.admin?.name}</strong>?
+                    </p>
+                    {modalAction.type === 'archive' && <small style={{ color: '#6c757d', fontSize: '0.90rem' }}>You can still unarchive the admin if you change your mind.</small>}
+                </Modal.Body>
+                <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button variant="btn btn-confirm" onClick={confirmAction} style={{ flex: 'none' }}>Confirm</Button>
+                    <Button variant="btn btn-cancel" onClick={() => setShowModal(false)} style={{ marginRight: '0.5rem', flex: 'none' }}>Cancel</Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

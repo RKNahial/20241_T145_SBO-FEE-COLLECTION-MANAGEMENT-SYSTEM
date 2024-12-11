@@ -223,25 +223,36 @@ const AdminStudents = () => {
                 <AdminSidebar isCollapsed={isCollapsed} />
                 <div className="content-wrapper" style={{
                     marginLeft: isCollapsed ? '5rem' : '15.625rem',
+                    marginTop: '5rem', 
+                    paddingTop: '2rem', 
                     transition: 'margin-left 0.3s ease',
-                    width: `calc(100% - ${isCollapsed ? '5rem' : '15.625rem'})`
+                    width: `calc(100% - ${isCollapsed ? '5rem' : '15.625rem'})`,
+                    padding: '1.5rem',
+                    minHeight: 'calc(100vh - 4rem)',
+                    position: 'relative', 
+                    zIndex: 1 
                 }}>
                     <div className="table-container">
                         <div className="container-fluid px-4">
-                            <div className="content-card">
-                                <div className="d-flex justify-content-between align-items-center mb-4">
+                            <div className="content-card" style={{
+                                backgroundColor: '#fff',
+                                borderRadius: '0.5rem',
+                                boxShadow: '0 0.125rem 0.25rem rgba(0, 0, 0, 0.075)',
+                                padding: '1.5rem',
+                                position: 'relative', 
+                                zIndex: 1 
+                            }}>
+                                <div className="d-flex justify-content-between align-items-center mb-4" style={{ marginTop: '1rem' }}>
                                     <h5 className="card-title mb-0">
                                         <i className="fas fa-users text-primary me-2"></i>
                                         Student Management
                                     </h5>
-                                    <Link to="/admin/students/add" className="btn btn-primary btn-sm">
-                                        <i className="fas fa-plus"></i>
-                                        Add Student
-                                    </Link>
+                                    
                                 </div>
 
                                 {/* Search and Filter Section */}
 
+                                {successMessage && <div className="alert alert-success">{successMessage}</div>}
 
                                 {/* Table Section */}
                                 {loading ? (
