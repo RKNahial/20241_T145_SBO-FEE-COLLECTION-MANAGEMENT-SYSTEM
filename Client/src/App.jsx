@@ -25,6 +25,7 @@ import OfficerAddStud from './pages/officer/OfficerAddStud';
 import OfficerEditStud from './pages/officer/OfficerEditStud';
 import OfficerReports from './pages/officer/OfficerReports';
 import OfficerProfile from './pages/officer/OfficerProfile';
+import OfficerFileUpload from './pages/officer/OfficerFileUpload';
 
 import TreasurerDashboard from './pages/treasurer/TreasurerDashboard';
 import TreasurerFee from './pages/treasurer/TreasurerFee';
@@ -143,6 +144,7 @@ const App = () => {
                                     <Route path="students/edit/:id" element={<OfficerEditStud />} />
                                     <Route path="reports" element={<OfficerReports />} />
                                     <Route path="profile" element={<OfficerProfile />} />
+                                    <Route path="file-upload" element={<OfficerFileUpload />} />
                                 </Routes>
                             </ProtectedRoute>
                         } />

@@ -374,12 +374,20 @@
   background-color: #fff;
 }
 
+.pagination .page-link:focus {
+  box-shadow: none; 
+  border-color: #FF8C00; 
+}
+
 .pagination {
   display: flex;
   justify-content: flex-end;
   overflow: hidden;
   border: 1px solid #DEE2E6;
   border-radius: 0.25rem;
+  display: flex;
+  align-items: center; 
+  justify-content: space-between;
 }
 
 .pagination .page-item {

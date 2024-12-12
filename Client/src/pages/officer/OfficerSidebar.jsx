@@ -38,6 +38,9 @@ const OfficerSidebar = ({ isCollapsed }) => {
                             <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/officer/reports" end>
                                 <i className="far fa-file-alt icon-space"></i>{!isCollapsed && <span> Reports</span>}
                             </NavLink>
+                             <NavLink to="/officer/file-upload" className={`nav-link ${location.pathname === '/officer/file-upload' ? 'active' : ''}`}>
+                                <i className="fas fa-file-upload icon-space"></i>{!isCollapsed && <span> File Upload</span>}
+                            </NavLink>
                         </div>
                         <button
                             onClick={handleLogout}

@@ -398,7 +398,7 @@ const OfficerFee = () => {
                                 ) : error ? (
                                     <div className="alert alert-danger">{error}</div>
                                 ) : (
-                                    <div className="table-responsive mt-3 fee-row">
+                                    <div className="table-responsive mt-3 fee-row table-shadow">
                                         <table className="table table-hover">
                                             <thead>
                                                 <tr>
@@ -446,7 +446,7 @@ const OfficerFee = () => {
                                 )}
 
                                 {/* SHOWING OF ENTRIES AND PAGINATION */}
-                                <div className="d-flex justify-content-between align-items-center mb-2" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
+                                <div className="d-flex justify-content-between align-items-center mb-2 mt-3" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
                                     <div>
                                         Showing {showingStart} to {showingEnd} of {totalEntries} entries
                                     </div>
