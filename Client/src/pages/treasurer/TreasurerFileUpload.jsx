@@ -20,6 +20,9 @@ const TreasurerFileUpload = () => {
     const fileInputRef = useRef(null);
     const analytics = getAnalytics(app);
 
+    const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState(null);
+
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
     };
@@ -72,7 +75,7 @@ const TreasurerFileUpload = () => {
 
     const handleFileUpload = async (file) => {
         if (!file) {
-            console.error('No file selected');
+            setError('No file selected');
             return;
         }
 
@@ -81,6 +84,7 @@ const TreasurerFileUpload = () => {
 
         try {
             setLoading(true);
+            setError(null); // Clear any previous errors
             const token = localStorage.getItem('token');
             await axios.post('http://localhost:8000/api/drive/upload', formData, {
                 headers: {
@@ -92,9 +96,11 @@ const TreasurerFileUpload = () => {
                     setUploadProgress(progress);
                 }
             });
+            setSuccessMessage('File uploaded successfully!');
             fetchFiles();
             setUploadProgress(0);
         } catch (error) {
+            setError(error.response?.data?.message || 'Error uploading file');
             console.error('Error uploading file:', error);
         } finally {
             setLoading(false);
@@ -112,6 +118,18 @@ const TreasurerFileUpload = () => {
     useEffect(() => {
         fetchFiles();
     }, []);
+
+    useEffect(() => {
+        if (error || successMessage) {
+            const timer = setTimeout(() => {
+                setError(null);
+                setSuccessMessage(null);
+            }, 2500);
+    
+            return () => clearTimeout(timer);
+        }
+    }, [error, successMessage]);
+    
 
     useEffect(() => {
         logEvent(analytics, 'page_view', {
@@ -147,7 +165,7 @@ const TreasurerFileUpload = () => {
     };
 
     return (
-        <div className="sb-nav-fixed">
+        <div className={`sb-nav-fixed ${isCollapsed ? 'sb-sidenav-toggled' : ''}`}>
             <style>
                 {`
                     .table-hover .no-hover:hover {
@@ -223,152 +241,168 @@ const TreasurerFileUpload = () => {
                     id="layoutSidenav_content"
                     style={{
                         marginLeft: isCollapsed ? '5rem' : '15.625rem',
-                        marginRight: '0rem',
                         transition: 'margin-left 0.3s',
                         flexGrow: 1,
-                        marginTop: '3.5rem'
+                        marginTop: '3.5rem',
                     }}
                 >
-                    <div className="container-fluid px-5 mb-5">
-                        <p className="system-gray mt-4 welcome-text">File Management</p>
-                        <div className="row mb-4">
-                            <div className="col">
-                                <div className="card">
-                                    <div className="card-body">
-                                        {/* Upload Section */}
+                    <div className="container-fluid px-4 mb-5 form-top">
+                        <div className="card mb-4">
+                            <div className="card-header">
+                                <div className="row">
+                                    <div className="col col-md-6">
+                                        <i className="fas fa-file me-2"></i> <strong>File Management</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="card-body">
+                                {error && (
+                                    <div className="alert alert-danger" role="alert">
+                                        {error}
+                                    </div>
+                                )}
+                                {successMessage && (
+                                    <div className="alert alert-success" role="alert">
+                                        {successMessage}
+                                    </div>
+                                )}
+                                
+                                {/* Upload Section */}
+                                <div
+                                    className={`upload-container ${dragActive ? 'drag-active' : ''}`}
+                                    onDragEnter={handleDrag}
+                                    onDragLeave={handleDrag}
+                                    onDragOver={handleDrag}
+                                    onDrop={handleDrop}
+                                    onClick={handleUploadClick}
+                                >
+                                    <i className="fas fa-cloud-upload-alt upload-icon"></i>
+                                    <h5 className="upload-text">Drag and drop files here or click to upload</h5>
+                                    <p className="upload-subtext">Supported files: PDF, DOC, DOCX, XLS, XLSX</p>
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        style={{ display: 'none' }}
+                                        onChange={handleFileSelect}
+                                        accept=".pdf,.doc,.docx,.xls,.xlsx"
+                                    />
+                                </div>
+
+                                {loading && <LoadingSpinner />}
+
+                                {uploadProgress > 0 && (
+                                    <div className="progress">
                                         <div
-                                            className={`upload-container ${dragActive ? 'drag-active' : ''}`}
-                                            onDragEnter={handleDrag}
-                                            onDragLeave={handleDrag}
-                                            onDragOver={handleDrag}
-                                            onDrop={handleDrop}
-                                            onClick={handleUploadClick}
+                                            className="progress-bar"
+                                            role="progressbar"
+                                            style={{ width: `${uploadProgress}%` }}
+                                            aria-valuenow={uploadProgress}
+                                            aria-valuemin="0"
+                                            aria-valuemax="100"
                                         >
-                                            <i className="fas fa-cloud-upload-alt upload-icon"></i>
-                                            <h5 className="upload-text">Drag and drop files here or click to upload</h5>
-                                            <p className="upload-subtext">Supported files: PDF, DOC, DOCX, XLS, XLSX</p>
-                                            <input
-                                                type="file"
-                                                ref={fileInputRef}
-                                                style={{ display: 'none' }}
-                                                onChange={handleFileSelect}
-                                                accept=".pdf,.doc,.docx,.xls,.xlsx"
-                                            />
-                                        </div>
-
-                                        {loading && <LoadingSpinner />}
-
-                                        {uploadProgress > 0 && (
-                                            <div className="progress">
-                                                <div
-                                                    className="progress-bar"
-                                                    role="progressbar"
-                                                    style={{ width: `${uploadProgress}%` }}
-                                                    aria-valuenow={uploadProgress}
-                                                    aria-valuemin="0"
-                                                    aria-valuemax="100"
-                                                >
-                                                    {uploadProgress}%
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Search Section */}
-                                        <div className="search-container">
-                                            <i className="fas fa-search"></i>
-                                            <input
-                                                type="text"
-                                                className="form-control search-input"
-                                                placeholder="Search files..."
-                                                value={searchTerm}
-                                                onChange={(e) => setSearchTerm(e.target.value)}
-                                            />
-                                        </div>
-
-                                        {/* Files Table */}
-                                        <div className="table-responsive">
-                                            <table className="table table-hover">
-                                                <thead>
-                                                    <tr>
-                                                        <th>File Name</th>
-                                                        <th>Size</th>
-                                                        <th>Last Modified</th>
-                                                        <th>Actions</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {currentFiles.map((file) => (
-                                                        <tr key={file.id}>
-                                                            <td>
-                                                                <i className={`fas fa-file-${getFileIcon(file.name)} me-2 text-muted`}></i>
-                                                                {file.name}
-                                                            </td>
-                                                            <td>{formatFileSize(file.size)}</td>
-                                                            <td>{new Date(file.modifiedTime).toLocaleDateString()}</td>
-                                                            <td>
-                                                                <a
-                                                                    href={file.webViewLink}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    className="btn btn-sm btn-primary me-2"
-                                                                    style={actionButtonStyle}
-                                                                    title="View File"
-                                                                >
-                                                                    <i className="fas fa-eye"></i>
-                                                                </a>
-                                                                <a
-                                                                    href={file.webContentLink}
-                                                                    className="btn btn-sm btn-success"
-                                                                    download
-                                                                    style={actionButtonStyle}
-                                                                    title="Download File"
-                                                                >
-                                                                    <i className="fas fa-download"></i>
-                                                                </a>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-
-                                        {/* Pagination */}
-                                        <div className="d-flex justify-content-end mt-3">
-                                            <nav>
-                                                <ul className="pagination">
-                                                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                                        <button
-                                                            className="page-link"
-                                                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                                        >
-                                                            Previous
-                                                        </button>
-                                                    </li>
-                                                    {[...Array(totalPages)].map((_, index) => (
-                                                        <li
-                                                            key={index + 1}
-                                                            className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}
-                                                        >
-                                                            <button
-                                                                className="page-link"
-                                                                onClick={() => setCurrentPage(index + 1)}
-                                                            >
-                                                                {index + 1}
-                                                            </button>
-                                                        </li>
-                                                    ))}
-                                                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                                        <button
-                                                            className="page-link"
-                                                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                                        >
-                                                            Next
-                                                        </button>
-                                                    </li>
-                                                </ul>
-                                            </nav>
+                                            {uploadProgress}%
                                         </div>
                                     </div>
+                                )}
+
+                                {/* Search Section */}
+                                <div className="search-container">
+                                    <i className="fas fa-search"></i>
+                                    <input
+                                        type="text"
+                                        className="form-control search-input"
+                                        placeholder="Search files..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
+
+                                {/* Files Table */}
+                                <div className="table-responsive">
+                                    <table className="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>File Name</th>
+                                                <th>Size</th>
+                                                <th>Last Modified</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {currentFiles.map((file) => (
+                                                <tr key={file.id}>
+                                                    <td>
+                                                        <i className={`fas fa-file-${getFileIcon(file.name)} me-2 text-muted`}></i>
+                                                        {file.name}
+                                                    </td>
+                                                    <td>{formatFileSize(file.size)}</td>
+                                                    <td>{new Date(file.modifiedTime).toLocaleDateString()}</td>
+                                                    <td>
+                                                        <a
+                                                            href={file.webViewLink}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="btn btn-sm btn-primary me-2"
+                                                            style={actionButtonStyle}
+                                                            title="View File"
+                                                        >
+                                                            <i className="fas fa-eye"></i>
+                                                        </a>
+                                                        <a
+                                                            href={file.webContentLink}
+                                                            className="btn btn-sm btn-success"
+                                                            download
+                                                            style={actionButtonStyle}
+                                                            title="Download File"
+                                                        >
+                                                            <i className="fas fa-download"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Pagination */}
+                                <div className="d-flex justify-content-between align-items-center mb-2" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
+                                    <div>
+                                        Showing {indexOfFirstItem + 1} to {indexOfLastItem} of {filteredFiles.length} entries
+                                    </div>
+                                    <nav>
+                                        <ul className="pagination">
+                                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                                <button
+                                                    className="page-link"
+                                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                                >
+                                                    Previous
+                                                </button>
+                                            </li>
+                                            {[...Array(totalPages)].map((_, index) => (
+                                                <li
+                                                    key={index + 1}
+                                                    className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}
+                                                >
+                                                    <button
+                                                        className="page-link"
+                                                        onClick={() => setCurrentPage(index + 1)}
+                                                    >
+                                                        {index + 1}
+                                                    </button>
+                                                </li>
+                                            ))}
+                                            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                                <button
+                                                    className="page-link"
+                                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                                >
+                                                    Next
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </nav>
                                 </div>
                             </div>
                         </div>
