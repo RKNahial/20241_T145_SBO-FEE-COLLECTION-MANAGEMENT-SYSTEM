@@ -86,7 +86,6 @@
 
 .table td, .table th {
     overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
@@ -152,30 +151,6 @@
     padding-top: 1rem;
     padding-bottom: 1rem;
     vertical-align: middle;
-}
-
-/* Pagination styles */
-.pagination {
-    margin-bottom: 0;
-}
-
-.pagination .page-link {
-    border: none;
-    padding: 0.5rem 0.75rem;
-    margin: 0 0.25rem;
-    border-radius: 0.35rem;
-    color: #858796;
-    transition: all 0.3s ease;
-}
-
-.pagination .page-item.active .page-link {
-    background-color: #4e73df;
-    color: white;
-}
-
-.pagination .page-link:hover {
-    background-color: #f8f9fc;
-    color: #4e73df;
 }
 
 /* Modal styles */

@@ -551,36 +551,48 @@ const TreasurerStudents = () => {
                                         </table>
 
                                         {/* Pagination */}
-                                        <div className="d-flex justify-content-between align-items-center mb-2" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
-                                            <div>
-                                                Showing {indexOfFirstItem + 1} to {indexOfLastItem} of {filteredStudents.length} entries
+                                        <div className="d-flex justify-content-between align-items-center mt-3">
+                                            <div style={{ color: '#6C757D', fontSize: '0.875rem' }}>
+                                                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredStudents.length)} of {filteredStudents.length} entries
                                             </div>
                                             <nav>
-                                                <ul className="pagination justify-content-center">
-                                                    <li className="page-item">
+                                                <ul className="pagination">
+                                                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
                                                         <button
                                                             onClick={() => paginate(currentPage - 1)}
                                                             className="page-link"
                                                             disabled={currentPage === 1}
+                                                            style={{ color: '#6C757D' }}
                                                         >
                                                             Previous
                                                         </button>
                                                     </li>
                                                     {[...Array(totalPages)].map((_, index) => (
-                                                        <li key={index} className="page-item">
+                                                        <li 
+                                                            key={index} 
+                                                            className={`page-item ${index + 1 === currentPage ? 'active' : ''}`}
+                                                        >
                                                             <button
                                                                 onClick={() => paginate(index + 1)}
-                                                                className={`page-link ${index + 1 === currentPage ? 'active' : ''}`}
+                                                                className="page-link"
+                                                                style={index + 1 === currentPage ? {
+                                                                    backgroundColor: '#FF8C00',
+                                                                    borderColor: '#FF8C00',
+                                                                    color: '#EAEAEA'
+                                                                } : {
+                                                                    color: '#6C757D'
+                                                                }}
                                                             >
                                                                 {index + 1}
                                                             </button>
                                                         </li>
                                                     ))}
-                                                    <li className="page-item">
+                                                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
                                                         <button
                                                             onClick={() => paginate(currentPage + 1)}
                                                             className="page-link"
                                                             disabled={currentPage === totalPages}
+                                                            style={{ color: '#6C757D' }}
                                                         >
                                                             Next
                                                         </button>
@@ -588,6 +600,7 @@ const TreasurerStudents = () => {
                                                 </ul>
                                             </nav>
                                         </div>
+
                                     </ >
                                 )} 
                             </div>

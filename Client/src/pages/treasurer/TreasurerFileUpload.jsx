@@ -28,6 +28,7 @@ const TreasurerFileUpload = () => {
     };
 
     const fetchFiles = async () => {
+        setLoading(true); 
         try {
             const token = localStorage.getItem('token');
             const response = await axios.get('http://localhost:8000/api/drive/files', {
@@ -39,9 +40,11 @@ const TreasurerFileUpload = () => {
             if (error.response?.status === 401) {
                 console.log('Unauthorized access. Please login again.');
             }
+        } finally {
+            setLoading(false);
         }
     };
-
+    
     const handleUploadClick = () => {
         fileInputRef.current?.click();
     };
@@ -84,7 +87,7 @@ const TreasurerFileUpload = () => {
 
         try {
             setLoading(true);
-            setError(null); // Clear any previous errors
+            setError(null); 
             const token = localStorage.getItem('token');
             await axios.post('http://localhost:8000/api/drive/upload', formData, {
                 headers: {
@@ -214,11 +217,10 @@ const TreasurerFileUpload = () => {
                     .search-bar {
                         margin-bottom: 20px;
                     }
-
                 `}
             </style>
             <Helmet>
-                <title>File Management | SFCM</title>
+                <title>Treasurer | File Upload</title>
             </Helmet>
             <TreasurerNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
@@ -307,7 +309,7 @@ const TreasurerFileUpload = () => {
                                 </form>
 
                                 {/* Files Table */}
-                                <div className="table-responsive">
+                                <div className="table-responsive table-shadow">
                                     <table className="table table-hover">
                                         <thead>
                                             <tr>
@@ -318,9 +320,22 @@ const TreasurerFileUpload = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {currentFiles.map((file) => (
+                                            {loading ? (
+                                                <tr>
+                                                    <td colSpan="4" style={{ textAlign: 'center', padding: '2rem' }}>
+                                                        <LoadingSpinner />
+                                                    </td>
+                                                </tr>
+                                            ) : currentFiles.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan="4" style={{ textAlign: 'center', padding: '1rem' }}>
+                                                        No files found
+                                                    </td>
+                                                </tr>
+                                            ) : (
+                                                currentFiles.map((file) => (
                                                 <tr key={file.id}>
-                                                    <td>
+                                                    <td className="text-left">
                                                         <i className={`fas fa-file-${getFileIcon(file.name)} me-2 text-muted`}></i>
                                                         {file.name}
                                                     </td>
@@ -348,13 +363,14 @@ const TreasurerFileUpload = () => {
                                                         </a>
                                                     </td>
                                                 </tr>
-                                            ))}
+                                              ))
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>
 
                                 {/* Pagination */}
-                                <div className="d-flex justify-content-between align-items-center mb-2" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
+                                <div className="d-flex justify-content-between align-items-center mb-2 mt-3" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
                                     <div>
                                         Showing {indexOfFirstItem + 1} to {indexOfLastItem} of {filteredFiles.length} entries
                                     </div>

@@ -107,11 +107,11 @@ const TreasurerSidebar = ({ isCollapsed }) => {
         <div className={`sidebar ${isCollapsed ? 'collapsed' : 'expanded'}`}>
             <nav className="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div className="sb-sidenav-menu">
-                    <div className="nav" style={{ marginTop: '-0.55rem' }}>
+                    <div className="nav" style={{ marginTop: '0.65rem' }}>
                         <div>
                             <div onClick={() => handleNavigation('/treasurer/dashboard')} className={`nav-link ${location.pathname === '/treasurer/dashboard' ? 'active' : ''}`} role="button">
                                 <i className="fas fa-home icon-space"></i>{!isCollapsed && <span> Dashboard</span>}
-                            </div>
+                            </div> 
                             <div onClick={() => handleNavigation('/treasurer/manage-fee')} className={`nav-link ${location.pathname === '/treasurer/manage-fee' ? 'active' : ''}`} role="button">
                                 <i className="fas fa-hand-holding-usd icon-space"></i>{!isCollapsed && <span> Manage Fee</span>}
                             </div>

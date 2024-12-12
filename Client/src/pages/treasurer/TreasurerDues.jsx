@@ -389,7 +389,7 @@ const TreasurerDues = () => {
                                             </div>
                                         </div>
 
-                                        <div className="table-responsive mt-3 due-row">
+                                        <div className="table-responsive mt-3 due-row table-shadow">
                                             <table className="table table-hover">
                                                 <thead>
                                                     <tr>
@@ -442,7 +442,7 @@ const TreasurerDues = () => {
                                             </table>
                                         </div>
                                         
-                                        <div className="d-flex justify-content-between align-items-center mb-2">
+                                        <div className="d-flex justify-content-between align-items-center mb-2 mt-3">
                                             <div>
                                                 Showing {indexOfFirstOfficer + 1} to {Math.min(indexOfLastOfficer, officers.length)} of {officers.length} entries
                                             </div>

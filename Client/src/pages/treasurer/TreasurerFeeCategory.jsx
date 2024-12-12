@@ -324,25 +324,36 @@ const TreasurerFeeCategory = () => {
 
                                         {/* Pagination */}
                                         <div className="d-flex justify-content-between align-items-center mt-3">
-                                            <div className="text-muted small">
+                                            <div style={{ color: '#6C757D', fontSize: '0.875rem' }}>
                                                 Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredCategories.length)} of {filteredCategories.length} entries
                                             </div>
                                             <nav>
-                                                <ul className="pagination pagination-sm mb-0">
+                                                <ul className="pagination">
                                                     <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
                                                         <button
                                                             className="page-link"
                                                             onClick={() => setCurrentPage(prev => prev - 1)}
                                                             disabled={currentPage === 1}
+                                                            style={{ color: '#6C757D' }}
                                                         >
                                                             Previous
                                                         </button>
                                                     </li>
                                                     {[...Array(totalPages)].map((_, index) => (
-                                                        <li key={index} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
+                                                        <li 
+                                                            key={index} 
+                                                            className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}
+                                                        >
                                                             <button
                                                                 className="page-link"
                                                                 onClick={() => setCurrentPage(index + 1)}
+                                                                style={currentPage === index + 1 ? {
+                                                                    backgroundColor: '#FF8C00',
+                                                                    borderColor: '#FF8C00',
+                                                                    color: '#EAEAEA'
+                                                                } : {
+                                                                    color: '#6C757D'
+                                                                }}
                                                             >
                                                                 {index + 1}
                                                             </button>
@@ -353,6 +364,7 @@ const TreasurerFeeCategory = () => {
                                                             className="page-link"
                                                             onClick={() => setCurrentPage(prev => prev + 1)}
                                                             disabled={currentPage === totalPages}
+                                                            style={{ color: '#6C757D' }}
                                                         >
                                                             Next
                                                         </button>
@@ -360,6 +372,7 @@ const TreasurerFeeCategory = () => {
                                                 </ul>
                                             </nav>
                                         </div>
+
                                     </>
 
                                 )}

@@ -411,7 +411,7 @@ const TreasurerDashboard = () => {
                             <h5 className="mb-4 header">Recent Payments</h5>
                             <table className="table table-hover">
                                 <thead>
-                                <tr>
+                                     <tr>
                                         <th className="index-column">#</th>
                                         <th className="date-time-column">Date</th>
                                         <th className="date-time-column">Time</th>
