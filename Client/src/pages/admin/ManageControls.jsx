@@ -382,16 +382,17 @@ const ManageControls = () => {
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
                                             style={{
-                                                paddingLeft: '40px',
+                                                paddingRight: '40px',
                                                 width: '300px',
-                                                height: '38px'
+                                                height: '38px',
+                                                borderRadius: '4px'
                                             }}
                                         />
                                         <i className="fas fa-search position-absolute" style={{
-                                            left: '12px',
+                                            right: '12px',
                                             top: '50%',
                                             transform: 'translateY(-50%)',
-                                            color: '#6c757d'
+                                            color: 'orange'
                                         }}></i>
                                     </div>
                                 </div>
@@ -429,7 +430,7 @@ const ManageControls = () => {
                                                         onClick={() => handleUserClick(user)}
                                                         className="px-3"
                                                     >
-                                                        <i className="fas fa-cog me-2"></i>
+                                                        <i className="fas fa-cog me-2" style={{ color: 'orange' }}></i>
                                                         Manage Access
                                                     </Button>
                                                 </td>

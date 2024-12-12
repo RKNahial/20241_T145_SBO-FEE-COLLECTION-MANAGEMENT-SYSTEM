@@ -255,7 +255,7 @@ const TreasurerFileUpload = () => {
                                         {successMessage}
                                     </div>
                                 )}
-                                
+                                 
                                 {/* Upload Section */}
                                 <div
                                     className={`upload-container ${dragActive ? 'drag-active' : ''}`}
@@ -277,7 +277,7 @@ const TreasurerFileUpload = () => {
                                     />
                                 </div>
 
-                                {loading && <LoadingSpinner />}
+                                {loading && <LoadingSpinner icon="file" />}
 
                                 {uploadProgress > 0 && (
                                     <div className="progress">
@@ -323,7 +323,7 @@ const TreasurerFileUpload = () => {
                                             {loading ? (
                                                 <tr>
                                                     <td colSpan="4" style={{ textAlign: 'center', padding: '2rem' }}>
-                                                        <LoadingSpinner />
+                                                        <LoadingSpinner icon="file" />
                                                     </td>
                                                 </tr>
                                             ) : currentFiles.length === 0 ? (

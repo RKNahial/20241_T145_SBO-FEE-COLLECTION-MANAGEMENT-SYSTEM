@@ -29,6 +29,9 @@ const LoadingSpinner = ({ text = "Loading", icon = "circle-notch", subtext }) =>
             // ARCHIVED
             case 'archived':
                 return { icon: 'archive', color: '#FF8C00', animation: 'archive-pulse' };
+            // FILE
+            case 'file':
+                return { icon: 'file', color: '#FF8C00', animation: 'file-bounce' };
             default:
                 return { icon: 'circle-notch', color: '#FF8C00', animation: 'default-pulse' };
         }

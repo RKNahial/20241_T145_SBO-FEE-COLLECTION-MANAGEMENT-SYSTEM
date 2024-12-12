@@ -390,35 +390,14 @@ const AdminDashboard = () => {
                                                                         href={file.webViewLink}
                                                                         target="_blank"
                                                                         rel="noopener noreferrer"
-                                                                        className="btn btn-primary"
-                                                                        style={{
-                                                                            width: '36px',
-                                                                            height: '36px',
-                                                                            display: 'flex',
-                                                                            alignItems: 'center',
-                                                                            justifyContent: 'center',
-                                                                            padding: 0,
-                                                                            lineHeight: '1',
-                                                                            marginBottom: '14px',
-                                                                        }}
+                                                                        style={{ color: 'orange', cursor: 'pointer', marginRight: '10px' }}
                                                                     >
                                                                         <i className="fas fa-eye" style={{ fontSize: '16px' }}></i>
                                                                     </a>
                                                                     <a
                                                                         href={file.webContentLink}
                                                                         download
-                                                                        className="btn btn-success"
-                                                                        style={{
-                                                                            width: '36px',
-                                                                            height: '36px',
-                                                                            display: 'flex',
-                                                                            alignItems: 'center',
-                                                                            justifyContent: 'center',
-                                                                            padding: 0,
-                                                                            lineHeight: '1'
-
-
-                                                                        }}
+                                                                        style={{ color: 'green', cursor: 'pointer' }}
                                                                     >
                                                                         <i className="fas fa-download" style={{ fontSize: '16px' }}></i>
                                                                     </a>

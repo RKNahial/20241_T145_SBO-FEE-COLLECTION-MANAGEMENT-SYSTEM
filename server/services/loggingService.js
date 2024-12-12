@@ -16,8 +16,23 @@ class LoggingService {
         try {
             let query = {};
             
-            if (filters.startDate) {
-                query.timestamp = { $gte: new Date(filters.startDate) };
+            // Handle date range filtering
+            if (filters.startDate || filters.endDate) {
+                query.timestamp = {};
+                
+                if (filters.startDate) {
+                    // Set time to start of day (00:00:00)
+                    const startDate = new Date(filters.startDate);
+                    startDate.setHours(0, 0, 0, 0);
+                    query.timestamp.$gte = startDate;
+                }
+                
+                if (filters.endDate) {
+                    // Set time to end of day (23:59:59)
+                    const endDate = new Date(filters.endDate);
+                    endDate.setHours(23, 59, 59, 999);
+                    query.timestamp.$lte = endDate;
+                }
             }
             
             if (filters.action) {

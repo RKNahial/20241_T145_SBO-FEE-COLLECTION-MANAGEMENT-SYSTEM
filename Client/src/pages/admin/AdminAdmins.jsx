@@ -141,7 +141,7 @@ const AdminAdmins = () => {
                             <div className="card-header">
                                 <div className="row">
                                     <div className="col col-md-6">
-                                        <i className="fa fa-user-cog me-2"></i> <strong>Admin</strong>
+                                        <i className="fa fa-user-shield" style={{ color: 'blue' }}></i> <strong>Admins</strong>
                                     </div>
                                 </div>
                             </div>
@@ -180,9 +180,6 @@ const AdminAdmins = () => {
                                             <option value="Archived">Archived</option>
                                         </select>
                                         <div className="input-group" style={{ width: 'auto', position: 'relative' }}>
-                                            <span className="input-group-text" style={{ backgroundColor: 'transparent', border: 'none', position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}>
-                                                <i className="fas fa-search" style={{ color: '#6c757d' }}></i>
-                                            </span>
                                             <input
                                                 type="text"
                                                 className="form-control"
@@ -191,13 +188,16 @@ const AdminAdmins = () => {
                                                 onChange={(e) => setSearchTerm(e.target.value)}
                                                 aria-label="Search admin"
                                                 style={{
-                                                    paddingLeft: '40px',
+                                                    paddingRight: '40px',
                                                     borderRadius: '5px',
                                                     border: '1px solid #ced4da',
                                                     boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
                                                     width: '250px'
                                                 }}
                                             />
+                                            <span className="input-group-text" style={{ backgroundColor: 'transparent', border: 'none', position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}>
+                                                <i className="fas fa-search" style={{ color: 'orange' }}></i>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>

@@ -20,6 +20,7 @@ router.get('/history-logs', auth, async (req, res) => {
     try {
         const filters = {
             startDate: req.query.startDate,
+            endDate: req.query.endDate,
             action: req.query.action
         };
         const logs = await loggingService.getLogs(filters);

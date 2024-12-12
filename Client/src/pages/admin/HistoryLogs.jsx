@@ -12,7 +12,8 @@ const HistoryLogs = () => {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [filterDate, setFilterDate] = useState('');
+    const [filterStartDate, setFilterStartDate] = useState('');
+    const [filterEndDate, setFilterEndDate] = useState('');
     const [filterAction, setFilterAction] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
@@ -25,7 +26,8 @@ const HistoryLogs = () => {
 
             // Add query parameters if filters are set
             const params = new URLSearchParams();
-            if (filterDate) params.append('startDate', filterDate);
+            if (filterStartDate) params.append('startDate', filterStartDate);
+            if (filterEndDate) params.append('endDate', filterEndDate);
             if (filterAction) params.append('action', filterAction);
 
             if (params.toString()) {
@@ -59,7 +61,7 @@ const HistoryLogs = () => {
 
     useEffect(() => {
         fetchLogs();
-    }, [filterDate, filterAction]);
+    }, [filterStartDate, filterEndDate, filterAction]);
 
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
@@ -133,20 +135,33 @@ const HistoryLogs = () => {
                                 </Col>
                                 <Col md={4}>
                                     <Form.Group>
-                                        <div style={{ width: '200px', margin: '0 auto' }}>
+                                        <div style={{ width: '100%', maxWidth: '400px', margin: '0 auto' }}>
                                             <Form.Label style={{ marginBottom: '8px' }}>
-                                                Filter by Date
+                                                Filter by Date Range
                                             </Form.Label>
-                                            <div className="position-relative d-flex justify-content-center">
-                                                <DatePicker
-                                                    selected={filterDate ? new Date(filterDate) : null}
-                                                    onChange={(date) => setFilterDate(date ? date.toISOString().split('T')[0] : '')}
-                                                    dateFormat="yyyy-MM-dd"
-                                                    className="form-control"
-                                                    placeholderText="Select date"
-                                                    isClearable
-                                                    style={{ width: '100%', maxWidth: '200px' }}
-                                                />
+                                            <div className="d-flex gap-2 align-items-center">
+                                                <div className="position-relative" style={{ flex: 1 }}>
+                                                    <DatePicker
+                                                        selected={filterStartDate ? new Date(filterStartDate) : null}
+                                                        onChange={(date) => setFilterStartDate(date ? date.toISOString().split('T')[0] : '')}
+                                                        dateFormat="yyyy-MM-dd"
+                                                        className="form-control"
+                                                        placeholderText="Start date"
+                                                        isClearable
+                                                    />
+                                                </div>
+                                                <span>to</span>
+                                                <div className="position-relative" style={{ flex: 1 }}>
+                                                    <DatePicker
+                                                        selected={filterEndDate ? new Date(filterEndDate) : null}
+                                                        onChange={(date) => setFilterEndDate(date ? date.toISOString().split('T')[0] : '')}
+                                                        dateFormat="yyyy-MM-dd"
+                                                        className="form-control"
+                                                        placeholderText="End date"
+                                                        isClearable
+                                                        minDate={filterStartDate ? new Date(filterStartDate) : null}
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
                                     </Form.Group>
@@ -173,8 +188,6 @@ const HistoryLogs = () => {
                                             <option value="EMAIL_SENT">Email Sent</option>
                                             <option value="LOGIN">Login</option>
                                             <option value="LOGOUT">Logout</option>
-
-
                                         </Form.Select>
                                     </Form.Group>
                                 </Col>
@@ -204,6 +217,7 @@ const HistoryLogs = () => {
                                         </div>
                                     ) : (
                                         <>
+
                                             <Table responsive hover className="logs-table">
                                                 <thead>
                                                     <tr>
@@ -264,6 +278,7 @@ const HistoryLogs = () => {
                                                         {Array.from({ length: totalPages }, (_, index) => (
                                                             <li key={index + 1}
                                                                 className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
+
                                                                 <button
                                                                     className="page-link"
                                                                     onClick={() => paginate(index + 1)}
@@ -285,8 +300,10 @@ const HistoryLogs = () => {
                                                 </nav>
                                             </div>
                                         </>
+
                                     )}
                                 </>
+
                             )}
                         </Card.Body>
                     </Card>
@@ -296,4 +313,4 @@ const HistoryLogs = () => {
     );
 };
 
-export default HistoryLogs; 
+export default HistoryLogs;

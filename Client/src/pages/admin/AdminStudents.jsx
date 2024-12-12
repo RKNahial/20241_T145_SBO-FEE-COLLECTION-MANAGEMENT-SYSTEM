@@ -307,8 +307,8 @@ const AdminStudents = () => {
                                                         <option value="All">All</option>
                                                     </select>
                                                     <div className="input-group" style={{ width: 'auto', position: 'relative' }}>
-                                                        <span className="input-group-text" style={{ backgroundColor: 'transparent', border: 'none', position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}>
-                                                            <i className="fas fa-search" style={{ color: '#6c757d' }}></i>
+                                                        <span className="input-group-text" style={{ backgroundColor: 'transparent', border: 'none', position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}>
+                                                            <i className="fas fa-search" style={{ color: 'orange' }}></i>
                                                         </span>
                                                         <input
                                                             type="text"
@@ -318,7 +318,7 @@ const AdminStudents = () => {
                                                             onChange={(e) => setSearchTerm(e.target.value)}
                                                             aria-label="Search students"
                                                             style={{
-                                                                paddingLeft: '40px',
+                                                                paddingRight: '40px',
                                                                 borderRadius: '5px',
                                                                 border: '1px solid #ced4da',
                                                                 boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
@@ -448,6 +448,7 @@ const AdminStudents = () => {
                                                             <button
                                                                 onClick={() => paginate(index + 1)}
                                                                 className={`page-link ${index + 1 === currentPage ? 'active' : ''}`}
+                                                                style={index + 1 === currentPage ? { backgroundColor: 'orange', borderColor: 'orange', color: 'white' } : {color: 'black'}}
                                                             >
                                                                 {index + 1}
                                                             </button>
