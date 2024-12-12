@@ -227,6 +227,7 @@ const TreasurerFee = () => {
     const handleViewClick = (student) => {
         setViewedStudent(student);
         setIsViewModalOpen(true);
+        console.log('Opening view modal for student:', student, 'with category:', selectedCategory);
     };
 
     // PAGINATION
@@ -834,6 +835,14 @@ const TreasurerFee = () => {
                     initialPaymentCategory={selectedCategory}
                 />
             )}
+            {/* View Payment Modal */}
+            <ViewFeeModal
+                isOpen={isViewModalOpen}
+                onClose={() => setIsViewModalOpen(false)}
+                student={viewedStudent}
+                categoryId={selectedCategory}
+                onEmailSuccess={handleEmailSuccess}
+            />
             <style>
                 {`
                     .pagination .page-item.active .page-link {

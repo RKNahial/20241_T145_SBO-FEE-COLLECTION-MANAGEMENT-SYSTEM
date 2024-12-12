@@ -8,189 +8,123 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId, onEmailSuccess }) 
     const [paymentDetails, setPaymentDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [sendingEmail, setSendingEmail] = useState(false); 
-    const userDetails = JSON.parse(localStorage.getItem('userDetails') || '{}');
-    const isTreasurer = userDetails?.position === 'Treasurer';
-    console.log('Current user details:', userDetails);
-    console.log('Is Treasurer:', isTreasurer);
-    console.log('Loading:', loading);
-    console.log('Error:', error);
-    console.log('Payment Details:', paymentDetails);
+    const [sendingEmail, setSendingEmail] = useState(false);
 
     useEffect(() => {
         const fetchPaymentDetails = async () => {
-            if (isOpen && student) {
-                try {
-                    const token = localStorage.getItem('token');
-                    const url = categoryId
-                        ? `http://localhost:8000/api/payment-fee/details/${student._id}?category=${categoryId}`
-                        : `http://localhost:8000/api/payment-fee/details/${student._id}`;
-                    const response = await axios.get(url, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    if (response.data.success) {
-                        setPaymentDetails(response.data.paymentFee);
-                    } else {
-                        throw new Error(response.data.message);
+            if (!isOpen || !student || !categoryId) {
+                return;
+            }
+
+            setLoading(true);
+            setError(null);
+
+            try {
+                const token = localStorage.getItem('token');
+                const url = `http://localhost:8000/api/payment-fee/details/${student._id}?category=${categoryId}`;
+                
+                console.log('Fetching payment details:', url);
+                
+                const response = await axios.get(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
                     }
-                } catch (error) {
-                    console.error('Error fetching payment details:', error);
-                    setError(error.message || 'Failed to fetch payment details');
-                } finally {
-                    setLoading(false);
+                });
+
+                if (response.data.success) {
+                    console.log('Payment details received:', response.data);
+                    setPaymentDetails(response.data.paymentFee);
+                } else {
+                    throw new Error(response.data.message || 'Failed to fetch payment details');
                 }
+            } catch (error) {
+                console.error('Error fetching payment details:', error);
+                setError(error.message || 'Failed to fetch payment details');
+            } finally {
+                setLoading(false);
             }
         };
 
-        if (isOpen) {
-            fetchPaymentDetails();
-        }
+        fetchPaymentDetails();
     }, [isOpen, student, categoryId]);
 
-    const handleSendEmail = async () => {
-        if (!student.institutionalEmail || !paymentDetails) return;
-
-        setSendingEmail(true); 
-
-        const templateParams = {
-            from_name: "COT-SBO COLLECTION FEE MANAGEMENT SYSTEM",
-            to_name: student.name,
-            to_email: student.institutionalEmail,
-            payment_category: paymentDetails.paymentCategory || 'N/A',
-            total_price: paymentDetails.totalPrice?.toString() || '0.00',
-            amount_paid: paymentDetails.amountPaid?.toString() || '0.00',
-            payment_status: student.paymentstatus,
-            transaction_history: paymentDetails.transactions?.map(t =>
-                `• Amount: ₱${t.amount.toFixed(2)}\n  Date: ${t.formattedDate}\n  Status: ${t.previousStatus || 'New'} → ${t.newStatus}`
-            ).join('\n\n') || 'No transaction history'
-        };
-
-        try {
-            const response = await emailjs.send(
-                "service_bni941i",
-                "template_x5s32eh",
-                templateParams,
-                "Nqbgnjhv9ss88DOrk"
-            );
-
-            if (response.status === 200) {
-                onEmailSuccess(`Payment details emailed to ${student.name}'s successfully!`);
-                onClose(); 
-            }
-        } catch (error) {
-            console.error('Error sending email:', error);
-            // Optionally handle the error here (e.g., set an error state)
-        } finally {
-            setSendingEmail(false); 
-        }
-    };
+    if (!isOpen || !student) return null;
 
     return (
-        <Modal
-            show={isOpen}
-            onHide={onClose}
-            centered
-            size="md"
-            backdrop="static"
-            keyboard={false}
-        >
-            <Modal.Header closeButton className="border-0">
-                <Modal.Title>
-                    <i className="fa-solid fa-eye me-2"></i>
-                    View Payment Details
-                </Modal.Title>
+        <Modal show={isOpen} onHide={onClose} size="lg">
+            <Modal.Header closeButton>
+                <Modal.Title>Payment Details</Modal.Title>
             </Modal.Header>
-
-            <Modal.Body className="px-4">
-            {loading ? (
-                    <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'center', 
-                        alignItems: 'center',
-                        minHeight: '200px'
-                    }}>
-                        <LoadingSpinner icon="coin" />
+            <Modal.Body>
+                {loading ? (
+                    <div className="text-center">
+                        <LoadingSpinner />
                     </div>
                 ) : error ? (
                     <Alert variant="danger">{error}</Alert>
-                ) : sendingEmail ? (
-                    <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'center', 
-                        alignItems: 'center',
-                        minHeight: '200px'
-                    }}>
-                        <LoadingSpinner text="Sending Email" icon="envelope" />
+                ) : paymentDetails ? (
+                    <div>
+                        <Row className="mb-3">
+                            <Col>
+                                <h5>Student Information</h5>
+                                <p><strong>Name:</strong> {student.name}</p>
+                                <p><strong>Student ID:</strong> {student.studentId}</p>
+                                <p><strong>Program:</strong> {student.program}</p>
+                            </Col>
+                        </Row>
+                        <Row className="mb-3">
+                            <Col>
+                                <h5>Payment Information</h5>
+                                <p><strong>Category:</strong> {paymentDetails.paymentCategory}</p>
+                                <p><strong>Total Amount:</strong> ₱{paymentDetails.totalPrice?.toFixed(2) || '0.00'}</p>
+                                <p><strong>Amount Paid:</strong> ₱{paymentDetails.amountPaid?.toFixed(2) || '0.00'}</p>
+                                <p><strong>Status:</strong> <span className={`badge ${paymentDetails.status === 'Fully Paid' ? 'bg-success' : paymentDetails.status === 'Partially Paid' ? 'bg-warning' : 'bg-danger'}`}>{paymentDetails.status}</span></p>
+                                {paymentDetails.paymentDate && (
+                                    <p><strong>Last Payment Date:</strong> {new Date(paymentDetails.paymentDate).toLocaleDateString()}</p>
+                                )}
+                            </Col>
+                        </Row>
+                        {paymentDetails.transactions && paymentDetails.transactions.length > 0 && (
+                            <Row>
+                                <Col>
+                                    <h5>Transaction History</h5>
+                                    <div className="transaction-history">
+                                        {paymentDetails.transactions.map((transaction, index) => (
+                                            <div key={index} className="transaction-item mb-2 p-2 border rounded">
+                                                <p className="mb-1"><strong>Amount:</strong> ₱{transaction.amount?.toFixed(2)}</p>
+                                                <p className="mb-1"><strong>Date:</strong> {new Date(transaction.date).toLocaleDateString()}</p>
+                                                <p className="mb-1"><strong>Status Change:</strong> {transaction.previousStatus} → {transaction.newStatus}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </Col>
+                            </Row>
+                        )}
                     </div>
                 ) : (
-                    <>
-                        <Row className="mb-3">
-                            <Col xs={5} className="fw-bold">Student:</Col>
-                            <Col>{student.name}</Col>
-                        </Row>
-                        <Row className="mb-3">
-                            <Col xs={5} className="fw-bold">Payment Status:</Col>
-                            <Col>{student.paymentstatus}</Col>
-                        </Row>
-                        <Row className="mb-3">
-                            <Col xs={5} className="fw-bold">Payment Category:</Col>
-                            <Col>{paymentDetails?.paymentCategory || 'N/A'}</Col>
-                        </Row>
-                        <Row className="mb-3">
-                            <Col xs={5} className="fw-bold">Total Price:</Col>
-                            <Col>₱{paymentDetails?.totalPrice?.toFixed(2) || '0.00'}</Col>
-                        </Row>
-                        <Row className="mb-3">
-                            <Col xs={5} className="fw-bold">Amount Paid:</Col>
-                            <Col>₱{paymentDetails?.amountPaid?.toFixed(2) || '0.00'}</Col>
-                        </Row>
-
-                        <div className="mt-4 pt-3 border-top">
-                            <h5 className="mb-3">Transaction History</h5>
-                            {paymentDetails?.transactions?.length > 0 ? (
-                                <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                                    {paymentDetails.transactions.map((transaction, index) => (
-                                        <div
-                                            key={index}
-                                            className="p-3 mb-2 bg-light rounded"
-                                            style={{ fontSize: '0.875rem' }}
-                                        >
-                                            <div>Amount: ₱{transaction.amount.toFixed(2)}</div>
-                                            <div>Date: {transaction.formattedDate}</div>
-                                            <div>Status Change: {transaction.previousStatus || 'New'} → {transaction.newStatus}</div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-muted">No transaction history available</div>
-                            )}
-                        </div>
-                    </>
+                    <Alert variant="info">No payment details available.</Alert>
                 )}
             </Modal.Body>
-
-            <Modal.Footer className="border-0 px-4 pb-4">
-            {isTreasurer && !loading && !error && (  
-                    <Button
-                        variant="btn btn-confirm"   
-                        onClick={handleSendEmail}
-                        className="me-2"
-                        disabled={sendingEmail}
-                    >
-                        {sendingEmail ? 'Sending...' : 'Send Email'}
-                    </Button>
-                )}
-                <Button
-                    variant="btn btn-cancel"
-                    onClick={onClose}
-                    disabled={sendingEmail}
-                >
+            <Modal.Footer>
+                <Button variant="secondary" onClick={onClose}>
                     Close
                 </Button>
             </Modal.Footer>
+            <style>
+                {`
+                    .transaction-history {
+                        max-height: 200px;
+                        overflow-y: auto;
+                    }
+                    .transaction-item {
+                        background-color: #f8f9fa;
+                    }
+                    .badge {
+                        padding: 0.5em 1em;
+                    }
+                `}
+            </style>
         </Modal>
     );
 };
