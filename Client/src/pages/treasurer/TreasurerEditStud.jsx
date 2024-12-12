@@ -441,11 +441,11 @@ const TreasurerEditStud = () => {
                                             <div className="d-grid mt-4">
                                                 <button
                                                     type="submit"
-                                                    className="btn system-button update-button"
+                                                    className="btn system-button update-button d-flex align-items-center"
                                                     disabled={!userPermissions.updateStudent === 'edit'}
-                                                >
-                                                    Update Student
-                                                </button>
+                                                > 
+                                                    <i className="fas fa-pen me-2"></i>Update   
+                                                </button>   
                                             </div>
                                         </form>
                                     </div>
