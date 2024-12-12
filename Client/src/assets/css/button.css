@@ -193,6 +193,13 @@
     margin-right: 0.0080rem;
 }
 
+.btn-download {
+    background-color: transparent;
+    color:rgb(3, 87, 3);
+    border: none;
+    transition: all 0.3s ease;
+}
+
 .btn-view i {
     color: #FF8C00;
     font-size: 0.95rem; 

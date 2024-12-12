@@ -202,24 +202,6 @@ const TreasurerFileUpload = () => {
                         color: #999;
                         font-size: 0.9rem;
                     }
-                    .search-container {
-                        position: relative;
-                        margin-bottom: 20px;
-                    }
-                    .search-container i {
-                        position: absolute;
-                        left: 10px;
-                        top: 50%;
-                        transform: translateY(-50%);
-                        color: #666;
-                    }
-                    .search-input {
-                        padding-left: 35px;
-                        border-radius: 20px;
-                        border: 1px solid #ddd;
-                        width: 100%;
-                        max-width: 300px;
-                    }
                     .progress {
                         height: 10px;
                         border-radius: 5px;
@@ -229,6 +211,10 @@ const TreasurerFileUpload = () => {
                         background-color: #ff7f00;
                         transition: width 0.3s ease;
                     }
+                    .search-bar {
+                        margin-bottom: 20px;
+                    }
+
                 `}
             </style>
             <Helmet>
@@ -307,16 +293,18 @@ const TreasurerFileUpload = () => {
                                 )}
 
                                 {/* Search Section */}
-                                <div className="search-container">
-                                    <i className="fas fa-search"></i>
+                                <form className="d-flex search-bar" onSubmit={(e) => e.preventDefault()}>
                                     <input
                                         type="text"
-                                        className="form-control search-input"
-                                        placeholder="Search files..."
+                                        placeholder="Search file"
+                                        className="search-input me-2"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                     />
-                                </div>
+                                    <button type="submit" className="search btn btn-sm">
+                                        <i className="fas fa-search"></i>
+                                    </button>
+                                </form>
 
                                 {/* Files Table */}
                                 <div className="table-responsive">
@@ -343,7 +331,7 @@ const TreasurerFileUpload = () => {
                                                             href={file.webViewLink}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="btn btn-sm btn-primary me-2"
+                                                            className="btn btn-view me-2"
                                                             style={actionButtonStyle}
                                                             title="View File"
                                                         >
@@ -351,7 +339,7 @@ const TreasurerFileUpload = () => {
                                                         </a>
                                                         <a
                                                             href={file.webContentLink}
-                                                            className="btn btn-sm btn-success"
+                                                            className="btn btn-download"
                                                             download
                                                             style={actionButtonStyle}
                                                             title="Download File"
