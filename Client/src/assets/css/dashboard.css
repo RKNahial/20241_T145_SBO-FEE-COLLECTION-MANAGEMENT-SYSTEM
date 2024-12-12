@@ -388,12 +388,12 @@
 
 .pagination .page-link {
   color: #6C757D;
-  border-right: 1px solid #DEE2E6;  /* Only right border */
+  border-right: 1px solid #DEE2E6; 
   background-color: transparent;
   padding: 0.5rem 0.75rem;
   transition: all 0.3s ease;
   margin: 0;
-  border-radius: 0;  /* Remove border radius */
+  border-radius: 0; 
 }
 
 /* Remove right border from last item */
@@ -410,7 +410,7 @@
 .pagination .page-item.active .page-link {
   color: #EAEAEA;
   background-color: #FF8C00;
-  border-right: 1px solid #DEE2E6;  /* Keep right border even when active */
+  border-right: 1px solid #DEE2E6;  
 }
 
 /* Disabled state */
