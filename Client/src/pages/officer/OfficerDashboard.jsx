@@ -1,4 +1,4 @@
-// src/pages/officer/OfficerDashboard.jsx
+// src/pages/Officer/OfficerDashboard.jsx
 import { Helmet } from 'react-helmet';
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import axios from 'axios';
@@ -55,15 +55,6 @@ const OfficerDashboard = () => {
         return shouldShow;
     });
     const [totalActiveOfficers, setTotalActiveOfficers] = useState(0);
-
-    // File management states
-    const [files, setFiles] = useState([]);
-    const [uploadProgress, setUploadProgress] = useState(0);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
-    const [selectedFile, setSelectedFile] = useState(null);
-    const fileInputRef = useRef(null);
 
     // Add analytics initialization
     const analytics = getAnalytics(app);
@@ -179,7 +170,7 @@ const OfficerDashboard = () => {
             page_title: 'Officer Dashboard',
             page_location: window.location.href,
             page_path: window.location.pathname,
-            user_role: 'officer'
+            user_role: 'Officer'
         });
     }, []);
 
@@ -198,73 +189,6 @@ const OfficerDashboard = () => {
 
         fetchTotalActiveOfficers();
     }, []);
-
-    useEffect(() => {
-        const fetchFiles = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await axios.get('http://localhost:8000/api/drive/files', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setFiles(response.data.files);
-            } catch (error) {
-                console.error('Error fetching files:', error);
-            }
-        };
-
-        fetchFiles();
-    }, []);
-
-    const handleUploadClick = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleFileSelect = (event) => {
-        if (event.target.files && event.target.files.length > 0) {
-            const file = event.target.files[0];
-            setSelectedFile(file);
-            handleFileUpload(file);
-        }
-    };
-
-    const handleFileUpload = async (file) => {
-        if (!file) {
-            console.error('No file selected');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            setLoading(true);
-            const token = localStorage.getItem('token');
-            await axios.post('http://localhost:8000/api/drive/upload', formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data'
-                },
-                onUploadProgress: (progressEvent) => {
-                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                    setUploadProgress(progress);
-                }
-            });
-            fetchFiles();
-            setUploadProgress(0);
-        } catch (error) {
-            console.error('Error uploading file:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const formatFileSize = (bytes) => {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    };
 
     const formatAmount = (amount) => {
         if (typeof amount !== 'number' || isNaN(amount)) {
@@ -317,22 +241,36 @@ const OfficerDashboard = () => {
         const timer = setTimeout(() => {
             setCalendarLoading(false);
         }, 1500); 
+
         return () => clearTimeout(timer);
     }, []);
 
-    // Filter files based on search
-    const filteredFiles = files.filter(file =>
-        file.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    // Calculate pagination
-    const indexOfLastFile = currentPage * itemsPerPage;
-    const indexOfFirstFile = indexOfLastFile - itemsPerPage;
-    const currentFiles = filteredFiles.slice(indexOfFirstFile, indexOfLastFile);
-    const totalPages = Math.ceil(filteredFiles.length / itemsPerPage);
+    const actionButtonStyle = {
+        width: '35px',
+        height: '35px',
+        padding: '0',
+        margin: '0 4px',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: '4px',
+        border: 'none',
+        transition: 'all 0.2s ease',
+    };
 
     return (
         <div className="sb-nav-fixed">
+            <style>
+                {`
+                    .table-hover .no-hover:hover {
+                        background-color: transparent !important;
+                    }
+                    .pagination .page-item.active .page-link {
+                        background-color: #ff7f00 !important; /* Set to orange */
+                        border-color: #ff7f00 !important;
+                    }
+                `}
+            </style>
             {showCelebration && <LoginCelebration />}
             <Helmet>
                 <title>Officer | Dashboard</title>
@@ -353,58 +291,116 @@ const OfficerDashboard = () => {
                 >
                     {/* CONTENT */}
                     <div className="container-fluid px-5 mb-5">
-                        <p className="system-gray mt-4 welcome-text">Welcome back, officer!</p>
+                        <p className="system-gray mt-4 welcome-text">Welcome back, Officer!</p>
 
                         {/* ORANGE CARDS */}
                         <div className="row">
-                            <div className="col-xl-3 col-md-6">
-                                <div className="card orange-card mb-4">
-                                    <div className="card-body d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h2 className="big-text">{totalActiveStudents}</h2>
-                                            <h5 className="small-text">Active Students</h5>
+                            <div className="col-xl-3 col-md-6 mb-3">
+                                <div className="card border-0" style={{
+                                    borderRadius: '15px',
+                                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+                                }}>
+                                    <div className="card-body d-flex align-items-center justify-content-center py-3"
+                                        style={{
+                                            backgroundColor: '#FF8C00',
+                                            borderRadius: '15px'
+                                        }}>
+                                        <div className="text-center">
+                                            <div className="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
+                                                style={{
+                                                    width: '45px',
+                                                    height: '45px',
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
+                                                }}>
+                                                <i className="fas fa-user-graduate fa-lg text-white"></i>
+                                            </div>
+                                            <h5 className="mb-1 fw-bold text-white">{totalActiveStudents}</h5>
+                                            <p className="mb-0 text-white">Active Students</p>
                                         </div>
-                                        <i className="fas fa-user-graduate big-icon text-white"></i>
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-xl-3 col-md-6">
-                                <div className="card orange-card mb-4">
-                                    <div className="card-body d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h2 className="big-text">{totalActiveOfficers}</h2>
-                                            <h5 className="small-text">Total Officers</h5>
+
+                            <div className="col-xl-3 col-md-6 mb-3">
+                                <div className="card border-0" style={{
+                                    borderRadius: '15px',
+                                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+                                }}>
+                                    <div className="card-body d-flex align-items-center justify-content-center py-3"
+                                        style={{
+                                            backgroundColor: '#FF8C00',
+                                            borderRadius: '15px'
+                                        }}>
+                                        <div className="text-center">
+                                            <div className="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
+                                                style={{
+                                                    width: '45px',
+                                                    height: '45px',
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
+                                                }}>
+                                                <i className="fas fa-user-tie fa-lg text-white"></i>
+                                            </div>
+                                            <h5 className="mb-1 fw-bold text-white">{totalActiveOfficers}</h5>
+                                            <p className="mb-0 text-white">Total Officers</p>
                                         </div>
-                                        <i className="fas fa-user-tie big-icon text-white"></i>
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-xl-3 col-md-6">
-                                <div className="card orange-card mb-4">
-                                    <div className="card-body d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h2 className="big-text">{activeCategories}</h2>
-                                            <h5 className="small-text">Payment Categories</h5>
+
+                            <div className="col-xl-3 col-md-6 mb-3">
+                                <div className="card border-0" style={{
+                                    borderRadius: '15px',
+                                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+                                }}>
+                                    <div className="card-body d-flex align-items-center justify-content-center py-3"
+                                        style={{
+                                            backgroundColor: '#FF8C00',
+                                            borderRadius: '15px'
+                                        }}>
+                                        <div className="text-center">
+                                            <div className="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
+                                                style={{
+                                                    width: '45px',
+                                                    height: '45px',
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
+                                                }}>
+                                                <i className="fas fa-list-alt fa-lg text-white"></i>
+                                            </div>
+                                            <h5 className="mb-1 fw-bold text-white">{activeCategories}</h5>
+                                            <p className="mb-0 text-white">Payment Categories</p>
                                         </div>
-                                        <i className="fas fa-wallet big-icon text-white"></i>
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-xl-3 col-md-6">
-                                <div className="card orange-card mb-4">
-                                    <div className="card-body d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h2 className="big-text"
-                                                // onClick={() => setShowFullAmount(!showFullAmount)}
-                                                style={{ cursor: 'pointer' }}>
-                                                <span style={{
-                                                    fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif'
-                                                }}></span>
+
+                            <div className="col-xl-3 col-md-6 mb-3">
+                                <div className="card border-0" style={{
+                                    borderRadius: '15px',
+                                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+                                }}>
+                                    <div className="card-body d-flex align-items-center justify-content-center py-3"
+                                        style={{
+                                            backgroundColor: '#FF8C00',
+                                            borderRadius: '15px'
+                                        }}>
+                                        <div className="text-center">
+                                            <div className="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
+                                                style={{
+                                                    width: '45px',
+                                                    height: '45px',
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
+                                                }}>
+                                                <i className="fas fa-money-bill-wave fa-lg text-white"></i>
+                                            </div>
+                                            <h5 className="mb-1 fw-bold text-white" onClick={() => setShowFullAmount(!showFullAmount)} style={{ cursor: 'pointer' }}>
                                                 {formatAmount(totalFees)}
-                                            </h2>
-                                            <h5 className="small-text">Total Fees Received</h5>
+                                            </h5>
+                                            <p className="mb-0 text-white">Total Fees</p>
                                         </div>
-                                        <i className="fas fa-money-bill-wave big-icon text-white"></i>
                                     </div>
                                 </div>
                             </div>
@@ -415,7 +411,7 @@ const OfficerDashboard = () => {
                             <h5 className="mb-4 header">Recent Payments</h5>
                             <table className="table table-hover">
                                 <thead>
-                                <tr>
+                                     <tr>
                                         <th className="index-column">#</th>
                                         <th className="date-time-column">Date</th>
                                         <th className="date-time-column">Time</th>
@@ -541,7 +537,7 @@ const OfficerDashboard = () => {
                                                 className="calendar-iframe"
                                                 frameBorder="0"
                                                 scrolling="no"
-                                                title="Treasurer Calendar"
+                                                title="Officer Calendar"
                                                 onLoad={() => setCalendarLoading(false)}  // Add this handler
                                             />
                                         )}
@@ -552,118 +548,6 @@ const OfficerDashboard = () => {
                             </div>
                         </div>
                         {/* REPORTS AND CALENDAR END */}
-
-                        {/* FILE MANAGEMENT */}
-                        <div className="card-body">
-                            <div className="d-flex justify-content-between align-items-center px-3 mb-3">
-                                <h5 className="mb-0 header">File Management</h5>
-                                <button
-                                    className="calendar-add-button"
-                                    onClick={handleUploadClick}
-                                >
-                                    <i className="fas fa-plus me-2"></i>
-                                    Upload File
-                                </button>
-                            </div>
-                            <div style={{ padding: '0 1rem' }}>
-                                <input
-                                    type="file"
-                                    ref={fileInputRef}
-                                    onChange={handleFileSelect}
-                                    style={{ display: 'none' }}
-                                />
-                                {selectedFile && (
-                                    <div>
-                                        <p>Selected File: {selectedFile.name}</p>
-                                        <p>Upload Progress: {uploadProgress}%</p>
-                                    </div>
-                                )}
-                                <table className="table table-hover">
-                                    <thead>
-                                    <tr>
-                                        <th className="index-column">#</th>
-                                        <th>File Name</th>
-                                        <th>File Size</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {files.length === 0 ? (
-                                        <tr>
-                                            <td colSpan="4" className="text-center">No files found</td>
-                                        </tr>
-                                    ) : (
-                                        currentFiles.map((file, index) => (
-                                            <tr key={file.id}>
-                                                <td>{index + 1}</td>
-                                                <td>{file.name}</td>
-                                                <td>{formatFileSize(file.size)}</td>
-                                                <td>
-                                                    <div className="d-flex gap-2">
-                                                        <a
-                                                            href={file.webViewLink}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="btn btn-primary"
-                                                            style={{
-                                                                width: '36px',
-                                                                height: '36px',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center',
-                                                                padding: 0,
-                                                                lineHeight: '1'
-                                                            }}
-                                                        >
-                                                            <i className="fas fa-eye" style={{ fontSize: '16px' }}></i>
-                                                        </a>
-                                                        <a
-                                                            href={file.webContentLink}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="btn btn-success"
-                                                            style={{
-                                                                width: '36px',
-                                                                height: '36px',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center',
-                                                                padding: 0,
-                                                                lineHeight: '1'
-                                                            }}
-                                                        >
-                                                            <i className="fas fa-download" style={{ fontSize: '16px' }}></i>
-                                                        </a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    )}
-                                    </tbody>
-                                </table>
-                                <div className="pagination">
-                                    <button
-                                        className="pagination-button"
-                                        onClick={() => setCurrentPage(currentPage - 1)}
-                                        disabled={currentPage === 1}
-                                    >
-                                        Previous
-                                    </button>
-                                    <span className="pagination-text">
-                                        Page {currentPage} of {totalPages}
-                                    </span>
-                                    <button
-                                        className="pagination-button"
-                                        onClick={() => setCurrentPage(currentPage + 1)}
-                                        disabled={currentPage === totalPages}
-                                    >
-                                        Next
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        {/* FILE MANAGEMENT END */}
-
                     </div>
                 </div>
             </div>
