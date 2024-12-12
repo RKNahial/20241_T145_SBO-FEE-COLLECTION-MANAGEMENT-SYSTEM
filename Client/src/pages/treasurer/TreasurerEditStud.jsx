@@ -441,7 +441,7 @@ const TreasurerEditStud = () => {
                                             <div className="d-grid mt-4">
                                                 <button
                                                     type="submit"
-                                                    className="btn btn-primary"
+                                                    className="btn update-button"
                                                     disabled={!userPermissions.updateStudent === 'edit'}
                                                 >
                                                     Update Student

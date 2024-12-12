@@ -339,7 +339,6 @@ const TreasurerArchivedStud = () => {
                                         </table>
 
                                         {/* Pagination */}
-                                        <div className="pagination-container">
                                             <div className="d-flex justify-content-between align-items-center mt-3">
                                                 <div style={{ color: '#6C757D', fontSize: '0.875rem' }}>
                                                     Showing {indexOfFirstItem + 1} to {indexOfLastItem} of {filteredStudents.length} entries
@@ -389,7 +388,6 @@ const TreasurerArchivedStud = () => {
                                                     </ul>
                                                 </nav>
                                             </div>
-                                        </div>
                                     </>
                                 )}
                             </div>
