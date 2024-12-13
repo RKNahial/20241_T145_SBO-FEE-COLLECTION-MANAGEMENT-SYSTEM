@@ -31,24 +31,28 @@ const GovProfile = () => {
         setIsModalOpen(false);
         try {
             const token = localStorage.getItem('token');
-            const userDetails = JSON.parse(localStorage.getItem('userDetails')); // Add this line
-
+            const userDetails = JSON.parse(localStorage.getItem('userDetails'));
+    
             const response = await axios.put(
-                `http://localhost:8000/api/profile/${userDetails.email}/${userDetails.position}`, // Updated API endpoint
+                `http://localhost:8000/api/profile/${userDetails.email}/${userDetails.position}`,
                 {
                     name: formData.name,
                     ID: formData.ID,
                     email: formData.email,
                     password: formData.password || undefined,
-                    position: userDetails.position // Add position
+                    position: userDetails.position
                 },
                 {
                     headers: { Authorization: `Bearer ${token}` }
                 }
             );
-
+    
             if (response.data.success) {
+                // Add both toast and success message
                 toast.success('Profile updated successfully');
+                setSuccessMessage('Profile updated successfully');
+                setTimeout(() => setSuccessMessage(''), 3000); // Clear success message after 3 seconds
+    
                 // Update local storage with new details
                 const updatedDetails = {
                     ...userDetails,
@@ -61,10 +65,14 @@ const GovProfile = () => {
                 fetchGovernorProfile();
             } else {
                 toast.error(response.data.message || 'Failed to update profile');
+                setError(response.data.message || 'Failed to update profile');
+                setTimeout(() => setError(null), 3000);
             }
         } catch (error) {
             console.error('Error updating profile:', error);
             toast.error(error.response?.data?.message || 'Failed to update profile');
+            setError(error.response?.data?.message || 'Failed to update profile');
+            setTimeout(() => setError(null), 3000);
         }
     };
 

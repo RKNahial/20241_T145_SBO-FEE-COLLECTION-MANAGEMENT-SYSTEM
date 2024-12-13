@@ -11,7 +11,7 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import { usePayment } from '../../context/PaymentContext';
 
 const CALENDAR_ID = 'c_24e4973e704b983a944d5bc4cd1a7e0437d3eb519a1935d01706fb81909b68d3@group.calendar.google.com';
-const CALENDAR_URL = `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(CALENDAR_ID)}&ctz=UTC`;
+const CALENDAR_URL = `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(CALENDAR_ID)}&ctz=UTC&hl=en`;
 
 const AdminDashboard = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
