@@ -103,12 +103,16 @@ const AdminDashboard = () => {
                 totalActiveStudents: studentsRes.data.count,
                 totalActiveOfficers: officersRes.data.count,
                 totalAdmins: adminsRes.data.count,
-                pageViews: 0 // This can be implemented later if needed
+                pageViews: 0
             });
         } catch (error) {
             console.error('Error fetching stats:', error);
         }
     };
+
+    useEffect(() => {
+        fetchStats();
+    }, []);
 
     const [showFullAmount, setShowFullAmount] = useState(false);
     const [totalFees, setTotalFees] = useState(0);
