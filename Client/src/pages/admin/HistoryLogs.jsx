@@ -6,6 +6,7 @@ import axios from 'axios';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import { Helmet } from 'react-helmet';
 
 const HistoryLogs = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -41,11 +42,13 @@ const HistoryLogs = () => {
                 }
             });
 
-            // Check if response.data exists and is an array
-            if (Array.isArray(response.data)) {
-                setLogs(response.data);
+            // Check if response has the expected format
+            if (response.data && response.data.success && Array.isArray(response.data.logs)) {
+                setLogs(response.data.logs);
+                setError(null);
             } else {
                 setError('Invalid data format received');
+                setLogs([]);
             }
         } catch (err) {
             console.error('Error fetching logs:', err);
@@ -54,6 +57,7 @@ const HistoryLogs = () => {
             } else {
                 setError('Failed to fetch history logs');
             }
+            setLogs([]);
         } finally {
             setLoading(false);
         }
@@ -67,22 +71,25 @@ const HistoryLogs = () => {
         setIsCollapsed(prev => !prev);
     };
 
-    // Add this function to handle searching
-    const filteredLogs = logs
-        .filter(log => {
-            const searchString = searchTerm.toLowerCase();
-            return (
-                log.userName?.toLowerCase().includes(searchString) ||
-                log.userEmail?.toLowerCase().includes(searchString) ||
-                log.userPosition?.toLowerCase().includes(searchString) ||
-                log.action?.toLowerCase().includes(searchString) ||
-                log.details?.toLowerCase().includes(searchString) ||
-                new Date(log.timestamp).toLocaleString().toLowerCase().includes(searchString)
-            );
-        })
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by timestamp descending
+    // Filter logs based on search term
+    const filteredLogs = logs.filter(log => {
+        const searchString = searchTerm.toLowerCase();
+        const timestamp = new Date(log.timestamp);
+        const formattedDate = timestamp.toLocaleDateString();
+        const formattedTime = timestamp.toLocaleTimeString();
+        const userInfo = `${log.userName} (${log.userPosition})`;
+        
+        return (
+            userInfo.toLowerCase().includes(searchString) ||
+            log.userEmail?.toLowerCase().includes(searchString) ||
+            log.action?.toLowerCase().includes(searchString) ||
+            log.details?.toLowerCase().includes(searchString) ||
+            formattedDate.toLowerCase().includes(searchString) ||
+            formattedTime.toLowerCase().includes(searchString)
+        );
+    }).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-    // Update these calculations to use filteredLogs
+    // Pagination calculations
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentLogs = filteredLogs.slice(indexOfFirstItem, indexOfLastItem);
@@ -90,13 +97,16 @@ const HistoryLogs = () => {
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-    // Add this to reset pagination when search term changes
+    // Reset pagination when search term changes
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm]);
 
     return (
         <div className="sb-nav-fixed">
+            <Helmet>
+                <title>Admin | History Logs</title>
+            </Helmet>
             <AdminNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
                 <AdminSidebar isCollapsed={isCollapsed} />
@@ -217,43 +227,39 @@ const HistoryLogs = () => {
                                         </div>
                                     ) : (
                                         <>
-
                                             <Table responsive hover className="logs-table">
                                                 <thead>
                                                     <tr>
                                                         <th>#</th>
-                                                        <th>Timestamp</th>
-                                                        <th>User Name</th>
-                                                        <th>Email</th>
+                                                        <th>Date</th>
+                                                        <th>Time</th>
+                                                        <th>User</th>
                                                         <th>Position</th>
                                                         <th>Action</th>
                                                         <th style={{ minWidth: '300px' }}>Details</th>
-                                                        <th>Status</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {currentLogs.map((log, index) => (
-                                                        <tr key={log._id}>
-                                                            <td>{indexOfFirstItem + index + 1}</td>
-                                                            <td>{new Date(log.timestamp).toLocaleString()}</td>
-                                                            <td>{log.userName}</td>
-                                                            <td>{log.userEmail}</td>
-                                                            <td>{log.userPosition}</td>
-                                                            <td>{log.action}</td>
-                                                            <td style={{
-                                                                whiteSpace: 'normal',
-                                                                wordBreak: 'break-word',
-                                                                minWidth: '300px'
-                                                            }}>
-                                                                {log.details}
-                                                            </td>
-                                                            <td>
-                                                                <Badge bg={log.status === 'completed' ? 'success' : 'warning'}>
-                                                                    {log.status}
-                                                                </Badge>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
+                                                    {currentLogs.map((log, index) => {
+                                                        const timestamp = new Date(log.timestamp);
+                                                        return (
+                                                            <tr key={log._id}>
+                                                                <td>{indexOfFirstItem + index + 1}</td>
+                                                                <td>{timestamp.toLocaleDateString()}</td>
+                                                                <td>{timestamp.toLocaleTimeString()}</td>
+                                                                <td>{log.userName}</td>
+                                                                <td>{log.userPosition}</td>
+                                                                <td>{log.action}</td>
+                                                                <td style={{
+                                                                    whiteSpace: 'normal',
+                                                                    wordBreak: 'break-word',
+                                                                    minWidth: '300px'
+                                                                }}>
+                                                                    {log.details}
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
                                                 </tbody>
                                             </Table>
 
@@ -266,7 +272,7 @@ const HistoryLogs = () => {
                                                 </div>
                                                 <nav>
                                                     <ul className="pagination mb-0">
-                                                        <li className="page-item">
+                                                        <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
                                                             <button
                                                                 className="page-link"
                                                                 onClick={() => paginate(currentPage - 1)}
@@ -278,7 +284,6 @@ const HistoryLogs = () => {
                                                         {Array.from({ length: totalPages }, (_, index) => (
                                                             <li key={index + 1}
                                                                 className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
-
                                                                 <button
                                                                     className="page-link"
                                                                     onClick={() => paginate(index + 1)}
@@ -287,7 +292,7 @@ const HistoryLogs = () => {
                                                                 </button>
                                                             </li>
                                                         ))}
-                                                        <li className="page-item">
+                                                        <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
                                                             <button
                                                                 className="page-link"
                                                                 onClick={() => paginate(currentPage + 1)}
@@ -300,10 +305,8 @@ const HistoryLogs = () => {
                                                 </nav>
                                             </div>
                                         </>
-
                                     )}
                                 </>
-
                             )}
                         </Card.Body>
                     </Card>

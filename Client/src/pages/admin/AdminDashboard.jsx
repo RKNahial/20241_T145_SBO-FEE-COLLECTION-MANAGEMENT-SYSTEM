@@ -202,7 +202,7 @@ const AdminDashboard = () => {
             try {
                 const token = localStorage.getItem('token');
                 const response = await axios.get(
-                    'http://localhost:8000/api/history-logs/recent',  // Updated endpoint
+                    'http://localhost:8000/api/history-logs/recent',  
                     {
                         headers: { 
                             Authorization: `Bearer ${token}`
@@ -211,7 +211,16 @@ const AdminDashboard = () => {
                 );
         
                 if (response.data.success) {
-                    setRecentLogs(response.data.logs);
+                    const formattedLogs = response.data.logs.map(log => {
+                        const timestamp = new Date(log.timestamp);
+                        return {
+                            ...log,
+                            date: timestamp.toLocaleDateString(),
+                            time: timestamp.toLocaleTimeString(),
+                            user: `${log.userName} (${log.userPosition})`
+                        };
+                    });
+                    setRecentLogs(formattedLogs);
                 }
             } catch (error) {
                 console.error('Error fetching recent logs:', error);
@@ -440,55 +449,70 @@ const AdminDashboard = () => {
                         
                         {/* Recent History Logs Table */}
                         <div className="card-body">
-                        <h5 className="mb-4 header">Recent Activity Logs</h5>
-                        <table className="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th className="index-column">#</th>
-                                    <th className="date-time-column">Date</th>
-                                    <th className="date-time-column">Time</th>
-                                    <th>User</th>
-                                    <th>Action</th>
-                                    <th>Details</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {loading ? (
-                                    <tr className="no-hover">
-                                        <td colSpan="6" style={{ border: 'none' }}>
-                                            <div style={{ 
-                                                display: 'flex', 
-                                                justifyContent: 'center', 
-                                                alignItems: 'center',
-                                                minHeight: '200px'  
-                                            }}>
-                                                <LoadingSpinner icon="history"/>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ) : error ? (
-                                    <tr>
-                                        <td colSpan="6" className="text-center text-danger">{error}</td>
-                                    </tr>
-                                ) : recentLogs.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="6" className="text-center">No recent activity found</td>
-                                    </tr>
-                                ) : (
-                                    recentLogs.map((log, index) => (
-                                        <tr key={log._id}>
-                                            <td>{index + 1}</td>
-                                            <td>{log.date}</td>
-                                            <td>{log.time}</td>
-                                            <td>{log.user}</td>
-                                            <td>{log.action}</td>
-                                            <td>{log.details}</td>
+                            <h5 className="mb-4 header">Recent Activity Logs</h5>
+                            <div className="table-responsive">
+                                <table className="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th className="index-column">#</th>
+                                            <th className="date-time-column">Date</th>
+                                            <th className="date-time-column">Time</th>
+                                            <th>User</th>
+                                            <th>Action</th>
+                                            <th>Details</th>
                                         </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                    </thead>
+                                    <tbody>
+                                        {loading ? (
+                                            <tr className="no-hover">
+                                                <td colSpan="6" style={{ border: 'none' }}>
+                                                    <div style={{ 
+                                                        display: 'flex', 
+                                                        justifyContent: 'center', 
+                                                        alignItems: 'center',
+                                                        minHeight: '200px'  
+                                                    }}>
+                                                        <LoadingSpinner icon="history"/>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ) : error ? (
+                                            <tr>
+                                                <td colSpan="6" className="text-center text-danger">
+                                                    <i className="fas fa-exclamation-circle me-2"></i>
+                                                    {error}
+                                                </td>
+                                            </tr>
+                                        ) : recentLogs.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="6" className="text-center">
+                                                    <i className="fas fa-info-circle me-2"></i>
+                                                    No recent activity found
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            recentLogs.map((log, index) => (
+                                                <tr key={log._id}>
+                                                    <td>{index + 1}</td>
+                                                    <td>{log.date}</td>
+                                                    <td>{log.time}</td>
+                                                    <td>{log.user}</td>
+                                                    <td>{log.action}</td>
+                                                    <td style={{
+                                                        maxWidth: '300px',
+                                                        whiteSpace: 'nowrap',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis'
+                                                    }}>
+                                                        {log.details}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     {/* REPORTS AND CALENDAR */}
                     <div className="card-body mt-4">
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
