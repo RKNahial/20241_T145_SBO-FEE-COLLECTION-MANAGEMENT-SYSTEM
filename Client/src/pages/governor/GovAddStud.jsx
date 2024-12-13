@@ -57,6 +57,9 @@ const GovAddStud = () => {
             const fetchStudentData = async () => {
                 try {
                     const token = localStorage.getItem('token');
+                    console.log('Fetching student data for ID:', id);
+                    console.log('Token:', token);
+
                     const response = await axios.get(
                         `http://localhost:8000/api/update/students/${id}`,
                         {
@@ -67,8 +70,12 @@ const GovAddStud = () => {
                         }
                     );
 
+                    console.log('Full response:', response);
+
                     if (response.status === 200 && response.data.success) {
                         const studentData = response.data.data;
+                        console.log('Received student data:', studentData);
+
                         setFormData({
                             name: studentData.name || '',
                             studentId: studentData.studentId || '',
@@ -77,6 +84,7 @@ const GovAddStud = () => {
                             program: studentData.program || ''
                         });
                     } else {
+                        console.error('Failed to fetch student data:', response);
                         setMessage({
                             type: 'error',
                             text: 'Unable to retrieve student information'
@@ -84,6 +92,17 @@ const GovAddStud = () => {
                     }
                 } catch (error) {
                     console.error('Error fetching student data:', error);
+                    
+                    if (error.response) {
+                        console.error('Error response data:', error.response.data);
+                        console.error('Error response status:', error.response.status);
+                        console.error('Error response headers:', error.response.headers);
+                    } else if (error.request) {
+                        console.error('Error request:', error.request);
+                    } else {
+                        console.error('Error message:', error.message);
+                    }
+
                     setMessage({
                         type: 'error',
                         text: error.response?.data?.message || 'Failed to fetch student data'
@@ -97,10 +116,12 @@ const GovAddStud = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        console.log(`Updating ${name} with value:`, value);
+        setFormData(prev => {
+            const newData = { ...prev, [name]: value };
+            console.log('New form data:', newData);
+            return newData;
+        });
     };
 
     const handleSubmit = (e) => {
@@ -131,6 +152,9 @@ const GovAddStud = () => {
             }
 
             const userDetails = JSON.parse(userDetailsStr);
+            console.log('Submitting form data:', formData);
+            console.log('User details:', userDetails);
+
             const endpoint = isEditMode
                 ? `http://localhost:8000/api/update/students/${id}`
                 : 'http://localhost:8000/api/add/students';
@@ -152,6 +176,8 @@ const GovAddStud = () => {
                     'Content-Type': 'application/json'
                 }
             });
+
+            console.log('Server response:', response.data);
 
             setMessage({
                 type: 'success',

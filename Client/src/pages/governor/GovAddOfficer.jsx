@@ -1,6 +1,7 @@
 // src/pages/Gov/GovAddOfficer.jsx
 import { Helmet } from 'react-helmet';
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import GovSidebar from "./GovSidebar"; 
 import GovNavbar from "./GovNavbar";
 import axios from 'axios';
@@ -16,6 +17,7 @@ const GovAddOfficer = () => {
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const navigate = useNavigate();
 
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
@@ -38,8 +40,8 @@ const GovAddOfficer = () => {
             );
             setSuccess('Officer added successfully!');
             setTimeout(() => {
-                setSuccess('');
-            }, 5000);
+                navigate('/governor/officers');
+            }, 2000);
         } catch (error) {
             setError(error.response?.data?.message || 'Failed to add officer');
         }
