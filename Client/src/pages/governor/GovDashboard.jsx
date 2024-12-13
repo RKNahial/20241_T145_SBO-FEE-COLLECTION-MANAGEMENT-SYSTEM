@@ -507,14 +507,26 @@ const GovDashboard = () => {
                                                 Files
                                             </h5>
                                             <div className="d-flex gap-2">
-                                                <input
-                                                    type="text"
-                                                    className="form-control form-control-sm"
-                                                    placeholder="Search files..."
-                                                    value={searchTerm}
-                                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                                    style={{ width: '200px' }}
-                                                />
+                                                <div className="position-relative">
+                                                    <input
+                                                        type="text"
+                                                        className="form-control form-control-sm pe-4"
+                                                        placeholder="Search files..."
+                                                        value={searchTerm}
+                                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                                        style={{ width: '200px' }}
+                                                    />
+                                                    <i 
+                                                        className="fas fa-search position-absolute" 
+                                                        style={{ 
+                                                            top: '50%', 
+                                                            right: '10px', 
+                                                            transform: 'translateY(-50%)',
+                                                            color: '#FF8C00',
+                                                            pointerEvents: 'none'
+                                                        }}
+                                                    ></i>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -527,7 +539,7 @@ const GovDashboard = () => {
                                                         <th>Type</th>
                                                         <th>Size</th>
                                                         <th>Modified</th>
-                                                        <th>Actions</th>
+                                                        <th className="text-center">Actions</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -537,22 +549,19 @@ const GovDashboard = () => {
                                                             <td>{file.mimeType}</td>
                                                             <td>{formatFileSize(file.size)}</td>
                                                             <td>{new Date(file.modifiedTime).toLocaleString()}</td>
-                                                            <td className="align-middle">
-                                                                <div className="d-flex align-items-center justify-content-center" style={{ gap: '8px' }}>
+                                                            <td>
+                                                                <div className="d-flex align-items-center justify-content-center gap-2">
                                                                     <a
                                                                         href={file.webViewLink}
                                                                         target="_blank"
                                                                         rel="noopener noreferrer"
-                                                                        className="btn btn-primary"
                                                                         style={{
-                                                                            width: '36px',
-                                                                            height: '36px',
-                                                                            display: 'flex',
+                                                                            color: '#FF8C00',
+                                                                            textDecoration: 'none',
+                                                                            padding: '8px',
+                                                                            display: 'inline-flex',
                                                                             alignItems: 'center',
-                                                                            justifyContent: 'center',
-                                                                            padding: 0,
-                                                                            lineHeight: '1',
-                                                                            marginBottom: '14px',
+                                                                            justifyContent: 'center'
                                                                         }}
                                                                     >
                                                                         <i className="fas fa-eye" style={{ fontSize: '16px' }}></i>
@@ -560,16 +569,13 @@ const GovDashboard = () => {
                                                                     <a
                                                                         href={file.webContentLink}
                                                                         download
-                                                                        className="btn btn-success"
                                                                         style={{
-                                                                            width: '36px',
-                                                                            height: '36px',
-                                                                            display: 'flex',
+                                                                            color: '#28a745',
+                                                                            textDecoration: 'none',
+                                                                            padding: '8px',
+                                                                            display: 'inline-flex',
                                                                             alignItems: 'center',
-                                                                            justifyContent: 'center',
-                                                                            padding: 0,
-                                                                            lineHeight: '1',
-                                                                            marginBottom: '14px',
+                                                                            justifyContent: 'center'
                                                                         }}
                                                                     >
                                                                         <i className="fas fa-download" style={{ fontSize: '16px' }}></i>

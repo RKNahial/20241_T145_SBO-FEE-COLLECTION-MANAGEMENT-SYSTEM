@@ -31,6 +31,7 @@ const GovOfficers = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("Active");
     const [currentPage, setCurrentPage] = useState(1);
+    const [showArchived, setShowArchived] = useState(false);
     const itemsPerPage = 10;
     const [archivingId, setArchivingId] = useState(null);
 
@@ -152,7 +153,7 @@ const GovOfficers = () => {
                             <div className="card-header">
                                 <div className="row">
                                     <div className="col col-md-6">
-                                        <i className="fa fa-users me-2"></i> <strong>Officers</strong>
+                                        <i className="fa fa-users me-2" style={{ color: '#FF8C00' }}></i> <strong>Officers</strong>
                                     </div>
                                 </div>
                             </div>
@@ -176,6 +177,24 @@ const GovOfficers = () => {
                                             <i className="fas fa-plus me-2"></i>
                                             Add New Officer
                                         </Link>
+                                        <button 
+                                            onClick={() => {
+                                                setShowArchived(!showArchived);
+                                                setStatusFilter(showArchived ? "Active" : "Archived");
+                                            }}
+                                            className="btn btn-sm me-2"
+                                            style={{
+                                                backgroundColor: '#FF8C00',
+                                                color: 'white',
+                                                border: 'none',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.5rem'
+                                            }}
+                                        >
+                                            <i className={`fas fa-${showArchived ? 'box-open' : 'box-archive'}`}></i>
+                                            {showArchived ? 'Show Active' : 'Show Archived'}
+                                        </button>
                                     </div>
                                     <div className="d-flex align-items-center me-3"> 
                                         <label className="me-2 mb-0">Officer Status</label>
@@ -183,7 +202,10 @@ const GovOfficers = () => {
                                             <select 
                                                 className="form-control" 
                                                 value={statusFilter}
-                                                onChange={(e) => setStatusFilter(e.target.value)}
+                                                onChange={(e) => {
+                                                    setStatusFilter(e.target.value);
+                                                    setShowArchived(e.target.value === "Archived");
+                                                }}
                                             >
                                                 <option value="All">All</option>
                                                 <option value="Active">Active</option>
@@ -191,17 +213,25 @@ const GovOfficers = () => {
                                             </select>
                                         </div>
                                     </div>
-                                    <div className="search-bar">
+                                    <div className="position-relative">
                                         <input 
                                             type="text" 
                                             placeholder="Search officer" 
-                                            className="form-control search-input" 
+                                            className="form-control form-control-sm pe-4" 
                                             value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            onChange={handleSearchChange}
+                                            style={{ width: '200px' }}
                                         />
-                                        <button type="button" className="search">
-                                            <i className="fas fa-search"></i>
-                                        </button>
+                                        <i 
+                                            className="fas fa-search position-absolute" 
+                                            style={{ 
+                                                top: '50%', 
+                                                right: '10px', 
+                                                transform: 'translateY(-50%)',
+                                                color: '#FF8C00',
+                                                pointerEvents: 'none'
+                                            }}
+                                        ></i>
                                     </div>
                                 </div>
 

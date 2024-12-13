@@ -192,7 +192,11 @@ const GovProfile = () => {
                                                         </div>
                                                     </div>
                                                     <div className="col-12">
-                                                        <button type="submit" className="btn system-button">
+                                                        <button 
+                                                            type="submit" 
+                                                            className="btn btn-sm"
+                                                            style={{ backgroundColor: 'orange', color: 'white', width: 'auto', padding: '0.375rem 0.75rem' }}
+                                                        >
                                                             <i className="fas fa-save me-2"></i>
                                                             Save Changes
                                                         </button>

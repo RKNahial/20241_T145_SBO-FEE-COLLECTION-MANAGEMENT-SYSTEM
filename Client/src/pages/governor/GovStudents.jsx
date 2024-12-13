@@ -61,6 +61,7 @@ const GovStudents = () => {
     const [successMessage, setSuccessMessage] = useState("");
     const [showLockModal, setShowLockModal] = useState(false);
     const [lockMessage, setLockMessage] = useState("");
+    const [showArchived, setShowArchived] = useState(false);
     const itemsPerPage = 10;
 
     const toggleSidebar = () => {
@@ -177,6 +178,23 @@ const GovStudents = () => {
         setModalAction({ type: '', student: null });
     };
 
+    const handleEditClick = (student) => {
+        navigate(`/governor/students/edit/${student._id}`, {
+            state: {
+                studentData: {
+                    _id: student._id,
+                    name: student.name,
+                    studentId: student.studentId,
+                    institutionalEmail: student.institutionalEmail,
+                    yearLevel: student.yearLevel,
+                    program: student.program,
+                    status: student.status,
+                    isArchived: student.isArchived
+                }
+            }
+        });
+    };
+
     return (
         <div className="sb-nav-fixed">
             <Helmet>
@@ -186,157 +204,251 @@ const GovStudents = () => {
             <GovNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
                 <GovSidebar isCollapsed={isCollapsed} />
-                <div id="layoutSidenav_content" style={{ marginLeft: isCollapsed ? '5rem' : '15.625rem', transition: 'margin-left 0.3s', flexGrow: 1, marginTop: '3.5rem' }}>
+                <div
+                    id="layoutSidenav_content"
+                    style={{
+                        marginLeft: isCollapsed ? '5rem' : '15.625rem',
+                        transition: 'margin-left 0.3s',
+                        flexGrow: 1,
+                        marginTop: '3.5rem',
+                    }}
+                >
                     <main>
-                        <div className="container-fluid px-4">
-                            <div className="d-flex justify-content-between align-items-center">
-                                <h1 className="mt-4 mb-4">Students</h1>
-                                <button
-                                    className="btn btn-primary btn-sm"
-                                    onClick={() => navigate('/governor/students/add-new')}
-                                >
-                                    <i className="fas fa-plus me-2"></i>Add Student
-                                </button>
-                            </div>
-                            <div className="card shadow-sm border-0 mb-3">
-                                <div className="card-header bg-white py-3">
-                                    <div className="d-flex justify-content-between align-items-center">
-                                        <h5 className="card-title mb-0">
-                                            <i className="fas fa-users me-2 text-primary"></i>
-                                            Students List
-                                        </h5>
-                                        <div className="d-flex align-items-center gap-3">
-                                            <div className="me-2">
-                                                <select
-                                                    className="form-select form-select-sm"
-                                                    value={statusFilter}
-                                                    onChange={(e) => setStatusFilter(e.target.value)}
-                                                    style={styles.formSelect}
-                                                >
-                                                    <option value="Active">Active</option>
-                                                    <option value="Archived">Archived</option>
-                                                    <option value="All">All</option>
-                                                </select>
-                                            </div>
-                                            <div className="search-container" style={styles.searchContainer}>
-                                                <input
-                                                    type="text"
-                                                    placeholder="Search student"
-                                                    className="form-control form-control-sm"
-                                                    value={searchTerm}
-                                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                                    style={{ minWidth: '200px' }}
-                                                />
+                        <div className="container-fluid px-4" style={{ marginTop: '1.5rem' }}>
+                            <div className="card mb-4">
+                                <div className="card-header">
+                                    <div className="row">
+                                        <div className="col">
+                                            <div className="d-flex align-items-center">
+                                                <i className="fas fa-users me-2" style={{ color: '#FF8C00' }}></i>
+                                                <h5 className="mb-0">Students</h5>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="card-body">
-                                    {loading ? (
-                                        <div className="text-center py-5">
-                                            <LoadingSpinner />
-                                        </div>
-                                    ) : error ? (
-                                        <div className="alert alert-danger">{error}</div>
-                                    ) : (
-                                        <>
-                                            {successMessage && (
-                                                <div className="alert alert-success alert-dismissible fade show">
-                                                    {successMessage}
-                                                    <button type="button" className="btn-close" onClick={() => setSuccessMessage("")}></button>
-                                                </div>
-                                            )}
+                                    <div className="d-flex justify-content-between mb-3 align-items-center">
+                                        <div className="d-flex gap-3">
+                                            {/* Add Student Button */}
+                                            <Link 
+                                                to="/governor/students/add-new"
+                                                className="btn btn-sm"
+                                                style={{
+                                                    backgroundColor: '#FF8C00',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.5rem',
+                                                    padding: '0.4rem 0.8rem'
+                                                }}
+                                            >
+                                                <i className="fas fa-plus me-1"></i>
+                                                Add Student
+                                            </Link>
 
-                                            <table className="table table-bordered table-hover">
-                                                <thead>
+                                            {/* Archive Button */}
+                                            <button
+                                                className="btn btn-sm"
+                                                onClick={() => {
+                                                    setShowArchived(!showArchived);
+                                                    setStatusFilter(showArchived ? "Active" : "Archived");
+                                                }}
+                                                style={{
+                                                    backgroundColor: '#FF8C00',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.5rem',
+                                                    padding: '0.4rem 0.8rem'
+                                                }}
+                                            >
+                                                <i className={`fas fa-${showArchived ? 'box-open' : 'box-archive'} me-1`}></i>
+                                                {showArchived ? 'Show Active' : 'Show Archived'}
+                                            </button>
+                                        </div>
+
+                                        <div className="d-flex align-items-center gap-3">
+                                            {/* Status Filter */}
+                                            <select 
+                                                className="form-select form-select-sm" 
+                                                value={statusFilter}
+                                                onChange={(e) => setStatusFilter(e.target.value)}
+                                                style={{ 
+                                                    width: 'auto',
+                                                    minWidth: '120px'
+                                                }}
+                                            >
+                                                <option value="All">All Students</option>
+                                                <option value="Active">Active</option>
+                                                <option value="Archived">Archived</option>
+                                            </select>
+
+                                            {/* Search Form */}
+                                            <form 
+                                                className="d-flex align-items-center search-form" 
+                                                onSubmit={(e) => e.preventDefault()}
+                                                style={{ position: 'relative' }}
+                                            >
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="Search student" 
+                                                    className="form-control form-control-sm" 
+                                                    value={searchTerm}
+                                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                                    style={{ 
+                                                        paddingRight: '2rem',
+                                                        width: '200px'
+                                                    }}
+                                                />
+                                                <button 
+                                                    type="submit" 
+                                                    className="btn btn-sm position-absolute"
+                                                    style={{ 
+                                                        right: '0.5rem',
+                                                        top: '50%',
+                                                        transform: 'translateY(-50%)',
+                                                        padding: '0',
+                                                        color: '#FF8C00'
+                                                    }}
+                                                >
+                                                    <i className="fas fa-search"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    {error && (
+                                        <div className="alert alert-danger" role="alert">
+                                            <i className="fas fa-exclamation-circle me-2"></i>
+                                            {error}
+                                        </div>
+                                    )}
+                                    {successMessage && (
+                                        <div className="alert alert-success" role="alert">
+                                            <i className="fas fa-check-circle me-2"></i>
+                                            {successMessage}
+                                        </div>
+                                    )}
+
+                                    {loading ? (
+                                        <LoadingSpinner 
+                                            text="Loading Students" 
+                                            icon="users" 
+                                            subtext="Fetching student records..." 
+                                        />
+                                    ) : (
+                                        <div className="table-responsive">
+                                            <table className="table table-hover">
+                                                <thead className="table-light">
                                                     <tr>
-                                                        <th className="index-column">#</th>
-                                                        <th>Student ID</th>
-                                                        <th className="name-column">Student Name</th>
-                                                        <th>Year Level</th>
-                                                        <th>Program</th>
-                                                        <th>Status</th>
-                                                        <th>Actions</th>
+                                                        <th scope="col" style={{ width: '5%' }}>#</th>
+                                                        <th scope="col" style={{ width: '15%' }}>Student ID</th>
+                                                        <th scope="col" style={{ width: '25%' }}>Student Name</th>
+                                                        <th scope="col" style={{ width: '20%' }}>Course</th>
+                                                        <th scope="col" style={{ width: '15%' }}>Year Level</th>
+                                                        <th scope="col" style={{ width: '10%' }}>Status</th>
+                                                        <th scope="col" style={{ width: '10%' }}>Actions</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {currentItems.map((student, index) => (
-                                                        <tr key={student._id}>
-                                                            <td>{index + indexOfFirstItem + 1}</td>
-                                                            <td>{student.studentId}</td>
-                                                            <td>{student.name}</td>
-                                                            <td>{student.yearLevel}</td>
-                                                            <td>{student.program}</td>
-                                                            <td>
-                                                                <StudentStatusTag
-                                                                    status={student.isArchived ? 'Archived' : 'Active'}
-                                                                    onClick={() => handleArchiveAction(student._id, student.name, student.isArchived)}
-                                                                />
-                                                            </td>
-                                                            <td>
-                                                                <div className="btn-group">
-                                                                    <button
-                                                                        className="btn btn-edit btn-sm me-2"
-                                                                        onClick={() => navigate(`/governor/edit-student/${student._id}`)}
-                                                                        title="Edit Student"
-                                                                    >
-                                                                        <i className="fas fa-edit"></i>
-                                                                    </button>
-                                                                    <button
-                                                                        className="btn btn-archive btn-sm"
-                                                                        onClick={() => handleArchiveAction(student._id, student.name, student.isArchived)}
-                                                                        title={student.isArchived ? 'Unarchive Student' : 'Archive Student'}
-                                                                    >
-                                                                        <i className={`fas fa-${student.isArchived ? 'box-open' : 'box-archive'}`}></i>
-                                                                    </button>
-                                                                </div>
+                                                    {currentItems.length === 0 ? (
+                                                        <tr>
+                                                            <td colSpan="7" className="text-center py-4">
+                                                                <i className="fas fa-search me-2"></i>
+                                                                No students found
                                                             </td>
                                                         </tr>
-                                                    ))}
+                                                    ) : (
+                                                        currentItems.map((student, index) => (
+                                                            <tr key={student._id}>
+                                                                <td>{indexOfFirstItem + index + 1}</td>
+                                                                <td>{student.studentId}</td>
+                                                                <td>{student.name}</td>
+                                                                <td>{student.program}</td>
+                                                                <td>{student.yearLevel}</td>
+                                                                <td>
+                                                                    <StudentStatusTag
+                                                                        status={student.isArchived ? 'Archived' : 'Active'}
+                                                                        onClick={() => handleArchiveAction(student._id, student.name, student.isArchived)}
+                                                                    />
+                                                                </td>
+                                                                <td>
+                                                                    <div className="btn-group">
+                                                                        <button
+                                                                            className="btn btn-edit btn-sm me-2"
+                                                                            onClick={() => handleEditClick(student)}
+                                                                            title="Edit Student"
+                                                                        >
+                                                                            <i className="fas fa-edit"></i>
+                                                                        </button>
+                                                                        <button
+                                                                            className={`btn btn-archive btn-sm ${student.isArchived ? 'btn-open' : ''}`}
+                                                                            onClick={() => handleArchiveAction(student._id, student.name, student.isArchived)}
+                                                                            title={student.isArchived ? 'Unarchive Student' : 'Archive Student'}
+                                                                        >
+                                                                            <i className={`fas fa-${student.isArchived ? 'box-open' : 'archive'}`}></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    )}
                                                 </tbody>
                                             </table>
-
-                                            {/* Pagination */}
-                                            <div className="d-flex justify-content-between align-items-center mb-2" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
-                                                <div>
-                                                    Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredStudents.length)} of {filteredStudents.length} entries
-                                                </div>
-                                                <nav>
-                                                    <ul className="pagination justify-content-center">
-                                                        <li className="page-item">
-                                                            <button
-                                                                onClick={() => paginate(currentPage - 1)}
-                                                                className="page-link"
-                                                                disabled={currentPage === 1}
-                                                            >
-                                                                Previous
-                                                            </button>
-                                                        </li>
-                                                        {[...Array(totalPages)].map((_, index) => (
-                                                            <li key={index} className="page-item">
-                                                                <button
-                                                                    onClick={() => paginate(index + 1)}
-                                                                    className={`page-link ${index + 1 === currentPage ? 'active' : ''}`}
-                                                                >
-                                                                    {index + 1}
-                                                                </button>
-                                                            </li>
-                                                        ))}
-                                                        <li className="page-item">
-                                                            <button
-                                                                onClick={() => paginate(currentPage + 1)}
-                                                                className="page-link"
-                                                                disabled={currentPage === totalPages}
-                                                            >
-                                                                Next
-                                                            </button>
-                                                        </li>
-                                                    </ul>
-                                                </nav>
-                                            </div>
-                                        </>
+                                        </div>
                                     )}
+                                </div>
+
+                                {/* Pagination */}
+                                <div className="d-flex justify-content-between align-items-center mt-3">
+                                    <div style={{ color: '#6C757D', fontSize: '0.875rem' }}>
+                                        Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredStudents.length)} of {filteredStudents.length} entries
+                                    </div>
+                                    <nav>
+                                        <ul className="pagination">
+                                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                                <button
+                                                    onClick={() => paginate(currentPage - 1)}
+                                                    className="page-link"
+                                                    disabled={currentPage === 1}
+                                                    style={{ color: '#6C757D' }}
+                                                >
+                                                    Previous
+                                                </button>
+                                            </li>
+                                            {[...Array(totalPages)].map((_, index) => (
+                                                <li 
+                                                    key={index} 
+                                                    className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}
+                                                >
+                                                    <button
+                                                        onClick={() => paginate(index + 1)}
+                                                        className="page-link"
+                                                        style={{ 
+                                                            color: currentPage === index + 1 ? '#fff' : '#6C757D',
+                                                            backgroundColor: currentPage === index + 1 ? '#FF8C00' : '#fff',
+                                                            borderColor: currentPage === index + 1 ? '#FF8C00' : '#dee2e6'
+                                                        }}
+                                                    >
+                                                        {index + 1}
+                                                    </button>
+                                                </li>
+                                            ))}
+                                            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                                <button
+                                                    onClick={() => paginate(currentPage + 1)}
+                                                    className="page-link"
+                                                    disabled={currentPage === totalPages}
+                                                    style={{ color: '#6C757D' }}
+                                                >
+                                                    Next
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </nav>
                                 </div>
                             </div>
                         </div>
