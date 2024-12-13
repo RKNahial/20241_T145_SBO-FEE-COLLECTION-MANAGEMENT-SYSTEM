@@ -65,6 +65,7 @@ import AdminEditAdmin from './pages/admin/AdminEditAdmin';
 import AdminSchoolYear from './pages/admin/AdminSchoolYear';
 import AdminProfile from './pages/admin/AdminProfile';
 import HistoryLogs from './pages/admin/HistoryLogs';
+import AdminFileUpload from './pages/admin/AdminFileUpload';
 
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -103,6 +104,7 @@ const App = () => {
                                     <Route path="profile" element={<AdminProfile />} />
                                     <Route path="history-logs" element={<HistoryLogs />} />
                                     <Route path="manage-controls" element={<ManageControls />} />
+                                    <Route path="file-upload" element={<AdminFileUpload />} />
                                 </Routes>
                             </ProtectedRoute>
                         } />

@@ -7,6 +7,8 @@ import axios from 'axios';
 import { getAnalytics, logEvent } from "firebase/analytics";
 import { app } from '../firebase/firebaseConfig';
 import '../../assets/css/calendar.css';
+import LoadingSpinner from '../../components/LoadingSpinner'; 
+import { usePayment } from '../../context/PaymentContext';
 
 const CALENDAR_ID = 'c_24e4973e704b983a944d5bc4cd1a7e0437d3eb519a1935d01706fb81909b68d3@group.calendar.google.com';
 const CALENDAR_URL = `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(CALENDAR_ID)}&ctz=UTC`;
@@ -28,6 +30,9 @@ const AdminDashboard = () => {
     const itemsPerPage = 10;
     const [selectedFile, setSelectedFile] = useState(null);
     const fileInputRef = useRef(null);
+
+    const [recentLogs, setRecentLogs] = useState([]);
+    const [error, setError] = useState(null);
 
     const toggleSidebar = useCallback(() => {
         setIsCollapsed(prev => !prev);
@@ -62,6 +67,70 @@ const AdminDashboard = () => {
         }
     };
 
+    const [showFullAmount, setShowFullAmount] = useState(false);
+    const [totalFees, setTotalFees] = useState(0);
+    const formatAmount = (amount) => {
+        if (typeof amount !== 'number' || isNaN(amount)) {
+            return '₱0.00';
+        }
+
+        // Show full amount if showFullAmount is true
+        if (showFullAmount) {
+            return `₱${amount.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })}`;
+        }
+
+        // Format for trillions
+        if (amount >= 1_000_000_000_000) {
+            return `₱${(amount / 1_000_000_000_000).toFixed(1)}T`;
+        }
+
+        // Format for billions
+        if (amount >= 1_000_000_000) {
+            return `₱${(amount / 1_000_000_000).toFixed(1)}B`;
+        }
+
+        // Format for millions
+        if (amount >= 1_000_000) {
+            return `₱${(amount / 1_000_000).toFixed(1)}M`;
+        }
+
+        // Format for thousands
+        if (amount >= 1_000) {
+            return `₱${(amount / 1_000).toFixed(1)}K`;
+        }
+
+        // Format regular numbers
+        return `₱${amount.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })}`;
+    };
+
+    const { paymentUpdate } = usePayment();
+     useEffect(() => {
+        const fetchTotalFees = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/api/payment-fee/total-fees');
+                if (response.data.success) {
+                    setTotalFees(response.data.totalFees);
+                } else {
+                    console.error('Failed to fetch total fees:', response.data.error);
+                    setTotalFees(0);
+                }
+            } catch (err) {
+                console.error('Error fetching total fees:', err);
+                setTotalFees(0);
+            }
+        };
+
+        fetchTotalFees();
+    }, [paymentUpdate]);
+
+
+
     // Fetch files from Google Drive
     const fetchFiles = async () => {
         try {
@@ -74,6 +143,43 @@ const AdminDashboard = () => {
             console.error('Error fetching files:', error);
         }
     };
+    
+    const [calendarLoading, setCalendarLoading] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setCalendarLoading(false);
+        }, 1500); 
+
+        return () => clearTimeout(timer);
+    }, []);
+    
+    useEffect(() => {
+        const fetchRecentLogs = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.get(
+                    'http://localhost:8000/api/history-logs/recent',  // Updated endpoint
+                    {
+                        headers: { 
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
+        
+                if (response.data.success) {
+                    setRecentLogs(response.data.logs);
+                }
+            } catch (error) {
+                console.error('Error fetching recent logs:', error);
+                setError('Error loading recent logs');
+            } finally {
+                setLoading(false);
+            }
+        };
+    
+        fetchRecentLogs();
+    }, []);
 
     // Function to trigger file input click
     const handleUploadClick = () => {
@@ -173,16 +279,16 @@ const AdminDashboard = () => {
                 }}>
                     <div className="container-fluid px-4">
                         {/* Welcome Message */}
-                        <h4 className="mt-4 mb-4">Welcome back, Admin!</h4>
+                        <p className="system-gray mt-4 welcome-text">Welcome back, admin!</p>
 
-                        {/* Statistics Cards Row */}
+                       {/* Statistics Cards Row */}
                         <div className="row justify-content-center mb-4">
                             <div className="col-xl-3 col-md-6 mb-3">
                                 <div className="card border-0" style={{
                                     borderRadius: '15px',
                                     boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
                                 }}>
-                                    <div className="card-body d-flex align-items-center justify-content-center py-3"
+                                   <div className="card-body d-flex align-items-center justify-content-center py-3"
                                         style={{
                                             backgroundColor: '#FF8C00',
                                             borderRadius: '15px'
@@ -257,186 +363,131 @@ const AdminDashboard = () => {
                                     </div>
                                 </div>
                             </div>
+                            
+                            <div className="col-xl-3 col-md-6 mb-3">
+                                {/* Total Fees Card */}
+                                <div className="card border-0" style={{
+                                    borderRadius: '15px',
+                                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+                                }}>
+                                    <div className="card-body d-flex align-items-center justify-content-center py-3"
+                                        style={{
+                                            backgroundColor: '#FF8C00',
+                                            borderRadius: '15px'
+                                        }}>
+                                        <div className="text-center">
+                                            <div className="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
+                                                style={{
+                                                    width: '45px',
+                                                    height: '45px',
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
+                                                }}>
+                                                <i className="fas fa-money-bill-wave fa-lg text-white"></i>
+                                            </div>
+                                            <h5 className="mb-1 fw-bold text-white" onClick={() => setShowFullAmount(!showFullAmount)} style={{ cursor: 'pointer' }}>
+                                                {formatAmount(totalFees)}
+                                            </h5>
+                                            <p className="mb-0 text-white">Total Fees</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+                        
+                        {/* Recent History Logs Table */}
+                        <div className="card-body">
+                        <h5 className="mb-4 header">Recent Activity Logs</h5>
+                        <table className="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th className="index-column">#</th>
+                                    <th className="date-time-column">Date</th>
+                                    <th className="date-time-column">Time</th>
+                                    <th>User</th>
+                                    <th>Action</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {loading ? (
+                                    <tr className="no-hover">
+                                        <td colSpan="6" style={{ border: 'none' }}>
+                                            <div style={{ 
+                                                display: 'flex', 
+                                                justifyContent: 'center', 
+                                                alignItems: 'center',
+                                                minHeight: '200px'  
+                                            }}>
+                                                <LoadingSpinner icon="history"/>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : error ? (
+                                    <tr>
+                                        <td colSpan="6" className="text-center text-danger">{error}</td>
+                                    </tr>
+                                ) : recentLogs.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="6" className="text-center">No recent activity found</td>
+                                    </tr>
+                                ) : (
+                                    recentLogs.map((log, index) => (
+                                        <tr key={log._id}>
+                                            <td>{index + 1}</td>
+                                            <td>{log.date}</td>
+                                            <td>{log.time}</td>
+                                            <td>{log.user}</td>
+                                            <td>{log.action}</td>
+                                            <td>{log.details}</td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
 
                         {/* Main Content Area */}
-                        <div className="row">
-                            {/* Left Column - Calendar */}
-                            <div className="col-xl-8 mb-4">
-                                <div className="card border-0 shadow-sm h-100">
-                                    <div className="card-header bg-white border-0 py-2">
-                                        <div className="d-flex justify-content-between align-items-center">
-                                            <h6 className="mb-0 fw-semibold text-primary">
-                                                <i className="far fa-calendar-alt me-2"></i>
-                                                Calendar
-                                            </h6>
+                        <div className="container-fluid px-5 mb-5 mt-3">
+                            {/* CALENDAR */}
+                            <div style={{   
+                                flex: 1, 
+                                maxWidth: '50rem',
+                                marginRight: 'auto', 
+                                marginLeft: '-3rem' 
+                            }}>
+                                    <div className="calendar-card">
+                                        <div className="calendar-header">
+                                            <h5 className="calendar-title header">Calendar</h5>
                                             <button
-                                                className="btn btn-outline-primary btn-sm px-3 py-1"
+                                                className="calendar-add-button"
                                                 onClick={handleAddToCalendar}
-                                                style={{ fontSize: '0.8rem' }}
                                             >
-                                                <i className="fas fa-plus me-1"></i>
+                                                <i className="fas fa-plus me-2"></i>
                                                 Add Event
                                             </button>
                                         </div>
-                                    </div>
-                                    <div className="card-body p-0">
-                                        <div className="calendar-wrapper" style={{ height: '500px' }}>
+                                        <div className="calendar-container">
+                                        {calendarLoading ? (
+                                            <LoadingSpinner icon="calendar"/> 
+                                        ) : (
                                             <iframe
                                                 src={CALENDAR_URL}
-                                                style={{
-                                                    width: '100%',
-                                                    height: '100%',
-                                                    border: 'none'
-                                                }}
+                                                className="calendar-iframe"
                                                 frameBorder="0"
                                                 scrolling="no"
-                                                title="Admin Calendar"
+                                                title="Treasurer Calendar"
+                                                onLoad={() => setCalendarLoading(false)}  // Add this handler
                                             />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Right Column - File Upload */}
-                            <div className="col-xl-4 mb-4">
-                                <div className="card border-0 shadow-sm h-100">
-                                    <div className="card-header bg-white border-0 py-3">
-                                        <div className="d-flex justify-content-between align-items-center">
-                                            <h5 className="mb-0">
-                                                <i className="fas fa-upload me-2 text-primary"></i>
-                                                Upload Files
-                                            </h5>
-                                            <button
-                                                className="btn btn-primary btn-sm"
-                                                onClick={handleUploadClick}
-                                                disabled={loading}
-                                            >
-                                                <i className="fas fa-upload me-2"></i>
-                                                Upload File
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className="card-body p-0">
-                                        <div className="mb-3">
-                                            <input
-                                                ref={fileInputRef}
-                                                type="file"
-                                                style={{ display: 'none' }}
-                                                onChange={handleFileSelect}
-                                                disabled={loading}
-                                            />
-                                        </div>
-                                        {uploadProgress > 0 && (
-                                            <div className="progress mb-3">
-                                                <div
-                                                    className="progress-bar"
-                                                    role="progressbar"
-                                                    style={{ width: `${uploadProgress}%` }}
-                                                    aria-valuenow={uploadProgress}
-                                                    aria-valuemin="0"
-                                                    aria-valuemax="100"
-                                                >
-                                                    {uploadProgress}%
-                                                </div>
-                                            </div>
                                         )}
+                                       </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* File List Section - Full Width */}
-                        <div className="row">
-                            <div className="col-12">
-                                <div className="card mb-4">
-                                    <div className="card-header">
-                                        <i className="fas fa-file me-1"></i>
-                                        Files
-                                    </div>
-                                    <div className="card-body">
-                                        <div className="mb-3 d-flex justify-content-between align-items-center">
-                                            <div className="d-flex align-items-center">
-                                                <input
-                                                    type="text"
-                                                    className="form-control form-control-sm me-2"
-                                                    placeholder="Search files..."
-                                                    value={searchTerm}
-                                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="table-responsive">
-                                            <table className="table table-bordered">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Name</th>
-                                                        <th>Type</th>
-                                                        <th>Size</th>
-                                                        <th>Last Modified</th>
-                                                        <th>Actions</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {currentFiles.map((file) => (
-                                                        <tr key={file.id}>
-                                                            <td>{file.name}</td>
-                                                            <td>{file.mimeType}</td>
-                                                            <td>{formatFileSize(file.size)}</td>
-                                                            <td>{new Date(file.modifiedTime).toLocaleString()}</td>
-                                                            <td className="align-middle">
-                                                                <div className="d-flex align-items-center justify-content-center" style={{ gap: '8px' }}>
-                                                                    <a
-                                                                        href={file.webViewLink}
-                                                                        target="_blank"
-                                                                        rel="noopener noreferrer"
-                                                                        style={{ color: 'orange', cursor: 'pointer', marginRight: '10px' }}
-                                                                    >
-                                                                        <i className="fas fa-eye" style={{ fontSize: '16px' }}></i>
-                                                                    </a>
-                                                                    <a
-                                                                        href={file.webContentLink}
-                                                                        download
-                                                                        style={{ color: 'green', cursor: 'pointer' }}
-                                                                    >
-                                                                        <i className="fas fa-download" style={{ fontSize: '16px' }}></i>
-                                                                    </a>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        {/* Pagination */}
-                                        <div className="d-flex justify-content-between align-items-center mt-3">
-                                            <div className="text-muted">
-                                                Showing {indexOfFirstFile + 1} to {Math.min(indexOfLastFile, filteredFiles.length)} of {filteredFiles.length} entries
-                                            </div>
-                                            <nav>
-                                                <ul className="pagination pagination-sm mb-0">
-                                                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                                        <button className="page-link" onClick={() => setCurrentPage(currentPage - 1)}>Previous</button>
-                                                    </li>
-                                                    {[...Array(totalPages)].map((_, i) => (
-                                                        <li key={i} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
-                                                            <button className="page-link" onClick={() => setCurrentPage(i + 1)}>{i + 1}</button>
-                                                        </li>
-                                                    ))}
-                                                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                                        <button className="page-link" onClick={() => setCurrentPage(currentPage + 1)}>Next</button>
-                                                    </li>
-                                                </ul>
-                                            </nav>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+       </div>
     );
 };
 

@@ -96,6 +96,9 @@ const AdminSidebar = ({ isCollapsed }) => {
                                 <i className="fas fa-history icon-space"></i>
                                 {!isCollapsed && <span> History Logs</span>}
                             </NavLink>
+                            <NavLink to="/admin/file-upload" className={`nav-link ${location.pathname === '/admin/file-upload' ? 'active' : ''}`}>
+                                <i className="fas fa-file-upload icon-space"></i>{!isCollapsed && <span> File Upload</span>}
+                            </NavLink>
                         </div>
                         <button
                             onClick={handleLogout}
