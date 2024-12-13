@@ -270,26 +270,17 @@ const AdminStudents = () => {
                                                 <div className="d-flex gap-2">
                                                     <Link
                                                         to="/admin/students/add-new"
-                                                        className="btn btn-add"
-                                                        style={{
-                                                            backgroundColor: '#FF8C00',
-                                                            color: 'white',
-                                                            padding: '0.5rem 1rem',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            gap: '0.5rem'
-                                                        }}
-                                                    >
-                                                        <i className="fas fa-plus"></i>
-                                                        Add Student
+                                                        className="add-button btn btn-sm me-2">
+                                                        <i className="fas fa-plus me-2"></i>
+                                                        Add New Student
                                                     </Link>
                                                     <button
-                                                        className="btn btn-secondary"
+                                                        className="add-button btn btn-sm me-2"
                                                         onClick={() => setStatusFilter("Archived")}
                                                         style={{ backgroundColor: '#FF8C00', color: 'white', border: 'none' }}
                                                     >
                                                         <i className="fas fa-archive me-1"></i>
-                                                        Show Archived
+                                                        Archived Students
                                                     </button>
                                                 </div>
                                                 <div className="d-flex align-items-center" style={{ width: 'auto' }}>
@@ -303,24 +294,18 @@ const AdminStudents = () => {
                                                         <option value="Archived">Archived</option>
                                                         <option value="All">All</option>
                                                     </select>
-                                                    <div className="input-group" style={{ width: 'auto', position: 'relative' }}>
-                                                        <span className="input-group-text" style={{ backgroundColor: 'transparent', border: 'none', position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}>
-                                                            <i className="fas fa-search" style={{ color: 'orange' }}></i>
-                                                        </span>
+                                                    <div className="input-group d-flex search-bar" style={{ width: 'auto', position: 'relative' }}>
                                                         <input
                                                             type="text"
-                                                            className="form-control"
-                                                            placeholder="Search students..."
+                                                            className="search-input me-2"
+                                                            placeholder="Search student"
                                                             value={searchTerm}
                                                             onChange={(e) => setSearchTerm(e.target.value)}
                                                             aria-label="Search students"
-                                                            style={{
-                                                                paddingRight: '40px',
-                                                                borderRadius: '5px',
-                                                                border: '1px solid #ced4da',
-                                                                width: '250px'
-                                                            }}
                                                         />
+                                                        <button type="submit" className="search btn btn-sm">
+                                                                <i className="fas fa-search"></i>
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>

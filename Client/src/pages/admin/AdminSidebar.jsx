@@ -76,13 +76,6 @@ const AdminSidebar = ({ isCollapsed }) => {
                                 {!isCollapsed && <span> Admin</span>}
                             </NavLink>
                             <NavLink
-                                to="/admin/school-year"
-                                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                            >
-                                <i className="fa-regular fa-calendar-days icon-space"></i>
-                                {!isCollapsed && <span> School Year</span>}
-                            </NavLink>
-                            <NavLink
                                 to="/admin/manage-controls"
                                 className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
                             >

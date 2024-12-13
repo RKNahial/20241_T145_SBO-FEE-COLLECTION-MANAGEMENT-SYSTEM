@@ -176,7 +176,7 @@ const AdminOfficers = () => {
                             <div className="card-header">
                                 <div className="row">
                                     <div className="col col-md-6">
-                                        <i className="fas fa-users" style={{ color: 'blue' }}></i> <strong>Officers</strong>
+                                        <i className="fas fa-users me-2"></i> <strong>Officers</strong>
                                     </div>
                                 </div>
                             </div>
@@ -196,17 +196,20 @@ const AdminOfficers = () => {
                                 {/* Your existing filters and search bar */}
                                 <div className="mb-3 d-flex justify-content-between align-items-center">
                                     <div>
-                                        <Link to="/admin/officers/add-new" className="btn system-button me-2">
-                                            <i className="far fa-plus me-1"></i> Add
+                                        <Link 
+                                            to="/admin/officers/add-new" 
+                                            className="add-button btn btn-sm me-2" >
+                                            <i className="fas fa-plus me-2"></i>
+                                            Add New Officer
                                         </Link>
                                         <button
-                                            className="btn btn-secondary"
+                                            className="add-button btn btn-sm me-2"
                                             onClick={() => setStatusFilter("Archived")}
                                             style={{ backgroundColor: '#FF8C00', color: 'white', border: 'none' }}
-                                        >
-                                            <i className="fas fa-archive me-1"></i>
-                                            Show Archived
-                                        </button>
+                                            >
+                                                <i className="fas fa-archive me-1"></i>
+                                                Archived Officers
+                                            </button>
                                     </div>
                                     <div className="d-flex align-items-center" style={{ width: 'auto' }}>
                                         <select
@@ -219,25 +222,18 @@ const AdminOfficers = () => {
                                             <option value="Active">Active</option>
                                             <option value="Archived">Archived</option>
                                         </select>
-                                        <div className="input-group" style={{ width: 'auto', position: 'relative' }}>
-                                            <span className="input-group-text" style={{ backgroundColor: 'transparent', border: 'none', position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}>
-                                                <i className="fas fa-search" style={{ color: '#6c757d' }}></i>
-                                            </span>
+                                        <div className="input-group d-flex search-bar" style={{ width: 'auto', position: 'relative' }}>
                                             <input
                                                 type="text"
-                                                className="form-control"
-                                                placeholder="Search by ID, name, position, or type..."
+                                                className="search-input me-2"
+                                                placeholder="Search officer"
                                                 value={searchTerm}
                                                 onChange={handleSearchChange}
                                                 aria-label="Search officers"
-                                                style={{
-                                                    paddingLeft: '40px',
-                                                    borderRadius: '5px',
-                                                    border: '1px solid #ced4da',
-                                                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                                                    width: '250px'
-                                                }}
                                             />
+                                            <button type="submit" className="search btn btn-sm">
+                                                    <i className="fas fa-search"></i>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -328,44 +324,48 @@ const AdminOfficers = () => {
                                             </tbody>
                                         </table>
 
-                                        {/* Pagination section */}
-                                        <div className="d-flex justify-content-between align-items-center mb-2" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
-                                            <div>
-                                                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredOfficers.length)} of {filteredOfficers.length} entries
-                                            </div>
-                                            <nav>
-                                                <ul className="pagination mb-0">
-                                                    <li className="page-item">
+                                       {/* Pagination */}
+                                    <div className="d-flex justify-content-between align-items-center mb-2 mt-3" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
+                                        <div>
+                                            Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredOfficers.length)} of {filteredOfficers.length} entries
+                                        </div>
+                                        <nav>
+                                            <ul className="pagination mb-0">
+                                                <li className="page-item">
+                                                    <button
+                                                        className="page-link"
+                                                        onClick={() => paginate(currentPage - 1)}
+                                                        disabled={currentPage === 1}
+                                                    >
+                                                        Previous
+                                                    </button>
+                                                </li>
+                                                {[...Array(totalPages)].map((_, index) => (
+                                                    <li key={index} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
                                                         <button
                                                             className="page-link"
-                                                            onClick={() => paginate(currentPage - 1)}
-                                                            disabled={currentPage === 1}
+                                                            onClick={() => paginate(index + 1)}
+                                                            style={currentPage === index + 1 ? 
+                                                                { backgroundColor: 'orange', borderColor: 'orange', color: 'white' } 
+                                                                : {color: 'black'}
+                                                            }
                                                         >
-                                                            Previous
+                                                            {index + 1}
                                                         </button>
                                                     </li>
-                                                    {Array.from({ length: totalPages }, (_, index) => (
-                                                        <li key={index + 1} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
-                                                            <button
-                                                                className="page-link"
-                                                                onClick={() => paginate(index + 1)}
-                                                            >
-                                                                {index + 1}
-                                                            </button>
-                                                        </li>
-                                                    ))}
-                                                    <li className="page-item">
-                                                        <button
-                                                            className="page-link page-label"
-                                                            onClick={() => paginate(currentPage + 1)}
-                                                            disabled={currentPage === totalPages}
-                                                        >
-                                                            Next
-                                                        </button>
-                                                    </li>
-                                                </ul>
-                                            </nav>
-                                        </div>
+                                                ))}
+                                                <li className="page-item">
+                                                    <button
+                                                        className="page-link page-label"
+                                                        onClick={() => paginate(currentPage + 1)}
+                                                        disabled={currentPage === totalPages}
+                                                    >
+                                                        Next
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    </div>
                                     </>
                                 )}
                             </div>

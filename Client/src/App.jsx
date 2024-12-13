@@ -62,7 +62,6 @@ import AdminEditOfficer from './pages/admin/AdminEditOfficer';
 import AdminAdmins from './pages/admin/AdminAdmins';
 import AdminAddAdmin from './pages/admin/AdminAddAdmin';
 import AdminEditAdmin from './pages/admin/AdminEditAdmin';
-import AdminSchoolYear from './pages/admin/AdminSchoolYear';
 import AdminProfile from './pages/admin/AdminProfile';
 import HistoryLogs from './pages/admin/HistoryLogs';
 import AdminFileUpload from './pages/admin/AdminFileUpload';
@@ -100,7 +99,6 @@ const App = () => {
                                     <Route path="admins" element={<AdminAdmins />} />
                                     <Route path="admins/add-new" element={<AdminAddAdmin />} />
                                     <Route path="admins/edit/:id" element={<AdminEditAdmin />} />
-                                    <Route path="school-year" element={<AdminSchoolYear />} />
                                     <Route path="profile" element={<AdminProfile />} />
                                     <Route path="history-logs" element={<HistoryLogs />} />
                                     <Route path="manage-controls" element={<ManageControls />} />
