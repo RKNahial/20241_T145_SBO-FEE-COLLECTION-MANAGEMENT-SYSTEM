@@ -173,20 +173,6 @@ const AdminDashboard = () => {
     }, [paymentUpdate]);
 
 
-
-    // Fetch files from Google Drive
-    const fetchFiles = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:8000/api/drive/files', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setFiles(response.data.files);
-        } catch (error) {
-            console.error('Error fetching files:', error);
-        }
-    };
-    
     const [calendarLoading, setCalendarLoading] = useState(true);
 
     useEffect(() => {
@@ -202,7 +188,7 @@ const AdminDashboard = () => {
             try {
                 const token = localStorage.getItem('token');
                 const response = await axios.get(
-                    'http://localhost:8000/api/history-logs/recent',  // Updated endpoint
+                    'http://localhost:8000/api/history-logs/recent',  
                     {
                         headers: { 
                             Authorization: `Bearer ${token}`
@@ -211,7 +197,16 @@ const AdminDashboard = () => {
                 );
         
                 if (response.data.success) {
-                    setRecentLogs(response.data.logs);
+                    const formattedLogs = response.data.logs.map(log => {
+                        const timestamp = new Date(log.timestamp);
+                        return {
+                            ...log,
+                            date: timestamp.toLocaleDateString(),
+                            time: timestamp.toLocaleTimeString(),
+                            user: `${log.userName} (${log.userPosition})`
+                        };
+                    });
+                    setRecentLogs(formattedLogs);
                 }
             } catch (error) {
                 console.error('Error fetching recent logs:', error);
@@ -223,81 +218,6 @@ const AdminDashboard = () => {
     
         fetchRecentLogs();
     }, []);
-
-    // Function to trigger file input click
-    const handleUploadClick = () => {
-        fileInputRef.current?.click();
-    };
-
-    // Separate function to handle file selection
-    const handleFileSelect = (event) => {
-        if (event.target.files && event.target.files.length > 0) {
-            const file = event.target.files[0];
-            setSelectedFile(file);
-            handleFileUpload(file); // Automatically upload when file is selected
-        }
-    };
-
-    // Handle file upload
-    const handleFileUpload = async (file) => {
-        if (!file) {
-            console.error('No file selected');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            setLoading(true);
-            const token = localStorage.getItem('token');
-            await axios.post('http://localhost:8000/api/drive/upload', formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data'
-                },
-                onUploadProgress: (progressEvent) => {
-                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                    setUploadProgress(progress);
-                }
-            });
-            fetchFiles();
-            setUploadProgress(0);
-        } catch (error) {
-            console.error('Error uploading file:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Handle file deletion
-    const handleDeleteFile = async (fileId) => {
-        try {
-            const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:8000/api/drive/files/${fileId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            fetchFiles(); // Refresh file list
-        } catch (error) {
-            console.error('Error deleting file:', error);
-        }
-    };
-
-    useEffect(() => {
-        fetchStats();
-        fetchFiles();
-    }, []);
-
-    // Filter files based on search
-    const filteredFiles = files.filter(file =>
-        file.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    // Calculate pagination
-    const indexOfLastFile = currentPage * itemsPerPage;
-    const indexOfFirstFile = indexOfLastFile - itemsPerPage;
-    const currentFiles = filteredFiles.slice(indexOfFirstFile, indexOfLastFile);
-    const totalPages = Math.ceil(filteredFiles.length / itemsPerPage);
 
     // Add this function for calendar
     const handleAddToCalendar = () => {
@@ -440,55 +360,70 @@ const AdminDashboard = () => {
                         
                         {/* Recent History Logs Table */}
                         <div className="card-body">
-                        <h5 className="mb-4 header">Recent Activity Logs</h5>
-                        <table className="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th className="index-column">#</th>
-                                    <th className="date-time-column">Date</th>
-                                    <th className="date-time-column">Time</th>
-                                    <th>User</th>
-                                    <th>Action</th>
-                                    <th>Details</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {loading ? (
-                                    <tr className="no-hover">
-                                        <td colSpan="6" style={{ border: 'none' }}>
-                                            <div style={{ 
-                                                display: 'flex', 
-                                                justifyContent: 'center', 
-                                                alignItems: 'center',
-                                                minHeight: '200px'  
-                                            }}>
-                                                <LoadingSpinner icon="history"/>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ) : error ? (
-                                    <tr>
-                                        <td colSpan="6" className="text-center text-danger">{error}</td>
-                                    </tr>
-                                ) : recentLogs.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="6" className="text-center">No recent activity found</td>
-                                    </tr>
-                                ) : (
-                                    recentLogs.map((log, index) => (
-                                        <tr key={log._id}>
-                                            <td>{index + 1}</td>
-                                            <td>{log.date}</td>
-                                            <td>{log.time}</td>
-                                            <td>{log.user}</td>
-                                            <td>{log.action}</td>
-                                            <td>{log.details}</td>
+                            <h5 className="mb-4 header">Recent Activity Logs</h5>
+                            <div className="table-responsive table-shadow">
+                                <table className="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th className="index-column">#</th>
+                                            <th className="date-time-column">Date</th>
+                                            <th className="date-time-column">Time</th>
+                                            <th>User</th>
+                                            <th>Action</th>
+                                            <th>Details</th>
                                         </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                    </thead>
+                                    <tbody>
+                                        {loading ? (
+                                            <tr className="no-hover">
+                                                <td colSpan="6" style={{ border: 'none' }}>
+                                                    <div style={{ 
+                                                        display: 'flex', 
+                                                        justifyContent: 'center', 
+                                                        alignItems: 'center',
+                                                        minHeight: '200px'  
+                                                    }}>
+                                                        <LoadingSpinner icon="history"/>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ) : error ? (
+                                            <tr>
+                                                <td colSpan="6" className="text-center text-danger">
+                                                    <i className="fas fa-exclamation-circle me-2"></i>
+                                                    {error}
+                                                </td>
+                                            </tr>
+                                        ) : recentLogs.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="6" className="text-center">
+                                                    <i className="fas fa-info-circle me-2"></i>
+                                                    No recent activity found
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            recentLogs.map((log, index) => (
+                                                <tr key={log._id}>
+                                                    <td>{index + 1}</td>
+                                                    <td>{log.date}</td>
+                                                    <td>{log.time}</td>
+                                                    <td>{log.user}</td>
+                                                    <td>{log.action}</td>
+                                                    <td style={{
+                                                        maxWidth: '300px',
+                                                        whiteSpace: 'nowrap',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis'
+                                                    }}>
+                                                        {log.details}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     {/* REPORTS AND CALENDAR */}
                     <div className="card-body mt-4">
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>

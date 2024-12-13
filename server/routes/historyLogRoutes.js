@@ -17,8 +17,21 @@ router.post('/history-logs/dues-toggle', auth, historyLogController.logDuesToggl
 
 router.post('/history-logs/dues-payment', auth, historyLogController.logDuesPayment);
 
-router.get('/recent', auth, historyLogController.getRecentLogs); 
+// Get recent logs (limited to 10)
+router.get('/history-logs/recent', auth, async (req, res) => {
+    try {
+        const logs = await loggingService.getRecentLogs();
+        res.json({ success: true, logs });
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error fetching recent logs', 
+            error: error.message 
+        });
+    }
+});
 
+// Get all logs with filters
 router.get('/history-logs', auth, async (req, res) => {
     try {
         const filters = {
@@ -27,9 +40,13 @@ router.get('/history-logs', auth, async (req, res) => {
             action: req.query.action
         };
         const logs = await loggingService.getLogs(filters);
-        res.json(logs);
+        res.json({ success: true, logs });
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching history logs', error: error.message });
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error fetching history logs', 
+            error: error.message 
+        });
     }
 });
 

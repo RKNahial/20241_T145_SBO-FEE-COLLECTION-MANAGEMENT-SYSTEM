@@ -239,7 +239,7 @@ const AdminFileUpload = () => {
                             <div className="card-header">
                                 <div className="row">
                                     <div className="col col-md-6">
-                                        <i className="fas fa-file me-2"></i> <strong>File Management</strong>
+                                        <i className="fas fa-file me-2"></i> <strong>File Upload</strong>
                                     </div>
                                 </div>
                             </div>
