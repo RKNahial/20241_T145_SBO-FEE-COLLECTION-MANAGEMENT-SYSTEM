@@ -202,7 +202,11 @@ const AdminDashboard = () => {
                         return {
                             ...log,
                             date: timestamp.toLocaleDateString(),
-                            time: timestamp.toLocaleTimeString(),
+                            time: timestamp.toLocaleTimeString('en-US', {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                hour12: true
+                            }),
                             user: `${log.userName} (${log.userPosition})`
                         };
                     });
