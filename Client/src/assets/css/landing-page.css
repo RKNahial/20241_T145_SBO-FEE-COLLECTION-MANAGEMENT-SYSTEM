@@ -11,7 +11,8 @@
 .landing-page__nav__logo a {
   font-size: 1.8rem;
   font-weight: 500;
-  color: var(--primary-color);
+  padding: 0 5.30rem;
+  color: #FF8C00 ;
   text-decoration: none;
   transition: 0.3s;
 }
@@ -20,6 +21,7 @@
   list-style: none;
   display: flex;
   align-items: center;
+  padding-right: 6rem;
   gap: 1rem;
 }
 
@@ -42,7 +44,7 @@
 .landing-page__nav__btn {
   padding: 0.5rem 2rem;
   color: var(--white);
-  background-color: var(--primary-color);
+  background-color: #FF8C00;
   border-radius: 5px;
   transition: background-color 0.3s, color 0.3s; 
 }
@@ -53,7 +55,7 @@
 }
 
 .landing-page__nav__btn:active {
-  background-color: var(--primary-color-darker); 
+  background-color: #E07B00; 
 }
 
 /* Dropdown styles */
@@ -66,8 +68,8 @@
 
 .landing-page__container {
   max-width: var(--max-width);
-  margin: auto;
-  padding: 1rem;
+  margin: 1rem auto; 
+  padding: 0 6rem;
   min-height: calc(100vh - 100px);
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -85,7 +87,7 @@
   font-size: 5rem;
   font-weight: 400;
   line-height: 3.5rem;
-  color: var(--primary-color-dark);
+  color: #E07B00;
   margin-bottom: 2rem;
 }
 
@@ -95,7 +97,7 @@
 }
 
 .landing-page__heading--2 {
-  color: var(--primary-color);
+  color: #FF8400;
 }
 
 .landing-page__content-container p {
@@ -193,7 +195,7 @@
   transform: translate(-50%, -50%);
   height: 28.125rem;
   width: 28.125rem;
-  background-color: var(--primary-color);
+  background-color: #FF8C00;
   border-radius: 100%;
   z-index: -1;
 }
@@ -219,6 +221,7 @@
   box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.2);
 }
 
+
 .image__content__1 {
   transform: translate(calc(-50% - 12rem), calc(-50% - 8rem));
 }
@@ -226,7 +229,7 @@
 .image__content__1 span {
   padding: 10px 12px;
   font-size: 1.5rem;
-  color: var(--primary-color);
+  color: #FF8C00;
   background-color: #defcf4;
   border-radius: 100%;
 }
