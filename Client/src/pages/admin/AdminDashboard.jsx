@@ -9,6 +9,26 @@ import { app } from '../firebase/firebaseConfig';
 import '../../assets/css/calendar.css';
 import LoadingSpinner from '../../components/LoadingSpinner'; 
 import { usePayment } from '../../context/PaymentContext';
+import { Bar } from 'react-chartjs-2';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+} from 'chart.js';
+import '../../assets/css/calendar.css';
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
 const CALENDAR_ID = 'c_24e4973e704b983a944d5bc4cd1a7e0437d3eb519a1935d01706fb81909b68d3@group.calendar.google.com';
 const CALENDAR_URL = `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(CALENDAR_ID)}&ctz=UTC&hl=en`;
@@ -33,10 +53,33 @@ const AdminDashboard = () => {
 
     const [recentLogs, setRecentLogs] = useState([]);
     const [error, setError] = useState(null);
+    const [reportData, setReportData] = useState([]);
+    const [reportLoading, setReportLoading] = useState(true);
+    const [reportError, setReportError] = useState(null);
 
     const toggleSidebar = useCallback(() => {
         setIsCollapsed(prev => !prev);
     }, []);
+
+    useEffect(() => {
+    const fetchReportData = async () => {
+        setReportLoading(true);
+        try {
+            const currentYear = new Date().getFullYear();
+            const response = await axios.get(`http://localhost:8000/api/payment-fee/reports/by-program?year=${currentYear}`);
+            if (response.data.success) {
+                setReportData(response.data.data);
+            }
+        } catch (err) {
+            setReportError('Failed to fetch report data');
+            console.error('Error:', err);
+        } finally {
+            setReportLoading(false);
+        }
+    };
+
+    fetchReportData();
+}, []);
 
     // Fetch statistics
     const fetchStats = async () => {
@@ -446,28 +489,76 @@ const AdminDashboard = () => {
                             </tbody>
                         </table>
                     </div>
+                    {/* REPORTS AND CALENDAR */}
+                    <div className="card-body mt-4">
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            {/* REPORTS */}
+                            <div style={{ flex: 1, marginRight: '1.25rem' }}>
+                                <div className="card" style={{
+                                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                                    paddingTop: '1.25rem',
+                                    border: 'none',
+                                    height: '500px'
+                                }}>
+                                    <div className="d-flex justify-content-between align-items-center px-3 mb-3">
+                                        <h5 className="mb-0 header">Reports by Payment Category</h5>
+                                    </div>
+                                    <div style={{ padding: '0 1rem', height: '400px'}}>
+                                        {reportLoading ? (
+                                            <LoadingSpinner icon="reports"/> 
+                                        ) : reportError ? (
+                                            <div className="alert alert-danger">{reportError}</div>
+                                        ) : (
+                                            <Bar
+                                                data={{
+                                                    labels: reportData.map(item => item.category),
+                                                    datasets: [{
+                                                        label: 'Payment Received',
+                                                        data: reportData.map(item => item.total),
+                                                        backgroundColor: 'rgba(255, 159, 64, 0.8)',
+                                                        borderColor: 'rgba(255, 159, 64, 1)',
+                                                        borderWidth: 1,
+                                                    }]
+                                                }}
+                                                options={{
+                                                    responsive: true,
+                                                    maintainAspectRatio: false,
+                                                    plugins: {
+                                                        legend: {
+                                                            position: 'top',
+                                                        }
+                                                    },
+                                                    scales: {
+                                                        y: {
+                                                            beginAtZero: true,
+                                                            ticks: {
+                                                                callback: function (value) {
+                                                                    return '₱' + value.toLocaleString();
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
 
-                        {/* Main Content Area */}
-                        <div className="container-fluid px-5 mb-5 mt-3">
                             {/* CALENDAR */}
-                            <div style={{   
-                                flex: 1, 
-                                maxWidth: '50rem',
-                                marginRight: 'auto', 
-                                marginLeft: '-3rem' 
-                            }}>
-                                    <div className="calendar-card">
-                                        <div className="calendar-header">
-                                            <h5 className="calendar-title header">Calendar</h5>
-                                            <button
-                                                className="calendar-add-button"
-                                                onClick={handleAddToCalendar}
-                                            >
-                                                <i className="fas fa-plus me-2"></i>
-                                                Add Event
-                                            </button>
-                                        </div>
-                                        <div className="calendar-container">
+                            <div style={{ flex: 1 }}>
+                                <div className="calendar-card">
+                                    <div className="calendar-header">
+                                        <h5 className="calendar-title header">Calendar</h5>
+                                        <button
+                                            className="calendar-add-button"
+                                            onClick={handleAddToCalendar}
+                                        >
+                                            <i className="fas fa-plus me-2"></i>
+                                            Add Event
+                                        </button>
+                                    </div>
+                                    <div className="calendar-container">
                                         {calendarLoading ? (
                                             <LoadingSpinner icon="calendar"/> 
                                         ) : (
@@ -476,28 +567,21 @@ const AdminDashboard = () => {
                                                 className="calendar-iframe"
                                                 frameBorder="0"
                                                 scrolling="no"
-                                                title="Treasurer Calendar"
-                                                onLoad={() => setCalendarLoading(false)}  // Add this handler
+                                                title="Admin Calendar"
+                                                onLoad={() => setCalendarLoading(false)}
                                             />
                                         )}
-                                       </div>
                                     </div>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    {/* REPORTS AND CALENDAR END */}
+                    </div>
                 </div>
             </div>
-       </div>
+        </div>
     );
-};
-
-// Helper function to format file sizes
-const formatFileSize = (bytes) => {
-    if (!bytes) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
 export default AdminDashboard;

@@ -133,7 +133,7 @@ const AdminAddStud = () => {
                             subtext="Preparing student registration form..."
                         />
                     ) : (
-                        <div className="container-fluid px-4 mb-5 form-top">
+                        <div className="container-fluid px-4 mb-5 form-top" style={{ marginTop: '4rem' }}>
                             <div className="row">
                                 <div className="col-md-6">
                                     <div className="card mb-4">
