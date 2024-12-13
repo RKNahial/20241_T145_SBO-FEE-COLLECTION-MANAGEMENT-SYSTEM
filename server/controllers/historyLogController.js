@@ -311,3 +311,32 @@ exports.logDuesPayment = async (req, res) => {
         });
     }
 }; 
+
+exports.getRecentLogs = async (req, res) => {
+    try {
+        const recentLogs = await HistoryLog.find()
+            .sort({ timestamp: -1 })
+            .limit(5)
+            .lean();
+
+        const formattedLogs = recentLogs.map(log => ({
+            _id: log._id,
+            date: new Date(log.timestamp).toLocaleDateString(),
+            time: new Date(log.timestamp).toLocaleTimeString(),
+            user: log.userName,
+            action: log.action,
+            details: log.details
+        }));
+
+        res.status(200).json({
+            success: true,
+            logs: formattedLogs
+        });
+    } catch (error) {
+        console.error('Error fetching recent logs:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching recent logs'
+        });
+    }
+};

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const loggingService = require('../services/loggingService');
+const { getRecentLogs } = require('../controllers/historyLogController');
 const auth = require('../middleware/auth');
 const historyLogController = require('../controllers/historyLogController');
 
@@ -15,6 +16,8 @@ router.post('/history-logs/category-update', auth, historyLogController.logCateg
 router.post('/history-logs/dues-toggle', auth, historyLogController.logDuesToggle);
 
 router.post('/history-logs/dues-payment', auth, historyLogController.logDuesPayment);
+
+router.get('/recent', auth, historyLogController.getRecentLogs); 
 
 router.get('/history-logs', auth, async (req, res) => {
     try {
