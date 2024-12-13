@@ -1,4 +1,3 @@
-// src/pages/Gov/GovEditStud.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
@@ -14,6 +13,8 @@ const GovEditStud = () => {
     const { id } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
+    const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState("");
     
     const [studentData, setStudentData] = useState({
         name: '',
@@ -24,11 +25,6 @@ const GovEditStud = () => {
         status: '',
         isArchived: false
     });
-    
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [showModal, setShowModal] = useState(false);
-    const [showExitModal, setShowExitModal] = useState(false);
 
     useEffect(() => {
         const fetchStudentData = async () => {
@@ -37,7 +33,14 @@ const GovEditStud = () => {
                 if (location.state?.studentData) {
                     data = location.state.studentData;
                 } else {
-                    const response = await axios.get(`${API_URL}/api/getAll/students/${id}`);
+                    const token = localStorage.getItem('token');
+                    const response = await axios.get(`${API_URL}/api/getAll/students/${id}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
                     if (response.data.success) {
                         data = response.data.data;
                     } else {
@@ -54,17 +57,17 @@ const GovEditStud = () => {
                     status: data.status || '',
                     isArchived: data.isArchived || false
                 });
-                
-                setLoading(false);
             } catch (err) {
                 console.error('Error fetching student:', err);
                 setError(err.message || 'Failed to fetch student data');
-                setLoading(false);
+                setTimeout(() => {
+                    navigate('/governor/students');
+                }, 2000);
             }
         };
 
         fetchStudentData();
-    }, [id, location.state]);
+    }, [id, location.state, navigate]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -76,17 +79,40 @@ const GovEditStud = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setShowModal(true);
-    };
+        setError(null);
+        setSuccessMessage('');
 
-    const confirmUpdate = async () => {
         try {
+            // Validate required fields
+            if (!studentData.name || !studentData.studentId || !studentData.institutionalEmail || 
+                !studentData.yearLevel || !studentData.program) {
+                setError('All fields are required');
+                return;
+            }
+
+            // Validate email format
+            if (!studentData.institutionalEmail.endsWith('@student.buksu.edu.ph')) {
+                setError('Institutional email must end with @student.buksu.edu.ph');
+                return;
+            }
+
             const token = localStorage.getItem('token');
+            const previousData = { ...studentData };
+            
+            const updateData = {
+                name: studentData.name,
+                studentId: studentData.studentId,
+                institutionalEmail: studentData.institutionalEmail,
+                yearLevel: studentData.yearLevel,
+                program: studentData.program,
+                previousData
+            };
+
             const response = await axios.put(
                 `${API_URL}/api/update/students/${id}`,
-                studentData,
+                updateData,
                 {
-                    headers: {
+                    headers: { 
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     }
@@ -102,19 +128,15 @@ const GovEditStud = () => {
                 }).then(() => {
                     navigate('/governor/students');
                 });
-            } else {
-                throw new Error(response.data.message || 'Failed to update student');
             }
-        } catch (err) {
-            console.error('Update error:', err);
+        } catch (error) {
+            console.error('Error updating student:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: err.response?.data?.message || 'Failed to update student information',
+                text: error.response?.data?.message || 'Failed to update student information',
                 confirmButtonColor: '#FF8C00'
             });
-        } finally {
-            setShowModal(false);
         }
     };
 
@@ -123,15 +145,17 @@ const GovEditStud = () => {
     };
 
     const handleExit = () => {
-        setShowExitModal(true);
-    };
-
-    const confirmExit = () => {
         navigate('/governor/students');
     };
 
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>{error}</div>;
+    if (error) {
+        return (
+            <div className="alert alert-danger m-4">
+                {error}
+                <div>Redirecting to students list...</div>
+            </div>
+        );
+    }
 
     return (
         <div className="sb-nav-fixed">

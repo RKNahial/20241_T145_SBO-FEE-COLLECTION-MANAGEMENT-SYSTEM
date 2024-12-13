@@ -1,12 +1,13 @@
 import { Helmet } from 'react-helmet';
-import React, { useState } from "react";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Modal, Button } from 'react-bootstrap';
 import GovSidebar from "./GovSidebar";
 import GovNavbar from "./GovNavbar";
+import React, { useState, useEffect } from "react"; 
 
 const GovAddStud = () => {
+    const navigate = useNavigate(); 
     // State to handle form data
     const [formData, setFormData] = useState({
         name: '',
@@ -15,6 +16,7 @@ const GovAddStud = () => {
         yearLevel: '',
         program: ''
     });
+    
 
     // State to handle messages
     const [message, setMessage] = useState(null);
@@ -25,14 +27,110 @@ const GovAddStud = () => {
     // Handle sidebar collapse
     const [isCollapsed, setIsCollapsed] = useState(false);
     const toggleSidebar = () => setIsCollapsed(prev => !prev);
+    const [permissions, setPermissions] = useState({});
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [id, setId] = useState(null);
 
-    // Form data change handler
+    useEffect(() => {
+        const checkPermissions = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const userDetails = JSON.parse(localStorage.getItem('userDetails'));
+                const response = await axios.get(
+                    `http://localhost:8000/api/permissions/${userDetails._id}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+
+                const userPermissions = response.data.data || {};
+                setPermissions(userPermissions);
+
+                if ((isEditMode && userPermissions.updateStudent !== 'edit') ||
+                    (!isEditMode && userPermissions.addStudent !== 'edit')) {
+                    navigate('/unauthorized');
+                    return;
+                }
+            } catch (error) {
+                console.error('Error checking permissions:', error);
+                navigate('/unauthorized');
+            }
+        };
+
+        checkPermissions();
+    }, [navigate, isEditMode]);
+
+    useEffect(() => {
+        if (id) {
+            setIsEditMode(true);
+            
+            const fetchStudentData = async () => {
+                try {
+                    const token = localStorage.getItem('token');
+                    console.log('Fetching student data for ID:', id);
+                    console.log('Token:', token);
+
+                    const response = await axios.get(
+                        `http://localhost:8000/api/update/students/${id}`,
+                        {
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            }
+                        }
+                    );
+
+                    console.log('Full response:', response);
+
+                    if (response.status === 200 && response.data.success) {
+                        const studentData = response.data.data;
+                        console.log('Received student data:', studentData);
+
+                        setFormData({
+                            name: studentData.name || '',
+                            studentId: studentData.studentId || '',
+                            institutionalEmail: studentData.institutionalEmail || '',
+                            yearLevel: studentData.yearLevel || '',
+                            program: studentData.program || ''
+                        });
+                    } else {
+                        console.error('Failed to fetch student data:', response);
+                        setMessage({
+                            type: 'error',
+                            text: 'Unable to retrieve student information'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error fetching student data:', error);
+                    
+                    if (error.response) {
+                        console.error('Error response data:', error.response.data);
+                        console.error('Error response status:', error.response.status);
+                        console.error('Error response headers:', error.response.headers);
+                    } else if (error.request) {
+                        console.error('Error request:', error.request);
+                    } else {
+                        console.error('Error message:', error.message);
+                    }
+
+                    setMessage({
+                        type: 'error',
+                        text: error.response?.data?.message || 'Failed to fetch student data'
+                    });
+                }
+            };
+
+            fetchStudentData();
+        }
+    }, [id]);
+
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        console.log(`Updating ${name} with value:`, value);
+        setFormData(prev => {
+            const newData = { ...prev, [name]: value };
+            console.log('New form data:', newData);
+            return newData;
+        });
     };
-
-    // Initialize navigate
-    const navigate = useNavigate();
 
     // Form submission handler
     const handleSubmit = (e) => {
@@ -45,7 +143,7 @@ const GovAddStud = () => {
         try {
             const token = localStorage.getItem('token');
             const userDetailsStr = localStorage.getItem('userDetails');
-
+    
             if (!userDetailsStr) {
                 setMessage({
                     type: 'error',
@@ -53,11 +151,14 @@ const GovAddStud = () => {
                 });
                 return;
             }
-
+    
             const userDetails = JSON.parse(userDetailsStr);
-
+            const endpoint = isEditMode
+                ? `http://localhost:8000/api/update/students/${id}`
+                : 'http://localhost:8000/api/add/students';
+    
             const response = await axios.post(
-                'http://localhost:8000/api/add/students',
+                endpoint,  // Use the endpoint variable instead of hardcoded URL
                 {
                     ...formData,
                     userName: userDetails.name || userDetails.email.split('@')[0],
@@ -73,7 +174,13 @@ const GovAddStud = () => {
                 }
             );
 
-            setMessage({ type: 'success', text: 'Student added successfully!' });
+            console.log('Server response:', response.data);
+
+            setMessage({
+                type: 'success',
+                text: isEditMode ? 'Student updated successfully!' : 'Student added successfully!'
+            });
+
             setTimeout(() => {
                 navigate('/treasurer/students');
             }, 2000);
