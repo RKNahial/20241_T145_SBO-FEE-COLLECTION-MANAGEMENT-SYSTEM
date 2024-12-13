@@ -12,7 +12,7 @@ const AdminAddAdmin = () => {
         name: '',
         ID: '',
         email: '',
-        position: 'Admin'  // Default value since this is for adding admins
+        position: 'Admin'  
     });
 
     const [message, setMessage] = useState(null);
@@ -94,33 +94,34 @@ const AdminAddAdmin = () => {
             <AdminNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
                 <AdminSidebar isCollapsed={isCollapsed} />
-                <div id="layoutSidenav_content" style={{
-                    flex: '1',
-                    marginLeft: isCollapsed ? '70px' : '250px',  // Adjust these values based on your sidebar width
-                    transition: 'margin-left 0.3s ease-in-out',
-                    position: 'relative',
-                    zIndex: 0
-                }}>
-                    <div className="container-fluid px-4">
-                        <div className="row align-items-center">
-                            <div className="col-6">
-                                <h1 className="mt-4 mb-4">Add Admin</h1>
-                            </div>
-                        </div>
-
-                        {message && (
-                            <div className={`alert ${message.type === 'success' ? 'alert-success' : 'alert-danger'}`}>
-                                {message.text}
-                            </div>
-                        )}
-
+                <div
+                    id="layoutSidenav_content"
+                    style={{
+                        marginLeft: isCollapsed ? '5rem' : '15.625rem',
+                        transition: 'margin-left 0.3s',
+                        flexGrow: 1,
+                        marginTop: '3.5rem'
+                    }}
+                >
+                    <div className="container-fluid px-4 mb-5 form-top">
                         <div className="row">
-                            <div className="col-lg-12">
+                            <div className="col-md-6">
                                 <div className="card mb-4">
+                                    <div className="card-header">
+                                        <i className="fas fa-user-plus me-2"></i>
+                                        <strong>Add Admin</strong>
+                                    </div>
                                     <div className="card-body">
+                                        {message && (
+                                            <div className={`alert ${message.type === 'success' ? 'alert-success' : 'alert-danger'}`}>
+                                                {message.text.split('\n').map((line, i) => (
+                                                    <div key={i}>{line}</div>
+                                                ))}
+                                            </div>
+                                        )}
                                         <form onSubmit={handleSubmit}>
                                             <div className="mb-3">
-                                                <label className="mb-1">Admin Name</label>
+                                                <label className="small mb-1">Admin Name</label>
                                                 <input
                                                     type="text"
                                                     name="name"
@@ -132,7 +133,7 @@ const AdminAddAdmin = () => {
                                                 />
                                             </div>
                                             <div className="mb-3">
-                                                <label className="mb-1">Admin ID</label>
+                                                <label className="small mb-1">Admin ID</label>
                                                 <input
                                                     type="text"
                                                     name="ID"
@@ -144,7 +145,7 @@ const AdminAddAdmin = () => {
                                                 />
                                             </div>
                                             <div className="mb-4">
-                                                <label className="mb-1">Email</label>
+                                                <label className="small mb-1">Email</label>
                                                 <input
                                                     type="email"
                                                     name="email"
@@ -158,9 +159,9 @@ const AdminAddAdmin = () => {
                                             <div className="mb-0">
                                                 <button
                                                     type="submit"
-                                                    className="btn system-button"
+                                                    className="btn system-button update-button d-flex align-items-center"
                                                 >
-                                                    <i className="far fa-plus me-1"></i> Add
+                                                    <i className="fas fa-plus me-2"></i>Add
                                                 </button>
                                             </div>
                                         </form>
@@ -199,5 +200,4 @@ const AdminAddAdmin = () => {
         </div>
     );
 };
-
 export default AdminAddAdmin;

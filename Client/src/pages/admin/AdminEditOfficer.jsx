@@ -208,9 +208,9 @@ const AdminEditOfficer = () => {
                                             <div className="mb-0">
                                                 <button
                                                     type="submit"
-                                                    className="btn system-button"
+                                                    className="btn system-button update-button d-flex align-items-center"
                                                 >
-                                                    <i className="far fa-save me-1"></i> Save Changes
+                                                    <i className="fas fa-pen me-2"></i>Update
                                                 </button>
                                             </div>
                                         </form>

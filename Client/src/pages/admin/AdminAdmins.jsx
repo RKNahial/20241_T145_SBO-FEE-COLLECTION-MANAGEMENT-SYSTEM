@@ -141,7 +141,7 @@ const AdminAdmins = () => {
                             <div className="card-header">
                                 <div className="row">
                                     <div className="col col-md-6">
-                                        <i className="fa fa-user-shield" style={{ color: 'blue' }}></i> <strong>Admins</strong>
+                                        <i className="fa fa-user-shield me-2"></i> <strong>Admin</strong>
                                     </div>
                                 </div>
                             </div>
@@ -156,17 +156,18 @@ const AdminAdmins = () => {
                                 {/* Filters and Add button section */}
                                 <div className="d-flex justify-content-between mb-3 align-items-center">
                                     <div>
-                                        <Link to="/admin/admins/add-new" className="btn system-button me-2">
-                                            <i className="far fa-plus me-1"></i> Add
+                                        <Link to="/admin/admins/add-new" className="add-button btn btn-sm me-2" >
+                                            <i className="fas fa-plus me-2"></i>
+                                            Add New Admin
                                         </Link>
                                         <button
-                                            className="btn btn-secondary"
+                                            className="add-button btn btn-sm me-2"
                                             onClick={() => setStatusFilter("Archived")}
                                             style={{ backgroundColor: '#FF8C00', color: 'white', border: 'none' }}
-                                        >
-                                            <i className="fas fa-archive me-1"></i>
-                                            Show Archived
-                                        </button>
+                                            >
+                                                <i className="fas fa-archive me-1"></i>
+                                                Archived Admins
+                                            </button>
                                     </div>
                                     <div className="d-flex align-items-center" style={{ width: 'auto' }}>
                                         <select
@@ -179,25 +180,18 @@ const AdminAdmins = () => {
                                             <option value="Active">Active</option>
                                             <option value="Archived">Archived</option>
                                         </select>
-                                        <div className="input-group" style={{ width: 'auto', position: 'relative' }}>
+                                        <div className="input-group d-flex search-bar" style={{ width: 'auto', position: 'relative' }}>
                                             <input
                                                 type="text"
-                                                className="form-control"
-                                                placeholder="Search admin..."
+                                                className="search-input me-2"
+                                                placeholder="Search admin"
                                                 value={searchTerm}
                                                 onChange={(e) => setSearchTerm(e.target.value)}
                                                 aria-label="Search admin"
-                                                style={{
-                                                    paddingRight: '40px',
-                                                    borderRadius: '5px',
-                                                    border: '1px solid #ced4da',
-                                                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                                                    width: '250px'
-                                                }}
                                             />
-                                            <span className="input-group-text" style={{ backgroundColor: 'transparent', border: 'none', position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}>
-                                                <i className="fas fa-search" style={{ color: 'orange' }}></i>
-                                            </span>
+                                             <button type="submit" className="search btn btn-sm">
+                                                    <i className="fas fa-search"></i>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -262,9 +256,9 @@ const AdminAdmins = () => {
                                         </table>
 
                                         {/* Pagination section */}
-                                        <div className="d-flex justify-content-between align-items-center mb-2">
+                                        <div className="d-flex justify-content-between align-items-center mb-2 mt-3" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
                                             <div>
-                                                Showing {indexOfFirstItem + 1} to {indexOfLastItem} of {filteredAdmins.length} entries
+                                                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredAdmins.length)} of {filteredAdmins.length} entries
                                             </div>
                                             <nav>
                                                 <ul className="pagination mb-0">
@@ -277,11 +271,15 @@ const AdminAdmins = () => {
                                                             Previous
                                                         </button>
                                                     </li>
-                                                    {Array.from({ length: totalPages }, (_, index) => (
-                                                        <li key={index + 1} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
+                                                    {[...Array(totalPages)].map((_, index) => (
+                                                        <li key={index} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
                                                             <button
                                                                 className="page-link"
                                                                 onClick={() => paginate(index + 1)}
+                                                                style={currentPage === index + 1 ? 
+                                                                    { backgroundColor: 'orange', borderColor: 'orange', color: 'white' } 
+                                                                    : {color: 'black'}
+                                                                }
                                                             >
                                                                 {index + 1}
                                                             </button>
