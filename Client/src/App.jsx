@@ -50,6 +50,7 @@ import GovOfficers from './pages/governor/GovOfficers';
 import GovAddOfficer from './pages/governor/GovAddOfficer';
 import GovEditOfficer from './pages/governor/GovEditOfficer';
 import GovProfile from './pages/governor/GovProfile';
+import GovFileUpload from './pages/governor/GovFileUpload';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminStudents from './pages/admin/AdminStudents';
@@ -161,6 +162,7 @@ const App = () => {
                                     <Route path="officers/add-new" element={<GovAddOfficer />} />
                                     <Route path="officers/edit/:id" element={<GovEditOfficer />} />
                                     <Route path="profile" element={<GovProfile />} />
+                                    <Route path="file-upload" element={<GovFileUpload />} />
                                 </Routes>
                             </ProtectedRoute>
                         } />

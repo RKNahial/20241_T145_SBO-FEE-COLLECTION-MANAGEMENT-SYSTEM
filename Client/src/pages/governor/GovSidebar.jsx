@@ -37,13 +37,13 @@ const GovSidebar = ({ isCollapsed }) => {
         <div className={`sidebar ${isCollapsed ? 'collapsed' : 'expanded'}`}>
             <nav className="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div className="sb-sidenav-menu">
-                    <div className="nav" style={{ marginTop: '-0.55rem' }}>
+                    <div className="nav" style={{ marginTop: '-0.55rem' }}>  
                         <div>
                             <NavLink 
                                 className={({ isActive }) => `nav-link mt-4 ${isActive ? 'active' : ''}`} 
                                 to="/governor/dashboard"
                             >
-                                <i className="fas fa-chart-line icon-space"></i>
+                                <i className="fas fa-home icon-space"></i>
                                 {!isCollapsed && <span> Dashboard</span>}
                             </NavLink>
                             <NavLink 
@@ -59,6 +59,9 @@ const GovSidebar = ({ isCollapsed }) => {
                             >
                                 <i className="fas fa-user-graduate icon-space"></i>
                                 {!isCollapsed && <span> Students</span>}
+                            </NavLink>
+                            <NavLink to="/governor/file-upload" className={`nav-link ${location.pathname === '/governor/file-upload' ? 'active' : ''}`}>
+                                <i className="fas fa-file-upload icon-space"></i>{!isCollapsed && <span> File Upload</span>}
                             </NavLink>
                         </div>
                         <button

@@ -9,26 +9,6 @@ import { Modal, Button } from 'react-bootstrap';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import '../../styles/LockModal.css';
 
-// Add styles
-const styles = {
-    searchContainer: {
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-    },
-    formSelect: {
-        padding: '0.375rem 2.25rem 0.375rem 0.75rem',
-        fontSize: '0.875rem',
-        fontWeight: '400',
-        lineHeight: '1.5',
-        color: '#212529',
-        backgroundColor: '#fff',
-        border: '1px solid #ced4da',
-        borderRadius: '0.25rem',
-        transition: 'border-color .15s ease-in-out,box-shadow .15s ease-in-out',
-    }
-};
-
 // Student Status Tag Component
 const StudentStatusTag = ({ status, onClick }) => {
     let className;
@@ -220,8 +200,7 @@ const GovStudents = () => {
                                     <div className="row">
                                         <div className="col">
                                             <div className="d-flex align-items-center">
-                                                <i className="fas fa-users me-2" style={{ color: '#FF8C00' }}></i>
-                                                <h5 className="mb-0">Students</h5>
+                                                <i className="far fa-user me-2"></i> <strong>Students</strong>
                                             </div>
                                         </div>
                                     </div>
@@ -272,51 +251,40 @@ const GovStudents = () => {
 
                                         <div className="d-flex align-items-center gap-3">
                                             {/* Status Filter */}
-                                            <select 
-                                                className="form-select form-select-sm" 
-                                                value={statusFilter}
-                                                onChange={(e) => setStatusFilter(e.target.value)}
-                                                style={{ 
-                                                    width: 'auto',
-                                                    minWidth: '120px'
-                                                }}
-                                            >
-                                                <option value="All">All Students</option>
-                                                <option value="Active">Active</option>
-                                                <option value="Archived">Archived</option>
-                                            </select>
+                                            <div className="d-flex align-items-center me-3">
+                                                <label className="me-2 mb-0">Student Status</label>
+                                                <div className="dashboard-select" style={{ width: 'auto' }}>
+                                                    <select
+                                                        className="form-control"
+                                                        value={statusFilter}
+                                                        onChange={(e) => setStatusFilter(e.target.value)}
+                                                    >
+                                                        <option value="Active">Active</option>
+                                                        <option value="Archived">Archived</option>
+                                                        <option value="All">All</option>
+                                                    </select>
+                                                </div>
+                                            </div>
 
                                             {/* Search Form */}
                                             <form 
-                                                className="d-flex align-items-center search-form" 
-                                                onSubmit={(e) => e.preventDefault()}
-                                                style={{ position: 'relative' }}
-                                            >
-                                                <input 
-                                                    type="text" 
-                                                    placeholder="Search student" 
-                                                    className="form-control form-control-sm" 
-                                                    value={searchTerm}
-                                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                                    style={{ 
-                                                        paddingRight: '2rem',
-                                                        width: '200px'
-                                                    }}
-                                                />
-                                                <button 
-                                                    type="submit" 
-                                                    className="btn btn-sm position-absolute"
-                                                    style={{ 
-                                                        right: '0.5rem',
-                                                        top: '50%',
-                                                        transform: 'translateY(-50%)',
-                                                        padding: '0',
-                                                        color: '#FF8C00'
-                                                    }}
-                                                >
-                                                    <i className="fas fa-search"></i>
-                                                </button>
-                                            </form>
+    className="d-flex search-bar" 
+    onSubmit={(e) => e.preventDefault()}
+>
+    <input 
+        type="text" 
+        placeholder="Search student" 
+        className="search-input me-2"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+    />
+    <button 
+        type="submit" 
+        className="search btn btn-sm"
+    >
+        <i className="fas fa-search"></i>
+    </button>
+</form>
                                         </div>
                                     </div>
 
@@ -340,7 +308,7 @@ const GovStudents = () => {
                                             subtext="Fetching student records..." 
                                         />
                                     ) : (
-                                        <div className="table-responsive">
+                                        <div className="table-responsive table-shadow">
                                             <table className="table table-hover">
                                                 <thead className="table-light">
                                                     <tr>
@@ -422,15 +390,17 @@ const GovStudents = () => {
                                             {[...Array(totalPages)].map((_, index) => (
                                                 <li 
                                                     key={index} 
-                                                    className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}
+                                                    className={`page-item ${index + 1 === currentPage ? 'active' : ''}`}
                                                 >
                                                     <button
                                                         onClick={() => paginate(index + 1)}
                                                         className="page-link"
-                                                        style={{ 
-                                                            color: currentPage === index + 1 ? '#fff' : '#6C757D',
-                                                            backgroundColor: currentPage === index + 1 ? '#FF8C00' : '#fff',
-                                                            borderColor: currentPage === index + 1 ? '#FF8C00' : '#dee2e6'
+                                                        style={index + 1 === currentPage ? {
+                                                            backgroundColor: '#FF8C00',
+                                                            borderColor: '#FF8C00',
+                                                            color: '#EAEAEA'
+                                                        } : {
+                                                            color: '#6C757D'
                                                         }}
                                                     >
                                                         {index + 1}
