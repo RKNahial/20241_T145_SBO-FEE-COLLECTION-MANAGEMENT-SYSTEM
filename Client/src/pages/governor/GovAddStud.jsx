@@ -1,17 +1,13 @@
-// src/pages/governor/GovAddStud.jsx
 import { Helmet } from 'react-helmet';
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from 'axios';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Modal, Button } from 'react-bootstrap';
 import GovSidebar from "./GovSidebar";
 import GovNavbar from "./GovNavbar";
 
 const GovAddStud = () => {
-    const [permissions, setPermissions] = useState({});
-    const navigate = useNavigate();
-    const { id } = useParams();
-    const [isEditMode, setIsEditMode] = useState(false);
+    // State to handle form data
     const [formData, setFormData] = useState({
         name: '',
         studentId: '',
@@ -19,93 +15,29 @@ const GovAddStud = () => {
         yearLevel: '',
         program: ''
     });
+
+    // State to handle messages
     const [message, setMessage] = useState(null);
+
+    // State to handle modal visibility
     const [showModal, setShowModal] = useState(false);
+
+    // Handle sidebar collapse
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const toggleSidebar = () => setIsCollapsed(prev => !prev);
 
-    useEffect(() => {
-        const checkPermissions = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                const userDetails = JSON.parse(localStorage.getItem('userDetails'));
-                const response = await axios.get(
-                    `http://localhost:8000/api/permissions/${userDetails._id}`,
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
-
-                const userPermissions = response.data.data || {};
-                setPermissions(userPermissions);
-
-                if ((isEditMode && userPermissions.updateStudent !== 'edit') ||
-                    (!isEditMode && userPermissions.addStudent !== 'edit')) {
-                    navigate('/unauthorized');
-                    return;
-                }
-            } catch (error) {
-                console.error('Error checking permissions:', error);
-                navigate('/unauthorized');
-            }
-        };
-
-        checkPermissions();
-    }, [navigate, isEditMode]);
-
-    useEffect(() => {
-        if (id) {
-            setIsEditMode(true);
-            
-            const fetchStudentData = async () => {
-                try {
-                    const token = localStorage.getItem('token');
-                    const response = await axios.get(
-                        `http://localhost:8000/api/update/students/${id}`,
-                        {
-                            headers: {
-                                'Authorization': `Bearer ${token}`,
-                                'Content-Type': 'application/json'
-                            }
-                        }
-                    );
-
-                    if (response.status === 200 && response.data.success) {
-                        const studentData = response.data.data;
-                        setFormData({
-                            name: studentData.name || '',
-                            studentId: studentData.studentId || '',
-                            institutionalEmail: studentData.institutionalEmail || '',
-                            yearLevel: studentData.yearLevel || '',
-                            program: studentData.program || ''
-                        });
-                    } else {
-                        setMessage({
-                            type: 'error',
-                            text: 'Unable to retrieve student information'
-                        });
-                    }
-                } catch (error) {
-                    console.error('Error fetching student data:', error);
-                    setMessage({
-                        type: 'error',
-                        text: error.response?.data?.message || 'Failed to fetch student data'
-                    });
-                }
-            };
-
-            fetchStudentData();
-        }
-    }, [id]);
-
+    // Form data change handler
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    // Initialize navigate
+    const navigate = useNavigate();
+
+    // Form submission handler
     const handleSubmit = (e) => {
         e.preventDefault();
-        setShowModal(true);
+        setShowModal(true); // Show the confirmation modal
     };
 
     const confirmSubmit = async () => {
@@ -122,61 +54,44 @@ const GovAddStud = () => {
                 return;
             }
 
-            if (!formData.name || !formData.studentId || !formData.institutionalEmail || !formData.yearLevel || !formData.program) {
-                setMessage({
-                    type: 'error',
-                    text: 'All fields are required'
-                });
-                return;
-            }
-
             const userDetails = JSON.parse(userDetailsStr);
-            const endpoint = isEditMode
-                ? `http://localhost:8000/api/update/students/${id}`
-                : 'http://localhost:8000/api/add/students';
 
-            const method = isEditMode ? 'PUT' : 'POST';
-
-            const response = await axios({
-                method,
-                url: endpoint,
-                data: {
+            const response = await axios.post(
+                'http://localhost:8000/api/add/students',
+                {
                     ...formData,
                     userName: userDetails.name || userDetails.email.split('@')[0],
                     userEmail: userDetails.email,
                     userPosition: userDetails.position,
                     userId: userDetails._id
                 },
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
                 }
-            });
+            );
 
-            setMessage({
-                type: 'success',
-                text: isEditMode ? 'Student updated successfully!' : 'Student added successfully!'
-            });
-
+            setMessage({ type: 'success', text: 'Student added successfully!' });
             setTimeout(() => {
-                navigate('/governor/students');
+                navigate('/treasurer/students');
             }, 2000);
 
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error adding student:', error);
             setMessage({
                 type: 'error',
-                text: error.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'add'} student`
+                text: error.response?.data?.message || 'Failed to add student'
             });
         }
     };
 
-    const toggleSidebar = () => setIsCollapsed(prev => !prev);
 
     return (
         <div className="sb-nav-fixed">
             <Helmet>
-                <title>Governor | {isEditMode ? 'Edit' : 'Add'} Student</title>
+                <title>Gov | Add Student</title>
             </Helmet>
             <GovNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
@@ -190,13 +105,13 @@ const GovAddStud = () => {
                         marginTop: '3.5rem'
                     }}
                 >
+                    {/* CONTENT */}
                     <div className="container-fluid px-4 mb-5 form-top">
                         <div className="row">
                             <div className="col-md-6">
                                 <div className="card mb-4">
                                     <div className="card-header">
-                                        <i className={`far fa-${isEditMode ? 'edit' : 'plus'} me-2`}></i>
-                                        <strong>{isEditMode ? 'Edit Student' : 'Add New Student'}</strong>
+                                        <i className="far fa-plus me-2"></i> <strong>Add New Student</strong>
                                     </div>
                                     <div className="card-body">
                                         {message && (
@@ -220,7 +135,7 @@ const GovAddStud = () => {
                                             <div className="mb-3">
                                                 <label className="mb-1">Student ID</label>
                                                 <input
-                                                    type="text"
+                                                    type="number"
                                                     name="studentId"
                                                     value={formData.studentId}
                                                     onChange={handleChange}
@@ -279,8 +194,7 @@ const GovAddStud = () => {
                                                     type="submit"
                                                     className="btn system-button"
                                                 >
-                                                    <i className={`far fa-${isEditMode ? 'edit' : 'plus'} me-1`}></i>
-                                                    {isEditMode ? 'Update' : 'Add'}
+                                                    <i className="far fa-plus me-1"></i> Add
                                                 </button>
                                             </div>
                                         </form>
@@ -290,14 +204,14 @@ const GovAddStud = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div >
             {/* Confirmation Modal */}
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Confirm {isEditMode ? 'Edit' : 'Add'} Student</Modal.Title>
+                    <Modal.Title>Confirm Add Student</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    Do you want to {isEditMode ? 'update' : 'add'} <strong>{formData.name}</strong>?
+                    Do you want to add <strong>{formData.name}</strong>?
                 </Modal.Body>
                 <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <Button
@@ -316,7 +230,7 @@ const GovAddStud = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
-        </div>
+        </div >
     );
 };
 

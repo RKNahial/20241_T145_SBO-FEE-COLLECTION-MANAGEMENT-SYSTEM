@@ -75,7 +75,7 @@ const OfficerAddStud = () => {
 
             setMessage({ type: 'success', text: 'Student added successfully!' });
             setTimeout(() => {
-                navigate('/treasurer/students');
+                navigate('/officer/students');
             }, 2000);
 
         } catch (error) {

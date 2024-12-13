@@ -136,36 +136,40 @@ const GovEditStud = () => {
     return (
         <div className="sb-nav-fixed">
             <Helmet>
-                <title>Edit Student | CICT Fee Collection Management System</title>
+                <title>Governor | Edit Student</title>
             </Helmet>
-            <GovNavbar toggleSidebar={toggleSidebar} />
-            <div id="layoutSidenav">
+            <GovNavbar toggleSidebar={() => setIsCollapsed(!isCollapsed)} />
+            <div style={{ display: 'flex' }}>
                 <GovSidebar isCollapsed={isCollapsed} />
-                <div id="layoutSidenav_content">
-                    <main
-                        className="p-4"
-                        style={{
-                            marginTop: '20px',
-                            backgroundColor: '#F0F0F0'
-                        }}
-                    >
+                <div id="layoutSidenav_content" style={{
+                    marginLeft: isCollapsed ? '5rem' : '15.625rem',
+                    transition: 'margin-left 0.3s',
+                    flexGrow: 1,
+                    marginTop: '3.5rem'
+                }}>
                     <div className="container-fluid px-4 mb-5 form-top">
                         <div className="row">
                             <div className="col-md-6">
                                 <div className="card mb-4">
-                                    <div className="card-header d-flex justify-content-between align-items-center">
-                                        <h4 className="mb-0">Edit Student</h4>
+                                    <div className="card-header">
+                                        <i className="fa-solid fa-pen me-2"></i> <strong>Edit Student</strong>
                                     </div>
                                     <div className="card-body">
+                                        {error && (
+                                            <div className="alert alert-danger" role="alert">
+                                                {error}
+                                            </div>
+                                        )}
                                         <form onSubmit={handleSubmit}>
                                             <div className="mb-3">
-                                                <label className="mb-1">Name</label>
+                                                <label className="mb-1">Student Name</label>
                                                 <input
                                                     type="text"
-                                                    className="form-control"
                                                     name="name"
                                                     value={studentData.name}
                                                     onChange={handleInputChange}
+                                                    className="form-control system"
+                                                    placeholder="Enter student name"
                                                     required
                                                 />
                                             </div>
@@ -173,48 +177,50 @@ const GovEditStud = () => {
                                                 <label className="mb-1">Student ID</label>
                                                 <input
                                                     type="text"
-                                                    className="form-control"
                                                     name="studentId"
                                                     value={studentData.studentId}
                                                     onChange={handleInputChange}
+                                                    className="form-control system"
+                                                    placeholder="Enter student ID"
                                                     required
                                                 />
                                             </div>
-                                            <div className="mb-3">
+                                            <div className="mb-4">
                                                 <label className="mb-1">Institutional Email</label>
                                                 <input
                                                     type="email"
-                                                    className="form-control"
                                                     name="institutionalEmail"
                                                     value={studentData.institutionalEmail}
                                                     onChange={handleInputChange}
+                                                    className="form-control"
+                                                    placeholder="Enter institutional email"
                                                     required
                                                 />
                                             </div>
                                             <div className="mb-4">
                                                 <label className="mb-1">Program</label>
-                                                <select 
-                                                    className="form-control form-select" 
+                                                <select
                                                     name="program"
                                                     value={studentData.program}
                                                     onChange={handleInputChange}
+                                                    className="form-select"
                                                     required
                                                 >
-                                                    <option value="" disabled>Select a program</option>
+                                                    <option value="">Select Program</option>
                                                     <option value="BSIT">BSIT</option>
                                                     <option value="BSEMC">BSEMC</option>
                                                 </select>
                                             </div>
                                             <div className="mb-4">
                                                 <label className="mb-1">Year Level</label>
-                                                <select 
-                                                    className="form-control form-select" 
+                                                <select
                                                     name="yearLevel"
                                                     value={studentData.yearLevel}
                                                     onChange={handleInputChange}
+                                                    className="form-select"
                                                     required
                                                 >
-                                                    <option value="" disabled>Select year level</option>
+                                                    <option value="">Select Year Level</option>
                                                     <option value="1st Year">1st Year</option>
                                                     <option value="2nd Year">2nd Year</option>
                                                     <option value="3rd Year">3rd Year</option>
@@ -222,13 +228,8 @@ const GovEditStud = () => {
                                                 </select>
                                             </div>
                                             <div className="d-flex justify-content-start">
-                                                <button 
-                                                    type="submit" 
-                                                    className="btn btn-primary btn-sm"
-                                                    style={{ width: 'auto', padding: '0.375rem 0.75rem' }}
-                                                >
-                                                    <i className="fas fa-save me-2"></i>
-                                                    Update
+                                                <button type="submit" className="btn system-button update-button d-flex align-items-center">
+                                                    <i className="fas fa-pen me-2"></i>Update 
                                                 </button>
                                             </div>
                                         </form>
@@ -237,10 +238,8 @@ const GovEditStud = () => {
                             </div>
                         </div>
                     </div>
-                    </main>
                 </div>
             </div>
-
             {/* Update Confirmation Modal */}
             <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }}>
                 <div className="modal-dialog">

@@ -268,23 +268,23 @@ const GovStudents = () => {
 
                                             {/* Search Form */}
                                             <form 
-    className="d-flex search-bar" 
-    onSubmit={(e) => e.preventDefault()}
->
-    <input 
-        type="text" 
-        placeholder="Search student" 
-        className="search-input me-2"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-    />
-    <button 
-        type="submit" 
-        className="search btn btn-sm"
-    >
-        <i className="fas fa-search"></i>
-    </button>
-</form>
+                                                className="d-flex search-bar" 
+                                                onSubmit={(e) => e.preventDefault()}
+                                            >
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="Search student" 
+                                                    className="search-input me-2"
+                                                    value={searchTerm}
+                                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                                />
+                                                <button 
+                                                    type="submit" 
+                                                    className="search btn btn-sm"
+                                                >
+                                                    <i className="fas fa-search"></i>
+                                                </button>
+                                            </form>
                                         </div>
                                     </div>
 
