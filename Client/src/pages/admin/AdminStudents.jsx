@@ -214,61 +214,58 @@ const AdminStudents = () => {
     );
 
     return (
-        <div className={`sb-nav-fixed ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
+        <div className={`sb-nav-fixed ${isCollapsed ? 'sb-sidenav-toggled' : ''}`}>
             <Helmet>
                 <title>Admin | Students</title>
             </Helmet>
             <AdminNavbar toggleSidebar={toggleSidebar} />
-            <div className="d-flex">
+            <div style={{ display: 'flex' }}>
                 <AdminSidebar isCollapsed={isCollapsed} />
-                <div className="content-wrapper" style={{
-                    marginLeft: isCollapsed ? '5rem' : '15.625rem',
-                    marginTop: '5rem', 
-                    paddingTop: '2rem', 
-                    transition: 'margin-left 0.3s ease',
-                    width: `calc(100% - ${isCollapsed ? '5rem' : '15.625rem'})`,
-                    padding: '1.5rem',
-                    minHeight: 'calc(100vh - 4rem)',
-                    position: 'relative', 
-                    zIndex: 1 
-                }}>
-                    <div className="table-container">
-                        <div className="container-fluid px-4">
-                            <div className="content-card" style={{
-                                backgroundColor: '#fff',
-                                borderRadius: '0.5rem',
-                                boxShadow: '0 0.125rem 0.25rem rgba(0, 0, 0, 0.075)',
-                                padding: '1.5rem',
-                                position: 'relative', 
-                                zIndex: 1 
-                            }}>
-                                <div className="d-flex justify-content-between align-items-center mb-4" style={{ marginTop: '1rem' }}>
-                                    <h5 className="card-title mb-0">
-                                        <i className="fas fa-users text-primary me-2"></i>
-                                        Student Management
-                                    </h5>
-                                    
-                                </div>
-
-                                {/* Search and Filter Section */}
-
-                                {successMessage && <div className="alert alert-success">{successMessage}</div>}
-
-                                {/* Table Section */}
-                                {loading ? (
-                                    <LoadingSpinner
-                                        text="Loading Students"
-                                        icon="user-graduate"
-                                        subtext="Fetching student records..."
-                                    />
-                                ) : error ? (
-                                    <div className="alert alert-danger">
-                                        <i className="fas fa-exclamation-circle me-2"></i>
-                                        {error}
+                <div
+                    id="layoutSidenav_content"
+                    style={{
+                        marginLeft: isCollapsed ? '5rem' : '15.625rem',
+                        transition: 'margin-left 0.3s',
+                        flexGrow: 1,
+                        marginTop: '3.5rem',
+                    }}
+                >
+                    <div className="container-fluid px-4 mb-4 form-top">
+                        <div className="card mb-4"> 
+                            <div className="card-header">
+                                <div className="row">
+                                    <div className="col col-md-6">
+                                        <i className="far fa-user me-2"></i> <strong>Students</strong>
                                     </div>
-                                ) : (
+                                </div>
+                            </div>
+    
+                            <div className="card-body">
+                            {error && (
+                                <div className="alert alert-danger" role="alert">
+                                    {error}
+                                </div>
+                            )}
+                            {successMessage && (
+                                <div className="alert alert-success" role="alert">
+                                    {successMessage}
+                                </div>
+                            )}
+                            
+                            {loading ? (
+                                <div style={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'center', 
+                                    alignItems: 'center',
+                                    minHeight: '300px' 
+                                }}>
+                                    <LoadingSpinner icon="user-graduate" />
+                                </div>
+                            ) : error ? (
+                                <div className="alert alert-danger">{error}</div>
+                            ) : (
                                     <>
-                                        <div className="table-responsive">
+                                        <div className="table-responsive table-shadow">
                                             <div className="d-flex justify-content-between align-items-center mb-3">
                                                 <div className="d-flex gap-2">
                                                     <Link
@@ -321,14 +318,13 @@ const AdminStudents = () => {
                                                                 paddingRight: '40px',
                                                                 borderRadius: '5px',
                                                                 border: '1px solid #ced4da',
-                                                                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
                                                                 width: '250px'
                                                             }}
                                                         />
                                                     </div>
                                                 </div>
                                             </div>
-                                            <table className="table table-bordered table-hover">
+                                            <table className="table table-hover">
                                                 <thead>
                                                     <tr>
                                                         <th scope="col">#</th>
@@ -428,7 +424,7 @@ const AdminStudents = () => {
                                         </div>
 
                                         {/* Pagination */}
-                                        <div className="d-flex justify-content-between align-items-center mb-2" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
+                                        <div className="d-flex justify-content-between align-items-center mt-3" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
                                             <div>
                                                 Showing {indexOfFirstItem + 1} to {indexOfLastItem} of {filteredStudents.length} entries
                                             </div>
@@ -465,7 +461,7 @@ const AdminStudents = () => {
                                                     </li>
                                                 </ul>
                                             </nav>
-                                        </div>
+                                        </div>  
                                     </>
                                 )}
                             </div>
@@ -473,7 +469,6 @@ const AdminStudents = () => {
                     </div>
                 </div>
             </div>
-
             {/* Confirmation Modal */}
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>

@@ -320,7 +320,7 @@ const AdminDashboard = () => {
                     flexGrow: 1,
                     marginTop: '3.5rem'
                 }}>
-                    <div className="container-fluid px-4">
+                    <div className="container-fluid px-4 mb-4">
                         {/* Welcome Message */}
                         <p className="system-gray mt-4 welcome-text">Welcome back, admin!</p>
 

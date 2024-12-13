@@ -429,7 +429,7 @@ const TreasurerStudents = () => {
                         marginTop: '3.5rem',
                     }}
                 >
-                    <div className="container-fluid px-4 mb-5 form-top">
+                    <div className="container-fluid px-4 form-top">
                         <div className="card mb-4">
                             <div className="card-header">
                                 <div className="row">
@@ -482,7 +482,7 @@ const TreasurerStudents = () => {
                                                 </button>
                                             </div>
                                             <div className="d-flex align-items-center me-3">
-                                                <label className="me-2 mb-0">Student Status</label>
+                                                <label className="me-2">Student Status</label>
                                                 <div className="dashboard-select" style={{ width: 'auto' }}>
                                                     <select
                                                         className="form-control"
