@@ -6,6 +6,7 @@ import AdminNavbar from './AdminNavbar';
 import '../../assets/css/manage-control.css';
 import { Card, Table, Button, Modal, Form, Badge, OverlayTrigger, Tooltip, Pagination } from 'react-bootstrap';
 import axios from 'axios';
+import LoadingSpinner from '../../components/LoadingSpinner'; 
 
 const ManageControls = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -16,6 +17,9 @@ const ManageControls = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [users, setUsers] = useState({ Governor: [], Treasurer: [], Officer: [] });
     const usersPerPage = 5;
+    const [loading, setLoading] = useState(true);
+    const [savingPermissions, setSavingPermissions] = useState(false);
+    const [unsavedChanges, setUnsavedChanges] = useState(false);
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -30,17 +34,17 @@ const ManageControls = () => {
                 const groupedUsers = {
                     Governor: data.filter(user => {
                         const isGovernor = user.position?.toLowerCase().trim() === 'governor';
-                        const isNotArchived = user.isArchived === false; // Changed this line
+                        const isNotArchived = user.isArchived === false;
                         return isGovernor && isNotArchived;
                     }),
                     Treasurer: data.filter(user => {
                         const isTreasurer = user.position?.toLowerCase().trim() === 'treasurer';
-                        const isNotArchived = user.isArchived === false; // Changed this line
+                        const isNotArchived = user.isArchived === false;
                         return isTreasurer && isNotArchived;
                     }),
                     Officer: data.filter(user => {
                         const isOfficer = user.position?.toLowerCase().trim() === 'officer';
-                        const isNotArchived = user.isArchived === false; // Changed this line
+                        const isNotArchived = user.isArchived === false;
                         return isOfficer && isNotArchived;
                     })
                 };
@@ -52,7 +56,7 @@ const ManageControls = () => {
         };
     
         fetchUsers();
-    }, []);
+    }, [currentPage]);
     
     const filteredUsers = useMemo(() => {
         const roleUsers = users[selectedRole] || [];
@@ -164,6 +168,10 @@ const ManageControls = () => {
             fetchPermissions();
         }, [selectedUser]);
 
+        const handlePageChange = (pageNumber) => {
+            setCurrentPage(pageNumber);
+        };
+
         const handlePermissionChange = (module, value) => {
             const updatedPermissions = {
                 ...permissions,
@@ -242,38 +250,52 @@ const ManageControls = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {Object.entries(permissionLabels).map(([key, label]) => (
-                                        <tr key={key}>
-                                            <td>{label}</td>
-                                            <td className="text-center">
-                                                <Form.Check
-                                                    type="radio"
-                                                    name={`${key}-permission`}
-                                                    checked={permissions[key] === 'view'}
-                                                    onChange={() => handlePermissionChange(key, 'view')}
-                                                    inline
-                                                />
-                                            </td>
-                                            <td className="text-center">
-                                                <Form.Check
-                                                    type="radio"
-                                                    name={`${key}-permission`}
-                                                    checked={permissions[key] === 'edit'}
-                                                    onChange={() => handlePermissionChange(key, 'edit')}
-                                                    inline
-                                                />
-                                            </td>
-                                            <td className="text-center">
-                                                <Form.Check
-                                                    type="radio"
-                                                    name={`${key}-permission`}
-                                                    checked={permissions[key] === 'denied'}
-                                                    onChange={() => handlePermissionChange(key, 'denied')}
-                                                    inline
-                                                />
+                                    {loading ? (
+                                        <tr>
+                                            <td colSpan="4" className="text-center py-4">
+                                                <i className="fas fa-spinner fa-spin fa-2x"></i>
                                             </td>
                                         </tr>
-                                    ))}
+                                    ) : Object.keys(permissions).length === 0 ? (
+                                        <tr>
+                                            <td colSpan="4" className="text-center py-3" style={{ color: '#6c757d' }}>
+                                                No entries to show
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        Object.entries(permissionLabels).map(([key, label]) => (
+                                            <tr key={key}>
+                                                <td>{label}</td>
+                                                <td className="text-center">
+                                                    <Form.Check
+                                                        type="radio"
+                                                        name={`${key}-permission`}
+                                                        checked={permissions[key] === 'view'}
+                                                        onChange={() => handlePermissionChange(key, 'view')}
+                                                        inline
+                                                    />
+                                                </td>
+                                                <td className="text-center">
+                                                    <Form.Check
+                                                        type="radio"
+                                                        name={`${key}-permission`}
+                                                        checked={permissions[key] === 'edit'}
+                                                        onChange={() => handlePermissionChange(key, 'edit')}
+                                                        inline
+                                                    />
+                                                </td>
+                                                <td className="text-center">
+                                                    <Form.Check
+                                                        type="radio"
+                                                        name={`${key}-permission`}
+                                                        checked={permissions[key] === 'denied'}
+                                                        onChange={() => handlePermissionChange(key, 'denied')}
+                                                        inline
+                                                    />
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
                                 </tbody>
                             </Table>
                         </div>
@@ -434,21 +456,20 @@ const ManageControls = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                        {currentUsers.map(user => (
-                                            <tr key={user.id}>
-                                                <td style={{ width: '35%', paddingLeft: '2rem' }}>
-                                                    <div className="d-flex align-items-center">
-                                                        <div className="role-icon me-3">
-                                                            <i className="fas fa-user-circle" style={{ 
-                                                                // Change color based on selected role instead of user's position
-                                                                color: roleColors[selectedRole] || '#4e73df' 
-                                                            }}></i>
+                                            {currentUsers.map(user => ( 
+                                                <tr key={user.id}>
+                                                    <td style={{ width: '35%', paddingLeft: '2rem' }}>
+                                                        <div className="d-flex align-items-center">
+                                                            <div className="role-icon me-3">
+                                                                <i className="fas fa-user-circle" style={{ 
+                                                                    color: roleColors[selectedRole] || '#4e73df' 
+                                                                }}></i>
+                                                            </div>
+                                                            <div>
+                                                                <h6 className="mb-0">{user.name}</h6>
+                                                                <small className="text-muted">{user.position}</small>
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <h6 className="mb-0">{user.name}</h6>
-                                                            <small className="text-muted">{user.position}</small>
-                                                        </div>
-                                                    </div>
                                                 </td>
                                                 <td style={{ width: '30%' }}>{user.email}</td>
                                                 <td style={{ width: '15%' }}>{user.id}</td>
@@ -504,7 +525,7 @@ const ManageControls = () => {
                                             <li className="page-item">
                                                 <button
                                                     className="page-link"
-                                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                                    onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
                                                     disabled={currentPage === 1}
                                                 >
                                                     Previous
@@ -515,7 +536,7 @@ const ManageControls = () => {
                                                     className={`page-item ${currentPage === idx + 1 ? 'active' : ''}`}>
                                                     <button
                                                         className="page-link"
-                                                        onClick={() => setCurrentPage(idx + 1)}
+                                                        onClick={() => handlePageChange(idx + 1)}
                                                         style={currentPage === idx + 1 ? 
                                                             { backgroundColor: 'orange', borderColor: 'orange', color: 'white' } 
                                                             : {color: 'black'}
@@ -528,14 +549,14 @@ const ManageControls = () => {
                                             <li className="page-item">
                                                 <button
                                                     className="page-link"
-                                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                                    onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
                                                     disabled={currentPage === totalPages}
                                                 >
                                                     Next
                                                 </button>
                                             </li>
                                         </ul>
-                                    </nav>
+</nav>
                                 </div>
                             </div>
                         </div>
