@@ -652,7 +652,7 @@ const TreasurerStudents = () => {
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    Are you sure you want to {modalAction.type} {modalAction.student?.name}?
+                    Are you sure you want to {modalAction.type} <strong>{modalAction.student?.name}</strong>?
                 </Modal.Body>
                 <Modal.Footer>
                 <Button
@@ -662,12 +662,12 @@ const TreasurerStudents = () => {
                 >
                     Confirm
                 </Button>
-                    <Button variant="secondary" onClick={() => setShowModal(false)}>
+                    <Button variant="btn btn-cancel" onClick={() => setShowModal(false)}>
                         Cancel
                     </Button>
                 </Modal.Footer>
             </Modal>
-        </div>
+        </div>  
     );
 };
 
