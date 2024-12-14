@@ -48,17 +48,17 @@ const GovSidebar = ({ isCollapsed }) => {
                             </NavLink>
                             <NavLink 
                                 className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} 
-                                to="/governor/officers"
-                            >
-                                <i className="fas fa-users icon-space"></i>
-                                {!isCollapsed && <span> Officers</span>}
-                            </NavLink>
-                            <NavLink 
-                                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} 
                                 to="/governor/students"
                             >
                                 <i className="fas fa-user-graduate icon-space"></i>
                                 {!isCollapsed && <span> Students</span>}
+                            </NavLink>
+                            <NavLink 
+                                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} 
+                                to="/governor/officers"
+                            >
+                                <i className="fas fa-users icon-space"></i>
+                                {!isCollapsed && <span> Officers</span>}
                             </NavLink>
                             <NavLink to="/governor/file-upload" className={`nav-link ${location.pathname === '/governor/file-upload' ? 'active' : ''}`}>
                                 <i className="fas fa-file-upload icon-space"></i>{!isCollapsed && <span> File Upload</span>}
