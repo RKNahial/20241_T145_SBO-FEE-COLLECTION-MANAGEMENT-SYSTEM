@@ -90,7 +90,7 @@ const AdminOfficers = () => {
             
             // Modified request
             const response = await axios.put(
-                `http://localhost:8000/api/officials/${officialId}/unarchive`, 
+                `http://localhost:8000/api/officials/${officialId}/unarchive?type=${type}`, 
                 {}, // Empty body since we're not sending any data
                 {
                     headers: { Authorization: `Bearer ${token}` }

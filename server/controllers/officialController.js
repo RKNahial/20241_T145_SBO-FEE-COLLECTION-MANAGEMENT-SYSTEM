@@ -22,7 +22,7 @@ exports.toggleArchiveStatus = async (req, res) => {
     try {
         const { id } = req.params;
         const { type } = req.query;
-        const isArchiving = req.path.includes('archive');
+        const isArchiving = req.path.endsWith('/archive');
 
         const official = await officialService.toggleArchiveStatus(id, type, isArchiving);
 
