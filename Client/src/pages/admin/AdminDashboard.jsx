@@ -211,11 +211,16 @@ const AdminDashboard = () => {
                         const timestamp = new Date(log.timestamp);
                         return {
                             ...log,
-                            date: timestamp.toLocaleDateString(),
-                            time: timestamp.toLocaleTimeString('en-US', {
+                            date: timestamp.toLocaleDateString('en-PH', {
+                                month: '2-digit',
+                                day: '2-digit',
+                                year: 'numeric'
+                            }),
+                            time: timestamp.toLocaleTimeString('en-PH', {
                                 hour: 'numeric',
                                 minute: '2-digit',
-                                hour12: true
+                                hour12: true,
+                                timeZone: 'Asia/Manila'
                             }),
                             user: `${log.userName} (${log.userPosition})`
                         };
