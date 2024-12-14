@@ -112,12 +112,19 @@ const AdminAddAdmin = () => {
                                         <strong>Add Admin</strong>
                                     </div>
                                     <div className="card-body">
-                                        {message && (
-                                            <div className={`alert ${message.type === 'success' ? 'alert-success' : 'alert-danger'}`}>
-                                                {message.text.split('\n').map((line, i) => (
-                                                    <div key={i}>{line}</div>
-                                                ))}
+                                    {message && (
+                                        <div className={`alert ${message.type === 'success' ? 'alert-success' : 'alert-danger'}`}>
+                                            <div className="mb-2" style={{ whiteSpace: 'pre-line' }}>
+                                                {message.text}
                                             </div>
+                                            {message.type === 'success' && (
+                                                <div className="mt-2 small text-muted">
+                                                    Please save this password. It will only be shown once.
+                                                    <br />
+                                                    Page will redirect in 10 seconds...
+                                                </div>
+                                            )}
+                                        </div>
                                         )}
                                         <form onSubmit={handleSubmit}>
                                             <div className="mb-3">

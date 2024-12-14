@@ -256,6 +256,23 @@ const AdminAddStud = () => {
                 </Modal.Body>
                 <Modal.Footer style={{ border: 'none', padding: '1rem' }}>
                     <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                    <button
+                            type="button"
+                            onClick={confirmSubmit}
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: '#FF8C00',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#E67E22'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = '#FF8C00'}
+                        >
+                            Confirm
+                        </button>
                         <button
                             type="button"
                             onClick={() => setShowModal(false)}
@@ -272,23 +289,6 @@ const AdminAddStud = () => {
                             onMouseLeave={(e) => e.target.style.backgroundColor = 'red'}
                         >
                             Cancel
-                        </button>
-                        <button
-                            type="button"
-                            onClick={confirmSubmit}
-                            style={{
-                                borderRadius: '0.35rem',
-                                color: '#EAEAEA',
-                                border: 'none',
-                                padding: '0.5rem 1rem',
-                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
-                                backgroundColor: '#FF8C00',
-                                cursor: 'pointer'
-                            }}
-                            onMouseEnter={(e) => e.target.style.backgroundColor = '#E67E22'}
-                            onMouseLeave={(e) => e.target.style.backgroundColor = '#FF8C00'}
-                        >
-                            Confirm
                         </button>
                     </div>
                 </Modal.Footer>
