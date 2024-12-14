@@ -429,19 +429,19 @@ const GovDashboard = () => {
                                 </thead>
                                 <tbody>
                                 {loading ? (
-                                        <tr className="no-hover">
-                                            <td colSpan="6" style={{ border: 'none' }}>
-                                                <div style={{ 
-                                                    display: 'flex', 
-                                                    justifyContent: 'center', 
-                                                    alignItems: 'center',
-                                                    minHeight: '200px'  
-                                                }}>
-                                                    <LoadingSpinner icon="coin"/>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ) : error ? (
+                                    <tr className="no-hover">
+                                        <td colSpan="6" style={{ border: 'none' }}>
+                                            <div style={{ 
+                                                display: 'flex', 
+                                                justifyContent: 'center', 
+                                                alignItems: 'center',
+                                                minHeight: '200px'  
+                                            }}>
+                                                <LoadingSpinner icon="coin"/>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : error ? (
                                     <tr>
                                         <td colSpan="6" className="text-center text-danger">{error}</td>
                                     </tr>
@@ -450,18 +450,25 @@ const GovDashboard = () => {
                                         <td colSpan="6" className="text-center">No recent payments found</td>
                                     </tr>
                                 ) : (
-                                    recentPayments.map((payment, index) => (
-                                        <tr key={payment.id}>
-                                            <td>{index + 1}</td>
-                                            <td>{new Date(payment.date).toLocaleDateString()}</td>
-                                            <td>{payment.paymentTime}</td> 
-                                            <td>{payment.categoryName}</td> 
-                                            <td>{payment.studentName}</td>
-                                            <td>₱{payment.paidAmount.toFixed(2)}</td>
-                                        </tr>
-                                    ))
+                                    recentPayments.map((payment, index) => {
+                                        const timestamp = new Date(payment.date);
+                                        return (
+                                            <tr key={payment.id}>
+                                                <td>{index + 1}</td>
+                                                <td>{timestamp.toLocaleDateString('en-PH', {
+                                                    month: '2-digit',
+                                                    day: '2-digit',
+                                                    year: 'numeric'
+                                                })}</td>
+                                                <td>{payment.paymentTime}</td>
+                                                <td>{payment.categoryName}</td>
+                                                <td>{payment.studentName}</td>
+                                                <td>₱{payment.paidAmount.toFixed(2)}</td>
+                                            </tr>
+                                        );
+                                    })
                                 )}
-                                </tbody>
+                            </tbody>
                             </table>
                         </div>
                         {/* TABLE ENDS */}
