@@ -5,11 +5,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import GovSidebar from "./GovSidebar"; 
 import GovNavbar from "./GovNavbar";
 import axios from 'axios';
+import { Modal } from 'react-bootstrap';
 
 const GovEditOfficer = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         ID: '',
@@ -57,8 +59,13 @@ const GovEditOfficer = () => {
         });
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
+        setShowModal(true);
+    };
+    
+    const confirmUpdate = async () => {
+        setShowModal(false);
         try {
             const token = localStorage.getItem('token');
             await axios.put(`http://localhost:8000/api/officials/${id}`,
@@ -172,6 +179,68 @@ const GovEditOfficer = () => {
                     </div>
                 </div>
             </div>
+            {/* Add Confirmation Modal */}
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+                <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
+                    <Modal.Title>
+                        Confirm Update Officer
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p className="mb-1">
+                        Are you sure you want to update the information for <strong>{formData.name}</strong>?
+                    </p>
+                    <div className="mt-3" style={{ fontSize: '0.95rem' }}>
+                        <p className="mb-1">Updated Information:</p>
+                        <ul style={{ listStyle: 'none', padding: 0 }}>
+                            <li><strong>Officer ID:</strong> {formData.ID}</li>
+                            <li><strong>Position:</strong> {formData.position}</li>
+                            <li><strong>Email:</strong> {formData.email}</li>
+                        </ul>
+                    </div>
+                    <small style={{ color: '#6c757d', fontSize: '0.90rem' }}>
+                        Please review the details carefully before confirming.
+                    </small>
+                </Modal.Body>
+                <Modal.Footer style={{ border: 'none', padding: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                        <button
+                            type="button"
+                            onClick={confirmUpdate}
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: '#FF8C00',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#E67E22'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = '#FF8C00'}
+                        >
+                            Confirm
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setShowModal(false)}
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: 'red',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#cc0000'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = 'red'}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

@@ -172,29 +172,66 @@ const AdminAddAdmin = () => {
                     </div>
                 </div>
             </div>
-
+            {/* CONFIRMATION MODAL */}
             <Modal show={showModal} onHide={() => setShowModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Confirm Add Admin</Modal.Title>
+                <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
+                    <Modal.Title>
+                        Confirm Add Admin
+                    </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    Do you want to add <strong>{formData.name}</strong> as an admin?
+                    <p className="mb-1">
+                        Are you sure you want to add <strong>{formData.name}</strong> as a new admin?
+                    </p>
+                    <div className="mt-3" style={{ fontSize: '0.95rem' }}>
+                        <p className="mb-1">Admin Information:</p>
+                        <ul style={{ listStyle: 'none', padding: 0 }}>
+                            <li><strong>Admin ID:</strong> {formData.ID}</li>
+                            <li><strong>Position:</strong> {formData.position}</li>
+                            <li><strong>Email:</strong> {formData.email}</li>
+                        </ul>
+                    </div>
+                    <small style={{ color: '#6c757d', fontSize: '0.90rem' }}>
+                        A temporary password will be generated upon confirmation.
+                    </small>
                 </Modal.Body>
-                <Modal.Footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button
-                        variant="btn btn-confirm"
-                        onClick={confirmSubmit}
-                        style={{ flex: 'none' }}
-                    >
-                        Confirm
-                    </Button>
-                    <Button
-                        variant="btn btn-cancel"
-                        onClick={() => setShowModal(false)}
-                        style={{ marginRight: '0.5rem', flex: 'none' }}
-                    >
-                        Cancel
-                    </Button>
+                <Modal.Footer style={{ border: 'none', padding: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                        <button
+                            type="button"
+                            onClick={confirmSubmit}
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: '#FF8C00',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#E67E22'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = '#FF8C00'}
+                        >
+                            Confirm
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setShowModal(false)}
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: 'red',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#cc0000'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = 'red'}
+                        >
+                            Cancel
+                        </button>
+                    </div>
                 </Modal.Footer>
             </Modal>
         </div>
