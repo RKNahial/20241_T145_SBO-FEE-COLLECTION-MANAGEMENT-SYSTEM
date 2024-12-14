@@ -53,7 +53,7 @@ app.use('/api', loginRoutes);
 app.use('/api', googleroutes);
 app.use('/api', studentRoutes);
 app.use('/api', GetAllstudentsRoutes);
-app.use('/api', ArchiveStud); // Mount the student routes under /api
+app.use('/api', ArchiveStud); 
 app.use('/api', UpdateStudentRoutes);
 app.use('/api', duesPaymentRoutes);
 app.use('/api', paymentCategoryRoutes);

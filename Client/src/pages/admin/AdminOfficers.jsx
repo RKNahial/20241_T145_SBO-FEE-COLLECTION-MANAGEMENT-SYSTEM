@@ -9,10 +9,10 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import { Modal, Button } from 'react-bootstrap';
 
 const StatusTag = ({ status, onClick }) => {
-    let className = status === 'Active' ? 'badge active-status' : 'badge archived-status';
+    const isActive = status === 'Active';
     return (
         <span
-            className={className}
+            className={`badge ${isActive ? 'active-status' : 'archived-status'}`}
             onClick={onClick}
             style={{ cursor: 'pointer' }}
         >
@@ -87,18 +87,29 @@ const AdminOfficers = () => {
         try {
             setArchivingId(officialId);
             const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:8000/api/officials/${officialId}/unarchive?type=${type}`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setSuccessMessage(`${officialName} has been unarchived successfully`);
-            fetchOfficers();
-
-            // Auto-dismiss success message after 3 seconds
+            
+            // Modified request
+            const response = await axios.put(
+                `http://localhost:8000/api/officials/${officialId}/unarchive`, 
+                {}, // Empty body since we're not sending any data
+                {
+                    headers: { Authorization: `Bearer ${token}` }
+                }
+            );
+    
+            if (response.data.success) {
+                setSuccessMessage(`${officialName} has been unarchived successfully`);
+                await fetchOfficers();
+            } else {
+                throw new Error('Failed to unarchive official');
+            }
+    
             setTimeout(() => {
                 setSuccessMessage('');
             }, 3000);
-
+    
         } catch (error) {
+            console.error('Unarchive error:', error);
             setError('Failed to unarchive official. Please try again.');
         } finally {
             setArchivingId(null);
@@ -116,7 +127,6 @@ const AdminOfficers = () => {
 
     // Filter and search functionality
     const filteredOfficers = officers.filter(officer => {
-        // Convert all searchable fields to lowercase for case-insensitive search
         const searchableFields = [
             officer.ID?.toLowerCase() || '',
             officer.name?.toLowerCase() || '',
@@ -134,8 +144,10 @@ const AdminOfficers = () => {
 
         // Apply status filter along with search
         if (statusFilter === "All") return matchesSearch;
-        return matchesSearch &&
-            (statusFilter === "Active" ? !officer.isArchived : officer.isArchived);
+        
+        // Explicitly check isArchived boolean value
+        const isArchived = officer.isArchived === true;
+        return matchesSearch && (statusFilter === "Active" ? !isArchived : isArchived);
     });
 
     // Pagination
