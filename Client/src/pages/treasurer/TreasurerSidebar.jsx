@@ -60,47 +60,35 @@ const TreasurerSidebar = ({ isCollapsed }) => {
         
         if (isEditingStudent) {
             try {
-                // Extract student ID from the current path
-                const studentId = currentPath.split('/').pop();
                 const token = localStorage.getItem('token');
-                const userDetailsStr = localStorage.getItem('userDetails');
+                const userId = localStorage.getItem('userId');
                 
-                if (!token || !userDetailsStr) {
+                if (!token || !userId) {
                     console.error('Missing authentication details');
                     navigate('/login');
                     return;
                 }
 
-                const userDetails = JSON.parse(userDetailsStr);
-
-                // Release the lock
-                const response = await axios({
-                    method: 'delete',
-                    url: `http://localhost:8000/api/students/${studentId}/release-lock/Edit`,
+                // Clean all locks for this user
+                await axios({
+                    method: 'post',
+                    url: 'http://localhost:8000/api/students/clean-user-locks',
                     headers: { 
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
                     data: {
-                        userId: userDetails._id
+                        userId: userId
                     }
                 });
 
-                if (response.data && response.data.success) {
-                    console.log('Lock released successfully');
-                } else {
-                    console.error('Failed to release lock:', response.data?.message);
-                }
+                console.log('Locks cleaned successfully');
             } catch (error) {
-                console.error('Error releasing lock:', error.response?.data || error.message);
-            } finally {
-                // Navigate regardless of lock release success
-                navigate(path);
+                console.error('Error cleaning locks:', error.response?.data || error.message);
             }
-        } else {
-            // If not on edit page, just navigate
-            navigate(path);
         }
+        // Navigate to the new path
+        navigate(path);
     };
 
     return (

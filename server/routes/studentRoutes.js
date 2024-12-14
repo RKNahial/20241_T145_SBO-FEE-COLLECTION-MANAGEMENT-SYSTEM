@@ -8,6 +8,7 @@ const studentArchiveController = require('../controllers/StudentArchive');
 router.get('/students/:id/check-lock/:lockType', auth, studentController.checkLock);
 router.post('/students/:id/acquire-lock/:lockType', auth, studentController.acquireLock);
 router.delete('/students/:id/release-lock/:lockType', auth, studentController.releaseLock);
+router.post('/students/clean-user-locks', auth, studentController.cleanUserLocks);
 
 // Archive-related routes
 router.put('/archive/:id', auth, studentArchiveController.archiveStudent);
