@@ -714,7 +714,7 @@ const TreasurerFee = () => {
                                     <LoadingSpinner icon="envelope" text="Sending Email" />
                                 </div>
                             ) : (
-                                <div className="table-responsive mt-3 table-shadow fee-row">
+                                <div className="table-responsive mt-3 fee-row">
                                     {isLoading ? (  
                                         <div style={{ 
                                             display: 'flex', 
