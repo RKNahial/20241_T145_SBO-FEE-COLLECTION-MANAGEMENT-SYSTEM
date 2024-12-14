@@ -711,7 +711,7 @@ const TreasurerFee = () => {
                                     alignItems: 'center',
                                     minHeight: '300px' 
                                 }}>
-                                    <LoadingSpinner icon="envelope" />
+                                    <LoadingSpinner icon="envelope" text="Sending Email" />
                                 </div>
                             ) : (
                                 <div className="table-responsive mt-3 table-shadow fee-row">
