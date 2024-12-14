@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Row, Col, Alert } from 'react-bootstrap';
+import { Modal, Button, Row, Col, Spinner, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import emailjs from '@emailjs/browser';
 import LoadingSpinner from './LoadingSpinner';
@@ -8,288 +8,189 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId, onEmailSuccess }) 
     const [paymentDetails, setPaymentDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [sendingEmail, setSendingEmail] = useState(false);
+    const [sendingEmail, setSendingEmail] = useState(false); 
+    const userDetails = JSON.parse(localStorage.getItem('userDetails') || '{}');
+    const isTreasurer = userDetails?.position === 'Treasurer';
+    console.log('Current user details:', userDetails);
+    console.log('Is Treasurer:', isTreasurer);
+    console.log('Loading:', loading);
+    console.log('Error:', error);
+    console.log('Payment Details:', paymentDetails);
 
     useEffect(() => {
         const fetchPaymentDetails = async () => {
-            if (!isOpen || !student || !categoryId) return;
-
-            setLoading(true);
-            setError(null);
-
-            try {
-                const token = localStorage.getItem('token');
-                const url = `http://localhost:8000/api/payment-fee/details/${student._id}?category=${categoryId}`;
-                
-                const response = await axios.get(url, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
+            if (isOpen && student) {
+                try {
+                    const token = localStorage.getItem('token');
+                    const url = categoryId
+                        ? `http://localhost:8000/api/payment-fee/details/${student._id}?category=${categoryId}`
+                        : `http://localhost:8000/api/payment-fee/details/${student._id}`;
+                    const response = await axios.get(url, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (response.data.success) {
+                        setPaymentDetails(response.data.paymentFee);
+                    } else {
+                        throw new Error(response.data.message);
                     }
-                });
-
-                if (response.data.success) {
-                    setPaymentDetails(response.data.paymentFee);
-                } else {
-                    throw new Error(response.data.message || 'Failed to fetch payment details');
+                } catch (error) {
+                    console.error('Error fetching payment details:', error);
+                    setError(error.message || 'Failed to fetch payment details');
+                } finally {
+                    setLoading(false);
                 }
-            } catch (error) {
-                setError(error.message || 'Failed to fetch payment details');
-            } finally {
-                setLoading(false);
             }
         };
 
-        fetchPaymentDetails();
+        if (isOpen) {
+            fetchPaymentDetails();
+        }
     }, [isOpen, student, categoryId]);
 
-    const getStatusVariant = (status) => {
-        switch (status) {
-            case 'Fully Paid': return 'success';
-            case 'Partially Paid': return 'warning';
-            default: return 'danger';
+    const handleSendEmail = async () => {
+        if (!student.institutionalEmail || !paymentDetails) return;
+
+        setSendingEmail(true); 
+
+        const templateParams = {
+            from_name: "COT-SBO COLLECTION FEE MANAGEMENT SYSTEM",
+            to_name: student.name,
+            to_email: student.institutionalEmail,
+            payment_category: paymentDetails.paymentCategory || 'N/A',
+            total_price: paymentDetails.totalPrice?.toString() || '0.00',
+            amount_paid: paymentDetails.amountPaid?.toString() || '0.00',
+            payment_status: student.paymentstatus,
+            transaction_history: paymentDetails.transactions?.map(t =>
+                `• Amount: ₱${t.amount.toFixed(2)}\n  Date: ${t.formattedDate}\n  Status: ${t.previousStatus || 'New'} → ${t.newStatus}`
+            ).join('\n\n') || 'No transaction history'
+        };
+
+        try {
+            const response = await emailjs.send(
+                "service_bni941i",
+                "template_x5s32eh",
+                templateParams,
+                "Nqbgnjhv9ss88DOrk"
+            );
+
+            if (response.status === 200) {
+                onEmailSuccess(`Payment details emailed to ${student.name}'s successfully!`);
+                onClose(); 
+            }
+        } catch (error) {
+            console.error('Error sending email:', error);
+            // Optionally handle the error here (e.g., set an error state)
+        } finally {
+            setSendingEmail(false); 
         }
     };
 
-    if (!isOpen || !student) return null;
-
     return (
-        <Modal show={isOpen} onHide={onClose} size="lg" className="fee-modal">
-            <Modal.Header closeButton className="border-0 pb-0">
-                <Modal.Title className="text-navy fw-bold"><i className="fas fa-money-bill-wave" style={{ color: 'orange' }}></i> Payment Details</Modal.Title>
+        <Modal
+            show={isOpen}
+            onHide={onClose}
+            centered
+            size="md"
+            backdrop="static"
+            keyboard={false}
+        >
+            <Modal.Header closeButton className="border-0">
+                <Modal.Title>
+                    <i className="fa-solid fa-eye me-2"></i>
+                    View Payment Details
+                </Modal.Title>
             </Modal.Header>
-            <Modal.Body className="pt-2">
-                {loading ? (
-                    <div className="text-center py-5">
-                        <LoadingSpinner icon="file" />
+
+            <Modal.Body className="px-4">
+            {loading ? (
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center',
+                        minHeight: '200px'
+                    }}>
+                        <LoadingSpinner icon="coin" />
                     </div>
                 ) : error ? (
-                    <Alert variant="danger" className="mb-0">{error}</Alert>
-                ) : paymentDetails ? (
-                    <div className="fee-details">
-                        <section className="info-section mb-4">
-                            <h6 className="section-title mb-3">Student Information</h6>
-                            <div className="info-grid">
-                                <div className="info-item">
-                                    <span className="label"><i className="fas fa-user-graduate"></i> Name</span>
-                                    <span className="value">{student.name}</span>
-                                </div>
-                                <div className="info-item">
-                                    <span className="label"><i className="fas fa-id-card"></i> Student ID</span>
-                                    <span className="value">{student.studentId}</span>
-                                </div>
-                                <div className="info-item">
-                                    <span className="label"><i className="fas fa-book"></i> Program</span>
-                                    <span className="value">{student.program}</span>
-                                </div>
-                            </div>
-                        </section>
+                    <Alert variant="danger">{error}</Alert>
+                ) : sendingEmail ? (
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center',
+                        minHeight: '200px'
+                    }}>
+                        <LoadingSpinner text="Sending Email" icon="envelope" />
+                    </div>
+                ) : (
+                    <>
+                        <Row className="mb-3">
+                            <Col xs={5} className="fw-bold">Student:</Col>
+                            <Col>{student.name}</Col>
+                        </Row>
+                        <Row className="mb-3">
+                            <Col xs={5} className="fw-bold">Payment Status:</Col>
+                            <Col>{student.paymentstatus}</Col>
+                        </Row>
+                        <Row className="mb-3">
+                            <Col xs={5} className="fw-bold">Payment Category:</Col>
+                            <Col>{paymentDetails?.paymentCategory || 'N/A'}</Col>
+                        </Row>
+                        <Row className="mb-3">
+                            <Col xs={5} className="fw-bold">Total Price:</Col>
+                            <Col>₱{paymentDetails?.totalPrice?.toFixed(2) || '0.00'}</Col>
+                        </Row>
+                        <Row className="mb-3">
+                            <Col xs={5} className="fw-bold">Amount Paid:</Col>
+                            <Col>₱{paymentDetails?.amountPaid?.toFixed(2) || '0.00'}</Col>
+                        </Row>
 
-                        <section className="info-section mb-4">
-                            <h6 className="section-title mb-3">Payment Information</h6>
-                            <div className="info-grid">
-                                <div className="info-item">
-                                    <span className="label"><i className="fas fa-tags"></i> Category</span>
-                                    <span className="value">{paymentDetails.paymentCategory}</span>
-                                </div>
-                                <div className="info-item">
-                                    <span className="label"><i className="fas fa-money-bill-wave"></i> Total Amount</span>
-                                    <span className="value">₱{paymentDetails.totalPrice?.toFixed(2) || '0.00'}</span>
-                                </div>
-                                <div className="info-item">
-                                    <span className="label"><i className="fas fa-wallet"></i> Amount Paid</span>
-                                    <span className="value">₱{paymentDetails.amountPaid?.toFixed(2) || '0.00'}</span>
-                                </div>
-                                <div className="info-item">
-                                    <span className="label"><i className="fas fa-info-circle"></i> Status</span>
-                                    <span className={`status-badge status-${getStatusVariant(paymentDetails.status)}`}>
-                                        {paymentDetails.status}
-                                    </span>
-                                </div>
-                                {paymentDetails.paymentDate && (
-                                    <div className="info-item">
-                                        <span className="label"><i className="fas fa-calendar-alt"></i> Last Payment</span>
-                                        <span className="value">{new Date(paymentDetails.paymentDate).toLocaleDateString()}</span>
-                                    </div>
-                                )}
-                            </div>
-                        </section>
-
-                        {paymentDetails.transactions?.length > 0 && (
-                            <section className="info-section">
-                                <h6 className="section-title mb-3">Transaction History</h6>
-                                <div className="transaction-list">
+                        <div className="mt-4 pt-3 border-top">
+                            <h5 className="mb-3">Transaction History</h5>
+                            {paymentDetails?.transactions?.length > 0 ? (
+                                <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
                                     {paymentDetails.transactions.map((transaction, index) => (
-                                        <div key={index} className="transaction-item">
-                                            <div className="transaction-header">
-                                                <span className="amount">₱{transaction.amount?.toFixed(2)}</span>
-                                                <span className="date">{new Date(transaction.date).toLocaleDateString()}</span>
-                                            </div>
-                                            <div className="status-change">
-                                                <span className={`status-badge status-${getStatusVariant(transaction.previousStatus)}`}>
-                                                    {transaction.previousStatus}
-                                                </span>
-                                                <i className="fas fa-arrow-right mx-2"></i>
-                                                <span className={`status-badge status-${getStatusVariant(transaction.newStatus)}`}>
-                                                    {transaction.newStatus}
-                                                </span>
-                                            </div>
+                                        <div
+                                            key={index}
+                                            className="p-3 mb-2 bg-light rounded"
+                                            style={{ fontSize: '0.875rem' }}
+                                        >
+                                            <div>Amount: ₱{transaction.amount.toFixed(2)}</div>
+                                            <div>Date: {transaction.formattedDate}</div>
+                                            <div>Status Change: {transaction.previousStatus || 'New'} → {transaction.newStatus}</div>
                                         </div>
                                     ))}
                                 </div>
-                            </section>
-                        )}
-                    </div>
-                ) : (
-                    <Alert variant="info" className="mb-0">No payment details available.</Alert>
+                            ) : (
+                                <div className="text-muted">No transaction history available</div>
+                            )}
+                        </div>
+                    </>
                 )}
             </Modal.Body>
-            <Modal.Footer className="border-0 pt-0">
-                <button className="btn btn-orange" onClick={onClose}>
+
+            <Modal.Footer className="border-0 px-4 pb-4">
+            {isTreasurer && !loading && !error && (  
+                    <Button
+                        variant="btn btn-confirm"   
+                        onClick={handleSendEmail}
+                        className="me-2"
+                        disabled={sendingEmail}
+                    >
+                        {sendingEmail ? 'Sending...' : 'Send Email'}
+                    </Button>
+                )}
+                <Button
+                    variant="btn btn-cancel"
+                    onClick={onClose}
+                    disabled={sendingEmail}
+                >
                     Close
-                </button>
+                </Button>
             </Modal.Footer>
-            <style jsx>{`
-                .fee-modal .modal-content {
-                    background: linear-gradient(to right, #fff3e0, #ffffff);
-                    border-radius: 15px;
-                    border: none;
-                    box-shadow: 0 6px 40px rgba(0, 0, 0, 0.15);
-                    transition: all 0.3s ease-in-out;
-                }
-
-                .section-title {
-                    color: #003366;
-                    font-weight: 700;
-                    font-size: 1rem;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                    margin-bottom: 1.5rem;
-                }
-
-                .info-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-                    gap: 1.75rem;
-                }
-
-                .info-item {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 0.5rem;
-                    background: #ffffff;
-                    padding: 1rem;
-                    border-radius: 10px;
-                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-                }
-
-                .label {
-                    color: #FF8C00;
-                    font-size: 0.85rem;
-                    font-weight: 600;
-                }
-
-                .value {
-                    color: #003366;
-                    font-size: 0.95rem;
-                    font-weight: 600;
-                }
-
-                .status-badge {
-                    display: inline-block;
-                    padding: 0.35rem 0.85rem;
-                    border-radius: 8px;
-                    font-size: 0.8rem;
-                    font-weight: 600;
-                    text-transform: uppercase;
-                }
-
-                .status-success {
-                    background-color: #c8e6c9;
-                    color: #2e7d32;
-                }
-
-                .status-warning {
-                    background-color: #fff9c4;
-                    color: #f57f17;
-                }
-
-                .status-danger {
-                    background-color: #ffcdd2;
-                    color: #c62828;
-                }
-
-                .transaction-list {
-                    max-height: 320px;
-                    overflow-y: auto;
-                    padding-right: 0.5rem;
-                }
-
-                .transaction-list::-webkit-scrollbar {
-                    width: 6px;
-                }
-
-                .transaction-list::-webkit-scrollbar-track {
-                    background: #f1f1f1;
-                    border-radius: 3px;
-                }
-
-                .transaction-list::-webkit-scrollbar-thumb {
-                    background: #b0bec5;
-                    border-radius: 3px;
-                }
-
-                .transaction-item {
-                    background: #ffffff;
-                    border-radius: 10px;
-                    padding: 1.25rem;
-                    margin-bottom: 1rem;
-                    transition: all 0.2s ease;
-                    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
-                }
-
-                .transaction-item:hover {
-                    background: #f4f6f8;
-                    transform: translateY(-2px);
-                }
-
-                .transaction-header {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-bottom: 1rem;
-                }
-
-                .amount {
-                    font-weight: 700;
-                    color: #2c3e50;
-                }
-
-                .date {
-                    color: #95a5a6;
-                    font-size: 0.9rem;
-                }
-
-                .status-change {
-                    display: flex;
-                    align-items: center;
-                    gap: 0.75rem;
-                }
-
-                .btn-orange {
-                    color: #ffffff;
-                    background: #FF8C00;
-                    border: none;
-                    padding: 0.6rem 1.5rem;
-                    font-weight: 600;
-                    border-radius: 8px;
-                    transition: all 0.2s ease;
-                }
-
-                .btn-orange:hover {
-                    background: #e07b00;
-                    color: #ffffff;
-                }
-            `}</style>
         </Modal>
     );
 };

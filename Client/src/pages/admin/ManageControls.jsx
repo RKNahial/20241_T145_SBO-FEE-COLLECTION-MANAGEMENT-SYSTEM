@@ -21,6 +21,14 @@ const ManageControls = () => {
     const [savingPermissions, setSavingPermissions] = useState(false);
     const [unsavedChanges, setUnsavedChanges] = useState(false);
 
+    const [showNotification, setShowNotification] = useState(false);
+    
+    const handlePermissionUpdateSuccess = () => {
+        setShowUserModal(false);
+        setShowNotification(true);
+        setTimeout(() => setShowNotification(false), 3000); 
+    };
+
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -131,6 +139,8 @@ const ManageControls = () => {
         const [loading, setLoading] = useState(true);
         const [savingPermissions, setSavingPermissions] = useState(false);
         const [unsavedChanges, setUnsavedChanges] = useState(false);
+        const [hoverSave, setHoverSave] = useState(false);
+         const [hoverCancel, setHoverCancel] = useState(false);
 
         // Permission labels for better display
         const permissionLabels = {
@@ -195,8 +205,9 @@ const ManageControls = () => {
                     },
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
-
+    
                 setUnsavedChanges(false);
+                handlePermissionUpdateSuccess(); // Call the success handler
             } catch (error) {
                 console.error('Error updating permissions:', error);
             } finally {
@@ -222,9 +233,9 @@ const ManageControls = () => {
                 size="lg"
                 backdrop="static"
             >
-                <Modal.Header>
-                    <Modal.Title>
-                        <i className="fas fa-user-shield me-2 "></i>
+                <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
+                    <Modal.Title style={{ fontSize: '1.2rem'}}>
+                        <i className="fas fa-user-shield me-2"></i>
                         Manage Access Permissions - {selectedUser?.name}
                     </Modal.Title>
                     {unsavedChanges && (
@@ -236,11 +247,15 @@ const ManageControls = () => {
                 <Modal.Body>
                     {loading ? (
                         <div className="text-center py-4">
-                            <i className="fas fa-spinner fa-spin fa-2x"></i>
+                            <LoadingSpinner 
+                                text="Loading Access Permissions" 
+                                icon="access"
+                                subtext={`Loading permissions for ${selectedUser?.name}`}
+                            />
                         </div>
                     ) : (
                         <div className="table-responsive">
-                            <Table bordered hover>
+                            <Table hover>
                                 <thead className="bg-light">
                                     <tr>
                                         <th style={{ width: '40%' }}>Module</th>
@@ -300,29 +315,53 @@ const ManageControls = () => {
                             </Table>
                         </div>
                     )}
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button 
-                        variant="secondary" 
-                        onClick={() => setShowUserModal(false)}
-                        disabled={savingPermissions}
-                    >
-                        Cancel
-                    </Button>
-                    <Button 
-                        variant="primary" 
-                        onClick={savePermissions}
-                        disabled={!unsavedChanges || savingPermissions}
-                    >
-                        {savingPermissions ? (
-                            <>
-                                <i className="fas fa-spinner fa-spin me-2"></i>
-                                Saving...
-                            </>
-                        ) : (
-                            'Save Changes'
-                        )}
-                    </Button>
+               </Modal.Body>
+                <Modal.Footer style={{ border: 'none', padding: '1.25rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                        <button
+                            type="button"
+                            onClick={savePermissions}
+                            disabled={!unsavedChanges || savingPermissions}
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: hoverSave ? '#E67E22' : '#FF8C00',
+                                opacity: (!unsavedChanges || savingPermissions) ? 0.65 : 1
+                            }}
+                            onMouseEnter={() => setHoverSave(true)}
+                            onMouseLeave={() => setHoverSave(false)}
+                        >
+                            {savingPermissions ? (
+                                <>
+                                    <i className="fas fa-spinner fa-spin me-2"></i>
+                                    Saving...
+                                </>
+                            ) : (
+                                'Save Changes'
+                            )}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setShowUserModal(false)}
+                            disabled={savingPermissions}
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: hoverCancel ? '#cc0000' : 'red',
+                                opacity: savingPermissions ? 0.65 : 1
+                            }}
+                            onMouseEnter={() => setHoverCancel(true)}
+                            onMouseLeave={() => setHoverCancel(false)}
+                        >
+                            Cancel
+                        </button>
+                    </div>
                 </Modal.Footer>
             </Modal>
         );
@@ -363,6 +402,30 @@ const ManageControls = () => {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Notification */}
+                            {showNotification && (
+                                <div className="alert alert-success alert-dismissible fade show mx-4 mt-3" 
+                                    role="alert"
+                                    style={{
+                                        animation: 'fadeIn 0.5s',
+                                        borderRadius: '0.5rem',
+                                        backgroundColor: '#d1e7dd',
+                                        border: '1px solid #badbcc',
+                                        color: '#0f5132'
+                                    }}>
+                                    <div className="d-flex align-items-center">
+                                        <i className="fas fa-check-circle me-2"></i>
+                                        User Access Updated Successfully
+                                    </div>
+                                    <button 
+                                        type="button" 
+                                        className="btn-close" 
+                                        onClick={() => setShowNotification(false)}
+                                        style={{ padding: '1.05rem' }}
+                                    />
+                                </div>
+                            )}
 
                             <div className="card-body">
                                 <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
@@ -563,7 +626,7 @@ const ManageControls = () => {
                     </div>
                 </div>
             </div>
-            <UserDetailsModal />
+            <UserDetailsModal onUpdateSuccess={handlePermissionUpdateSuccess} />
         </div>
     );
 };

@@ -32,6 +32,12 @@ const LoadingSpinner = ({ text = "Loading", icon = "circle-notch", subtext }) =>
             // FILE
             case 'file':
                 return { icon: 'file', color: '#FF8C00', animation: 'file-bounce' };
+            // EMAIL
+            case 'envelope':
+                return { icon: 'envelope', color: '#FF8C00', animation: 'envelope-pulse' };
+            // CONTROL
+            case 'access':
+                return { icon: 'lock', color: '#FF8C00', animation: 'access-pulse' };
             default:
                 return { icon: 'circle-notch', color: '#FF8C00', animation: 'default-pulse' };
         }

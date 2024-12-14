@@ -340,7 +340,11 @@ const TreasurerFileUpload = () => {
                                                         {file.name}
                                                     </td>
                                                     <td>{formatFileSize(file.size)}</td>
-                                                    <td>{new Date(file.modifiedTime).toLocaleDateString()}</td>
+                                                    <td>{new Date(file.modifiedTime).toLocaleDateString('en-PH', {
+                                                        month: '2-digit',
+                                                        day: '2-digit',
+                                                        year: 'numeric'
+                                                    })}</td>
                                                     <td>
                                                         <a
                                                             href={file.webViewLink}

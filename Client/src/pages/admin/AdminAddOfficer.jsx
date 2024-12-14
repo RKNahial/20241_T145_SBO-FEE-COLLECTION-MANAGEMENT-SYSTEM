@@ -5,10 +5,12 @@ import { useNavigate } from 'react-router-dom';
 import AdminSidebar from "./AdminSidebar";
 import AdminNavbar from "./AdminNavbar";
 import axios from 'axios';
+import { Modal } from 'react-bootstrap';
 
 const AdminAddOfficer = () => {
     const navigate = useNavigate();
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         ID: '',
@@ -26,8 +28,14 @@ const AdminAddOfficer = () => {
         });
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
+        setShowModal(true);
+    };
+
+    // Add confirmSubmit function
+    const confirmSubmit = async () => {
+        setShowModal(false);
         try {
             const token = localStorage.getItem('token');
             const response = await axios.post('http://localhost:8000/api/users/register',
@@ -49,7 +57,6 @@ const AdminAddOfficer = () => {
             setError(error.response?.data?.message || 'Failed to add officer');
         }
     };
-
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
     };
@@ -153,6 +160,68 @@ const AdminAddOfficer = () => {
                     </div>
                 </div>
             </div>
+             {/* Add Confirmation Modal */}
+             <Modal show={showModal} onHide={() => setShowModal(false)}>
+                <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
+                    <Modal.Title>
+                        Confirm Add Officer
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p className="mb-1">
+                        Are you sure you want to add <strong>{formData.name}</strong> as a new officer?
+                    </p>
+                    <div className="mt-3" style={{ fontSize: '0.95rem' }}>
+                        <p className="mb-1">Officer Information:</p>
+                        <ul style={{ listStyle: 'none', padding: 0 }}>
+                            <li><strong>Officer ID:</strong> {formData.ID}</li>
+                            <li><strong>Position:</strong> {formData.position}</li>
+                            <li><strong>Email:</strong> {formData.email}</li>
+                        </ul>
+                    </div>
+                    <small style={{ color: '#6c757d', fontSize: '0.90rem' }}>
+                        A temporary password will be generated upon confirmation.
+                    </small>
+                </Modal.Body>
+                <Modal.Footer style={{ border: 'none', padding: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                    <button
+                            type="button"
+                            onClick={confirmSubmit}
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: '#FF8C00',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#E67E22'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = '#FF8C00'}
+                        >
+                            Confirm
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setShowModal(false)}
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: 'red',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#cc0000'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = 'red'}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

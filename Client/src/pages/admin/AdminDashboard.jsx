@@ -87,11 +87,11 @@ const AdminDashboard = () => {
             const token = localStorage.getItem('token');
 
             // Fetch all stats in parallel
-            const [studentsRes, officersRes, adminsRes] = await Promise.all([
+            const [studentsRes, officialsRes, adminsRes] = await Promise.all([
                 axios.get('http://localhost:8000/api/admin/active-students-count', {
                     headers: { Authorization: `Bearer ${token}` }
                 }),
-                axios.get('http://localhost:8000/api/admin/active-officers-count', {
+                axios.get('http://localhost:8000/api/officials', {  // Changed this endpoint
                     headers: { Authorization: `Bearer ${token}` }
                 }),
                 axios.get('http://localhost:8000/api/admin/active-admins-count', {
@@ -99,9 +99,15 @@ const AdminDashboard = () => {
                 })
             ]);
 
+            // Count active officials (officers, treasurers, and governors)
+            const activeOfficials = officialsRes.data.data.filter(official => 
+                !official.isArchived && 
+                ['officer', 'treasurer', 'governor'].includes(official.position?.toLowerCase())
+            ).length;
+
             setStats({
                 totalActiveStudents: studentsRes.data.count,
-                totalActiveOfficers: officersRes.data.count,
+                totalActiveOfficers: activeOfficials,  // This now includes all active officials
                 totalAdmins: adminsRes.data.count,
                 pageViews: 0
             });
@@ -205,11 +211,16 @@ const AdminDashboard = () => {
                         const timestamp = new Date(log.timestamp);
                         return {
                             ...log,
-                            date: timestamp.toLocaleDateString(),
-                            time: timestamp.toLocaleTimeString('en-US', {
+                            date: timestamp.toLocaleDateString('en-PH', {
+                                month: '2-digit',
+                                day: '2-digit',
+                                year: 'numeric'
+                            }),
+                            time: timestamp.toLocaleTimeString('en-PH', {
                                 hour: 'numeric',
                                 minute: '2-digit',
-                                hour12: true
+                                hour12: true,
+                                timeZone: 'Asia/Manila'
                             }),
                             user: `${log.userName} (${log.userPosition})`
                         };

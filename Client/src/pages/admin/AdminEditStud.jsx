@@ -5,6 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import AdminSidebar from "./AdminSidebar";
 import AdminNavbar from "./AdminNavbar";
 import axios from 'axios';
+import { Modal } from 'react-bootstrap';
 
 const AdminEditStud = () => {
     const { id } = useParams();
@@ -12,6 +13,8 @@ const AdminEditStud = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState("");
+    const [showModal, setShowModal] = useState(false);
+    const [message, setMessage] = useState(null);
     const [studentData, setStudentData] = useState({
         name: '',
         studentId: '',
@@ -62,29 +65,33 @@ const AdminEditStud = () => {
         }));
     };
 
-    const handleSubmit = async (e) => {
+    const handleFormSubmit = (e) => {
         e.preventDefault();
         setError(null);
         setSuccessMessage('');
 
+        // Validate required fields
+        if (!studentData.name || !studentData.studentId || !studentData.institutionalEmail || 
+            !studentData.yearLevel || !studentData.program) {
+            setError('All fields are required');
+            return;
+        }
+
+        // Validate email format
+        if (!studentData.institutionalEmail.endsWith('@student.buksu.edu.ph')) {
+            setError('Institutional email must end with @student.buksu.edu.ph');
+            return;
+        }
+
+        // Show confirmation modal if validation passes
+        setShowModal(true);
+    };
+
+    const handleConfirmUpdate = async () => {
         try {
-            // Validate required fields
-            if (!studentData.name || !studentData.studentId || !studentData.institutionalEmail || 
-                !studentData.yearLevel || !studentData.program) {
-                setError('All fields are required');
-                return;
-            }
-
-            // Validate email format
-            if (!studentData.institutionalEmail.endsWith('@student.buksu.edu.ph')) {
-                setError('Institutional email must end with @student.buksu.edu.ph');
-                return;
-            }
-
             const token = localStorage.getItem('token');
             const previousData = { ...studentData };
             
-            // Remove any extra fields that shouldn't be sent
             const updateData = {
                 name: studentData.name,
                 studentId: studentData.studentId,
@@ -106,6 +113,7 @@ const AdminEditStud = () => {
             );
 
             if (response.data.success) {
+                setShowModal(false);
                 setSuccessMessage('Student updated successfully');
                 setTimeout(() => {
                     navigate('/admin/students');
@@ -115,7 +123,8 @@ const AdminEditStud = () => {
             console.error('Error updating student:', error);
             const errorMessage = error.response?.data?.message || 'Failed to update student';
             setError(errorMessage);
-            window.scrollTo(0, 0); // Scroll to top to show error message
+            setShowModal(false);
+            window.scrollTo(0, 0);
         }
     };
 
@@ -134,9 +143,6 @@ const AdminEditStud = () => {
                     marginTop: '3.5rem'
                 }}>
                     <div className="container-fluid px-4 mb-5 form-top">
-                        {error && <div className="alert alert-danger">{error}</div>}
-                        {successMessage && <div className="alert alert-success">{successMessage}</div>}
-
                         <div className="row">
                             <div className="col-md-6">
                                 <div className="card mb-4">
@@ -145,7 +151,9 @@ const AdminEditStud = () => {
                                         <strong>Edit Student</strong>
                                     </div>
                                     <div className="card-body">
-                                        <form onSubmit={handleSubmit}>
+                                    {error && <div className="alert alert-danger">{error}</div>}
+                                    {successMessage && <div className="alert alert-success">{successMessage}</div>}
+                                        <form onSubmit={handleFormSubmit}>
                                             <div className="mb-3">
                                                 <label className="mb-1">Student Name</label>
                                                 <input
@@ -213,6 +221,69 @@ const AdminEditStud = () => {
                     </div>
                 </div>
             </div>
+            {/* Confirmation Modal */}
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+                <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
+                    <Modal.Title>
+                        Confirm Update Student
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p className="mb-1">
+                        Are you sure you want to update the information for <strong>{studentData.name}</strong>?
+                    </p>
+                    <div className="mt-3" style={{ fontSize: '0.95rem' }}>
+                        <p className="mb-1">Updated Information:</p>
+                        <ul style={{ listStyle: 'none', padding: 0 }}>
+                            <li><strong>Student ID:</strong> {studentData.studentId}</li>
+                            <li><strong>Program:</strong> {studentData.program}</li>
+                            <li><strong>Year Level:</strong> {studentData.yearLevel}</li>
+                            <li><strong>Email:</strong> {studentData.institutionalEmail}</li>
+                        </ul>
+                    </div>
+                    <small style={{ color: '#6c757d', fontSize: '0.90rem' }}>
+                        Please review the details carefully before confirming.
+                    </small>
+                </Modal.Body>
+                <Modal.Footer style={{ border: 'none', padding: '1rem' }}>
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                    <button
+                        type="button"
+                        onClick={handleConfirmUpdate}
+                        style={{
+                            borderRadius: '0.35rem',
+                            color: '#EAEAEA',
+                            border: 'none',
+                            padding: '0.5rem 1rem',
+                            transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                            backgroundColor: '#FF8C00',
+                            cursor: 'pointer'
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = '#E67E22'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = '#FF8C00'}
+                    >
+                        Confirm
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setShowModal(false)}
+                        style={{
+                            borderRadius: '0.35rem',
+                            color: '#EAEAEA',
+                            border: 'none',
+                            padding: '0.5rem 1rem',
+                            transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                            backgroundColor: 'red',
+                            cursor: 'pointer'
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = '#cc0000'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = 'red'}
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </Modal.Footer>
+        </Modal>
         </div>
     );
 };

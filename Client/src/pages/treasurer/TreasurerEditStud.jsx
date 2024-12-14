@@ -493,32 +493,61 @@ const TreasurerEditStud = () => {
             </div>
 
             {/* Confirmation Modal */}
-            <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-                <Modal.Header closeButton className="bg-light">
-                    <Modal.Title className="fw-bold text-primary">Confirm Student Information Update</Modal.Title>
+        `    <Modal show={showModal} onHide={() => setShowModal(false)}>
+                <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
+                    <Modal.Title>
+                        Confirm Update Student
+                    </Modal.Title>
                 </Modal.Header>
-                <Modal.Body className="text-center">
-                    <div className="mb-3">
-                        <p className="lead">You are about to update the following student's information:</p>
-                        <ul className="list-unstyled">
-                            <li><strong>Name:</strong> {formData.name}</li>
+                <Modal.Body>
+                    <p className="mb-1">
+                        Are you sure you want to update the information for <strong>{formData.name}</strong>?
+                    </p>
+                    <div className="mt-3" style={{ fontSize: '0.95rem' }}>
+                        <p className="mb-1">Updated Information:</p>
+                        <ul style={{ listStyle: 'none', padding: 0 }}>
                             <li><strong>Student ID:</strong> {formData.studentId}</li>
                             <li><strong>Program:</strong> {formData.program}</li>
                         </ul>
                     </div>
-                    <p className="text-muted">
-                        <i className="bi bi-info-circle me-2"></i>
-                        Please review the details carefully before confirming.
-                    </p>
                 </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="outline-secondary" onClick={() => setShowModal(false)}>
-                        Cancel
-                    </Button>
-                    <Button variant="primary" onClick={confirmUpdate}>
-                        <i className="bi bi-check-circle me-2"></i>
-                        Confirm Update
-                    </Button>
+                <Modal.Footer style={{ border: 'none', padding: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                        <button
+                            type="button"
+                            onClick={confirmUpdate}
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: '#FF8C00',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#E67E22'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = '#FF8C00'}
+                        >
+                            Confirm
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setShowModal(false)}
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: 'red',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#cc0000'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = 'red'}
+                        >
+                            Cancel
+                        </button>
+                    </div>
                 </Modal.Footer>
             </Modal>
 

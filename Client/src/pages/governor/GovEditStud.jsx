@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet';
 import GovSidebar from "./GovSidebar"; 
 import GovNavbar from "./GovNavbar";
 import axios from 'axios';
-import Swal from 'sweetalert2';
+import { Modal } from 'react-bootstrap';
 
 const API_URL = 'http://localhost:8000';
 
@@ -22,9 +22,12 @@ const GovEditStud = () => {
         institutionalEmail: '',
         yearLevel: '',
         program: '',
+
         status: '',
         isArchived: false
     });
+
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         const fetchStudentData = async () => {
@@ -77,25 +80,14 @@ const GovEditStud = () => {
         }));
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        setError(null);
-        setSuccessMessage('');
+        setShowModal(true);  
+    };
 
+    const confirmUpdate = async () => {
+        setShowModal(false);
         try {
-            // Validate required fields
-            if (!studentData.name || !studentData.studentId || !studentData.institutionalEmail || 
-                !studentData.yearLevel || !studentData.program) {
-                setError('All fields are required');
-                return;
-            }
-
-            // Validate email format
-            if (!studentData.institutionalEmail.endsWith('@student.buksu.edu.ph')) {
-                setError('Institutional email must end with @student.buksu.edu.ph');
-                return;
-            }
-
             const token = localStorage.getItem('token');
             const previousData = { ...studentData };
             
@@ -107,7 +99,7 @@ const GovEditStud = () => {
                 program: studentData.program,
                 previousData
             };
-
+    
             const response = await axios.put(
                 `${API_URL}/api/update/students/${id}`,
                 updateData,
@@ -118,34 +110,19 @@ const GovEditStud = () => {
                     }
                 }
             );
-
-            if (response.data.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: 'Student information updated successfully',
-                    confirmButtonColor: '#FF8C00'
-                }).then(() => {
-                    navigate('/governor/students');
-                });
-            }
+    
+            setSuccessMessage('Student updated successfully!');
+            setTimeout(() => {
+                navigate('/governor/students');
+            }, 3000);
         } catch (error) {
             console.error('Error updating student:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: error.response?.data?.message || 'Failed to update student information',
-                confirmButtonColor: '#FF8C00'
-            });
+            setError(error.response?.data?.message || 'Failed to update student information');
         }
     };
 
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
-    };
-
-    const handleExit = () => {
-        navigate('/governor/students');
     };
 
     if (error) {
@@ -179,11 +156,8 @@ const GovEditStud = () => {
                                         <i className="fa-solid fa-pen me-2"></i> <strong>Edit Student</strong>
                                     </div>
                                     <div className="card-body">
-                                        {error && (
-                                            <div className="alert alert-danger" role="alert">
-                                                {error}
-                                            </div>
-                                        )}
+                                         {error && <div className="alert alert-danger">{error}</div>}
+                                        {successMessage && <div className="alert alert-success">{successMessage}</div>}
                                         <form onSubmit={handleSubmit}>
                                             <div className="mb-3">
                                                 <label className="mb-1">Student Name</label>
@@ -233,6 +207,9 @@ const GovEditStud = () => {
                                                     <option value="">Select Program</option>
                                                     <option value="BSIT">BSIT</option>
                                                     <option value="BSEMC">BSEMC</option>
+                                                    <option value="BSET">BSET</option>
+                                                    <option value="BSAT">BSAT</option>
+                                                    <option value="BSFT">BSFT</option>
                                                 </select>
                                             </div>
                                             <div className="mb-4">
@@ -264,46 +241,66 @@ const GovEditStud = () => {
                     </div>
                 </div>
             </div>
-            {/* Update Confirmation Modal */}
-            <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }}>
-                <div className="modal-dialog">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title">Confirm Update</h5>
-                            <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
-                        </div>
-                        <div className="modal-body">
-                            Are you sure you want to update this student's information?
-                        </div>
-                        <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                            <button type="button" className="btn btn-primary" onClick={confirmUpdate}>Update</button>
-                        </div>
-                    </div>
+              {/* Confirmation Modal */}
+             <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
+                <Modal.Title>
+                    Confirm Update Student
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <p className="mb-1">
+                    Are you sure you want to update the information for <strong>{studentData.name}</strong>?
+                </p>
+                <div className="mt-3" style={{ fontSize: '0.95rem' }}>
+                    <p className="mb-1">Updated Information:</p>
+                    <ul style={{ listStyle: 'none', padding: 0 }}>
+                        <li><strong>Student ID:</strong> {studentData.studentId}</li>
+                        <li><strong>Program:</strong> {studentData.program}</li>
+                        <li><strong>Year Level:</strong> {studentData.yearLevel}</li>
+                        <li><strong>Email:</strong> {studentData.institutionalEmail}</li>
+                    </ul>
                 </div>
-            </div>
-
-            {/* Exit Confirmation Modal */}
-            <div className={`modal fade ${showExitModal ? 'show' : ''}`} style={{ display: showExitModal ? 'block' : 'none' }}>
-                <div className="modal-dialog">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title">Confirm Exit</h5>
-                            <button type="button" className="btn-close" onClick={() => setShowExitModal(false)}></button>
-                        </div>
-                        <div className="modal-body">
-                            Are you sure you want to exit? Any unsaved changes will be lost.
-                        </div>
-                        <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" onClick={() => setShowExitModal(false)}>Cancel</button>
-                            <button type="button" className="btn btn-primary" onClick={confirmExit}>Exit</button>
-                        </div>
-                    </div>
+            </Modal.Body>
+            <Modal.Footer style={{ border: 'none', padding: '1rem' }}>
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                    <button
+                        type="button"
+                        onClick={confirmUpdate}
+                        style={{
+                            borderRadius: '0.35rem',
+                            color: '#EAEAEA',
+                            border: 'none',
+                            padding: '0.5rem 1rem',
+                            transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                            backgroundColor: '#FF8C00',
+                            cursor: 'pointer'
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = '#E67E22'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = '#FF8C00'}
+                    >
+                        Confirm
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setShowModal(false)}
+                        style={{
+                            borderRadius: '0.35rem',
+                            color: '#EAEAEA',
+                            border: 'none',
+                            padding: '0.5rem 1rem',
+                            transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                            backgroundColor: 'red',
+                            cursor: 'pointer'
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = '#cc0000'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = 'red'}
+                    >
+                        Cancel
+                    </button>
                 </div>
-            </div>
-
-            {/* Modal Backdrop */}
-            {(showModal || showExitModal) && <div className="modal-backdrop fade show"></div>}
+            </Modal.Footer>
+        </Modal>
         </div>
     );
 };

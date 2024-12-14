@@ -5,6 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import AdminSidebar from "./AdminSidebar";
 import AdminNavbar from "./AdminNavbar";
 import axios from 'axios';
+import { Modal } from 'react-bootstrap';
 
 const AdminEditOfficer = () => {
     const { id } = useParams();
@@ -54,8 +55,17 @@ const AdminEditOfficer = () => {
         });
     };
 
-    const handleSubmit = async (e) => {
+    const [showModal, setShowModal] = useState(false);
+
+    // Modify handleSubmit to show modal first
+    const handleSubmit = (e) => {
         e.preventDefault();
+        setShowModal(true);
+    };
+
+    // Add confirmUpdate function with the original submission logic
+    const confirmUpdate = async () => {
+        setShowModal(false);
         setError(null);
         setSuccessMessage('');
 
@@ -65,16 +75,13 @@ const AdminEditOfficer = () => {
                 return;
             }
 
-            // Email validation based on position
             if (formData.position !== 'Admin' && !formData.email.endsWith('@student.buksu.edu.ph')) {
                 setError('Student email must end with @student.buksu.edu.ph');
                 return;
             }
 
             const token = localStorage.getItem('token');
-            
-            // Map position to correct type
-            let officialType = formData.type; // Keep original type by default
+            let officialType = formData.type;
             if (['Officer', 'Treasurer', 'Governor'].includes(formData.position)) {
                 officialType = formData.position;
             }
@@ -97,17 +104,18 @@ const AdminEditOfficer = () => {
             );
 
             if (response.data.success) {
-                setSuccessMessage('Official updated successfully');
+                setSuccessMessage('Officer updated successfully');
                 setTimeout(() => {
                     navigate('/admin/officers');
                 }, 2000);
             }
         } catch (error) {
-            const errorMessage = error.response?.data?.message || 'Error updating official';
+            const errorMessage = error.response?.data?.message || 'Error updating officer';
             setError(errorMessage);
             window.scrollTo(0, 0);
         }
     };
+
 
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
@@ -150,6 +158,10 @@ const AdminEditOfficer = () => {
                                         <strong>Edit Officer</strong>
                                     </div>
                                     <div className="card-body">
+                                         {error && <div className="alert alert-danger">{error}</div>}
+                                            {successMessage && (
+                                                <div className="alert alert-success">{successMessage}</div>
+                                            )}
                                         <form onSubmit={handleSubmit}>
                                             <div className="mb-3">
                                                 <label className="mb-1">Officer Name</label>
@@ -201,10 +213,6 @@ const AdminEditOfficer = () => {
                                                     ))}
                                                 </select>
                                             </div>
-                                            {error && <div className="alert alert-danger">{error}</div>}
-                                            {successMessage && (
-                                                <div className="alert alert-success">{successMessage}</div>
-                                            )}
                                             <div className="mb-0">
                                                 <button
                                                     type="submit"
@@ -221,6 +229,68 @@ const AdminEditOfficer = () => {
                     </div>
                 </div>
             </div>
+            {/* Add Confirmation Modal */}
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+                <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
+                    <Modal.Title>
+                        Confirm Update Officer
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p className="mb-1">
+                        Are you sure you want to update the information for <strong>{formData.name}</strong>?
+                    </p>
+                    <div className="mt-3" style={{ fontSize: '0.95rem' }}>
+                        <p className="mb-1">Updated Information:</p>
+                        <ul style={{ listStyle: 'none', padding: 0 }}>
+                            <li><strong>Officer ID:</strong> {formData.ID}</li>
+                            <li><strong>Position:</strong> {formData.position}</li>
+                            <li><strong>Email:</strong> {formData.email}</li>
+                        </ul>
+                    </div>
+                    <small style={{ color: '#6c757d', fontSize: '0.90rem' }}>
+                        Please review the details carefully before confirming.
+                    </small>
+                </Modal.Body>
+                <Modal.Footer style={{ border: 'none', padding: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                    <button
+                            type="button"
+                            onClick={confirmUpdate}
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: '#FF8C00',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#E67E22'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = '#FF8C00'}
+                        >
+                            Confirm
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setShowModal(false)}
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: 'red',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#cc0000'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = 'red'}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

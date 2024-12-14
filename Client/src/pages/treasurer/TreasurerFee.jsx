@@ -23,11 +23,11 @@ const TreasurerFee = () => {
     };
 
     const [students, setStudents] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchStudents = async () => {
+        setIsLoading(true); 
             try {
                 const token = localStorage.getItem('token');
                 const response = await fetch('http://localhost:8000/api/getAll/students', {
@@ -53,7 +53,7 @@ const TreasurerFee = () => {
                     window.location.href = '/login';
                 }
             } finally {
-                setLoading(false);
+                setIsLoading(false); 
             }
         };
         fetchStudents();
@@ -94,6 +94,8 @@ const TreasurerFee = () => {
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
     const [emailSuccessMessage, setEmailSuccessMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(true); 
+    const [sendingEmail, setSendingEmail] = useState(false); 
 
     const handleModalToggle = () => setIsModalOpen(!isModalOpen);
 
@@ -348,11 +350,12 @@ const TreasurerFee = () => {
         const fetchCategoryPayments = async () => {
             if (!selectedCategory) {
                 setCategoryPayments({});
+                setIsLoading(false); 
                 return;
             }
 
             try {
-                setLoading(true);
+                setIsLoading(false);
                 const response = await axios.get(`http://localhost:8000/api/payment-fee/by-category/${selectedCategory}`);
 
                 // Check if response.data.payments exists and is an array
@@ -376,7 +379,7 @@ const TreasurerFee = () => {
                 console.error('Error fetching payment data:', err);
                 setError('Failed to fetch payment data');
             } finally {
-                setLoading(false);
+                setIsLoading(false);
             }
         };
 
@@ -485,6 +488,7 @@ const TreasurerFee = () => {
             return;
         }
 
+        setSendingEmail(true); 
         try {
             const token = localStorage.getItem('token');
             const response = await axios.get(
@@ -549,6 +553,8 @@ const TreasurerFee = () => {
         } catch (error) {
             console.error('Error sending email:', error);
             setError('Failed to send email. Please try again.');
+        } finally {
+            setSendingEmail(false);
         }
     };
 
@@ -635,165 +641,180 @@ const TreasurerFee = () => {
                                         {emailSuccessMessage}
                                     </div>
                                 )}
-                                {/* SELECT CATEGORY AND SEARCH STUDENT */}
-                                <div className="d-flex justify-content-between mb-3 align-items-center">
-                                    <div className="d-flex me-auto">
-                                        <Link
-                                            to="/treasurer/manage-fee/payment-category"
-                                            className="add-button btn btn-sm me-2"
+                            {/* SELECT CATEGORY AND SEARCH STUDENT */}
+                            <div className="d-flex justify-content-between mb-3 align-items-center">
+                                <div className="d-flex me-auto">
+                                    <Link
+                                        to="/treasurer/manage-fee/payment-category"
+                                        className="add-button btn btn-sm me-2"
+                                    >
+                                        <i className="fas fa-cog me-2"></i>
+                                        Manage Payment Category
+                                    </Link>
+                                </div>
+                                <div className="d-flex align-items-center me-3">
+                                    <label className="me-2 mb-0">Payment Category</label>
+                                    <div className="dashboard-select" style={{ width: 'auto' }}>
+                                        <select
+                                            className="form-control"
+                                            value={selectedCategory}
+                                            onChange={(e) => setSelectedCategory(e.target.value)}
                                         >
-                                            <i className="fas fa-cog me-2"></i>
-                                            Manage Payment Category
-                                        </Link>
+                                            <option value="">Select Category</option>
+                                            {paymentCategories.map(category => (
+                                                <option key={category._id} value={category._id}>
+                                                    {category.name}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
-                                    <div className="d-flex align-items-center me-3">
-                                        <label className="me-2 mb-0">Payment Category</label>
-                                        <div className="dashboard-select" style={{ width: 'auto' }}>
-                                            <select
-                                                className="form-control"
-                                                value={selectedCategory}
-                                                onChange={(e) => setSelectedCategory(e.target.value)}
-                                            >
-                                                <option value="">Select Category</option>
-                                                {paymentCategories.map(category => (
-                                                    <option key={category._id} value={category._id}>
-                                                        {category.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <form className="d-flex search-bar" onSubmit={(e) => e.preventDefault()}>
-                                        <input
-                                            type="text"
-                                            placeholder="Search student"
-                                            className="search-input me-2"
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                        />
-                                        <button type="submit" className="search btn btn-sm">
-                                            <i className="fas fa-search"></i>
-                                        </button>
-                                    </form>
                                 </div>
-                               {/* New Tab Navigation */}
-                                <div className="payment-status-tabs">
-                                    <ul className="nav nav-tabs">
-                                        {['All', 'Fully Paid', 'Partially Paid', 'Not Paid', 'Refunded'].map(status => {
-                                            const count = getStatusCounts(filteredStudents)[status] || 0;
-                                            return (
-                                                <li className="nav-item" key={status}>
-                                                    <button
-                                                        className={`nav-link ${activeTab === status ? 'active-tab' : ''}`}
-                                                        onClick={() => setActiveTab(status)}
-                                                    >
-                                                        {status}
-                                                        <span className="badge bg-secondary ms-2">{count}</span>
-                                                    </button>
-                                                </li>
-                                            );
-                                        })}
-                                    </ul>
-                                </div>
+                                <form className="d-flex search-bar" onSubmit={(e) => e.preventDefault()}>
+                                    <input
+                                        type="text"
+                                        placeholder="Search student"
+                                        className="search-input me-2"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                    <button type="submit" className="search btn btn-sm">
+                                        <i className="fas fa-search"></i>
+                                    </button>
+                                </form>
+                            </div>
 
-                                {/* Table Content */}
-                                {loading ? (
+                            {/* New Tab Navigation */}
+                            <div className="payment-status-tabs">
+                                <ul className="nav nav-tabs">
+                                    {['All', 'Fully Paid', 'Partially Paid', 'Not Paid', 'Refunded'].map(status => {
+                                        const count = getStatusCounts(filteredStudents)[status] || 0;
+                                        return (
+                                            <li className="nav-item" key={status}>
+                                                <button
+                                                    className={`nav-link ${activeTab === status ? 'active-tab' : ''}`}
+                                                    onClick={() => setActiveTab(status)}
+                                                >
+                                                    {status}
+                                                    <span className="badge bg-secondary ms-2">{count}</span>
+                                                </button>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </div>
+
+                            {/* Table Content */}
+                            {sendingEmail ? (
                                 <div style={{ 
                                     display: 'flex', 
                                     justifyContent: 'center', 
                                     alignItems: 'center',
                                     minHeight: '300px' 
                                 }}>
-                                    <LoadingSpinner icon="coin" />
+                                    <LoadingSpinner icon="envelope" text="Sending Email" />
                                 </div>
-                                ) : error ? (
-                                    <div className="alert alert-danger">{error}</div>
-                                ) : (
-                                    <div className="table-responsive mt-3 table-shadow fee-row">
-                                        <table className="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th className="index-column">#</th>
-                                                    <th>Student ID</th>
-                                                    <th className="name-column">Student Name</th>
-                                                    <th>Year Level</th>
-                                                    <th>Program</th>
-                                                    <th>Payment Status</th>
-                                                    <th>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {currentItems
-                                                    .filter(student => {
-                                                        if (activeTab === 'All') return true;
-                                                        return getStudentPaymentStatus(student._id) === activeTab;
-                                                    })
-                                                    .map((student, index) => (
-                                                        <tr key={student._id} >
-                                                            <td>{indexOfFirstItem + index + 1}</td>
-                                                            <td>{student.studentId}</td>
-                                                            <td>{student.name}</td>
-                                                            <td>{student.yearLevel}</td>
-                                                            <td>{student.program}</td>  
-                                                            <td>
-                                                                <PaymentStatusTag
-                                                                    status={getStudentPaymentStatus(student._id) || 'Not Paid'}
-                                                                />
-                                                            </td>
-                                                            <td>
-                                                                {renderActionButtons(student)}
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                )}
+                            ) : (
+                                <div className="table-responsive mt-3 fee-row">
+                                    {isLoading ? (  
+                                        <div style={{ 
+                                            display: 'flex', 
+                                            justifyContent: 'center', 
+                                            alignItems: 'center',
+                                            minHeight: '300px' 
+                                        }}>
+                                            <LoadingSpinner icon="coin" />
+                                        </div>
+                                    ) : error ? (
+                                        <div className="alert alert-danger">{error}</div>
+                                    ) : (
+                                        <>
+                                            <table className="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th className="index-column">#</th>
+                                                        <th>Student ID</th>
+                                                        <th className="name-column">Student Name</th>
+                                                        <th>Year Level</th>
+                                                        <th>Program</th>
+                                                        <th>Payment Status</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {currentItems
+                                                        .filter(student => {
+                                                            if (activeTab === 'All') return true;
+                                                            return getStudentPaymentStatus(student._id) === activeTab;
+                                                        })
+                                                        .map((student, index) => (
+                                                            <tr key={student._id} >
+                                                                <td>{indexOfFirstItem + index + 1}</td>
+                                                                <td>{student.studentId}</td>
+                                                                <td>{student.name}</td>
+                                                                <td>{student.yearLevel}</td>
+                                                                <td>{student.program}</td>  
+                                                                <td>
+                                                                    <PaymentStatusTag
+                                                                        status={getStudentPaymentStatus(student._id) || 'Not Paid'}
+                                                                    />
+                                                                </td>
+                                                                <td>
+                                                                    {renderActionButtons(student)}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                </tbody>
+                                            </table>
 
-                                {/* SHOWING OF ENTRIES AND PAGINATION */}
-                                <div className="d-flex justify-content-between align-items-center mb-2 mt-3" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
-                                    <div>
-                                        Showing {showingStart} to {showingEnd} of {totalEntries} entries
-                                    </div>
-                                    <nav>
-                                        <ul className="pagination mb-0">
-                                            <li className="page-item">
-                                                <button
-                                                    className="page-link"
-                                                    onClick={() => paginate(currentPage - 1)}
-                                                    disabled={currentPage === 1}
-                                                >
-                                                    Previous
-                                                </button>
-                                            </li>
-                                            {Array.from({ length: totalPages }, (_, index) => (
-                                                <li key={index + 1} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
-                                                    <button
-                                                        className="page-link"
-                                                        onClick={() => paginate(index + 1)}
-                                                    >
-                                                        {index + 1}
-                                                    </button>
-                                                </li>
-                                            ))}
-                                            <li className="page-item">
-                                                <button
-                                                    className="page-link page-label"
-                                                    onClick={() => paginate(currentPage + 1)}
-                                                    disabled={currentPage === totalPages}
-                                                >
-                                                    Next
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    </nav>
+                                            {/* SHOWING OF ENTRIES AND PAGINATION */}
+                                            <div className="d-flex justify-content-between align-items-center mb-2 mt-3" 
+                                                 style={{ color: '#6C757D', fontSize: '0.875rem' }}>
+                                                <div>
+                                                    Showing {showingStart} to {showingEnd} of {totalEntries} entries
+                                                </div>
+                                                <nav>
+                                                    <ul className="pagination mb-0">
+                                                        <li className="page-item">
+                                                            <button
+                                                                className="page-link"
+                                                                onClick={() => paginate(currentPage - 1)}
+                                                                disabled={currentPage === 1}
+                                                            >
+                                                                Previous
+                                                            </button>
+                                                        </li>
+                                                        {Array.from({ length: totalPages }, (_, index) => (
+                                                            <li key={index + 1} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
+                                                                <button
+                                                                    className="page-link"
+                                                                    onClick={() => paginate(index + 1)}
+                                                                >
+                                                                    {index + 1}
+                                                                </button>
+                                                            </li>
+                                                        ))}
+                                                        <li className="page-item">
+                                                            <button
+                                                                className="page-link page-label"
+                                                                onClick={() => paginate(currentPage + 1)}
+                                                                disabled={currentPage === totalPages}
+                                                            >
+                                                                Next
+                                                            </button>
+                                                        </li>
+                                                    </ul>
+                                                </nav>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
-                            </div>
+                            )}
                         </div>
                     </div>
-
                 </div>
             </div>
+        </div>
+
             {/* Lock Modal */}
             <Modal
                 show={showLockModal}
