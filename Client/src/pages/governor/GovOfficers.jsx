@@ -321,34 +321,53 @@ const GovOfficers = () => {
                                         </table>
 
                                         {/* Pagination */}
-                                        <div className="d-flex justify-content-between align-items-center mt-4">
-                                            <div>
+                                        <div className="d-flex justify-content-between align-items-center mt-3" 
+                                            style={{ 
+                                                paddingLeft: '1rem', 
+                                                paddingRight: '1rem'
+                                            }}
+                                        >
+                                            <div style={{ color: '#6C757D', fontSize: '0.875rem' }}>
                                                 Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredOfficers.length)} of {filteredOfficers.length} entries
                                             </div>
                                             <nav>
-                                                <ul className="pagination mb-0">
+                                                <ul className="pagination">
                                                     <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
                                                         <button
-                                                            className="page-link"
                                                             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                                            className="page-link"
+                                                            disabled={currentPage === 1}
+                                                            style={{ color: '#6C757D' }}
                                                         >
                                                             Previous
                                                         </button>
                                                     </li>
-                                                    {[...Array(totalPages)].map((_, i) => (
-                                                        <li key={i + 1} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
+                                                    {[...Array(totalPages)].map((_, index) => (
+                                                        <li 
+                                                            key={index} 
+                                                            className={`page-item ${index + 1 === currentPage ? 'active' : ''}`}
+                                                        >
                                                             <button
+                                                                onClick={() => setCurrentPage(index + 1)}
                                                                 className="page-link"
-                                                                onClick={() => setCurrentPage(i + 1)}
+                                                                style={index + 1 === currentPage ? {
+                                                                    backgroundColor: '#FF8C00',
+                                                                    borderColor: '#FF8C00',
+                                                                    color: '#EAEAEA'
+                                                                } : {
+                                                                    color: '#6C757D'
+                                                                }}
                                                             >
-                                                                {i + 1}
+                                                                {index + 1}
                                                             </button>
                                                         </li>
                                                     ))}
                                                     <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
                                                         <button
-                                                            className="page-link"
                                                             onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                                            className="page-link"
+                                                            disabled={currentPage === totalPages}
+                                                            style={{ color: '#6C757D' }}
                                                         >
                                                             Next
                                                         </button>

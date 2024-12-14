@@ -135,7 +135,7 @@ const GovAddStud = () => {
     // Form submission handler
     const handleSubmit = (e) => {
         e.preventDefault();
-        setShowModal(true); // Show the confirmation modal
+        setShowModal(true); 
     };
 
     const confirmSubmit = async () => {
@@ -158,7 +158,7 @@ const GovAddStud = () => {
                 : 'http://localhost:8000/api/add/students';
     
             const response = await axios.post(
-                endpoint,  // Use the endpoint variable instead of hardcoded URL
+                endpoint, 
                 {
                     ...formData,
                     userName: userDetails.name || userDetails.email.split('@')[0],
@@ -182,7 +182,7 @@ const GovAddStud = () => {
             });
 
             setTimeout(() => {
-                navigate('/treasurer/students');
+                navigate('/governor/students');
             }, 2000);
 
         } catch (error) {
@@ -198,7 +198,7 @@ const GovAddStud = () => {
     return (
         <div className="sb-nav-fixed">
             <Helmet>
-                <title>Gov | Add Student</title>
+                <title>Governor | Add Student</title>
             </Helmet>
             <GovNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>

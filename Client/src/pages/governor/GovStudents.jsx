@@ -371,7 +371,11 @@ const GovStudents = () => {
                                 </div>
 
                                 {/* Pagination */}
-                                <div className="d-flex justify-content-between align-items-center mt-3">
+                                <div className="d-flex justify-content-between align-items-center" 
+                                    style={{ 
+                                        paddingLeft: '1rem', paddingRight: '1rem'
+                                    }}
+                                >
                                     <div style={{ color: '#6C757D', fontSize: '0.875rem' }}>
                                         Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredStudents.length)} of {filteredStudents.length} entries
                                     </div>
