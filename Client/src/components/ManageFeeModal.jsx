@@ -381,7 +381,6 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent,
             <Modal
                 show={showConfirmation}
                 onHide={() => setShowConfirmation(false)}
-                centered
             >
                 <Modal.Header closeButton>
                     <Modal.Title>

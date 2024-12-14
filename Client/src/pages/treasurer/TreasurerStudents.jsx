@@ -645,7 +645,7 @@ const TreasurerStudents = () => {
                 </Modal.Body>
             </Modal>
             {/* Confirmation Modal */}
-            <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>
                         {modalAction.type === 'archive' ? 'Archive Student' : 'Unarchive Student'}
@@ -655,14 +655,15 @@ const TreasurerStudents = () => {
                     Are you sure you want to {modalAction.type} {modalAction.student?.name}?
                 </Modal.Body>
                 <Modal.Footer>
+                <Button
+                    variant="btn btn-confirm"
+                    onClick={confirmAction}
+                    style={{ flex: 'none' }}
+                >
+                    Confirm
+                </Button>
                     <Button variant="secondary" onClick={() => setShowModal(false)}>
                         Cancel
-                    </Button>
-                    <Button
-                        variant={modalAction.type === 'archive' ? 'danger' : 'success'}
-                        onClick={confirmAction}
-                    >
-                        Confirm
                     </Button>
                 </Modal.Footer>
             </Modal>
