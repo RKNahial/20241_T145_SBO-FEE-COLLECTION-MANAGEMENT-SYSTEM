@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 class ResourceLockService {
     constructor() {
-        this.LOCK_TIMEOUT = 30000; // 30 seconds in milliseconds
+        this.LOCK_TIMEOUT = 60000; // 60 seconds to match MongoDB TTL
     }
 
     async acquireLock(resourceId, userId, userName, lockType) {
@@ -58,26 +58,40 @@ class ResourceLockService {
                 };
             }
 
-            // Delete any existing locks for this resource and type
-            await ResourceLock.deleteMany({
-                resourceId: resourceObjectId,
-                lockType: normalizedLockType
-            });
+            try {
+                // Create new lock with upsert
+                const newLock = await ResourceLock.findOneAndUpdate(
+                    {
+                        resourceId: resourceObjectId,
+                        lockType: normalizedLockType
+                    },
+                    {
+                        $set: {
+                            userId: userObjectId,
+                            userName: userName.toString(),
+                            lockedAt: new Date()
+                        }
+                    },
+                    {
+                        upsert: true,
+                        new: true
+                    }
+                );
 
-            // Create new lock
-            const newLock = await ResourceLock.create({
-                resourceId: resourceObjectId,
-                userId: userObjectId,
-                userName: userName.toString(),
-                lockType: normalizedLockType,
-                lockedAt: new Date()
-            });
-
-            return {
-                success: true,
-                message: `Lock acquired for ${normalizedLockType.toLowerCase()}ing`,
-                lock: newLock
-            };
+                return {
+                    success: true,
+                    message: `Lock acquired for ${normalizedLockType.toLowerCase()}ing`,
+                    lock: newLock
+                };
+            } catch (error) {
+                if (error.code === 11000) { // Duplicate key error
+                    return {
+                        success: false,
+                        message: 'Lock already exists'
+                    };
+                }
+                throw error;
+            }
         } catch (error) {
             console.error('Error in acquireLock:', error);
             return {
