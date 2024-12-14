@@ -165,17 +165,41 @@ const TreasurerEditStud = () => {
     useEffect(() => {
         return () => {
             // Call release lock when the component unmounts
-            releaseLock();
+            if (isLocked) {
+                releaseLock();
+            }
         };
-    }, []);
+    }, [isLocked]);
 
     const releaseLock = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
+        try {
+            if (!isLocked) return;
+            
+            const token = localStorage.getItem('token');
+            if (!token) return;
 
-        await axios.delete(`http://localhost:8000/api/students/${id}/release-lock/Edit`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+            await axios.delete(
+                `http://localhost:8000/api/students/${id}/release-lock/Edit`,
+                {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }
+            );
+            setIsLocked(false);
+        } catch (error) {
+            console.error('Error releasing lock:', error);
+        }
+    };
+
+    // Function to handle navigation away
+    const handleNavigateAway = async (path) => {
+        try {
+            await releaseLock();
+            navigate(path);
+        } catch (error) {
+            console.error('Error during navigation:', error);
+            // Navigate anyway to prevent user from being stuck
+            navigate(path);
+        }
     };
 
     // Set initial form data when component mounts
@@ -378,7 +402,11 @@ const TreasurerEditStud = () => {
             </Helmet>
             <TreasurerNavbar toggleSidebar={() => setIsCollapsed(!isCollapsed)} />
             <div style={{ display: 'flex' }}>
-                <TreasurerSidebar isCollapsed={isCollapsed} />
+                <TreasurerSidebar 
+                    isCollapsed={isCollapsed} 
+                    onNavigate={handleNavigateAway}
+                    isEditingStudent={true}
+                />
                 <div id="layoutSidenav_content" style={{
                     marginLeft: isCollapsed ? '5rem' : '15.625rem',
                     transition: 'margin-left 0.3s',

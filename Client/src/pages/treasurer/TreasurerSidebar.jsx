@@ -6,16 +6,32 @@ import { auth } from '../firebase/firebaseConfig';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../../context/AuthContext';
 
-const TreasurerSidebar = ({ isCollapsed }) => {
+const TreasurerSidebar = ({ isCollapsed, onNavigate, isEditingStudent }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const { setUser } = useAuth();
+
+    const handleNavigation = async (path) => {
+        if (isEditingStudent && onNavigate) {
+            // Use the provided navigation handler if we're editing a student
+            await onNavigate(path);
+        } else {
+            // Regular navigation for other cases
+            navigate(path);
+        }
+    };
 
     const handleLogout = async () => {
         if (handleLogout.isLoggingOut) return;
         handleLogout.isLoggingOut = true;
 
         try {
+            // If we're editing a student, release the lock before logging out
+            if (isEditingStudent && onNavigate) {
+                await onNavigate('/sbo-fee-collection');
+                return;
+            }
+
             const userDetailsString = localStorage.getItem('userDetails');
             if (userDetailsString) {
                 const userDetails = JSON.parse(userDetailsString);
@@ -51,44 +67,6 @@ const TreasurerSidebar = ({ isCollapsed }) => {
         } finally {
             handleLogout.isLoggingOut = false;
         }
-    };
-
-    const handleNavigation = async (path) => {
-        // Check if we're currently in the edit student page
-        const currentPath = location.pathname;
-        const isEditingStudent = currentPath.includes('/treasurer/edit-student/');
-        
-        if (isEditingStudent) {
-            try {
-                const token = localStorage.getItem('token');
-                const userId = localStorage.getItem('userId');
-                
-                if (!token || !userId) {
-                    console.error('Missing authentication details');
-                    navigate('/login');
-                    return;
-                }
-
-                // Clean all locks for this user
-                await axios({
-                    method: 'post',
-                    url: 'http://localhost:8000/api/students/clean-user-locks',
-                    headers: { 
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    data: {
-                        userId: userId
-                    }
-                });
-
-                console.log('Locks cleaned successfully');
-            } catch (error) {
-                console.error('Error cleaning locks:', error.response?.data || error.message);
-            }
-        }
-        // Navigate to the new path
-        navigate(path);
     };
 
     return (
