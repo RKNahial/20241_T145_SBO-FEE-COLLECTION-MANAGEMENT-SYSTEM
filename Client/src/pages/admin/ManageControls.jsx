@@ -25,37 +25,49 @@ const ManageControls = () => {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const data = response.data.data;
-
-                // Convert positions to lowercase for case-insensitive comparison
+                
+                // Updated filtering to use isArchived
                 const groupedUsers = {
-                    Governor: data.filter(user => user.position?.toLowerCase() === 'governor'),
-                    Treasurer: data.filter(user => user.position?.toLowerCase() === 'treasurer'),
-                    Officer: data.filter(user => user.position?.toLowerCase() === 'officer')
+                    Governor: data.filter(user => {
+                        const isGovernor = user.position?.toLowerCase().trim() === 'governor';
+                        const isNotArchived = user.isArchived === false; // Changed this line
+                        return isGovernor && isNotArchived;
+                    }),
+                    Treasurer: data.filter(user => {
+                        const isTreasurer = user.position?.toLowerCase().trim() === 'treasurer';
+                        const isNotArchived = user.isArchived === false; // Changed this line
+                        return isTreasurer && isNotArchived;
+                    }),
+                    Officer: data.filter(user => {
+                        const isOfficer = user.position?.toLowerCase().trim() === 'officer';
+                        const isNotArchived = user.isArchived === false; // Changed this line
+                        return isOfficer && isNotArchived;
+                    })
                 };
-
+                
                 setUsers(groupedUsers);
             } catch (error) {
                 console.error('Error fetching users:', error);
             }
         };
-
+    
         fetchUsers();
     }, []);
-
-    // Filter users based on selected role and search term
+    
     const filteredUsers = useMemo(() => {
         const roleUsers = users[selectedRole] || [];
-        return roleUsers.filter(user => 
-            (user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email?.toLowerCase().includes(searchTerm.toLowerCase())) &&
-            user.position?.toLowerCase() === selectedRole.toLowerCase()
-        );
+        
+        return roleUsers.filter(user => {
+            const matchesSearch = (
+                (user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.email?.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
+            const matchesPosition = user.position?.toLowerCase().trim() === selectedRole.toLowerCase();
+            const isNotArchived = user.isArchived === false; // Changed this line
+            
+            return matchesSearch && matchesPosition && isNotArchived;
+        });
     }, [users, selectedRole, searchTerm]);
-
-    // Reset current page when changing roles or search term
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [selectedRole, searchTerm]);
 
     const currentUsers = useMemo(() => {
         return filteredUsers.slice(
@@ -204,7 +216,7 @@ const ManageControls = () => {
             >
                 <Modal.Header>
                     <Modal.Title>
-                        <i className="fas fa-user-shield me-2 text-primary"></i>
+                        <i className="fas fa-user-shield me-2 "></i>
                         Manage Access Permissions - {selectedUser?.name}
                     </Modal.Title>
                     {unsavedChanges && (
@@ -299,10 +311,16 @@ const ManageControls = () => {
         setShowUserModal(true);
     };
 
+    const roleColors = {
+        Governor: '#4e73df',
+        Treasurer: '#1cc88a',
+        Officer: '#f6b100' 
+    };
+
     return (
         <div className="sb-nav-fixed">
             <Helmet>
-                <title>Admin | Manage Control</title>
+                <title>Admin | Manage Controls</title>
             </Helmet>
             <AdminNavbar toggleSidebar={() => setIsCollapsed(!isCollapsed)} />
             <div style={{ display: 'flex' }}>
@@ -319,7 +337,7 @@ const ManageControls = () => {
                                 <div className="row">
                                     <div className="col col-md-6">
                                         <i className="fas fa-shield-alt me-2"></i>
-                                        <strong>Role-Based Access Control</strong>
+                                        <strong>Manage Controls</strong>
                                     </div>
                                 </div>
                             </div>
@@ -390,45 +408,41 @@ const ManageControls = () => {
                                             </OverlayTrigger>
                                         ))}
                                     </div>
-                                    <div className="search-box position-relative">
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            placeholder="Search users..."
+                                    <div className="input-group d-flex search-bar" style={{ width: 'auto', position: 'relative' }}>
+                                            <input
+                                                type="text"
+                                                className="search-input me-2"
+                                            placeholder="Search users"
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
-                                            style={{
-                                                paddingRight: '40px',
-                                                width: '300px',
-                                                height: '38px',
-                                                borderRadius: '4px'
-                                            }}
                                         />
-                                        <i className="fas fa-search position-absolute" style={{
-                                            right: '12px',
-                                            top: '50%',
-                                            transform: 'translateY(-50%)',
-                                            color: 'orange'
-                                        }}></i>
+                                          <button type="submit" className="search btn btn-sm">
+                                                    <i className="fas fa-search"></i>
+                                        </button>
                                     </div>
                                 </div>
-
-                                <Table hover responsive className="align-middle mb-0">
-                                    <thead className="bg-light">
-                                        <tr>
-                                            <th style={{ width: '35%', paddingLeft: '2rem' }}>Name</th>
-                                            <th style={{ width: '30%' }}>Email</th>
-                                            <th style={{ width: '15%' }}>ID</th>
-                                            <th style={{ width: '20%' }} className="text-center">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+                                
+                                {/* Table */}
+                                <div className="table-shadow">
+                                    <Table hover responsive className="align-middle mb-0">
+                                        <thead className="bg-light">
+                                            <tr>
+                                                <th style={{ width: '35%', paddingLeft: '2rem' }}>Name</th>
+                                                <th style={{ width: '30%' }}>Email</th>
+                                                <th style={{ width: '15%' }}>ID</th>
+                                                <th style={{ width: '20%' }} className="text-center">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
                                         {currentUsers.map(user => (
                                             <tr key={user.id}>
                                                 <td style={{ width: '35%', paddingLeft: '2rem' }}>
                                                     <div className="d-flex align-items-center">
                                                         <div className="role-icon me-3">
-                                                            <i className="fas fa-user-circle text-primary"></i>
+                                                            <i className="fas fa-user-circle" style={{ 
+                                                                // Change color based on selected role instead of user's position
+                                                                color: roleColors[selectedRole] || '#4e73df' 
+                                                            }}></i>
                                                         </div>
                                                         <div>
                                                             <h6 className="mb-0">{user.name}</h6>
@@ -444,15 +458,41 @@ const ManageControls = () => {
                                                         size="sm"
                                                         onClick={() => handleUserClick(user)}
                                                         className="px-3"
+                                                        style={{
+                                                            borderColor: roleColors[selectedRole] || '#4e73df',
+                                                            color: roleColors[selectedRole] || '#4e73df',
+                                                            // Add hover and active states
+                                                            ':hover': {
+                                                                backgroundColor: roleColors[selectedRole] || '#4e73df',
+                                                                borderColor: roleColors[selectedRole] || '#4e73df',
+                                                                color: 'white'
+                                                            },
+                                                            ':active': {
+                                                                backgroundColor: roleColors[selectedRole] || '#4e73df',
+                                                                borderColor: roleColors[selectedRole] || '#4e73df',
+                                                                color: 'white'
+                                                            }
+                                                        }}
+                                                        onMouseOver={(e) => {
+                                                            e.currentTarget.style.backgroundColor = roleColors[selectedRole];
+                                                            e.currentTarget.style.color = 'white';
+                                                        }}
+                                                        onMouseOut={(e) => {
+                                                            e.currentTarget.style.backgroundColor = 'transparent';
+                                                            e.currentTarget.style.color = roleColors[selectedRole];
+                                                        }}
                                                     >
-                                                        <i className="fas fa-cog me-2" style={{ color: 'orange' }}></i>
+                                                        <i className="fas fa-cog me-2" style={{ 
+                                                            color: 'inherit'  
+                                                        }}></i>
                                                         Manage Access
                                                     </Button>
                                                 </td>
                                             </tr>
                                         ))}
                                     </tbody>
-                                </Table>
+                                    </Table>
+                                </div>
 
                                 <div className="d-flex justify-content-between align-items-center mb-2 mt-3" 
                                      style={{ color: '#6C757D', fontSize: '0.875rem' }}>
