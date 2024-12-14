@@ -324,48 +324,48 @@ const AdminOfficers = () => {
                                             </tbody>
                                         </table>
 
-                                       {/* Pagination */}
-                                    <div className="d-flex justify-content-between align-items-center mb-2 mt-3" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
-                                        <div>
-                                            Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredOfficers.length)} of {filteredOfficers.length} entries
-                                        </div>
-                                        <nav>
-                                            <ul className="pagination mb-0">
-                                                <li className="page-item">
-                                                    <button
-                                                        className="page-link"
-                                                        onClick={() => paginate(currentPage - 1)}
-                                                        disabled={currentPage === 1}
-                                                    >
-                                                        Previous
-                                                    </button>
-                                                </li>
-                                                {[...Array(totalPages)].map((_, index) => (
-                                                    <li key={index} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
+                                        {/* Pagination */}
+                                        <div className="d-flex justify-content-between align-items-center mb-2 mt-3" style={{ color: '#6C757D', fontSize: '0.875rem' }}>
+                                            <div>
+                                                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredOfficers.length)} of {filteredOfficers.length} entries
+                                            </div>
+                                            <nav>
+                                                <ul className="pagination mb-0">
+                                                    <li className="page-item">
                                                         <button
                                                             className="page-link"
-                                                            onClick={() => paginate(index + 1)}
-                                                            style={currentPage === index + 1 ? 
-                                                                { backgroundColor: 'orange', borderColor: 'orange', color: 'white' } 
-                                                                : {color: 'black'}
-                                                            }
+                                                            onClick={() => paginate(currentPage - 1)}
+                                                            disabled={currentPage === 1}
                                                         >
-                                                            {index + 1}
+                                                            Previous
                                                         </button>
                                                     </li>
-                                                ))}
-                                                <li className="page-item">
-                                                    <button
-                                                        className="page-link page-label"
-                                                        onClick={() => paginate(currentPage + 1)}
-                                                        disabled={currentPage === totalPages}
-                                                    >
-                                                        Next
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </nav>
-                                    </div>
+                                                    {[...Array(totalPages)].map((_, index) => (
+                                                        <li key={index} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
+                                                            <button
+                                                                className="page-link"
+                                                                onClick={() => paginate(index + 1)}
+                                                                style={currentPage === index + 1 ? 
+                                                                    { backgroundColor: 'orange', borderColor: 'orange', color: 'white' } 
+                                                                    : {color: 'black'}
+                                                                }
+                                                            >
+                                                                {index + 1}
+                                                            </button>
+                                                        </li>
+                                                    ))}
+                                                    <li className="page-item">
+                                                        <button
+                                                            className="page-link page-label"
+                                                            onClick={() => paginate(currentPage + 1)}
+                                                            disabled={currentPage === totalPages}
+                                                        >
+                                                            Next
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+                                        </div>
                                     </>
                                 )}
                             </div>

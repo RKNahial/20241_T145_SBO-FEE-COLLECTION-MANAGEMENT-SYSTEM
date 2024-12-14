@@ -1,3 +1,5 @@
+// src/pages/admin/ManageControls.jsx
+import { Helmet } from 'react-helmet';
 import React, { useState, useEffect, useMemo } from 'react';
 import AdminSidebar from './AdminSidebar';
 import AdminNavbar from './AdminNavbar';
@@ -182,6 +184,17 @@ const ManageControls = () => {
             }
         };
 
+        const getPageNumbers = (currentPage, totalPages) => {
+            let startPage = Math.max(currentPage - 2, 1);
+            let endPage = Math.min(startPage + 4, totalPages);
+        
+            if (endPage - startPage < 4) {
+                startPage = Math.max(endPage - 4, 1);
+            }
+        
+            return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+        };
+
         return (
             <Modal 
                 show={showUserModal} 
@@ -288,28 +301,31 @@ const ManageControls = () => {
 
     return (
         <div className="sb-nav-fixed">
+            <Helmet>
+                <title>Admin | Manage Control</title>
+            </Helmet>
             <AdminNavbar toggleSidebar={() => setIsCollapsed(!isCollapsed)} />
-            <div style={{ display: 'flex', height: '100vh' }}>
+            <div style={{ display: 'flex' }}>
                 <AdminSidebar isCollapsed={isCollapsed} />
                 <div id="layoutSidenav_content" style={{
                     marginLeft: isCollapsed ? '5rem' : '15.625rem',
                     transition: 'margin-left 0.3s',
-                    marginTop: '3.5rem',
-                    padding: '1.5rem',
-                    width: '100%',
-                    backgroundColor: '#f8f9fa'
+                    flexGrow: 1,
+                    marginTop: '3.5rem'
                 }}>
-                    <div className="container-fluid px-0">
-                        <div className="d-flex justify-content-between align-items-center mb-4">
-                            <h2 className="mb-0">
-                                <i className="fas fa-shield-alt me-2 text-primary"></i>
-                                Role-Based Access Control
-                            </h2>
-                        </div>
+                    <div className="container-fluid px-4 mb-5 form-top">
+                        <div className="card mb-4">
+                            <div className="card-header">
+                                <div className="row">
+                                    <div className="col col-md-6">
+                                        <i className="fas fa-shield-alt me-2"></i>
+                                        <strong>Role-Based Access Control</strong>
+                                    </div>
+                                </div>
+                            </div>
 
-                        <Card className="shadow-sm">
-                            <Card.Header className="bg-white py-3">
-                                <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <div className="card-body">
+                                <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
                                     <div className="role-selector d-flex gap-3">
                                         {[
                                             { role: 'Governor', icon: 'fa-user-shield', color: '#4e73df', description: 'Manage governor accounts' },
@@ -396,8 +412,7 @@ const ManageControls = () => {
                                         }}></i>
                                     </div>
                                 </div>
-                            </Card.Header>
-                            <Card.Body className="p-0">
+
                                 <Table hover responsive className="align-middle mb-0">
                                     <thead className="bg-light">
                                         <tr>
@@ -438,11 +453,52 @@ const ManageControls = () => {
                                         ))}
                                     </tbody>
                                 </Table>
-                                <div className="p-3 border-top">
-                                    <PaginationControls />
+
+                                <div className="d-flex justify-content-between align-items-center mb-2 mt-3" 
+                                     style={{ color: '#6C757D', fontSize: '0.875rem' }}>
+                                    <div>
+                                        Showing {Math.min(currentUsers.length, usersPerPage)} of {filteredUsers.length} entries
+                                    </div>
+                                    <nav>
+                                        <ul className="pagination mb-0">
+                                            <li className="page-item">
+                                                <button
+                                                    className="page-link"
+                                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                                    disabled={currentPage === 1}
+                                                >
+                                                    Previous
+                                                </button>
+                                            </li>
+                                            {[...Array(totalPages)].map((_, idx) => (
+                                                <li key={idx} 
+                                                    className={`page-item ${currentPage === idx + 1 ? 'active' : ''}`}>
+                                                    <button
+                                                        className="page-link"
+                                                        onClick={() => setCurrentPage(idx + 1)}
+                                                        style={currentPage === idx + 1 ? 
+                                                            { backgroundColor: 'orange', borderColor: 'orange', color: 'white' } 
+                                                            : {color: 'black'}
+                                                        }
+                                                    >
+                                                        {idx + 1}
+                                                    </button>
+                                                </li>
+                                            ))}
+                                            <li className="page-item">
+                                                <button
+                                                    className="page-link"
+                                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                                    disabled={currentPage === totalPages}
+                                                >
+                                                    Next
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </nav>
                                 </div>
-                            </Card.Body>
-                        </Card>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
