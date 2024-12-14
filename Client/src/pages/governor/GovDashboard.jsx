@@ -178,15 +178,22 @@ const GovDashboard = () => {
         const fetchTotalActiveOfficers = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.get('http://localhost:8000/api/admin/active-officers-count', {
+                const response = await axios.get('http://localhost:8000/api/officials', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                setTotalActiveOfficers(response.data.count);
+    
+                // Count active officials (officers, treasurers, and governors)
+                const activeOfficials = response.data.data.filter(official => 
+                    !official.isArchived && 
+                    ['officer', 'treasurer', 'governor'].includes(official.position?.toLowerCase())
+                ).length;
+    
+                setTotalActiveOfficers(activeOfficials);
             } catch (err) {
                 console.error('Error fetching total active officers:', err);
             }
         };
-
+    
         fetchTotalActiveOfficers();
     }, []);
 
