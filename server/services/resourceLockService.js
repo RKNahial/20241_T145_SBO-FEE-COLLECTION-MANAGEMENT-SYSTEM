@@ -140,6 +140,32 @@ class ResourceLockService {
         }
     }
 
+    async cleanAllLocksForUser(userId) {
+        try {
+            if (!userId) {
+                throw new Error('User ID is required');
+            }
+
+            const result = await ResourceLock.deleteMany({
+                userId: new mongoose.Types.ObjectId(userId)
+            });
+
+            console.log(`Cleaned ${result.deletedCount} locks for user ${userId}`);
+            return {
+                success: true,
+                message: 'All locks cleaned successfully',
+                deletedCount: result.deletedCount
+            };
+        } catch (error) {
+            console.error('Error cleaning user locks:', error);
+            return {
+                success: false,
+                message: 'Error cleaning user locks',
+                error: error.message
+            };
+        }
+    }
+
     async checkLock(resourceId, lockType) {
         try {
             if (!resourceId) {

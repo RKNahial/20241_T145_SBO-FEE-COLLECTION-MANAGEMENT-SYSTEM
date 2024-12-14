@@ -392,3 +392,31 @@ exports.unarchive = async (req, res) => {
         });
     }
 };
+
+exports.cleanUserLocks = async (req, res) => {
+    try {
+        const { userId } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                message: 'User ID is required'
+            });
+        }
+
+        const result = await resourceLockService.cleanAllLocksForUser(userId);
+
+        if (!result.success) {
+            return res.status(400).json(result);
+        }
+
+        res.json(result);
+    } catch (error) {
+        console.error('Error in cleanUserLocks controller:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error while cleaning locks',
+            error: error.message
+        });
+    }
+};
