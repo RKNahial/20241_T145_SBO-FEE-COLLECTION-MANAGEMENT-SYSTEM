@@ -123,8 +123,7 @@ exports.checkLock = async (req, res) => {
 
 exports.acquireLock = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { lockType } = req.body;
+        const { id, lockType } = req.params;
         
         // Validate user authentication
         if (!req.user || !req.user._id || !req.user.name) {
@@ -195,35 +194,22 @@ exports.acquireLock = async (req, res) => {
 
 exports.releaseLock = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { lockType } = req.params;
-        const { userId } = req.body;
+        const { id, lockType } = req.params;
+        
+        if (!req.user || !req.user._id) {
+            return res.status(401).json({
+                success: false,
+                message: 'User authentication required'
+            });
+        }
 
         console.log('Release Lock Request:', {
             id,
             lockType,
-            userId,
-            body: req.body
+            userId: req.user._id
         });
 
-        if (!id || !lockType) {
-            return res.status(400).json({
-                success: false,
-                message: 'Missing required parameters: id or lockType'
-            });
-        }
-
-        // If userId is not in body, try to get it from auth user
-        const effectiveUserId = userId || (req.user && req.user._id);
-        
-        if (!effectiveUserId) {
-            return res.status(400).json({
-                success: false,
-                message: 'User ID is required'
-            });
-        }
-
-        const result = await resourceLockService.releaseLock(id, effectiveUserId, lockType);
+        const result = await resourceLockService.releaseLock(id, req.user._id, lockType);
         console.log('Release Lock Result:', result);
 
         if (!result.success) {

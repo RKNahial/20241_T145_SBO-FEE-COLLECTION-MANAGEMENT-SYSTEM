@@ -47,10 +47,7 @@ const TreasurerEditStud = () => {
 
                 const response = await axios.post(
                     `http://localhost:8000/api/students/${id}/acquire-lock/Edit`,
-                    { 
-                        lockType: 'Edit',
-                        userId: localStorage.getItem('userId')
-                    },
+                    {},
                     {
                         headers: { 
                             'Authorization': `Bearer ${token}`,
@@ -135,18 +132,57 @@ const TreasurerEditStud = () => {
     useEffect(() => {
         return () => {
             // Call release lock when the component unmounts
-            releaseLock();
+            if (isLocked) {
+                releaseLock();
+            }
         };
-    }, []);
+    }, [isLocked]);
 
     const releaseLock = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
+        try {
+            const token = localStorage.getItem('token');
+            if (!token || !isLocked) return;
 
-        await axios.delete(`http://localhost:8000/api/students/${id}/release-lock/Edit`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+            await axios.delete(
+                `http://localhost:8000/api/students/${id}/release-lock/Edit`,
+                {
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            setIsLocked(false);
+        } catch (error) {
+            console.error('Error releasing lock:', error);
+        }
     };
+
+    // Handle navigation away from the page
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (isLocked) {
+                releaseLock();
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            if (isLocked) {
+                releaseLock();
+            }
+        };
+    }, [isLocked]);
+
+    // Handle component unmount
+    useEffect(() => {
+        return () => {
+            if (isLocked) {
+                releaseLock();
+            }
+        };
+    }, [isLocked]);
 
     // Set initial form data when component mounts
     useEffect(() => {
