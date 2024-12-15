@@ -27,4 +27,4 @@ package-lock.json
 *.sw?
 
 # Environment variables
-.env
+
