@@ -15,7 +15,6 @@ const OfficerEditStud = () => {
     const [successMessage, setSuccessMessage] = useState("");
     const [showModal, setShowModal] = useState(false);
 
-
     // Get the student data passed from the previous page
     const studentData = location.state?.studentData;
 
@@ -41,56 +40,10 @@ const OfficerEditStud = () => {
         }
     }, [studentData]);
 
-    useEffect(() => {
-        let lockTimer;
-
-        const acquireLock = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await axios.post(
-                    `http://localhost:8000/api/students/${id}/acquire-lock/EDIT`,
-                    {},
-                    {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    }
-                );
-
-                if (!response.data.success) {
-                    setError(response.data.message);
-                    navigate('/officer/students');
-                } else {
-                    // Set timer to show warning when lock is about to expire
-                    lockTimer = setTimeout(() => {
-                        setError('Your edit session will expire in 5 seconds. Please save your changes.');
-                    }, 15000); // Show warning 5 seconds before expiration
-                }
-            } catch (error) {
-                setError('Unable to edit student at this time');
-                navigate('/officer/students');
-            }
-        };
-
-        acquireLock();
-
-        return () => {
-            if (lockTimer) clearTimeout(lockTimer);
-            const releaseLock = async () => {
-                const token = localStorage.getItem('token');
-                await axios.delete(
-                    `http://localhost:8000/api/students/${id}/release-lock/EDIT`,
-                    {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    }
-                );
-            };
-            releaseLock();
-        };
-    }, [id, navigate]);
-
     const clearError = () => {
         setTimeout(() => {
             setError(null);
-        }, 3000);
+        }, 5000);
     };
 
     const handleSubmit = (e) => {
@@ -288,7 +241,7 @@ const OfficerEditStud = () => {
                 </div>
             </div>
               {/* Confirmation Modal */}
-        `    <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
                     <Modal.Title>
                         Confirm Update Student

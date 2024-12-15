@@ -3,6 +3,7 @@ const Treasurer = require('../models/TreasurerSchema');
 const Officer = require('../models/OfficerSchema');
 const Governor = require('../models/GovernorSchema');
 const Log = require('../models/LogSchema');
+const HistoryLog = require('../models/HistoryLog');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const axios = require('axios');
@@ -119,6 +120,47 @@ class UserService {
             user: newUser,
             temporaryPassword: password 
         };
+    }
+
+    async processLogout(userId, loginLogId) {
+        try {
+            // Update the login log entry with logout time
+            await Log.findByIdAndUpdate(loginLogId, {
+                status: 'completed',
+                logoutTime: new Date()
+            });
+
+            // Create a history log for the logout
+            const user = await this.findUserById(userId);
+            if (user) {
+                await HistoryLog.create({
+                    timestamp: new Date(),
+                    userName: user.name,
+                    userEmail: user.email,
+                    userPosition: user.position,
+                    action: 'LOGOUT',
+                    details: `User ${user.name} logged out`,
+                    status: 'completed'
+                });
+            }
+        } catch (error) {
+            console.error('Error processing logout:', error);
+            throw error;
+        }
+    }
+
+    async findUserById(userId) {
+        const models = [Admin, Treasurer, Officer, Governor];
+        for (const Model of models) {
+            const user = await Model.findById(userId);
+            if (user) {
+                return {
+                    ...user.toObject(),
+                    position: Model.modelName.replace('Model', '')
+                };
+            }
+        }
+        return null;
     }
 
 }

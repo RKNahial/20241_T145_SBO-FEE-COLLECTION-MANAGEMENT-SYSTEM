@@ -49,10 +49,23 @@ const AdminEditOfficer = () => {
     }, [id]);
 
     const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+        if (e.target.name === 'email') {
+            // Split email into username and domain
+            const currentEmail = formData.email;
+            const [, domain] = currentEmail.split('@');
+            
+            // Only allow editing the username part
+            const newUsername = e.target.value.split('@')[0];
+            setFormData({
+                ...formData,
+                email: newUsername + '@' + domain
+            });
+        } else {
+            setFormData({
+                ...formData,
+                [e.target.name]: e.target.value
+            });
+        }
     };
 
     const [showModal, setShowModal] = useState(false);

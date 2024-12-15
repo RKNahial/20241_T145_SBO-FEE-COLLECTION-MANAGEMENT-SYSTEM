@@ -102,8 +102,9 @@ exports.checkLock = async (req, res) => {
     try {
         const { id, lockType } = req.params;
         
-        // Update valid lock types to include Archive
-        if (!['Edit', 'View', 'Delete', 'Archive'].includes(lockType)) {
+        // Update valid lock types to include Archive and make case-insensitive
+        const validLockTypes = ['Edit', 'View', 'Delete', 'Archive'];
+        if (!validLockTypes.some(type => type.toLowerCase() === lockType.toLowerCase())) {
             return res.status(400).json({
                 success: false,
                 message: 'Invalid lock type'
@@ -135,7 +136,7 @@ exports.acquireLock = async (req, res) => {
 
         // Validate lock type
         const validLockTypes = ['Edit', 'View', 'Delete', 'Archive'];
-        if (!validLockTypes.includes(lockType)) {
+        if (!validLockTypes.some(type => type.toLowerCase() === lockType.toLowerCase())) {
             return res.status(400).json({
                 success: false,
                 message: 'Invalid lock type'

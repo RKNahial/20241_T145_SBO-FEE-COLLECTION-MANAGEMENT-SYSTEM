@@ -17,7 +17,7 @@ exports.updatePaymentStatus = async (req, res) => {
         }
 
         // Find the payment category
-        const category = await PaymentCategory.findOne({ name: paymentCategory });
+        const category = await PaymentCategory.findById(paymentCategory);
         if (!category) {
             return res.status(404).json({ success: false, message: 'Payment category not found' });
         }

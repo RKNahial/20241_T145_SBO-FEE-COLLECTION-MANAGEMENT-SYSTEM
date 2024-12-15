@@ -22,10 +22,19 @@ const AdminAddOfficer = () => {
     const [generatedPassword, setGeneratedPassword] = useState('');
 
     const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+        if (e.target.name === 'email') {
+            // Only take the part before @ if user types a full email
+            const emailValue = e.target.value.split('@')[0];
+            setFormData({
+                ...formData,
+                email: emailValue + '@student.buksu.edu.ph'
+            });
+        } else {
+            setFormData({
+                ...formData,
+                [e.target.name]: e.target.value
+            });
+        }
     };
 
     const handleSubmit = (e) => {

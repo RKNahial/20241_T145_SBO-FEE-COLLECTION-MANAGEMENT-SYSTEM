@@ -36,16 +36,26 @@ const TreasurerNavbar = ({ toggleSidebar }) => {
 
         try {
             const userDetailsString = localStorage.getItem('userDetails');
+            const token = localStorage.getItem('token');
+
             if (userDetailsString) {
                 const userDetails = JSON.parse(userDetailsString);
 
-                // Call backend logout
+                // Call backend logout with proper authorization
                 await axios.post('http://localhost:8000/api/logout', {
                     userId: userDetails._id,
-                    userModel: userDetails.position,
-                    email: userDetails.email,
                     loginLogId: userDetails.loginLogId
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
                 });
+            }
+
+            // Sign out from Firebase if using it
+            if (auth.currentUser) {
+                await signOut(auth);
             }
 
             // Clear all storage
@@ -53,15 +63,15 @@ const TreasurerNavbar = ({ toggleSidebar }) => {
             sessionStorage.clear();
             setUser(null);
 
-            // Force redirect to login page
-            window.location.href = '/sbo-fee-collection';
+            // Navigate to login page
+            navigate('/login');
         } catch (error) {
             console.error('Logout error:', error);
-            // Force logout even if there's an error
+            // Still clear storage and redirect even if logout request fails
             localStorage.clear();
             sessionStorage.clear();
             setUser(null);
-            window.location.href = '/sbo-fee-collection';
+            navigate('/login');
         }
     };
 
