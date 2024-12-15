@@ -11,9 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
-package-lock.json
 .vite/
-
+package-lock.json
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
