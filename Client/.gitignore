@@ -12,7 +12,7 @@ dist
 dist-ssr
 *.local
 
-package-lock.
+package-lock.josn
 .vite/
 
 # Editor directories and files
