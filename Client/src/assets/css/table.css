@@ -1,0 +1,66 @@
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #F8F9FD;
+    border-radius: 0.625rem;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+}
+
+.table-shadow{
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1) !important;
+}
+
+.table td {
+    border: none;
+    padding: 0.5rem;
+    text-align: center;
+    background-color: #FEFEFE;
+    color: #333333;
+    transition: background-color 0.2s ease;
+}
+.fee-row .table td {
+    padding: 0.75rem !important;
+}
+
+.due-row .table td {
+    padding: 0.85rem !important;
+}
+
+
+.table th { 
+    border: none;
+    text-align: center;
+    background-color: #ffad5d;
+    color: #333333;
+    font-weight: bold;
+    transition: background-color 0.2s ease;     
+}
+
+.table tbody tr {
+    border-bottom: 0.00625rem solid #E3E7EA;
+}
+
+.table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.index-column {
+    width: 4rem;  
+    text-align: center;
+}
+
+.name-column{
+    width: 20rem;  
+    text-align: center;
+}
+
+.name-column-2{
+    width: 15rem;  
+    text-align: center;
+}
+
+.date-time-column{
+    width: 10rem;  
+    text-align: center;
+}

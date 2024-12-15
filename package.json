@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "@emotion/react": "^11.13.5",
+    "@emotion/styled": "^11.13.5",
+    "@mui/material": "^6.1.8",
+    "bootstrap": "^5.3.3",
+    "jspdf": "^2.5.2",
+    "jspdf-autotable": "^3.8.4",
+    "moment-timezone": "^0.5.46",
+    "react-bootstrap": "^2.10.5",
+    "xlsx": "^0.18.5"
+  }
+}

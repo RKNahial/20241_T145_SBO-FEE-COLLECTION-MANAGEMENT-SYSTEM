@@ -1,0 +1,54 @@
+.payment-status-tabs {
+    margin-top: 1rem;
+    border-bottom: 2px solid #dee2e6;
+    width: 100%;
+}
+
+.payment-status-tabs .nav-tabs {
+    display: flex;
+    flex-direction: row;
+    border: none;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0;
+}
+
+.payment-status-tabs .nav-item {
+    flex: 1;
+    text-align: center;
+    margin: 0;
+}
+
+.payment-status-tabs .nav-link {
+    border: none;
+    color: #707d6c;
+    padding: 0.75rem 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.payment-status-tabs .nav-link:hover {
+    color: #0166cc;
+    background-color: #f8f9fa;
+}
+
+.payment-status-tabs .nav-link.active {
+    color: #0d6efd;
+    border-bottom: 2px solid #db8821;
+    background-color: transparent;
+}
+
+.payment-status-tabs .badge {
+    font-size: 0.75rem;
+    padding: 0.25em 0.6em;
+    border-radius: 10px;
+    background-color: #6c757d;
+}
+
+.payment-status-tabs .nav-link.active .badge {
+    background-color: #0d6efd;
+} 

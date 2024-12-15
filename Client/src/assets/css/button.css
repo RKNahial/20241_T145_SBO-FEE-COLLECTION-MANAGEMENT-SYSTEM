@@ -1,0 +1,361 @@
+.system-button {
+    display: flex;      
+    color: #EAEAEA;                 
+    background-color: #FF8C00;  
+    border: none;               
+    padding: 0.5rem 1rem;                    
+    border-radius: 0.35rem; 
+    white-space: nowrap; 
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.system-button:hover {
+    background-color: #E67E22; 
+    color: #EAEAEA;
+}
+
+.system-button:focus {
+    color: #333333;                  
+    background-color: #E67E22; 
+    border: none;   
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(255, 140, 0, 0.5);
+}
+
+
+.system-button:active .btn {
+    color: #EAEAEA;                  
+    background-color: #E67E22; 
+    border: none;   
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(255, 140, 0, 0.5);
+}
+
+.pay-button {
+    color: #EAEAEA;
+    background-color: #FF8C00;
+    border: none;
+    border-radius: 0.35rem;
+    padding: 0.40rem 1rem; 
+    font-size: 0.875rem; 
+    line-height: 1.25; 
+    white-space: nowrap;
+    width: auto;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    text-align: center;
+    display: inline-block; 
+}
+
+.pay-button:hover {
+    background-color: #E67E22; 
+    color: #EAEAEA;
+}
+
+.pay-button:focus {
+    color: #333333;                  
+    background-color: #E67E22; 
+    border: none;   
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(255, 140, 0, 0.5);
+}
+
+.pay-button:active {
+    color: #EAEAEA;                  
+    background-color: #E67E22; 
+    border: none;   
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(255, 140, 0, 0.5);
+}
+
+.add-button {
+    color: #EAEAEA;
+    background-color: #FF8C00;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.35rem; 
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer; 
+}
+
+.add-button:hover {
+    color: #EAEAEA;
+    background-color: #E67E22; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+}
+
+.update-button {
+    padding: 0.5rem 2rem; 
+    background-color: #FF8C00;
+    color: #EAEAEA; 
+    border-radius: 0.35rem; 
+    transition: background-color 0.2s ease, box-shadow 0.2s ease; 
+    min-width: 7rem; 
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+}
+
+.btn-primary .login-button{
+    background-color: #FF8C00;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 8px;
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  .btn-primary:hover { background-color: #E67E22; }
+
+  .btn-confirm {
+    background-color: #FF8C00;
+    border: none;
+    cursor: pointer;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.35rem;
+    transition: background-color 0.2s ease;
+}
+
+.btn-confirm:hover {
+    background-color: #E67E22;
+}
+
+.btn-cancel {
+    background-color: #6c757d;
+    border: none;
+    cursor: pointer;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.35rem;
+    transition: background-color 0.2s ease;
+}   
+
+.btn-cancel:hover {
+    background-color: #5a6268;
+}
+
+  .btn-edit {
+    color: green;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.btn-edit-mx {
+    margin-right: -0.40rem;
+    padding:0;
+}
+
+.btn-edit:hover {
+    text-decoration: underline;
+    color: rgb(3, 87, 3);
+    border: none;
+}
+
+.btn-archive {
+    color: red;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding-left: 1rem;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.btn-archive:hover {
+    color: rgb(165, 19, 19);
+    text-decoration: underline; 
+    border: none;
+}
+
+.btn-email {
+    color: #E67E22;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.btn-notes{
+    color: #E67E22;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding-left: 1rem;
+}
+
+.btn-view{
+    background-color: transparent; 
+    border: none; 
+    cursor: pointer; 
+    margin-right: 0.0070rem;
+}
+
+.btn-download {
+    background-color: transparent;
+    color:rgb(3, 87, 3);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-view i {
+    color: #FF8C00;
+    font-size: 0.95rem; 
+}
+
+.btn-view:hover i {
+    color: #FFA500; 
+}
+
+.btn-view:focus {
+    outline: none; 
+}
+
+.btn-archive:disabled {
+    background-color: #cccccc; 
+    color: #999999;
+    cursor: not-allowed; 
+    opacity: 0.6; 
+}
+
+.system-button {
+    display: inline-block;      
+    color: #EAEAEA;                 
+    background-color: #FF8C00;  
+    border: none;               
+    padding: 0.5rem 1rem;        
+    max-width: 5rem;              
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.system-button:hover {
+    background-color: #E67E22; 
+    color: #EAEAEA;
+}
+
+.system-button:focus,
+.system-button:focus-visible {
+    color: #333333;                  
+    background-color: #E67E22; 
+    border: none;   
+    outline: none; /* Ensure there's no outline */
+    box-shadow: none; /* Remove the box-shadow */
+}
+
+.system-button:active {
+    color: #EAEAEA;                  
+    background-color: #E67E22; 
+    border: none;   
+    outline: none; /* Ensure there's no outline */
+    box-shadow: none; /* Remove the box-shadow */
+}
+
+.btn-primary {
+    background-color: #FF8C00;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 8px;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.btn-primary:hover { 
+    background-color: #E67E22; 
+}
+
+.btn-edit {
+    color: green;
+    background: none;
+    border: none;   
+    cursor: pointer;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-right: 1rem !important;
+}
+
+.btn-edit:hover {
+    text-decoration: underline;
+    color: rgb(3, 87, 3);
+    border: none;
+}
+
+.btn-archive {
+    color: red;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.btn-open {
+    color: #990000 
+}
+
+.btn-archive:hover {
+    color: rgb(165, 19, 19);
+    text-decoration: underline; 
+    border: none;
+}
+
+button:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.badge.upcoming {
+    background-color: #FFB84D;
+    color: #EAEAEA;
+}
+
+.badge.completed {
+    background-color: #FF8C00;
+    color: #EAEAEA;
+}
+
+.badge.unknown {
+    background-color: #6c757d;
+    color: #EAEAEA;
+}
+
+.badge.active-status {
+    background-color: #FF8C00;  
+    color: #EAEAEA;
+}
+
+.badge.archived-status {
+    background-color: #FFB84D;  
+    color: #EAEAEA;
+}
+.paid, .not-paid {
+    transition: all 0.3s ease;
+}
+
+.paid:hover, .not-paid:hover {
+    opacity: 0.8;
+    cursor: pointer;
+}
+.btn-add {
+    transition: all 0.3s ease;
+}
+
+.btn-add:hover {
+    background-color: #e67e00 !important;
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.search-filter-container {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}

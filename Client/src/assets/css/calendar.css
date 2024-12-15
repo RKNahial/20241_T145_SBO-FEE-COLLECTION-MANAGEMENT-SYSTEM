@@ -1,0 +1,61 @@
+.calendar-card {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    padding-top: 1.25rem !important;
+    border: none !important;
+    height: 500px !important;
+    border-radius: 8px !important;
+    margin-bottom: 0 !important;
+}
+
+.calendar-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 1rem !important;
+    background-color: #fff !important;
+    margin: 0 !important;
+}
+
+.calendar-title {
+    font-size: 1.25rem !important;
+    font-weight: 600 !important;
+    color: #333 !important;
+    margin: 0 !important;
+}
+
+.calendar-add-button {
+    background-color: #FF8C00 !important;
+    color: white !important;
+    border: none !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    transition: background-color 0.3s !important;
+}
+
+.calendar-add-button:hover {
+    background-color: #FF7000 !important;
+}
+
+.calendar-container {
+    position: relative !important;
+    width: 100% !important;
+    height: 400px !important;
+    overflow: hidden !important;
+    background: #fff !important;
+    border-radius: 8px !important;
+    padding: 0 !important;
+}
+
+.calendar-iframe {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    background: white !important;
+} 
