@@ -1,12 +1,13 @@
 // src/pages/governor/GovSidebar.jsx
-import React from "react";
+import React, { useState } from "react"; 
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import axios from 'axios';
-
+import { Modal } from 'react-bootstrap'; 
 const GovSidebar = ({ isCollapsed }) => {
     const navigate = useNavigate();
     const { setUser } = useAuth();
+    const [showLogoutModal, setShowLogoutModal] = useState(false); 
 
     const handleLogout = async () => {
         try {
@@ -31,6 +32,11 @@ const GovSidebar = ({ isCollapsed }) => {
             setUser(null);
             window.location.href = '/sbo-fee-collection';
         }
+    };
+
+    const confirmLogout = () => {
+        handleLogout(); // Call the logout function
+        setShowLogoutModal(false); // Close the modal
     };
 
     return (
@@ -65,7 +71,7 @@ const GovSidebar = ({ isCollapsed }) => {
                             </NavLink>
                         </div>
                         <button
-                            onClick={handleLogout}
+                            onClick={() => setShowLogoutModal(true)} // Show the logout modal
                             className="nav-link logout-link"
                             style={{ 
                                 border: 'none', 
@@ -81,6 +87,58 @@ const GovSidebar = ({ isCollapsed }) => {
                     </div>
                 </div>
             </nav>
+
+            {/* Logout Confirmation Modal */}
+            <Modal show={showLogoutModal} onHide={() => setShowLogoutModal(false)}>
+                <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
+                    <Modal.Title>
+                        Confirm Logout
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p className="mb-1">
+                        Are you sure you want to log out?
+                    </p>
+                </Modal.Body>
+                <Modal.Footer style={{ border: 'none', padding: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                        <button
+                            type="button"
+                            onClick={confirmLogout} 
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: '#FF8C00',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#E67E22'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = '#FF8C00'}
+                        >
+                            Confirm
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setShowLogoutModal(false)} 
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: 'red',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#cc0000'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = 'red'}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

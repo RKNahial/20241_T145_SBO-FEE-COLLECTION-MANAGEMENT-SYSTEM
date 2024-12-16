@@ -1,16 +1,17 @@
-// src//pages/Governor/GovNavbar.jsx
+// src/pages/governor/GovNavbar.jsx
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { auth } from '../firebase/firebaseConfig';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../../context/AuthContext';
-
+import { Modal } from 'react-bootstrap'; // Import Modal
 
 const GovNavbar = ({ toggleSidebar }) => {
-        const navigate = useNavigate();
+    const navigate = useNavigate();
     const { setUser } = useAuth();
     const [userImage, setUserImage] = useState("/public/images/COT-logo.png");
+    const [showLogoutModal, setShowLogoutModal] = useState(false); // State for logout modal
 
     useEffect(() => {
         try {
@@ -32,9 +33,7 @@ const GovNavbar = ({ toggleSidebar }) => {
         }
     }, []);
 
-    const handleLogout = async (e) => {
-        e.preventDefault();
-
+    const handleLogout = async () => {
         try {
             const userDetailsString = localStorage.getItem('userDetails');
             if (userDetailsString) {
@@ -66,6 +65,10 @@ const GovNavbar = ({ toggleSidebar }) => {
         }
     };
 
+    const confirmLogout = () => {
+        handleLogout(); // Call the logout function
+        setShowLogoutModal(false); // Close the modal
+    };
 
     return (
         <nav className="sb-topnav navbar navbar-expand navbar navbar-padding">
@@ -104,10 +107,67 @@ const GovNavbar = ({ toggleSidebar }) => {
                     </Link>
                     <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                         <li><Link className="dropdown-item" to="/governor/profile">Profile</Link></li>
-                        <li><button className="dropdown-item" onClick={handleLogout}>Logout</button></li>
+                        <li>
+                            <button className="dropdown-item" onClick={() => setShowLogoutModal(true)}>Logout</button>
+                        </li>
                     </ul>
                 </li>
             </ul>
+
+            {/* Logout Confirmation Modal */}
+            <Modal show={showLogoutModal} onHide={() => setShowLogoutModal(false)}>
+                <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
+                    <Modal.Title>
+                        Confirm Logout
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p className="mb-1">
+                        Are you sure you want to log out?
+                    </p>
+                    <small style={{ color: '#6c757d', fontSize: '0.90rem' }}>
+                        Please confirm your action.
+                    </small>
+                </Modal.Body>
+                <Modal.Footer style={{ border: 'none', padding: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                        <button
+                            type="button"
+                            onClick={confirmLogout} // Call confirmLogout on confirm
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: '#FF8C00',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#E67E22'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = '#FF8C00'}
+                        >
+                            Confirm
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setShowLogoutModal(false)} // Close the modal on cancel
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: 'red',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#cc0000'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = 'red'}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </Modal.Footer>
+            </Modal>
         </nav>
     );
 };
