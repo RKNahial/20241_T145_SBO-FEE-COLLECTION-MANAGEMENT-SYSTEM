@@ -93,48 +93,69 @@ const Login = () => {
             await signOut(auth);
             const provider = new GoogleAuthProvider();
             provider.setCustomParameters({
-                prompt: 'select_account',
-                access_type: 'offline'
+                prompt: 'select_account'
             });
 
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
 
-            if (user && user.email) {
-                const response = await axios.post('http://localhost:8000/api/auth/verify-google-users', {
-                    email: user.email,
-                    uid: user.uid,
-                    displayName: user.displayName,
-                    photoURL: user.photoURL
-                });
-
-                if (response.data.authorized) {
-                    localStorage.setItem('token', response.data.token);
-
-                    const userDetails = {
-                        _id: user.uid,
+                if (user && user.email) {
+                    const response = await axios.post('http://localhost:8000/api/auth/verify-google-users', {
                         email: user.email,
-                        position: response.data.position,
-                        loginLogId: response.data.loginLogId,
-                        picture: user.photoURL,
-                        imageUrl: user.photoURL,
-                        sessionExpiry: new Date().getTime() + (keepSignedIn ? 24 : 1) * 60 * 60 * 1000 // 24 hours or 1 hour
-                    };
+                        uid: user.uid,
+                        displayName: user.displayName,
+                        photoURL: user.photoURL
+                    });
 
-                    // Store user details and complete login
-                    localStorage.setItem('userDetails', JSON.stringify(userDetails));
-                    setUser(userDetails);
+                    if (response.data.authorized) {
+                        localStorage.setItem('token', response.data.token);
 
-                    if (userDetails.position.toLowerCase() === 'treasurer') {
-                        navigate('/treasurer/dashboard');
+                        const userDetails = {
+                            _id: response.data.userId,
+                            email: user.email,
+                            position: response.data.position,
+                            loginLogId: response.data.loginLogId,
+                            picture: user.photoURL,
+                            imageUrl: user.photoURL,
+                            sessionExpiry: new Date().getTime() + (keepSignedIn ? 24 : 1) * 60 * 60 * 1000
+                        };
+
+                        localStorage.setItem('userDetails', JSON.stringify(userDetails));
+                        setUser(userDetails);
+
+                        const position = response.data.position.toLowerCase();
+                        switch (position) {
+                            case 'admin':
+                                navigate('/admin/dashboard');
+                                break;
+                            case 'treasurer':
+                                navigate('/treasurer/dashboard');
+                                break;
+                            case 'governor':
+                                navigate('/governor/dashboard');
+                                break;
+                            case 'officer':
+                                navigate('/officer/dashboard');
+                                break;
+                            default:
+                                setMessage('Invalid user position');
+                                console.error('Unknown position:', position);
+                        }
+                    } else {
+                        setMessage(response.data.message || 'Access denied. Only authorized users can log in.');
                     }
-                } else {
-                    setMessage('Access denied. Only authorized users can log in.');
                 }
+            } catch (popupError) {
+                if (popupError.code === 'auth/popup-closed-by-user') {
+                    console.log('Sign-in popup closed by user');
+                    return;
+                }
+                throw popupError;
             }
         } catch (error) {
             console.error('Google login error:', error);
-            setMessage('Failed to login with Google');
+            setMessage(error.response?.data?.message || 'Failed to login with Google. Please try again.');
         }
     };
 
@@ -157,22 +178,19 @@ const Login = () => {
             setRecaptchaToken(token);
             setShowOTPModal(true);
 
-            // Set expiration timer for 5 minutes
-            const expiryTime = new Date().getTime() + (5 * 60 * 1000); // 5 minutes
+            const expiryTime = new Date().getTime() + (5 * 60 * 1000);
             setRecaptchaExpiry(expiryTime);
 
-            // Set timeout to clear reCAPTCHA after 5 minutes
             setTimeout(() => {
                 setRecaptchaToken(null);
                 setRecaptchaExpiry(null);
                 setShowOTPModal(false);
                 setOtpVerified(false);
-                // Reset the reCAPTCHA widget
                 if (window.grecaptcha) {
                     window.grecaptcha.reset();
                 }
                 setMessage('reCAPTCHA expired. Please verify again.');
-            }, 5 * 60 * 1000); // 5 minutes
+            }, 5 * 60 * 1000);
         }
     };
 
@@ -201,7 +219,6 @@ const Login = () => {
             return;
         }
 
-        // Store the complete userDetails object
         localStorage.setItem('userDetails', JSON.stringify({
             _id: response.data.userDetails._id,
             email: response.data.userDetails.email,
@@ -209,7 +226,6 @@ const Login = () => {
             loginLogId: response.data.userDetails.loginLogId
         }));
 
-        // Log the stored details for debugging
         const storedDetails = localStorage.getItem('userDetails');
         console.log('Stored user details:', storedDetails);
     };
@@ -223,7 +239,6 @@ const Login = () => {
         localStorage.setItem('userDetails', JSON.stringify(userDetails));
         setUser(userDetails);
 
-        // Handle navigation based on position
         const position = userDetails.position.toLowerCase().trim();
 
         switch (position) {
@@ -249,14 +264,12 @@ const Login = () => {
         try {
             const userDetails = {
                 ...response.profileObj,
-                imageUrl: response.profileObj.imageUrl, // Store Google profile image URL
-                picture: response.profileObj.imageUrl,  // Store as both imageUrl and picture
+                imageUrl: response.profileObj.imageUrl,
+                picture: response.profileObj.imageUrl,
                 email: response.profileObj.email,
                 name: response.profileObj.name,
-                // ... other user details
             };
             localStorage.setItem('userDetails', JSON.stringify(userDetails));
-            // ... rest of your login logic
         } catch (error) {
             console.error('Error during Google login:', error);
         }
@@ -271,13 +284,12 @@ const Login = () => {
             if (response.data.success) {
                 const userDetails = {
                     ...response.data.user,
-                    imageUrl: googleData.picture, // Store Google profile picture URL
-                    picture: googleData.picture,  // Backup storage
+                    imageUrl: googleData.picture,
+                    picture: googleData.picture,
                     loginLogId: response.data.loginLogId
                 };
 
                 localStorage.setItem('userDetails', JSON.stringify(userDetails));
-                // Rest of your login logic
             }
         } catch (error) {
             console.error('Login error:', error);

@@ -44,6 +44,7 @@ class GoogleAuthService {
         const loginLog = await Log.create({
             userId: user._id,
             userModel: user.position,
+            email: user.email,
             action: 'login',
             timestamp: new Date(),
             status: 'active',

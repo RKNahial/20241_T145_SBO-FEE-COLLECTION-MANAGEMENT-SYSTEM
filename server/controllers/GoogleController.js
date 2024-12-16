@@ -11,8 +11,16 @@ exports.verifyGoogleUser = async (req, res) => {
         if (user && user.authorized) {
             console.log(`✨ User authenticated successfully as ${user.position}`);
             
-            const token = googleAuthService.generateToken(user);
-            const loginLog = await googleAuthService.createLoginLog(user);
+            // Ensure user object has all required fields
+            const userForLog = {
+                _id: user._id,
+                email: user.email,
+                position: user.position,
+                name: user.name || email.split('@')[0]
+            };
+            
+            const token = googleAuthService.generateToken(userForLog);
+            const loginLog = await googleAuthService.createLoginLog(userForLog);
             
             console.log(`👤 Google Account ${email} successfully authenticated and logged in`);
 
@@ -21,7 +29,9 @@ exports.verifyGoogleUser = async (req, res) => {
                 token: token,
                 position: user.position,
                 sessionDuration: 24 * 60 * 60 * 1000,
-                loginLogId: loginLog._id
+                loginLogId: loginLog._id,
+                userId: user._id,
+                email: user.email
             });
         }
 
@@ -31,6 +41,10 @@ exports.verifyGoogleUser = async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Authorization error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ 
+            error: 'Internal server error',
+            message: error.message,
+            details: error.errors
+        });
     }
 };

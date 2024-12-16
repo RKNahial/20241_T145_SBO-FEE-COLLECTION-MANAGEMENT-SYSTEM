@@ -74,14 +74,39 @@ exports.verifyOTP = async (req, res) => {
     try {
         const { phoneNumber, otpCode } = req.body;
 
-        // Implement your OTP verification logic here
-        // Compare the received OTP with the stored OTP
+        // Get stored OTP data
+        const storedOTPData = otpStore.get(phoneNumber);
         
-        // For now, returning a mock response
+        if (!storedOTPData) {
+            return res.status(400).json({
+                success: false,
+                message: 'No OTP found for this phone number. Please request a new OTP.',
+                valid: false
+            });
+        }
+
+        // Check if OTP has expired
+        if (Date.now() > storedOTPData.expiresAt) {
+            otpStore.delete(phoneNumber); // Clean up expired OTP
+            return res.status(400).json({
+                success: false,
+                message: 'OTP has expired. Please request a new one.',
+                valid: false
+            });
+        }
+
+        // Verify OTP
+        const isValid = storedOTPData.code === otpCode;
+        
+        if (isValid) {
+            // Clean up used OTP
+            otpStore.delete(phoneNumber);
+        }
+
         res.status(200).json({
             success: true,
-            message: 'OTP verified successfully',
-            valid: true
+            message: isValid ? 'OTP verified successfully' : 'Invalid OTP code',
+            valid: isValid
         });
     } catch (error) {
         console.error('Error verifying OTP:', error);
@@ -91,4 +116,4 @@ exports.verifyOTP = async (req, res) => {
             error: error.message
         });
     }
-}; 
+};
