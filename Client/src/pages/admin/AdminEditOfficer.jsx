@@ -213,55 +213,51 @@ const AdminEditOfficer = () => {
                                                     required
                                                 />
                                             </div>
-                                            <div className="mb-4">
+                                            <div className="mb-4 position-relative">
                                                 <label className="mb-1">Position</label>
-                                                <select
-                                                    name="position"
-                                                    className="form-control system"
-                                                    value={formData.position}
-                                                    onChange={handleChange}
-                                                    required
-                                                    style={{ paddingLeft: '35px', position: 'relative' }}
-                                                >
-                                                    <option value="">
-                                                        Select Position
-                                                    </option>
-                                                    {getPositionOptions().map((option) => (
-                                                        <option key={option.value} value={option.value}>
-                                                            {option.label}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                                <i 
-                                                    className={`fas ${getPositionIcon(formData.position)} position-icon`}
-                                                    style={{
-                                                        position: 'absolute',
-                                                        left: '25px',
-                                                        top: '50%',
-                                                        transform: 'translateY(-50%)',
-                                                        color: '#6c757d',
-                                                        pointerEvents: 'none'
-                                                    }}
-                                                ></i>
+                                                <div className="position-select-container">
+                                                    <select
+                                                        name="position"
+                                                        className="form-control system"
+                                                        value={formData.position}
+                                                        onChange={handleChange}
+                                                        required
+                                                    >
+                                                        <option value="">Select Position</option>
+                                                        {getPositionOptions().map((option) => (
+                                                            <option key={option.value} value={option.value}>
+                                                                {option.label}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    <i 
+                                                        className={`fas ${getPositionIcon(formData.position)} position-icon`}
+                                                    ></i>
+                                                </div>
                                             </div>
                                             <style>
                                                 {`
                                                     .position-select-container {
                                                         position: relative;
+                                                        display: block;
                                                     }
                                                     .position-icon {
                                                         position: absolute;
-                                                        left: 10px;
+                                                        left: 12px;
                                                         top: 50%;
                                                         transform: translateY(-50%);
                                                         color: #6c757d;
-                                                        pointerEvents: none;
+                                                        pointer-events: none;
+                                                        z-index: 1;
                                                     }
-                                                    select.form-control {
+                                                    .position-select-container select {
                                                         padding-left: 35px;
+                                                        -webkit-appearance: auto;
+                                                        -moz-appearance: auto;
                                                         appearance: auto;
+                                                        width: 100%;
                                                     }
-                                                    select.form-control option {
+                                                    .position-select-container select option {
                                                         padding: 10px;
                                                     }
                                                 `}
