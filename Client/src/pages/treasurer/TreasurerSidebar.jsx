@@ -119,7 +119,7 @@ const TreasurerSidebar = ({ isCollapsed, onNavigate, isEditingStudent }) => {
                     <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
                         <button
                             type="button"
-                            onClick={confirmLogout} // Call confirmLogout on confirm
+                            onClick={confirmLogout} 
                             style={{
                                 borderRadius: '0.35rem',
                                 color: '#EAEAEA',
@@ -136,7 +136,7 @@ const TreasurerSidebar = ({ isCollapsed, onNavigate, isEditingStudent }) => {
                         </button>
                         <button
                             type="button"
-                            onClick={() => setShowLogoutModal(false)} // Close the modal on cancel
+                            onClick={() => setShowLogoutModal(false)} 
                             style={{
                                 borderRadius: '0.35rem',
                                 color: '#EAEAEA',

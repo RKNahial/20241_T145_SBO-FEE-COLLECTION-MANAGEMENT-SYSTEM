@@ -1,12 +1,13 @@
-// src//pages/officer/OfficerSidebar.jsx
 import { Helmet } from 'react-helmet';
-import React from "react";
+import React, { useState } from "react"; 
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from '../../context/AuthContext';
+import { Modal } from 'react-bootstrap'; 
 
 const OfficerSidebar = ({ isCollapsed }) => {
     const navigate = useNavigate();
     const { setUser } = useAuth();
+    const [showLogoutModal, setShowLogoutModal] = useState(false); 
 
     const handleLogout = () => {
         // Clear all localStorage items
@@ -18,6 +19,11 @@ const OfficerSidebar = ({ isCollapsed }) => {
 
         // Navigate to login page
         navigate('/sbo-fee-collection');
+    };
+
+    const confirmLogout = () => {
+        handleLogout(); 
+        setShowLogoutModal(false); 
     };
 
     return (
@@ -38,12 +44,12 @@ const OfficerSidebar = ({ isCollapsed }) => {
                             <NavLink className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} to="/officer/reports" end>
                                 <i className="far fa-file-alt icon-space"></i>{!isCollapsed && <span> Reports</span>}
                             </NavLink>
-                             <NavLink to="/officer/file-upload" className={`nav-link ${location.pathname === '/officer/file-upload' ? 'active' : ''}`}>
+                            <NavLink to="/officer/file-upload" className={`nav-link ${location.pathname === '/officer/file-upload' ? 'active' : ''}`}>
                                 <i className="fas fa-file-upload icon-space"></i>{!isCollapsed && <span> File Upload</span>}
                             </NavLink>
                         </div>
                         <button
-                            onClick={handleLogout}
+                            onClick={() => setShowLogoutModal(true)} // Show the logout modal
                             className="nav-link logout-link"
                             style={{ border: 'none', background: 'none', width: '100%', textAlign: 'left' }}
                         >
@@ -53,6 +59,61 @@ const OfficerSidebar = ({ isCollapsed }) => {
                     </div>
                 </div>
             </nav>
+
+            {/* Logout Confirmation Modal */}
+            <Modal show={showLogoutModal} onHide={() => setShowLogoutModal(false)}>
+                <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
+                    <Modal.Title>
+                        Confirm Logout
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p className="mb-1">
+                        Are you sure you want to log out?
+                    </p>
+                    <small style={{ color: '#6c757d', fontSize: '0.90rem' }}>
+                        Please confirm your action.
+                    </small>
+                </Modal.Body>
+                <Modal.Footer style={{ border: 'none', padding: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                        <button
+                            type="button"
+                            onClick={confirmLogout} 
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: '#FF8C00',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#E67E22'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = '#FF8C00'}
+                        >
+                            Confirm
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setShowLogoutModal(false)} 
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: 'red',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#cc0000'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = 'red'}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };
