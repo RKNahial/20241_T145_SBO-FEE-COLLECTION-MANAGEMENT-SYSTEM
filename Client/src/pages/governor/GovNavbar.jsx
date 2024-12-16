@@ -5,13 +5,13 @@ import axios from "axios";
 import { auth } from '../firebase/firebaseConfig';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../../context/AuthContext';
-import { Modal } from 'react-bootstrap'; // Import Modal
+import { Modal } from 'react-bootstrap';
 
 const GovNavbar = ({ toggleSidebar }) => {
     const navigate = useNavigate();
     const { setUser } = useAuth();
     const [userImage, setUserImage] = useState("/public/images/COT-logo.png");
-    const [showLogoutModal, setShowLogoutModal] = useState(false); // State for logout modal
+    const [showLogoutModal, setShowLogoutModal] = useState(false); 
 
     useEffect(() => {
         try {
@@ -66,8 +66,8 @@ const GovNavbar = ({ toggleSidebar }) => {
     };
 
     const confirmLogout = () => {
-        handleLogout(); // Call the logout function
-        setShowLogoutModal(false); // Close the modal
+        handleLogout(); 
+        setShowLogoutModal(false); 
     };
 
     return (
@@ -125,9 +125,6 @@ const GovNavbar = ({ toggleSidebar }) => {
                     <p className="mb-1">
                         Are you sure you want to log out?
                     </p>
-                    <small style={{ color: '#6c757d', fontSize: '0.90rem' }}>
-                        Please confirm your action.
-                    </small>
                 </Modal.Body>
                 <Modal.Footer style={{ border: 'none', padding: '1rem' }}>
                     <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
