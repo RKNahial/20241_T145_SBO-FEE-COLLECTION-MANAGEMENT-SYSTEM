@@ -95,10 +95,22 @@ const VerifyOTP = ({ phoneNumber, onVerificationComplete, onResendRequest, onClo
                 </div>
             </div>
             <div className="d-flex justify-content-between align-items-center">
+            <div className="ml-auto"> {/* Add a div to contain the buttons for alignment */}
                 <Button
-                    variant="primary"
+                    variant="btn update-"
                     onClick={handleVerifyOTP}
                     disabled={verifying || otpCode.length !== 6}
+                    style={{
+                        display: 'inline-block', 
+                        color: '#EAEAEA',
+                        marginRight: '10px', 
+                        padding: '0.5rem 1rem', 
+                        transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                        backgroundColor: '#FF8C00',
+                        cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = '#E67E22'}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = '#FF8C00'}
                 >
                     <FontAwesomeIcon icon={faKey} className="me-2" />
                     {verifying ? 'Verifying...' : 'Verify OTP'}
@@ -107,6 +119,10 @@ const VerifyOTP = ({ phoneNumber, onVerificationComplete, onResendRequest, onClo
                     variant="outline-primary"
                     onClick={handleResend}
                     disabled={resendCooldown > 0}
+                    style={{
+                        display: 'inline-block', // Make the button take only the width of its content
+                        padding: '0.5rem 1rem', // Adjust padding as needed
+                    }}
                 >
                     {resendCooldown > 0 
                         ? `Resend in ${resendCooldown}s` 
@@ -114,6 +130,7 @@ const VerifyOTP = ({ phoneNumber, onVerificationComplete, onResendRequest, onClo
                 </Button>
             </div>
         </div>
+    </div>
     );
 };
 
