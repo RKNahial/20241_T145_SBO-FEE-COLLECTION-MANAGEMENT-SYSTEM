@@ -5,11 +5,13 @@ import axios from "axios";
 import { auth } from '../firebase/firebaseConfig';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../../context/AuthContext';
+import { Modal, Button } from 'react-bootstrap';
 
 const TreasurerNavbar = ({ toggleSidebar }) => {
     const navigate = useNavigate();
     const { setUser } = useAuth();
-    const [userImage, setUserImage] = useState("/public/images/COT-logo.png");
+    const [userImage, setUserImage] = useState("/public/images/COT-Logo.png");
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     useEffect(() => {
         try {
@@ -31,8 +33,9 @@ const TreasurerNavbar = ({ toggleSidebar }) => {
         }
     }, []);
 
-    const handleLogout = async (e) => {
-        e.preventDefault();
+    const handleLogout = async () => {
+        if (handleLogout.isLoggingOut) return;
+        handleLogout.isLoggingOut = true;
 
         try {
             const userDetailsString = localStorage.getItem('userDetails');
@@ -72,7 +75,14 @@ const TreasurerNavbar = ({ toggleSidebar }) => {
             sessionStorage.clear();
             setUser(null);
             navigate('/login');
+        } finally {
+            handleLogout.isLoggingOut = false;
         }
+    };
+
+    const confirmLogout = () => {
+        handleLogout(); 
+        setShowLogoutModal(false); 
     };
 
     return (
@@ -112,10 +122,64 @@ const TreasurerNavbar = ({ toggleSidebar }) => {
                     </Link>
                     <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                         <li><Link className="dropdown-item" to="/treasurer/profile">Profile</Link></li>
-                        <li><button className="dropdown-item" onClick={handleLogout}>Logout</button></li>
+                        <li>
+                            <button className="dropdown-item" onClick={() => setShowLogoutModal(true)}>Logout</button>
+                        </li>
                     </ul>
                 </li>
             </ul>
+
+            {/* Logout Confirmation Modal */}
+            <Modal show={showLogoutModal} onHide={() => setShowLogoutModal(false)}>
+                <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
+                    <Modal.Title>
+                        Confirm Logout
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p className="mb-1">
+                        Are you sure you want to log out?
+                    </p>
+                </Modal.Body>
+                <Modal.Footer style={{ border: 'none', padding: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                        <button
+                            type="button"
+                            onClick={confirmLogout} 
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: '#FF8C00',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#E67E22'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = '#FF8C00'}
+                        >
+                            Confirm
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setShowLogoutModal(false)} 
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: 'red',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#cc0000'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = 'red'}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </Modal.Footer>
+            </Modal>
         </nav>
     );
 };

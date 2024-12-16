@@ -1,22 +1,21 @@
-// src//pages/treasurer/TreasurerSidebar.jsx
-import React from "react";
+import React, { useState } from "react"; // Import useState
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { auth } from '../firebase/firebaseConfig';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../../context/AuthContext';
+import { Modal, Button } from 'react-bootstrap';
 
 const TreasurerSidebar = ({ isCollapsed, onNavigate, isEditingStudent }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const { setUser } = useAuth();
+    const [showLogoutModal, setShowLogoutModal] = useState(false); // State for logout modal
 
     const handleNavigation = async (path) => {
         if (isEditingStudent && onNavigate) {
-            // Use the provided navigation handler if we're editing a student
             await onNavigate(path);
         } else {
-            // Regular navigation for other cases
             navigate(path);
         }
     };
@@ -26,17 +25,9 @@ const TreasurerSidebar = ({ isCollapsed, onNavigate, isEditingStudent }) => {
         handleLogout.isLoggingOut = true;
 
         try {
-            // If we're editing a student, release the lock before logging out
-            if (isEditingStudent && onNavigate) {
-                await onNavigate('/sbo-fee-collection');
-                return;
-            }
-
             const userDetailsString = localStorage.getItem('userDetails');
             if (userDetailsString) {
                 const userDetails = JSON.parse(userDetailsString);
-
-                // Call backend logout
                 await axios.post('http://localhost:8000/api/logout', {
                     userId: userDetails._id,
                     userModel: userDetails.position,
@@ -45,21 +36,16 @@ const TreasurerSidebar = ({ isCollapsed, onNavigate, isEditingStudent }) => {
                 });
             }
 
-            // Sign out from Firebase/Google
             if (auth.currentUser) {
                 await signOut(auth);
             }
 
-            // Clear all local data
             localStorage.clear();
             sessionStorage.clear();
             setUser(null);
-
-            // Force redirect to login
             window.location.href = '/sbo-fee-collection';
         } catch (error) {
             console.error('Logout error:', error);
-            // Force logout even if there's an error
             localStorage.clear();
             sessionStorage.clear();
             setUser(null);
@@ -67,6 +53,11 @@ const TreasurerSidebar = ({ isCollapsed, onNavigate, isEditingStudent }) => {
         } finally {
             handleLogout.isLoggingOut = false;
         }
+    };
+
+    const confirmLogout = () => {
+        handleLogout(); // Call the logout function
+        setShowLogoutModal(false); // Close the modal
     };
 
     return (
@@ -96,7 +87,7 @@ const TreasurerSidebar = ({ isCollapsed, onNavigate, isEditingStudent }) => {
                         </div>
                         <button
                             className="nav-link logout-link"
-                            onClick={handleLogout}
+                            onClick={() => setShowLogoutModal(true)} // Show the logout modal
                             style={{
                                 border: 'none',
                                 background: 'none',
@@ -112,6 +103,57 @@ const TreasurerSidebar = ({ isCollapsed, onNavigate, isEditingStudent }) => {
                     </div>
                 </div>
             </nav>
+            {/* Logout Confirmation Modal */}
+            <Modal show={showLogoutModal} onHide={() => setShowLogoutModal(false)}>
+                <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
+                    <Modal.Title>
+                        Confirm Logout
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p className="mb-1">
+                        Are you sure you want to log out?
+                    </p>
+                </Modal.Body>
+                <Modal.Footer style={{ border: 'none', padding: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                        <button
+                            type="button"
+                            onClick={confirmLogout} // Call confirmLogout on confirm
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: '#FF8C00',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#E67E22'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = '#FF8C00'}
+                        >
+                            Confirm
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setShowLogoutModal(false)} // Close the modal on cancel
+                            style={{
+                                borderRadius: '0.35rem',
+                                color: '#EAEAEA',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                                backgroundColor: 'red',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#cc0000'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = 'red'}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };
