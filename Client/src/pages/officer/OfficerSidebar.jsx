@@ -71,9 +71,6 @@ const OfficerSidebar = ({ isCollapsed }) => {
                     <p className="mb-1">
                         Are you sure you want to log out?
                     </p>
-                    <small style={{ color: '#6c757d', fontSize: '0.90rem' }}>
-                        Please confirm your action.
-                    </small>
                 </Modal.Body>
                 <Modal.Footer style={{ border: 'none', padding: '1rem' }}>
                     <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
