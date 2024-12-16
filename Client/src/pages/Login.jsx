@@ -27,6 +27,28 @@ const Login = () => {
     const [otpVerified, setOtpVerified] = useState(false);
     const [showOTPModal, setShowOTPModal] = useState(false);
     const [recaptchaExpiry, setRecaptchaExpiry] = useState(null);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+    const SuccessModal = ({ isOpen, onClose }) => {
+        if (!isOpen) return null;
+        
+        return (
+            <div className="success-modal-overlay">
+                <div className="success-modal">
+                    <div className="success-checkmark">
+                        <div className="check-icon">
+                            <span className="icon-line line-tip"></span>
+                            <span className="icon-line line-long"></span>
+                            <div className="icon-circle"></div>
+                            <div className="icon-fix"></div>
+                        </div>
+                    </div>
+                    <h2>Login Successful!</h2>
+                    <p>Welcome back!</p>
+                </div>
+            </div>
+        );
+    };
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -55,25 +77,32 @@ const Login = () => {
                 localStorage.setItem('userDetails', JSON.stringify(userDetails));
                 setUser(userDetails);
 
-                const position = (response.data.position || '').toLowerCase().trim();
+                // Show success modal
+                setShowSuccessModal(true);
+                
+                // Navigate after a short delay
+                setTimeout(() => {
+                    setShowSuccessModal(false);
+                    const position = (response.data.position || '').toLowerCase().trim();
 
-                switch (position) {
-                    case 'admin':
-                        navigate('/admin/dashboard');
-                        break;
-                    case 'treasurer':
-                        navigate('/treasurer/dashboard');
-                        break;
-                    case 'governor':
-                        navigate('/governor/dashboard');
-                        break;
-                    case 'officer':
-                        navigate('/officer/dashboard');
-                        break;
-                    default:
-                        setMessage('Invalid user position');
-                        console.error('Unknown position:', position);
-                }
+                    switch (position) {
+                        case 'admin':
+                            navigate('/admin/dashboard');
+                            break;
+                        case 'treasurer':
+                            navigate('/treasurer/dashboard');
+                            break;
+                        case 'governor':
+                            navigate('/governor/dashboard');
+                            break;
+                        case 'officer':
+                            navigate('/officer/dashboard');
+                            break;
+                        default:
+                            setMessage('Invalid user position');
+                            console.error('Unknown position:', position);
+                    }
+                }, 2000);
             }
         } catch (error) {
             console.error('Login error:', error);
@@ -86,7 +115,6 @@ const Login = () => {
             setLoading(false);
         }
     };
-
 
     const handleGoogle = async () => {
         try {
@@ -323,123 +351,120 @@ const Login = () => {
     }, [recaptchaExpiry]);
 
     return (
-        <div className="login-body">
+        <>
             <Helmet>
-                <title></title>
+                <title>Login | PUPQC Fee Collection Management System</title>
             </Helmet>
-            <div className="login-container">
-                <div className="text-center">
-                    <img src="../images/COT-Logo.jpg" alt="COT Logo" className="logo" />
-                </div>
-                <h2>LOGIN</h2>
+            <div className="login-body">
+                <div className="login-container">
+                    <div className="text-center">
+                        <img src="../images/COT-Logo.jpg" alt="COT Logo" className="logo" />
+                    </div>
+                    <h2>LOGIN</h2>
 
-                {message && (
-                    <div className={`alert ${message.includes('success') ? 'alert-success' : 'alert-danger'}`}>
-                        {message}
-                    </div>
-                )}
+                    {message && (
+                        <div className={`alert ${message.includes('success') ? 'alert-success' : 'alert-danger'}`}>
+                            {message}
+                        </div>
+                    )}
 
-                <form id="loginForm" onSubmit={handleLogin}>
-                    <div className="form-group">
-                        <div className="input-icon-wrapper">
-                            <input
-                                type="email"
-                                className="form-control login-form"
-                                id="email"
-                                name="email"
-                                placeholder="Email"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                            <i className="input-icon fas fa-user"></i>
-                        </div>
-                    </div>
-                    <div className="form-group">
-                        <div className="input-icon-wrapper">
-                            <input
-                                type="password"
-                                className="form-control login-form"
-                                id="password"
-                                name="password"
-                                placeholder="Password"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                            <i className="input-icon fas fa-lock"></i>
-                            <button type="button" className="toggle-password" onClick={togglePassword}>
-                                <i className="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div className="form-group">
+                    <form id="loginForm" onSubmit={handleLogin}>
                         <div className="form-group">
-                            <div className="form-check">
+                            <div className="input-icon-wrapper">
                                 <input
-                                    type="checkbox"
-                                    className="form-check-input"
-                                    id="keepSignedIn"
-                                    checked={keepSignedIn}
-                                    onChange={(e) => setKeepSignedIn(e.target.checked)}
+                                    type="email"
+                                    className="form-control login-form"
+                                    id="email"
+                                    name="email"
+                                    placeholder="Email"
+                                    required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                 />
-                                <label className="form-check-label smaller-gray-text" htmlFor="keepSignedIn">
-                                    Keep me signed in for 24 hours
-                                </label>
+                                <i className="input-icon fas fa-user"></i>
                             </div>
                         </div>
+                        <div className="form-group">
+                            <div className="input-icon-wrapper">
+                                <input
+                                    type="password"
+                                    className="form-control login-form"
+                                    id="password"
+                                    name="password"
+                                    placeholder="Password"
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                                <i className="input-icon fas fa-lock"></i>
+                                <button type="button" className="toggle-password" onClick={togglePassword}>
+                                    <i className="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div className="form-group">
+                            <div className="form-group">
+                                <div className="form-check">
+                                    <input
+                                        type="checkbox"
+                                        className="form-check-input"
+                                        id="keepSignedIn"
+                                        checked={keepSignedIn}
+                                        onChange={(e) => setKeepSignedIn(e.target.checked)}
+                                    />
+                                    <label className="form-check-label smaller-gray-text" htmlFor="keepSignedIn">
+                                        Keep me signed in for 24 hours
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <ReCAPTCHA
+                            sitekey="6LcfaG0qAAAAAFTykOtXdpsqkS9ZUeALt2CgFmId"
+                            onChange={onRecaptchaChange}
+                            onExpired={() => {
+                                setRecaptchaToken(null);
+                                setRecaptchaExpiry(null);
+                                setShowOTPModal(false);
+                                setOtpVerified(false);
+                                setMessage('reCAPTCHA expired. Please verify again.');
+                            }}
+                        />
+
+                        <OTPVerificationModal
+                            show={showOTPModal}
+                            onClose={() => setShowOTPModal(false)}
+                            onVerificationComplete={() => setOtpVerified(true)}
+                            phoneNumber={phoneNumber}
+                            setPhoneNumber={setPhoneNumber}
+                            otpSent={otpSent}
+                            setOtpSent={setOtpSent}
+                            otpCode={otpCode}
+                            setOtpCode={setOtpCode}
+                            loading={loading}
+                            setLoading={setLoading}
+                            verifying={verifying}
+                            setVerifying={setVerifying}
+                            setOtpVerified={setOtpVerified}
+                            setMessage={setMessage}
+                        />
+
+                        <button type="submit" className="btn btn-primary login-button" disabled={loading || !recaptchaToken || !otpVerified}>
+                            <i className="fas fa-sign-in-alt mr-2"></i> {loading ? 'Logging in...' : 'LOGIN'}
+                        </button>
+                    </form>
+
+                    <div className="divider">
+                        <span>or continue with</span>
                     </div>
-
-                    <ReCAPTCHA
-                        sitekey="6LcfaG0qAAAAAFTykOtXdpsqkS9ZUeALt2CgFmId"
-                        onChange={onRecaptchaChange}
-                        onExpired={() => {
-                            setRecaptchaToken(null);
-                            setRecaptchaExpiry(null);
-                            setShowOTPModal(false);
-                            setOtpVerified(false);
-                            setMessage('reCAPTCHA expired. Please verify again.');
-                        }}
+                    <GoogleSignInButton
+                        onClick={handleGoogle}
+                        disabled={loading}
                     />
-
-                    <OTPVerificationModal
-                        show={showOTPModal}
-                        onClose={() => setShowOTPModal(false)}
-                        onVerificationComplete={() => setOtpVerified(true)}
-                        phoneNumber={phoneNumber}
-                        setPhoneNumber={setPhoneNumber}
-                        otpSent={otpSent}
-                        setOtpSent={setOtpSent}
-                        otpCode={otpCode}
-                        setOtpCode={setOtpCode}
-                        loading={loading}
-                        setLoading={setLoading}
-                        verifying={verifying}
-                        setVerifying={setVerifying}
-                        setOtpVerified={setOtpVerified}
-                        setMessage={setMessage}
-                    />
-
-                    <button type="submit" className="btn btn-primary login-button" disabled={loading || !recaptchaToken || !otpVerified}>
-                        <i className="fas fa-sign-in-alt mr-2"></i> {loading ? 'Logging in...' : 'LOGIN'}
-                    </button>
-                </form>
-
-                <div className="divider">
-                    <span>or continue with</span>
                 </div>
-                <GoogleSignInButton
-                    onClick={handleGoogle}
-                    disabled={loading}
-                />
+                <SuccessModal isOpen={showSuccessModal} onClose={() => setShowSuccessModal(false)} />
             </div>
-            {/* <ConsentModal
-                isOpen={showConsentModal}
-                onClose={() => setShowConsentModal(false)}
-                onAccept={handleConsentAccept}
-                onDecline={handleConsentDecline}
-            /> */}
-        </div>
+        </>
     );
 };
 export default Login;
