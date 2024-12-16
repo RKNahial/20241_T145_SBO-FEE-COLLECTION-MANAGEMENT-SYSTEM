@@ -41,17 +41,17 @@ const ManageControls = () => {
                 // Updated filtering to use isArchived
                 const groupedUsers = {
                     Governor: data.filter(user => {
-                        const isGovernor = user.position?.toLowerCase().trim() === 'governor';
+                        const isGovernor = user.position?.toLowerCase().trim() === 'governor'.trim();
                         const isNotArchived = user.isArchived === false;
                         return isGovernor && isNotArchived;
                     }),
                     Treasurer: data.filter(user => {
-                        const isTreasurer = user.position?.toLowerCase().trim() === 'treasurer';
+                        const isTreasurer = user.position?.toLowerCase().trim() === 'treasurer'.trim();
                         const isNotArchived = user.isArchived === false;
                         return isTreasurer && isNotArchived;
                     }),
                     Officer: data.filter(user => {
-                        const isOfficer = user.position?.toLowerCase().trim() === 'officer';
+                        const isOfficer = user.position?.toLowerCase().trim() === 'officer'.trim();
                         const isNotArchived = user.isArchived === false;
                         return isOfficer && isNotArchived;
                     })
@@ -74,8 +74,8 @@ const ManageControls = () => {
                 (user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 user.email?.toLowerCase().includes(searchTerm.toLowerCase()))
             );
-            const matchesPosition = user.position?.toLowerCase().trim() === selectedRole.toLowerCase();
-            const isNotArchived = user.isArchived === false; // Changed this line
+            const matchesPosition = user.position?.toLowerCase().trim() === selectedRole.toLowerCase().trim();
+            const isNotArchived = user.isArchived === false;
             
             return matchesSearch && matchesPosition && isNotArchived;
         });
@@ -140,9 +140,9 @@ const ManageControls = () => {
         const [savingPermissions, setSavingPermissions] = useState(false);
         const [unsavedChanges, setUnsavedChanges] = useState(false);
         const [hoverSave, setHoverSave] = useState(false);
-         const [hoverCancel, setHoverCancel] = useState(false);
+        const [hoverCancel, setHoverCancel] = useState(false);
+        const [error, setError] = useState(null);
 
-        // Permission labels for better display
         const permissionLabels = {
             addStudent: 'Add Student',
             addPaymentCategory: 'Add Payment Category',
@@ -162,14 +162,20 @@ const ManageControls = () => {
             const fetchPermissions = async () => {
                 if (selectedUser) {
                     try {
+                        setLoading(true);
+                        setError(null);
                         const token = localStorage.getItem('token');
                         const response = await axios.get(
                             `http://localhost:8000/api/permissions/${selectedUser._id}`,
                             { headers: { Authorization: `Bearer ${token}` } }
                         );
-                        setPermissions(response.data.data || permissions);
+                        
+                        // If no permissions found, use default permissions
+                        const userPermissions = response.data.data?.permissions || permissions;
+                        setPermissions(userPermissions);
                     } catch (error) {
                         console.error('Error fetching permissions:', error);
+                        setError('Failed to load permissions. Please try again.');
                     } finally {
                         setLoading(false);
                     }
@@ -178,22 +184,18 @@ const ManageControls = () => {
             fetchPermissions();
         }, [selectedUser]);
 
-        const handlePageChange = (pageNumber) => {
-            setCurrentPage(pageNumber);
-        };
-
         const handlePermissionChange = (module, value) => {
-            const updatedPermissions = {
-                ...permissions,
+            setPermissions(prevPermissions => ({
+                ...prevPermissions,
                 [module]: value
-            };
-            setPermissions(updatedPermissions);
+            }));
             setUnsavedChanges(true);
         };
 
         const savePermissions = async () => {
             try {
                 setSavingPermissions(true);
+                setError(null);
                 const token = localStorage.getItem('token');
                 await axios.put(
                     `http://localhost:8000/api/permissions/${selectedUser._id}`,
@@ -207,23 +209,13 @@ const ManageControls = () => {
                 );
     
                 setUnsavedChanges(false);
-                handlePermissionUpdateSuccess(); // Call the success handler
+                handlePermissionUpdateSuccess();
             } catch (error) {
                 console.error('Error updating permissions:', error);
+                setError('Failed to save permissions. Please try again.');
             } finally {
                 setSavingPermissions(false);
             }
-        };
-
-        const getPageNumbers = (currentPage, totalPages) => {
-            let startPage = Math.max(currentPage - 2, 1);
-            let endPage = Math.min(startPage + 4, totalPages);
-        
-            if (endPage - startPage < 4) {
-                startPage = Math.max(endPage - 4, 1);
-            }
-        
-            return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
         };
 
         return (
@@ -253,6 +245,11 @@ const ManageControls = () => {
                                 subtext={`Loading permissions for ${selectedUser?.name}`}
                             />
                         </div>
+                    ) : error ? (
+                        <div className="alert alert-danger" role="alert">
+                            <i className="fas fa-exclamation-circle me-2"></i>
+                            {error}
+                        </div>
                     ) : (
                         <div className="table-responsive">
                             <Table hover>
@@ -265,52 +262,38 @@ const ManageControls = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {loading ? (
-                                        <tr>
-                                            <td colSpan="4" className="text-center py-4">
-                                                <i className="fas fa-spinner fa-spin fa-2x"></i>
+                                    {Object.entries(permissionLabels).map(([key, label]) => (
+                                        <tr key={key}>
+                                            <td>{label}</td>
+                                            <td className="text-center">
+                                                <Form.Check
+                                                    type="radio"
+                                                    name={`${key}-permission`}
+                                                    checked={permissions[key] === 'view'}
+                                                    onChange={() => handlePermissionChange(key, 'view')}
+                                                    inline
+                                                />
+                                            </td>
+                                            <td className="text-center">
+                                                <Form.Check
+                                                    type="radio"
+                                                    name={`${key}-permission`}
+                                                    checked={permissions[key] === 'edit'}
+                                                    onChange={() => handlePermissionChange(key, 'edit')}
+                                                    inline
+                                                />
+                                            </td>
+                                            <td className="text-center">
+                                                <Form.Check
+                                                    type="radio"
+                                                    name={`${key}-permission`}
+                                                    checked={permissions[key] === 'denied'}
+                                                    onChange={() => handlePermissionChange(key, 'denied')}
+                                                    inline
+                                                />
                                             </td>
                                         </tr>
-                                    ) : Object.keys(permissions).length === 0 ? (
-                                        <tr>
-                                            <td colSpan="4" className="text-center py-3" style={{ color: '#6c757d' }}>
-                                                No entries to show
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        Object.entries(permissionLabels).map(([key, label]) => (
-                                            <tr key={key}>
-                                                <td>{label}</td>
-                                                <td className="text-center">
-                                                    <Form.Check
-                                                        type="radio"
-                                                        name={`${key}-permission`}
-                                                        checked={permissions[key] === 'view'}
-                                                        onChange={() => handlePermissionChange(key, 'view')}
-                                                        inline
-                                                    />
-                                                </td>
-                                                <td className="text-center">
-                                                    <Form.Check
-                                                        type="radio"
-                                                        name={`${key}-permission`}
-                                                        checked={permissions[key] === 'edit'}
-                                                        onChange={() => handlePermissionChange(key, 'edit')}
-                                                        inline
-                                                    />
-                                                </td>
-                                                <td className="text-center">
-                                                    <Form.Check
-                                                        type="radio"
-                                                        name={`${key}-permission`}
-                                                        checked={permissions[key] === 'denied'}
-                                                        onChange={() => handlePermissionChange(key, 'denied')}
-                                                        inline
-                                                    />
-                                                </td>
-                                            </tr>
-                                        ))
-                                    )}
+                                    ))}
                                 </tbody>
                             </Table>
                         </div>
@@ -626,7 +609,7 @@ const ManageControls = () => {
                     </div>
                 </div>
             </div>
-            <UserDetailsModal onUpdateSuccess={handlePermissionUpdateSuccess} />
+            <UserDetailsModal />
         </div>
     );
 };

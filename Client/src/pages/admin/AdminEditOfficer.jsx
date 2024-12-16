@@ -135,12 +135,8 @@ const AdminEditOfficer = () => {
     };
 
     const getPositionOptions = () => {
-        return [
-            'Officer',
-            'Governor',
-            'Treasurer',
-            'Admin'
-        ];
+        const positions = ['Officer', 'Governor', 'Treasurer'];
+        return positions.filter(pos => pos !== 'Admin'); // Exclude Admin from options
     };
 
     if (loading) return <div>Loading...</div>;
@@ -203,7 +199,7 @@ const AdminEditOfficer = () => {
                                                 <input
                                                     type="email"
                                                     name="email"
-                                                    className="form-control"
+                                                    className="form-control system"
                                                     value={formData.email}
                                                     onChange={handleChange}
                                                     required
@@ -212,14 +208,14 @@ const AdminEditOfficer = () => {
                                             <div className="mb-4">
                                                 <label className="mb-1">Position</label>
                                                 <select
-                                                    className="form-control form-select"
                                                     name="position"
+                                                    className="form-control system"
                                                     value={formData.position}
                                                     onChange={handleChange}
                                                     required
                                                 >
-                                                    <option value="" disabled>Select a position</option>
-                                                    {getPositionOptions().map(position => (
+                                                    <option value="">Select Position</option>
+                                                    {getPositionOptions().map((position) => (
                                                         <option key={position} value={position}>
                                                             {position}
                                                         </option>
