@@ -135,8 +135,16 @@ const AdminEditOfficer = () => {
     };
 
     const getPositionOptions = () => {
-        const positions = ['Officer', 'Governor', 'Treasurer'];
-        return positions.filter(pos => pos !== 'Admin'); // Exclude Admin from options
+        return [
+            { value: 'Officer', label: 'Officer', icon: 'fa-user-tie' },
+            { value: 'Governor', label: 'Governor', icon: 'fa-user-shield' },
+            { value: 'Treasurer', label: 'Treasurer', icon: 'fa-user-graduate' }
+        ];
+    };
+
+    const getPositionIcon = (position) => {
+        const option = getPositionOptions().find(opt => opt.value === position);
+        return option ? option.icon : 'fa-user';
     };
 
     if (loading) return <div>Loading...</div>;
@@ -213,15 +221,51 @@ const AdminEditOfficer = () => {
                                                     value={formData.position}
                                                     onChange={handleChange}
                                                     required
+                                                    style={{ paddingLeft: '35px', position: 'relative' }}
                                                 >
-                                                    <option value="">Select Position</option>
-                                                    {getPositionOptions().map((position) => (
-                                                        <option key={position} value={position}>
-                                                            {position}
+                                                    <option value="">
+                                                        Select Position
+                                                    </option>
+                                                    {getPositionOptions().map((option) => (
+                                                        <option key={option.value} value={option.value}>
+                                                            {option.label}
                                                         </option>
                                                     ))}
                                                 </select>
+                                                <i 
+                                                    className={`fas ${getPositionIcon(formData.position)} position-icon`}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        left: '25px',
+                                                        top: '50%',
+                                                        transform: 'translateY(-50%)',
+                                                        color: '#6c757d',
+                                                        pointerEvents: 'none'
+                                                    }}
+                                                ></i>
                                             </div>
+                                            <style>
+                                                {`
+                                                    .position-select-container {
+                                                        position: relative;
+                                                    }
+                                                    .position-icon {
+                                                        position: absolute;
+                                                        left: 10px;
+                                                        top: 50%;
+                                                        transform: translateY(-50%);
+                                                        color: #6c757d;
+                                                        pointerEvents: none;
+                                                    }
+                                                    select.form-control {
+                                                        padding-left: 35px;
+                                                        appearance: auto;
+                                                    }
+                                                    select.form-control option {
+                                                        padding: 10px;
+                                                    }
+                                                `}
+                                            </style>
                                             <div className="mb-0">
                                                 <button
                                                     type="submit"
