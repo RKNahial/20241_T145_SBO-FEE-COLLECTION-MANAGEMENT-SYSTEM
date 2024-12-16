@@ -65,6 +65,18 @@ exports.updateOfficial = async (req, res) => {
         const { id } = req.params;
         const updateData = req.body;
 
+        // Check for ID conflict
+        if (updateData.ID) {
+            const existingOfficialWithId = await officialService.findOfficialByID(updateData.ID, id);
+            if (existingOfficialWithId) {
+                return res.status(409).json({
+                    success: false,
+                    message: 'Conflict: ID already exists',
+                    error: 'ID_CONFLICT'
+                });
+            }
+        }
+
         const official = await officialService.updateOfficial(id, updateData);
 
         res.status(200).json({
@@ -74,10 +86,20 @@ exports.updateOfficial = async (req, res) => {
         });
     } catch (error) {
         console.error('Error updating official:', error);
+
+        // Handle specific error types
+        if (error.message === 'Email already exists') {
+            return res.status(409).json({
+                success: false,
+                message: 'Email already exists',
+                error: 'EMAIL_CONFLICT'
+            });
+        }
+
         res.status(500).json({
             success: false,
-            message: 'Failed to update official',
-            error: error.message
+            message: error.message || 'Failed to update official',
+            error: error.code || 'UPDATE_ERROR'
         });
     }
 };

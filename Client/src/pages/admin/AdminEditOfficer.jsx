@@ -123,7 +123,23 @@ const AdminEditOfficer = () => {
                 }, 2000);
             }
         } catch (error) {
-            const errorMessage = error.response?.data?.message || 'Error updating officer';
+            let errorMessage = 'Error updating officer';
+            
+            if (error.response) {
+                const { data } = error.response;
+                
+                switch (data.error) {
+                    case 'ID_CONFLICT':
+                        errorMessage = 'Conflict: ID already exists';
+                        break;
+                    case 'EMAIL_CONFLICT':
+                        errorMessage = 'Email already exists';
+                        break;
+                    default:
+                        errorMessage = data.message || 'Error updating officer';
+                }
+            }
+            
             setError(errorMessage);
             window.scrollTo(0, 0);
         }

@@ -139,9 +139,77 @@ const ManageControls = () => {
         const [loading, setLoading] = useState(true);
         const [savingPermissions, setSavingPermissions] = useState(false);
         const [unsavedChanges, setUnsavedChanges] = useState(false);
-        const [hoverSave, setHoverSave] = useState(false);
-        const [hoverCancel, setHoverCancel] = useState(false);
         const [error, setError] = useState(null);
+
+        useEffect(() => {
+            const fetchPermissions = async () => {
+                if (selectedUser) {
+                    try {
+                        setLoading(true);
+                        setError(null);
+                        const token = localStorage.getItem('token');
+                        const response = await axios.get(
+                            `http://localhost:8000/api/permissions/${selectedUser._id}`,
+                            { headers: { Authorization: `Bearer ${token}` } }
+                        );
+                        
+                        if (response.data.success) {
+                            setPermissions(response.data.data || permissions);
+                        } else {
+                            setError('Failed to load permissions');
+                        }
+                    } catch (error) {
+                        console.error('Error fetching permissions:', error);
+                        setError('Failed to load permissions. Please try again.');
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+            };
+            
+            if (selectedUser) {
+                fetchPermissions();
+            }
+        }, [selectedUser]);
+
+        const handlePermissionChange = (module, value) => {
+            setPermissions(prev => ({
+                ...prev,
+                [module]: value
+            }));
+            setUnsavedChanges(true);
+        };
+
+        const savePermissions = async () => {
+            try {
+                setSavingPermissions(true);
+                setError(null);
+                const token = localStorage.getItem('token');
+                
+                const response = await axios.put(
+                    `http://localhost:8000/api/permissions/${selectedUser._id}`,
+                    {
+                        userId: selectedUser._id,
+                        userName: selectedUser.name,
+                        position: selectedUser.position,
+                        permissions: permissions
+                    },
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+
+                if (response.data.success) {
+                    setUnsavedChanges(false);
+                    handlePermissionUpdateSuccess();
+                } else {
+                    setError('Failed to save permissions');
+                }
+            } catch (error) {
+                console.error('Error saving permissions:', error);
+                setError('Failed to save permissions. Please try again.');
+            } finally {
+                setSavingPermissions(false);
+            }
+        };
 
         const permissionLabels = {
             addStudent: 'Add Student',
@@ -156,66 +224,6 @@ const ManageControls = () => {
             archiveCategory: 'Archive Category',
             unarchiveCategory: 'Unarchive Category',
             emailNotifications: 'Email Notifications'
-        };
-
-        useEffect(() => {
-            const fetchPermissions = async () => {
-                if (selectedUser) {
-                    try {
-                        setLoading(true);
-                        setError(null);
-                        const token = localStorage.getItem('token');
-                        const response = await axios.get(
-                            `http://localhost:8000/api/permissions/${selectedUser._id}`,
-                            { headers: { Authorization: `Bearer ${token}` } }
-                        );
-                        
-                        // If no permissions found, use default permissions
-                        const userPermissions = response.data.data?.permissions || permissions;
-                        setPermissions(userPermissions);
-                    } catch (error) {
-                        console.error('Error fetching permissions:', error);
-                        setError('Failed to load permissions. Please try again.');
-                    } finally {
-                        setLoading(false);
-                    }
-                }
-            };
-            fetchPermissions();
-        }, [selectedUser]);
-
-        const handlePermissionChange = (module, value) => {
-            setPermissions(prevPermissions => ({
-                ...prevPermissions,
-                [module]: value
-            }));
-            setUnsavedChanges(true);
-        };
-
-        const savePermissions = async () => {
-            try {
-                setSavingPermissions(true);
-                setError(null);
-                const token = localStorage.getItem('token');
-                await axios.put(
-                    `http://localhost:8000/api/permissions/${selectedUser._id}`,
-                    {
-                        userId: selectedUser._id,
-                        userName: selectedUser.name,
-                        position: selectedUser.position,
-                        permissions: permissions
-                    },
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
-    
-                setUnsavedChanges(false);
-                handlePermissionUpdateSuccess();
-            } catch (error) {
-                console.error('Error updating permissions:', error);
-                setError('Failed to save permissions. Please try again.');
-            } finally {
-                setSavingPermissions(false);
-            }
         };
 
         return (
@@ -311,11 +319,9 @@ const ManageControls = () => {
                                 border: 'none',
                                 padding: '0.5rem 1rem',
                                 transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
-                                backgroundColor: hoverSave ? '#E67E22' : '#FF8C00',
+                                backgroundColor: '#FF8C00',
                                 opacity: (!unsavedChanges || savingPermissions) ? 0.65 : 1
                             }}
-                            onMouseEnter={() => setHoverSave(true)}
-                            onMouseLeave={() => setHoverSave(false)}
                         >
                             {savingPermissions ? (
                                 <>
@@ -336,11 +342,9 @@ const ManageControls = () => {
                                 border: 'none',
                                 padding: '0.5rem 1rem',
                                 transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
-                                backgroundColor: hoverCancel ? '#cc0000' : 'red',
+                                backgroundColor: 'red',
                                 opacity: savingPermissions ? 0.65 : 1
                             }}
-                            onMouseEnter={() => setHoverCancel(true)}
-                            onMouseLeave={() => setHoverCancel(false)}
                         >
                             Cancel
                         </button>

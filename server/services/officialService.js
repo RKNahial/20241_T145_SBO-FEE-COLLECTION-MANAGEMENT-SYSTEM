@@ -84,6 +84,25 @@ class OfficialService {
         };
     }
 
+    async findOfficialByID(ID, excludeId = null) {
+        // Check in each collection for the ID
+        const collections = [Officer, Treasurer, Governor];
+        
+        for (const Collection of collections) {
+            const query = { ID };
+            if (excludeId) {
+                query._id = { $ne: excludeId }; // Exclude the current official's ID
+            }
+            
+            const official = await Collection.findOne(query);
+            if (official) {
+                return official;
+            }
+        }
+        
+        return null;
+    }
+
     async updateOfficial(id, updateData) {
         const { name, ID, email, position } = updateData;
         
@@ -107,6 +126,12 @@ class OfficialService {
 
             if (existingUser) {
                 throw new Error('Email already exists');
+            }
+
+            // Check if ID exists in the new collection
+            const existingOfficial = await this.findOfficialByID(ID, id);
+            if (existingOfficial) {
+                throw new Error('ID already exists');
             }
 
             // Get the old document
@@ -143,6 +168,14 @@ class OfficialService {
 
             if (existingUser) {
                 throw new Error('Email already exists');
+            }
+
+            // Check if ID exists in the same collection
+            if (ID && ID !== currentOfficial.ID) {
+                const existingOfficial = await this.findOfficialByID(ID);
+                if (existingOfficial) {
+                    throw new Error('ID already exists');
+                }
             }
 
             const updatedOfficial = await Model.findByIdAndUpdate(

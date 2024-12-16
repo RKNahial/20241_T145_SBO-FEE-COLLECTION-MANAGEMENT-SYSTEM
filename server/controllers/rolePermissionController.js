@@ -3,25 +3,28 @@ const HistoryLog = require('../models/HistoryLog');
 
 exports.updatePermissions = async (req, res) => {
     try {
-        const { userId, permissions } = req.body;
+        const { userId, permissions, position, userName } = req.body;
         
-        if (!userId || !permissions) {
+        if (!userId || !permissions || !position) {
             return res.status(400).json({
                 success: false,
-                message: 'Missing required fields: userId and permissions'
+                message: 'Missing required fields: userId, permissions, and position'
             });
         }
 
+        // Find existing permissions or create new
         let rolePermission = await RolePermission.findOne({ userId });
         
         if (!rolePermission) {
             rolePermission = new RolePermission({
                 userId,
-                position: req.body.position,
+                position,
                 permissions
             });
         } else {
+            // Update existing permissions
             rolePermission.permissions = permissions;
+            rolePermission.position = position;
         }
         
         await rolePermission.save();
@@ -29,11 +32,11 @@ exports.updatePermissions = async (req, res) => {
         // Create history log
         await HistoryLog.create({
             timestamp: new Date(),
-            userName: req.user.name || 'Unknown',
-            userEmail: req.user.email || 'Unknown',
-            userPosition: req.user.position || 'Unknown',
+            userName: req.user?.name || 'Unknown',
+            userEmail: req.user?.email || 'Unknown',
+            userPosition: req.user?.position || 'Unknown',
             action: 'Update Permissions',
-            details: `Updated permissions for user: ${req.body.userName || userId}`,
+            details: `Updated permissions for user: ${userName || userId}`,
             status: 'completed'
         });
 
@@ -65,9 +68,25 @@ exports.getPermissions = async (req, res) => {
 
         const rolePermission = await RolePermission.findOne({ userId });
         
+        // Return default permissions if none exist
+        const defaultPermissions = {
+            addStudent: 'denied',
+            addPaymentCategory: 'denied',
+            updateStudent: 'denied',
+            updatePaymentCategory: 'denied',
+            archiveStudent: 'denied',
+            unarchiveStudent: 'denied',
+            toggleDuesPayment: 'denied',
+            duesPayment: 'denied',
+            paymentUpdate: 'denied',
+            archiveCategory: 'denied',
+            unarchiveCategory: 'denied',
+            emailNotifications: 'denied'
+        };
+
         res.status(200).json({
             success: true,
-            data: rolePermission?.permissions || {}
+            data: rolePermission?.permissions || defaultPermissions
         });
     } catch (error) {
         console.error('Error fetching permissions:', error);
