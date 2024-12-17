@@ -98,11 +98,15 @@ exports.updatePaymentStatus = async (req, res) => {
 exports.getPaymentDetails = async (req, res) => {
     try {
         const { studentId } = req.params;
+        const { category } = req.query;
         
-        // Find all payment records for the student
-        const paymentFee = await PaymentFee.findOne({ studentId })
-            .populate('categoryId')
-            .sort({ 'paymentDate': -1 });
+        // Find payment record for the student and specific category
+        const paymentFee = await PaymentFee.findOne({ 
+            studentId,
+            categoryId: category 
+        })
+        .populate('categoryId')
+        .sort({ 'paymentDate': -1 });
 
         if (!paymentFee) {
             return res.json({

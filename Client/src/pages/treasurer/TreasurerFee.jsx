@@ -293,7 +293,7 @@ const TreasurerFee = () => {
                     payment_category: paymentDetails.paymentCategory || 'N/A',
                     total_price: paymentDetails.totalPrice?.toString() || '0.00',
                     amount_paid: paymentDetails.amountPaid?.toString() || '0.00',
-                    payment_status: student.paymentstatus,
+                    payment_status: calculatePaymentStatus(paymentDetails),
                     transaction_history: paymentDetails.transactions?.map(t =>
                         `• Amount: ₱${t.amount.toFixed(2)}\n  Date: ${t.formattedDate}\n  Status: ${t.previousStatus || 'New'} → ${t.newStatus}`
                     ).join('\n\n') || 'No transaction history'
@@ -345,7 +345,7 @@ const TreasurerFee = () => {
     const [selectedCategory, setSelectedCategory] = useState('');
     const [categoryPayments, setCategoryPayments] = useState({});
 
-    // Modify the useEffect to fetch payments when category changes
+    // Update the useEffect to fetch payments when category changes
     useEffect(() => {
         const fetchCategoryPayments = async () => {
             if (!selectedCategory) {
@@ -355,7 +355,7 @@ const TreasurerFee = () => {
             }
 
             try {
-                setIsLoading(false);
+                setIsLoading(true);
                 const response = await axios.get(`http://localhost:8000/api/payment-fee/by-category/${selectedCategory}`);
 
                 // Check if response.data.payments exists and is an array
@@ -363,11 +363,13 @@ const TreasurerFee = () => {
                     const paymentData = {};
                     response.data.payments.forEach(payment => {
                         if (payment.studentId) {
-                            paymentData[payment.studentId._id] = {
-                                status: payment.status || 'Not Paid',
+                            const paymentInfo = {
                                 amountPaid: payment.amountPaid || 0,
                                 totalPrice: payment.totalPrice || 0
                             };
+                            // Calculate status based on actual payment amounts
+                            paymentInfo.status = calculatePaymentStatus(paymentInfo);
+                            paymentData[payment.studentId._id] = paymentInfo;
                         }
                     });
                     setCategoryPayments(paymentData);
@@ -386,15 +388,26 @@ const TreasurerFee = () => {
         fetchCategoryPayments();
     }, [selectedCategory]);
 
-    // Update the category select handler
-    const handleCategoryChange = (e) => {
-        setSelectedCategory(e.target.value);
+    const calculatePaymentStatus = (payment) => {
+        if (!payment) return 'Not Paid';
+        const amountPaid = parseFloat(payment.amountPaid) || 0;
+        const totalPrice = parseFloat(payment.totalPrice) || 0;
+        
+        // Ensure we're comparing numbers and handling edge cases
+        if (totalPrice <= 0) return 'Not Paid';
+        if (amountPaid >= totalPrice) return 'Fully Paid';
+        if (amountPaid > 0) return 'Partially Paid';
+        return 'Not Paid';
     };
 
     const getStudentPaymentStatus = (studentId) => {
-        if (!selectedCategory) return 'Not Paid';
-        const payment = categoryPayments[studentId];
-        return payment ? payment.status : 'Not Paid';
+        if (!selectedCategory || !categoryPayments[studentId]) return 'Not Paid';
+        return calculatePaymentStatus(categoryPayments[studentId]);
+    };
+
+    // Update the category select handler
+    const handleCategoryChange = (e) => {
+        setSelectedCategory(e.target.value);
     };
 
     // Add these new states after other state declarations
@@ -509,7 +522,7 @@ const TreasurerFee = () => {
                     payment_category: paymentDetails.paymentCategory || 'N/A',
                     total_price: paymentDetails.totalPrice?.toString() || '0.00',
                     amount_paid: paymentDetails.amountPaid?.toString() || '0.00',
-                    payment_status: student.paymentstatus,
+                    payment_status: calculatePaymentStatus(paymentDetails),
                     transaction_history: paymentDetails.transactions?.map(t =>
                         `• Amount: ₱${t.amount.toFixed(2)}\n  Date: ${t.formattedDate}\n  Status: ${t.previousStatus || 'New'} → ${t.newStatus}`
                     ).join('\n\n') || 'No transaction history'
