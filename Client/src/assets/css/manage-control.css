@@ -1,211 +1,420 @@
 .custom-checkbox {
     width: 1rem;
+
     height: 1rem;
+
 }
+
+
 
 .permission-check {
+
     display: flex;
+
     flex-direction: column;
+
     align-items: center;
+
     gap: 0.25rem;
+
 }
+
+
 
 .table td {
+
     vertical-align: middle;
+
 }
+
+
 
 .legend small {
+
     color: #6c757d;
+
     font-size: 0.875rem;
+
 }
+
+
 
 .tooltip {
+
     font-size: 0.875rem;
+
 }
 
+
+
 .badge {
+
     font-weight: 500;
+
     padding: 0.5rem 0.75rem;
+
     white-space: nowrap;
+
 }
+
+
 
 .role-icon {
+
     width: 40px;
+
     height: 40px;
+
     background-color: rgba(13, 110, 253, 0.1);
+
     border-radius: 50%;
+
     display: flex;
+
     align-items: center;
+
     justify-content: center;
+
     flex-shrink: 0;
+
 }
+
+
 
 .table > :not(caption) > * > * {
+
     padding: 1rem 0.75rem;
+
     vertical-align: middle;
+
 }
+
+
 
 .table tbody tr {
+
     border-bottom: 1px solid #e9ecef;
+
 }
+
+
 
 .table tbody tr:last-child {
+
     border-bottom: none;
+
 }
+
+
 
 .btn-group .btn {
+
     font-weight: 500;
+
 }
+
+
 
 .search-box .form-control {
+
     border-radius: 20px;
+
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+
 }
+
+
 
 .search-box .form-control:focus {
+
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+
 }
+
+
 
 .table > thead > tr > th {
+
     font-weight: 600;
+
     color: #495057;
+
 }
+
+
 
 .table > tbody > tr > td:first-child {
+
     padding-left: 2rem;
+
 }
+
+
 
 .table > thead > tr > th:first-child {
+
     padding-left: 2rem;
+
 }
 
+
+
 .table {
+
     table-layout: fixed;
+
     width: 100%;
+
 }
+
+
 
 .table td, .table th {
+
     overflow: hidden;
+
     white-space: nowrap;
+
 }
+
+
 
 .role-card {
+
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
     transform: translateY(0);
+
     transition: all 0.3s ease;
+
 }
+
+
 
 .role-card:hover {
+
     transform: translateY(-2px);
+
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
 }
+
+
 
 .role-card:not(.active):hover {
+
     background-color: #f8f9fc !important;
+
 }
+
+
 
 .role-card .icon-circle {
+
     transition: all 0.3s ease;
+
 }
+
+
 
 .role-card:hover .icon-circle {
+
     transform: scale(1.1);
+
 }
+
+
 
 .search-box input {
+
     border-radius: 0.5rem;
+
     border: 1px solid #e3e6f0;
+
     transition: all 0.3s ease;
+
 }
+
+
 
 .search-box input:focus {
+
     border-color: #4e73df;
+
     box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+
 }
+
+
 
 .search-box .fas {
+
     transition: all 0.3s ease;
+
 }
+
+
 
 .search-box input:focus + .fas {
+
     color: #4e73df !important;
+
 }
+
+
 
 /* Table styles */
+
 .table {
+
     margin-bottom: 0;
+
 }
+
+
 
 .table thead th {
+
     border-top: none;
+
     font-weight: 600;
+
     text-transform: uppercase;
+
     font-size: 0.75rem;
+
     letter-spacing: 0.5px;
+
     color: #858796;
+
     padding-top: 1rem;
+
     padding-bottom: 1rem;
+
 }
+
+
 
 .table tbody td {
+
     padding-top: 1rem;
+
     padding-bottom: 1rem;
+
     vertical-align: middle;
+
 }
+
+
 
 /* Modal styles */
+
 .modal-content {
+
     border: none;
+
     border-radius: 0.5rem;
+
 }
+
+
 
 .modal-header {
+
     background-color: #f8f9fc;
+
     border-bottom: 1px solid #e3e6f0;
+
     border-top-left-radius: 0.5rem;
+
     border-top-right-radius: 0.5rem;
+
 }
+
+
 
 .modal-footer {
+
     border-top: 1px solid #e3e6f0;
+
     padding: 1rem;
+
 }
+
+
 
 /* Button styles */
+
 .btn-outline-primary {
+
     border-width: 1px;
+
     font-weight: 500;
+
 }
+
+
 
 .btn-outline-primary:hover {
+
     background-color: #4e73df;
+
     color: white;
+
 }
+
+
 
 /* Badge styles */
+
 .badge {
+
     font-weight: 500;
+
     padding: 0.35rem 0.65rem;
+
     border-radius: 0.35rem;
+
 }
+
+
 
 /* Form check styles */
+
 .form-check-input {
+
     cursor: pointer;
+
 }
+
+
 
 .form-check-input:checked {
+
     background-color: #4e73df;
+
     border-color: #4e73df;
+
 }
 
+
+
 @keyframes fadeIn {
+
     from {
+
         opacity: 0;
+
         transform: translateY(-10px);
+
     }
+
     to {
+
         opacity: 1;
+
         transform: translateY(0);
+
     }
+
 }

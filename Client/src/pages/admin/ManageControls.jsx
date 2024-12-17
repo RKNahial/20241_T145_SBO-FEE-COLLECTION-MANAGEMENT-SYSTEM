@@ -444,36 +444,24 @@ const ManageControls = () => {
                                                         minWidth: '160px',
                                                     }}
                                                 >
-                                                    <div className="d-flex align-items-center gap-2">
-                                                        <div
-                                                            className="icon-circle"
+                                                    <div className="d-flex align-items-center gap-3">
+                                                        <i 
+                                                            className={`fas ${icon} fa-lg`} 
                                                             style={{
-                                                                width: '32px',
-                                                                height: '32px',
-                                                                borderRadius: '50%',
-                                                                backgroundColor: selectedRole === role ? 'rgba(255, 255, 255, 0.2)' : `${color}20`,
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center'
-                                                            }}
-                                                        >
-                                                            <i className={`fas ${icon}`} style={{
                                                                 color: selectedRole === role ? 'white' : color
-                                                            }}></i>
-                                                        </div>
+                                                            }}
+                                                        ></i>
                                                         <div>
-                                                            <h6 className="mb-0" style={{
-                                                                color: selectedRole === role ? 'white' : '#5a5c69',
-                                                                fontWeight: '600'
-                                                            }}>
-                                                                {role}s
+                                                            <h6 
+                                                                className="mb-0" 
+                                                                style={{
+                                                                    color: selectedRole === role ? 'white' : '#5a5c69',
+                                                                    fontSize: '1rem',
+                                                                    fontWeight: '600'
+                                                                }}
+                                                            >
+                                                                {role}
                                                             </h6>
-                                                            <small style={{
-                                                                color: selectedRole === role ? 'rgba(255, 255, 255, 0.8)' : '#858796',
-                                                                fontSize: '0.75rem'
-                                                            }}>
-                                                                {users[role]?.length || 0} members
-                                                            </small>
                                                         </div>
                                                     </div>
                                                 </div>
