@@ -272,11 +272,18 @@ const TreasurerFee = () => {
 
     // Update the handleEmailClick function
     const handleEmailClick = async (student) => {
+        if (!selectedCategory) {
+            alert('Please select a payment category first');
+            return;
+        }
+        
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(
-                `http://localhost:8000/api/payment-fee/details/${student._id}`,
+            
+            // First, get the payment details
+            const paymentResponse = await axios.get(
+                `http://localhost:8000/api/payment-fee/details/${student._id}?category=${selectedCategory}`,
                 {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -284,61 +291,63 @@ const TreasurerFee = () => {
                 }
             );
 
-            if (response.data.success) {
-                const paymentDetails = response.data.paymentFee;
-                const templateParams = {
-                    from_name: "COT-SBO COLLECTION FEE MANAGEMENT SYSTEM",
-                    to_name: student.name,
-                    to_email: student.institutionalEmail,
-                    payment_category: paymentDetails.paymentCategory || 'N/A',
-                    total_price: paymentDetails.totalPrice?.toString() || '0.00',
-                    amount_paid: paymentDetails.amountPaid?.toString() || '0.00',
-                    payment_status: calculatePaymentStatus(paymentDetails),
-                    transaction_history: paymentDetails.transactions?.map(t =>
-                        `• Amount: ₱${t.amount.toFixed(2)}\n  Date: ${t.formattedDate}\n  Status: ${t.previousStatus || 'New'} → ${t.newStatus}`
-                    ).join('\n\n') || 'No transaction history'
-                };
+            if (!paymentResponse.data.success) {
+                throw new Error('Failed to fetch payment details');
+            }
 
-                // Send email first
-                const emailResponse = await emailjs.send(
-                    "service_bni941i",
-                    "template_x5s32eh",
-                    templateParams,
-                    "Nqbgnjhv9ss88DOrk" // Your EmailJS public key
-                );
+            const paymentDetails = paymentResponse.data.paymentFee;
+            
+            // Find the category name
+            const category = paymentCategories.find(cat => cat._id === selectedCategory);
+            if (!category) {
+                throw new Error('Selected category not found');
+            }
 
-                if (emailResponse.status === 200) {
-                    // Log the successful email sending
-                    await axios.post(
-                        'http://localhost:8000/api/history-logs/email',
-                        {
-                            studentId: student._id,
-                            studentName: student.name,
-                            studentEmail: student.institutionalEmail,
-                            paymentDetails: {
-                                category: paymentDetails.paymentCategory,
-                                status: student.paymentstatus,
-                                totalPrice: paymentDetails.totalPrice,
-                                amountPaid: paymentDetails.amountPaid
-                            }
-                        },
-                        {
-                            headers: {
-                                'Authorization': `Bearer ${token}`,
-                                'Content-Type': 'application/json'
-                            }
-                        }
-                    );
+            // Format the transaction history
+            const formattedTransactions = paymentDetails.transactions?.map(t => 
+                `• Amount: ₱${parseFloat(t.amount).toFixed(2)}\n  Date: ${new Date(t.date).toLocaleString()}\n  Status: ${t.previousStatus} → ${t.newStatus}`
+            ).join('\n\n') || 'No transaction history';
 
-                    setSuccessMessage(`Payment details emailed to ${student.name}'s successfully!`);
-                    setTimeout(() => setSuccessMessage(''), 3000);
-                }
+            // Calculate the remaining balance
+            const totalPrice = parseFloat(paymentDetails.totalPrice) || 0;
+            const amountPaid = parseFloat(paymentDetails.amountPaid) || 0;
+            const remainingBalance = Math.max(0, totalPrice - amountPaid);
+
+            const templateParams = {
+                from_name: "COT-SBO COLLECTION FEE MANAGEMENT SYSTEM",
+                to_name: student.name,
+                to_email: student.institutionalEmail,
+                student_id: student.studentId,
+                payment_category: category.name,
+                total_price: `₱${totalPrice.toFixed(2)}`,
+                amount_paid: `₱${amountPaid.toFixed(2)}`,
+                remaining_balance: `₱${remainingBalance.toFixed(2)}`,
+                payment_status: paymentDetails.status || 'Not Paid',
+                transaction_history: formattedTransactions,
+                date_sent: new Date().toLocaleString()
+            };
+
+            console.log('Sending email with template params:', templateParams);
+
+            const emailResponse = await emailjs.send(
+                'service_2jqp83g',
+                'template_kw5h4wp',
+                templateParams,
+                'user_wqj3Hd6IxjUCUXGD9EOJ8'
+            );
+
+            if (emailResponse.status === 200) {
+                setSuccessMessage(`Payment details sent to ${student.institutionalEmail}`);
+                setTimeout(() => setSuccessMessage(''), 3000);
+            } else {
+                throw new Error('Failed to send email');
             }
         } catch (error) {
             console.error('Error sending email:', error);
-            setError('Failed to send email. Please try again.');
+            setError('Failed to send email: ' + error.message);
+            setTimeout(() => setError(null), 3000);
         } finally {
-            setLoading(false); 
+            setLoading(false);
         }
     };
 
@@ -559,7 +568,7 @@ const TreasurerFee = () => {
                         }
                     );
 
-                    setSuccessMessage(`Payment details sent to ${student.name}'s email successfully!`);
+                    setSuccessMessage(`Payment details emailed to ${student.name}'s successfully!`);
                     setTimeout(() => setSuccessMessage(''), 3000);
                 }
             }
