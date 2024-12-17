@@ -460,8 +460,18 @@ const ManageControls = () => {
                                                                     fontWeight: '600'
                                                                 }}
                                                             >
-                                                                {role}
+                                                                {role}s
                                                             </h6>
+                                                            <small 
+                                                                style={{
+                                                                    color: selectedRole === role ? 'rgba(255, 255, 255, 0.8)' : '#858796',
+                                                                    fontSize: '0.75rem',
+                                                                    display: 'block',
+                                                                    marginTop: '2px'
+                                                                }}
+                                                            >
+                                                                {users[role]?.length || 0} members
+                                                            </small>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -563,7 +573,7 @@ const ManageControls = () => {
                                             <li className="page-item">
                                                 <button
                                                     className="page-link"
-                                                    onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+                                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                                     disabled={currentPage === 1}
                                                 >
                                                     Previous
@@ -574,7 +584,7 @@ const ManageControls = () => {
                                                     className={`page-item ${currentPage === idx + 1 ? 'active' : ''}`}>
                                                     <button
                                                         className="page-link"
-                                                        onClick={() => handlePageChange(idx + 1)}
+                                                        onClick={() => setCurrentPage(idx + 1)}
                                                         style={currentPage === idx + 1 ? 
                                                             { backgroundColor: 'orange', borderColor: 'orange', color: 'white' } 
                                                             : {color: 'black'}
@@ -587,7 +597,7 @@ const ManageControls = () => {
                                             <li className="page-item">
                                                 <button
                                                     className="page-link"
-                                                    onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
+                                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                                     disabled={currentPage === totalPages}
                                                 >
                                                     Next
