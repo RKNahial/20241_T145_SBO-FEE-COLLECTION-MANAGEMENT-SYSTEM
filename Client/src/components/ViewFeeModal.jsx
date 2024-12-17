@@ -32,40 +32,47 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId, onEmailSuccess }) 
 
     useEffect(() => {
         const fetchPaymentDetails = async () => {
-            if (isOpen && student && categoryId) {
-                try {
-                    setLoading(true);
-                    setError(null);
-                    const token = localStorage.getItem('token');
-                    
-                    const url = `http://localhost:8000/api/payment-fee/details/${student._id}?category=${categoryId}`;
-                    console.log('Fetching payment details with URL:', url);
-                    
-                    const response = await axios.get(url, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    
-                    if (response.data.success) {
-                        const details = response.data.paymentFee;
-                        // Calculate the payment status
-                        details.status = calculatePaymentStatus(details);
-                        console.log('Received payment details:', details);
-                        setPaymentDetails(details);
-                    } else {
-                        throw new Error(response.data.message);
-                    }
-                } catch (error) {
-                    console.error('Error fetching payment details:', error);
-                    setError(error.message || 'Failed to fetch payment details');
-                    setPaymentDetails(null);
-                } finally {
-                    setLoading(false);
-                }
-            } else {
+            if (!isOpen) {
                 setPaymentDetails(null);
+                setLoading(false);
+                return;
+            }
+
+            if (!student || !categoryId) {
+                setPaymentDetails(null);
+                setLoading(false);
+                return;
+            }
+
+            try {
+                setLoading(true);
+                setError(null);
+                const token = localStorage.getItem('token');
+                
+                const url = `http://localhost:8000/api/payment-fee/details/${student._id}?category=${categoryId}`;
+                console.log('Fetching payment details with URL:', url);
+                
+                const response = await axios.get(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.data.success) {
+                    const details = response.data.paymentFee;
+                    // Calculate the payment status
+                    details.status = calculatePaymentStatus(details);
+                    console.log('Received payment details:', details);
+                    setPaymentDetails(details);
+                } else {
+                    throw new Error(response.data.message || 'Failed to fetch payment details');
+                }
+            } catch (error) {
+                console.error('Error fetching payment details:', error);
+                setError(error.message || 'Failed to fetch payment details');
+                setPaymentDetails(null);
+            } finally {
                 setLoading(false);
             }
         };
@@ -135,7 +142,7 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId, onEmailSuccess }) 
                         alignItems: 'center',
                         minHeight: '200px'
                     }}>
-                        <LoadingSpinner icon="coin" />
+                        <LoadingSpinner text="Loading payment details..." />
                     </div>
                 ) : error ? (
                     <Alert variant="danger">{error}</Alert>
@@ -148,6 +155,8 @@ const ViewFeeModal = ({ isOpen, onClose, student, categoryId, onEmailSuccess }) 
                     }}>
                         <LoadingSpinner text="Sending Email" icon="envelope" />
                     </div>
+                ) : !student ? (
+                    <Alert variant="warning">No student data available</Alert>
                 ) : (
                     <>
                         <Row className="mb-3">
