@@ -131,7 +131,7 @@ const AdminNavbar = ({ toggleSidebar }) => {
                         </button>
                         <button
                             type="button"
-                            onClick={() => setShowLogoutModal(false)} // Close the modal on cancel
+                            onClick={() => setShowLogoutModal(false)}
                             style={{
                                 borderRadius: '0.35rem',
                                 color: '#EAEAEA',

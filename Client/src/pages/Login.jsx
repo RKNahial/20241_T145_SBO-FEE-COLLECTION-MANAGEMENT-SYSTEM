@@ -353,7 +353,7 @@ const Login = () => {
     return (
         <>
             <Helmet>
-                <title>Login | PUPQC Fee Collection Management System</title>
+                <title>Login | Fee Collection Management System</title>
             </Helmet>
             <div className="login-body">
                 <div className="login-container">
