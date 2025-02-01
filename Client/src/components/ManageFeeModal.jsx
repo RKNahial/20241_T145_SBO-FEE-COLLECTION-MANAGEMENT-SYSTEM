@@ -155,8 +155,8 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent,
             return;
         }
 
-        // For refunded status, don't allow amount greater than total price
-        if (status === 'Refunded' && value > totalPrice) {
+        // Don't allow amount greater than total price for any status
+        if (value > totalPrice) {
             return;
         }
 
@@ -351,12 +351,12 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent,
                                     color: status === 'Not Paid' ? '#666666' : 'black',
                                 }}
                                 min="0.01"
-                                max={status === 'Refunded' ? totalPrice : undefined}
+                                max={totalPrice}
                                 step="0.01"
                             />
-                            {status === 'Refunded' && (
+                            {status !== 'Not Paid' && (
                                 <small className="text-muted">
-                                    Enter the amount to be refunded (max: ₱{totalPrice})
+                                    Maximum amount: ₱{totalPrice}
                                 </small>
                             )}
                         </div>
