@@ -102,6 +102,13 @@ const TreasurerEditCategory = () => {
         }
     };
     const handleChange = (e) => {
+        const { name, value } = e.target;
+        
+        // For totalPrice, only allow positive numbers
+        if (name === 'totalPrice' && value < 0) {
+            return;
+        }
+
         setFormData({
             ...formData,
             [e.target.name]: e.target.value
