@@ -141,6 +141,28 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent,
         }
     };
 
+    const handleAmountPaidChange = (e) => {
+        const value = parseFloat(e.target.value);
+        
+        // Allow empty string for initial typing
+        if (e.target.value === '') {
+            setAmountPaid('');
+            return;
+        }
+
+        // Prevent negative numbers and zero
+        if (value <= 0) {
+            return;
+        }
+
+        // Don't allow amount greater than total price for any status
+        if (value > totalPrice) {
+            return;
+        }
+
+        setAmountPaid(e.target.value);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setShowConfirmation(true);
@@ -315,7 +337,7 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent,
                             <input
                                 type="number"
                                 value={amountPaid}
-                                onChange={(e) => setAmountPaid(e.target.value)}
+                                onChange={handleAmountPaidChange}
                                 required={status !== 'Not Paid'}
                                 readOnly={status === 'Not Paid'}
                                 className="form-control"
@@ -328,13 +350,13 @@ const ManageFeeModal = ({ isOpen, onClose, onSave, studentName, selectedStudent,
                                     backgroundColor: status === 'Not Paid' ? '#cccccc' : 'white',
                                     color: status === 'Not Paid' ? '#666666' : 'black',
                                 }}
-                                min="0"
-                                max={status === 'Refunded' ? totalPrice : undefined} // Set max for refund
+                                min="0.01"
+                                max={totalPrice}
                                 step="0.01"
                             />
-                            {status === 'Refunded' && (
+                            {status !== 'Not Paid' && (
                                 <small className="text-muted">
-                                    Enter the amount to be refunded (max: ₱{totalPrice})
+                                    Maximum amount: ₱{totalPrice}
                                 </small>
                             )}
                         </div>
