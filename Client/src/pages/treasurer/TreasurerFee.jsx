@@ -600,7 +600,7 @@ const TreasurerFee = () => {
 
                 {userPermissions.paymentUpdate === 'edit' && (
                     <button
-                        className="btn btn-edit btn-sm me-2"
+                        className="btn btn-edit-2 btn-sm me-2"
                         onClick={() => handleEditClick(student)}
                         title="Update Payment"
                     >
