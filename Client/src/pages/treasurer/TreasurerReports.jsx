@@ -192,6 +192,38 @@ const TreasurerReports = () => {
     };
 
     // DOWNLOAD REPORT AS EXCEL
+    const hasData = () => {
+        if (!reportData || reportData.length === 0) return false;
+        
+        switch (reportType) {
+            case 'monthly':
+                if (selectedMonth) {
+                    // Check for specific month's data
+                    const monthData = reportData.find(item => item.month === selectedMonth);
+                    return monthData && 
+                           monthData.weeks && 
+                           monthData.weeks.length > 0 && 
+                           monthData.weeks.some(week => week.total > 0);
+                } else {
+                    // Check for any month with data
+                    return reportData.some(month => 
+                        month.weeks && 
+                        month.weeks.length > 0 && 
+                        month.weeks.some(week => week.total > 0)
+                    );
+                }
+            
+            case 'program':
+                return reportData.some(item => item.total > 0);
+                
+            case 'programTotal':
+                return reportData.some(item => item.total > 0);
+                
+            default:
+                return false;
+        }
+    };
+
     const handleDownloadExcel = () => {
         if (!reportData || reportData.length === 0) {
             alert('No data available to download');
@@ -291,6 +323,13 @@ const TreasurerReports = () => {
             console.error('Error generating CSV:', error);
             alert('Failed to generate report');
         }
+    };
+
+    // Add this function to get appropriate message
+    const getNoDataMessage = () => {
+        if (!selectedMonth) return "Please select a month";
+        if (!reportType) return "Please select a report type";
+        return "No data available for the selected criteria";
     };
 
     return (
@@ -740,3 +779,20 @@ const TreasurerReports = () => {
 };
 
 export default TreasurerReports;
+
+<style>
+    {`
+        .alert {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 0.25rem;
+        }
+        
+        .alert-info {
+            background-color: #e8f4f8;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+    `}
+</style>

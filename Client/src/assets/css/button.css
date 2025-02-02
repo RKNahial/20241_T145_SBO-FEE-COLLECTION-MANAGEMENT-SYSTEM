@@ -134,12 +134,20 @@
     background-color: #5a6268;
 }
 
-  .btn-edit {
+.btn-edit {
     color: green;
     background: none;
     border: none;
     cursor: pointer;
     padding-top: 0;
+    padding-bottom: 0;
+}
+
+.btn-edit-2 {
+    color: green;
+    background: none;
+    border: none;
+    cursor: pointer;
     padding-bottom: 0;
 }
 
