@@ -62,28 +62,6 @@ const TreasurerDues = () => {
     const weeksInMonth = getWeeksInMonth(selectedMonth);
     const weekOptions = Array.from({ length: weeksInMonth }, (_, index) => index + 1);
 
-    // const PaymentStatusTag = React.memo(({ status, onToggle }) => {
-    //     return (
-    //         <button
-    //             onClick={onToggle}
-    //             className={`btn btn-sm ${status === 'Paid' ? 'paid' : 'not-paid'}`}
-    //             style={{
-    //                 backgroundColor: status === 'Paid' ? '#FF8C00' : '#FFB84D',
-    //                 color: '#EAEAEA',
-    //                 border: 'none',
-    //                 padding: '0.25rem 0.75rem',
-    //                 borderRadius: '0.60rem',
-    //                 fontSize: '0.75rem',
-    //                 fontWeight: 500,
-    //                 display: 'inline-block'
-    //             }}
-    //         >
-    //             {status}
-    //         </button>
-    //     );
-    // });
-
-    // First, modify the PaymentStatusTag component to handle local state
     const PaymentStatusTag = React.memo(({ initialStatus, onToggle }) => {
         const [status, setStatus] = useState(initialStatus);
 
@@ -99,13 +77,13 @@ const TreasurerDues = () => {
                 className={`btn btn-sm ${status === 'Paid' ? 'paid' : 'not-paid'}`}
                 disabled={userPermissions.toggleDuesPayment !== 'edit'}
                 style={{
-                    backgroundColor: status === 'Paid' ? '#FF8C00' : '#FFD700', // Bold Orange for Paid, Light Orange for Unpaid
+                    backgroundColor: status === 'Paid' ? '#28a745' : '#dc3545', // Green for Paid, Red for Unpaid
                     color: '#FFFFFF',
                     border: 'none',
                     padding: '0.25rem 0.75rem',
                     borderRadius: '0.60rem',
                     fontSize: '0.75rem',
-                    fontWeight: 'bold', // Make the font bold
+                    fontWeight: 'bold',
                     display: 'inline-block',
                     cursor: userPermissions.toggleDuesPayment === 'edit' ? 'pointer' : 'not-allowed',
                     opacity: userPermissions.toggleDuesPayment === 'edit' ? 1 : 0.7,
@@ -117,7 +95,6 @@ const TreasurerDues = () => {
         );
     });
 
-    // Then, modify how you use the PaymentStatusTag in the table
     const handleStatusToggle = async (userId, day, currentStatus) => {
         if (userPermissions.toggleDuesPayment !== 'edit') {
             setError('You do not have permission to toggle dues payment status');
