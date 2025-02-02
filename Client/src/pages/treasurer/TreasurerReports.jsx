@@ -315,13 +315,6 @@ const TreasurerReports = () => {
         }
     };
 
-    // Add this function to get appropriate message
-    const getNoDataMessage = () => {
-        if (!selectedMonth) return "Please select a month";
-        if (!reportType) return "Please select a report type";
-        return "No data available for the selected criteria";
-    };
-
     return (
         <div className="sb-nav-fixed">
             <Helmet>
@@ -410,13 +403,6 @@ const TreasurerReports = () => {
                                     </div>
                                 </div>
 
-                                {/* Add this message display */}
-                                {!hasData() && selectedMonth && (
-                                    <div className="alert alert-info text-center">
-                                        {getNoDataMessage()}
-                                    </div>
-                                )}
-
                                 {loading ? (
                                     <div style={{ 
                                         display: 'flex', 
@@ -444,20 +430,3 @@ const TreasurerReports = () => {
 };
 
 export default TreasurerReports;
-
-<style>
-    {`
-        .alert {
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-            padding: 0.75rem;
-            border-radius: 0.25rem;
-        }
-        
-        .alert-info {
-            background-color: #e8f4f8;
-            border-color: #bee5eb;
-            color: #0c5460;
-        }
-    `}
-</style>

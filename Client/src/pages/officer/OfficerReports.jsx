@@ -125,9 +125,45 @@ const OfficerReports = () => {
         }
     };
 
+    const hasData = () => {
+        if (!reportData || reportData.length === 0) return false;
+        
+        switch (reportType) {
+            case 'monthly':
+                if (selectedMonth) {
+                    // Check for specific month's data
+                    const monthData = reportData.find(item => item.month === selectedMonth);
+                    return monthData && 
+                           monthData.weeks && 
+                           monthData.weeks.length > 0 && 
+                           monthData.weeks.some(week => week.total > 0);
+                } else {
+                    // Check for any month with data
+                    return reportData.some(month => 
+                        month.weeks && 
+                        month.weeks.length > 0 && 
+                        month.weeks.some(week => week.total > 0)
+                    );
+                }
+            
+            case 'program':
+                return reportData.some(item => item.total > 0);
+                
+            case 'programTotal':
+                return reportData.some(item => item.total > 0);
+                
+            default:
+                return false;
+        }
+    };
+
+    const getNoDataMessage = () => {
+        return "No data available for the selected criteria";
+    };
+
     // DOWNLOAD REPORT AS EXCEL
     const handleDownloadExcel = () => {
-        if (!reportData || reportData.length === 0) {
+        if (!hasData()) {
             alert('No data available to download');
             return;
         }
@@ -298,6 +334,8 @@ const OfficerReports = () => {
                                         <button
                                             className="add-button btn btn-sm me-2"
                                             onClick={handleDownloadExcel}
+                                            disabled={!hasData()}
+                                            title={!hasData() ? "No data available to download" : "Download Excel Report"}
                                         >
                                             <i className="fas fa-file-excel me-2"></i>
                                             Download Excel
@@ -313,6 +351,12 @@ const OfficerReports = () => {
                                     </div>
                                 </div>
 
+                                {!hasData() && (
+                                    <div className="alert alert-info text-center">
+                                        {getNoDataMessage()}
+                                    </div>
+                                )}
+
                                 {loading ? (
                                     <div style={{ 
                                         display: 'flex', 
@@ -322,11 +366,11 @@ const OfficerReports = () => {
                                     }}>
                                         <LoadingSpinner icon="reports" /> 
                                     </div>
-                                ) : (
+                                ) : hasData() ? (
                                     <div style={{ height: '400px' }}>
                                         <Bar data={chartData} options={options} />
                                     </div>
-                                )}
+                                ) : null}
 
                             </div>
                         </div>
@@ -340,3 +384,30 @@ const OfficerReports = () => {
 };
 
 export default OfficerReports;
+
+<style>
+    {`
+        .alert {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 0.25rem;
+        }
+        
+        .alert-info {
+            background-color: #fff3cd;
+            border-color: #ffeeba;
+            color: #856404;
+        }
+
+        .add-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .add-button:disabled:hover {
+            background-color: #cccccc;
+        }
+    `}
+</style>
