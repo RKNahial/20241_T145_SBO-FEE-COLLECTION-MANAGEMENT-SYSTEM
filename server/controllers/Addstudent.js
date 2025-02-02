@@ -62,6 +62,18 @@ exports.addStudent = async (req, res, next) => {
         console.log('------------------------\n');
         
         console.error('Error adding student:', error);
+
+        // Check for duplicate key error (code 11000)
+        if (error.code === 11000) {
+            return res.status(500).json({ 
+                message: 'Duplicate email cannot be updated. Try another email.',
+                error: {
+                    code: 11000,
+                    message: 'Duplicate email detected'
+                }
+            });
+        }
+
         res.status(500).json({ message: 'Failed to add student', error: error.message });
         next(error);
     }

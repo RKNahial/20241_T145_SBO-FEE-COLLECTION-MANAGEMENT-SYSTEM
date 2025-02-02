@@ -76,6 +76,19 @@ exports.updateStudent = async (req, res) => {
         });
     } catch (error) {
         console.error('Update error:', error);
+        
+        // Check for duplicate key error (code 11000)
+        if (error.code === 11000) {
+            return res.status(500).json({ 
+                success: false,
+                message: 'Duplicate email cannot be updated. Try another email.',
+                error: {
+                    code: 11000,
+                    message: 'Duplicate email detected'
+                }
+            });
+        }
+
         res.status(500).json({ 
             success: false,
             message: 'Error updating student', 

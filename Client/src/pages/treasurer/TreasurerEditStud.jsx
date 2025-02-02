@@ -385,7 +385,11 @@ const TreasurerEditStud = () => {
                 throw new Error(response.data.message || 'Failed to update student');
             }
         } catch (err) {
-            setError(err.message || 'Failed to update student. Please try again.');
+            if (err.response?.status === 500 && err.response?.data?.error?.code === 11000) {
+                setError('Duplicate email cannot be updated. Try another email.');
+            } else {
+                setError(err.message || 'Failed to update student. Please try again.');
+            }
             clearError();
             setShowModal(false);
         }

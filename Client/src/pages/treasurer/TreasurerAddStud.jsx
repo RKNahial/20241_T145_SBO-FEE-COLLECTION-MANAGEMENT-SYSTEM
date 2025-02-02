@@ -209,10 +209,17 @@ const TreasurerAddStud = () => {
 
         } catch (error) {
             console.error('Error:', error);
-            setMessage({
-                type: 'error',
-                text: error.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'add'} student`
-            });
+            if (error.response?.status === 500 && error.response?.data?.error?.code === 11000) {
+                setMessage({
+                    type: 'error',
+                    text: 'Duplicate email cannot be Add. Try another email.'
+                });
+            } else {
+                setMessage({
+                    type: 'error',
+                    text: error.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'add'} student`
+                });
+            }
         }
     };
 

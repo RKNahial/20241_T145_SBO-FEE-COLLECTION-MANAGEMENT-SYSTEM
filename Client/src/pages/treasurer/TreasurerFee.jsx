@@ -607,16 +607,6 @@ const TreasurerFee = () => {
                         <i className="fas fa-edit"></i>
                     </button>
                 )}
-                {userPermissions.emailNotifications === 'edit' && (
-                    <button
-                        className="btn btn-email btn-sm"
-                        onClick={() => sendPaymentReminderEmail(student)}
-                        disabled={isReminderDisabled(getStudentPaymentStatus(student._id))}
-                        title="Send Payment Reminder"
-                    >
-                        <i className="fas fa-envelope"></i>
-                    </button>
-                )}
             </div>
         );
     };
