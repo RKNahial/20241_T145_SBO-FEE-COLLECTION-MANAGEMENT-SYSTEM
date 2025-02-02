@@ -7,6 +7,8 @@ import { Helmet } from 'react-helmet';
 import { getAnalytics, logEvent } from "firebase/analytics";
 import { app } from '../firebase/firebaseConfig';
 
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB limit
+
 const AdminFileUpload = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [files, setFiles] = useState([]);
@@ -79,6 +81,11 @@ const AdminFileUpload = () => {
     const handleFileUpload = async (file) => {
         if (!file) {
             setError('No file selected');
+            return;
+        }
+
+        if (file.size > MAX_FILE_SIZE) {
+            setError(`File size exceeds 25MB limit. Your file is ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
             return;
         }
 
@@ -267,7 +274,11 @@ const AdminFileUpload = () => {
                                 >
                                     <i className="fas fa-cloud-upload-alt upload-icon"></i>
                                     <h5 className="upload-text">Drag and drop files here or click to upload</h5>
-                                    <p className="upload-subtext">Supported files: PDF, DOC, DOCX, XLS, XLSX</p>
+                                    <p className="upload-subtext">
+                                        Supported files: PDF, DOC, DOCX, XLS, XLSX
+                                        <br />
+                                        Maximum file size: 25MB
+                                    </p>
                                     <input
                                         type="file"
                                         ref={fileInputRef}
