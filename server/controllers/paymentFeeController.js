@@ -371,7 +371,7 @@ exports.getPaymentsByProgram = async (req, res) => {
             };
         }
 
-        const categoryPayments = await Promise.all(activeCategories.map(async category => {
+        const categoryPayments = await Promise.all(activeCategories.map(async (category) => {
             const payments = await PaymentFee.aggregate([
                 {
                     $match: {
@@ -468,6 +468,97 @@ exports.getPaymentsByProgramTotal = async (req, res) => {
 function getMonthName(month) {
     return new Date(0, parseInt(month) - 1).toLocaleString('en-US', { month: 'long' });
 }
+
+exports.getExpectedAmounts = async (req, res) => {
+    try {
+        // Get all active payment categories
+        const activeCategories = await PaymentCategory.find({ isArchived: false });
+        
+        // Get all active students
+        const activeStudents = await Student.find({ isArchived: false });
+        const totalActiveStudents = activeStudents.length;
+
+        // Calculate expected amounts for each category
+        const expectedAmounts = await Promise.all(activeCategories.map(async (category) => {
+            // Get all payments for this category
+            const payments = await PaymentFee.find({ categoryId: category._id });
+            
+            // Create a map of student payments
+            const studentPayments = {};
+            payments.forEach(payment => {
+                const amountPaid = parseFloat(payment.amountPaid) || 0;
+                const totalPrice = parseFloat(payment.totalPrice) || 0;
+                
+                // Calculate payment status using the same logic as TreasurerFee.jsx
+                let status = 'Not Paid';
+                if (totalPrice > 0) {
+                    if (amountPaid >= totalPrice) {
+                        status = 'Fully Paid';
+                    } else if (amountPaid > 0) {
+                        status = 'Partially Paid';
+                    }
+                }
+                
+                if (payment.studentId) {
+                    studentPayments[payment.studentId.toString()] = {
+                        status,
+                        amountPaid,
+                        totalPrice
+                    };
+                }
+            });
+            
+            // Count students by payment status
+            let unpaidCount = 0;
+            let partiallyPaidCount = 0;
+            let fullyPaidCount = 0;
+            
+            activeStudents.forEach(student => {
+                const payment = studentPayments[student._id.toString()];
+                if (!payment || payment.status === 'Not Paid') {
+                    unpaidCount++;
+                } else if (payment.status === 'Partially Paid') {
+                    partiallyPaidCount++;
+                } else if (payment.status === 'Fully Paid') {
+                    fullyPaidCount++;
+                }
+            });
+
+            // Calculate total amount received
+            const totalReceived = payments.reduce((sum, payment) => sum + (parseFloat(payment.amountPaid) || 0), 0);
+            
+            // Calculate expected total if all students paid the full amount
+            const expectedTotal = totalActiveStudents * category.totalPrice;
+            
+            // Calculate remaining amount to be collected
+            const remainingAmount = expectedTotal - totalReceived;
+
+            return {
+                categoryName: category.name,
+                price: category.totalPrice,
+                totalStudents: totalActiveStudents,
+                unpaidStudents: unpaidCount,
+                partiallyPaidStudents: partiallyPaidCount,
+                fullyPaidStudents: fullyPaidCount,
+                expectedTotal: expectedTotal,
+                actualReceived: totalReceived,
+                remainingAmount: remainingAmount
+            };
+        }));
+
+        res.json({
+            success: true,
+            data: expectedAmounts
+        });
+    } catch (error) {
+        console.error('Error calculating expected amounts:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error calculating expected amounts',
+            error: error.message
+        });
+    }
+};
 
 exports.checkLock = async (req, res) => {
     try {

@@ -17,5 +17,6 @@ router.get('/payment-fee/total-fees', paymentFeeController.getTotalFees);
 router.get('/payment-fee/reports', paymentFeeController.getPaymentReports);
 router.get('/payment-fee/reports/by-program', paymentFeeController.getPaymentsByProgram);
 router.get('/payment-fee/reports/by-program-total', paymentFeeController.getPaymentsByProgramTotal);
+router.get('/payment-fee/reports/expected-amounts', paymentFeeController.getExpectedAmounts);
 
 module.exports = router; 

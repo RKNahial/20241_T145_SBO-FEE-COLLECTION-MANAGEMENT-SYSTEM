@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet';
 import React, { useState, useEffect } from "react";
 import TreasurerSidebar from "./TreasurerSidebar";
 import TreasurerNavbar from "./TreasurerNavbar";
-import { Bar } from 'react-chartjs-2';
+import { Bar, Pie } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -11,7 +11,8 @@ import {
     BarElement,
     Title,
     Tooltip,
-    Legend
+    Legend,
+    ArcElement
 } from 'chart.js';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import jsPDF from 'jspdf'; 
@@ -22,6 +23,7 @@ ChartJS.register(
     CategoryScale,
     LinearScale,
     BarElement,
+    ArcElement,
     Title,
     Tooltip,
     Legend
@@ -39,6 +41,7 @@ const TreasurerReports = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedMonth, setSelectedMonth] = useState('');
+    const [expectedAmounts, setExpectedAmounts] = useState([]);
 
     // NEW: Add state for user permissions
     const [userPermissions, setUserPermissions] = useState({
@@ -65,9 +68,16 @@ const TreasurerReports = () => {
                         endpoint = 'reports';
                 }
 
-                const response = await axios.get(`http://localhost:8000/api/payment-fee/${endpoint}`);
-                if (response.data.success) {
-                    setReportData(response.data.data);
+                const [reportResponse, expectedResponse] = await Promise.all([
+                    axios.get(`http://localhost:8000/api/payment-fee/${endpoint}`),
+                    axios.get('http://localhost:8000/api/payment-fee/reports/expected-amounts')
+                ]);
+
+                if (reportResponse.data.success) {
+                    setReportData(reportResponse.data.data);
+                }
+                if (expectedResponse.data.success) {
+                    setExpectedAmounts(expectedResponse.data.data);
                 }
             } catch (err) {
                 setError('Failed to fetch report data');
@@ -313,62 +323,6 @@ const TreasurerReports = () => {
                             </div>
 
                             <div className="card-body">
-                                {/* SELECT REPORT CATEGORY */}
-                                <div className="d-flex justify-content-start mb-3">
-                                    <div className="d-flex align-items-center">
-                                        <label className="me-2 mb-0">Select Reports</label>
-                                        <div className="dashboard-select" style={{ width: 'auto' }}>
-                                            <select
-                                                className="form-control"
-                                                value={reportType}
-                                                onChange={(e) => setReportType(e.target.value)}
-                                            >
-                                                <option value="monthly">Monthly Report</option>
-                                                <option value="program">Report by Categories</option>
-                                                <option value="programTotal">Report by Program</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    {reportType === 'monthly' && (
-                                        <div className="d-flex align-items-center ms-3">
-                                            <label className="me-2 mb-0">Select Month</label>
-                                            <div className="dashboard-select" style={{ width: 'auto' }}>
-                                                <select
-                                                    className="form-control"
-                                                    value={selectedMonth}
-                                                    onChange={(e) => setSelectedMonth(e.target.value)}
-                                                >
-                                                    <option key="all" value="">All Months</option>
-                                                    {reportData.map(item => (
-                                                        <option key={item.month} value={item.month}>
-                                                            {item.month}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                     <div className="ms-auto">
-                                        <button
-                                            className="add-button btn btn-sm me-2"
-                                            onClick={handleDownloadExcel}
-                                        >
-                                            <i className="fas fa-file-excel me-2"></i>
-                                            Download Excel
-                                        </button>
-                                        {/* SUPPOSEDLY FOR PDF */}
-                                        {/* <button
-                                            className="add-button btn btn-sm me-2"
-                                            onClick={handleDownloadPDF}
-                                        >
-                                            <i className="fas fa-file-pdf me-2"></i>
-                                            Download PDF
-                                        </button> */}
-                                    </div>
-                                </div>
-
                                 {loading ? (
                                     <div style={{ 
                                         display: 'flex', 
@@ -379,16 +333,406 @@ const TreasurerReports = () => {
                                         <LoadingSpinner icon="reports" /> 
                                     </div>
                                 ) : (
-                                    <div style={{ height: '400px' }}>
-                                        <Bar data={chartData} options={options} />
-                                    </div>
-                                )}
+                                    <>
+                                        {/* Expected Amounts Section */}
+                                        <div className="mb-4">
+                                            <h5 className="text-center mb-4">Financial Overview</h5>
+                                            <div className="row">
+                                                <div className="col-md-4 mb-4">
+                                                    <div className="chart-container" style={{ position: 'relative', height: '300px' }}>
+                                                        <Pie 
+                                                            data={{
+                                                                labels: expectedAmounts.map(category => category.categoryName),
+                                                                datasets: [{
+                                                                    label: 'Expected Total',
+                                                                    data: expectedAmounts.map(category => category.expectedTotal),
+                                                                    backgroundColor: [
+                                                                        '#4BC0C0',
+                                                                        '#36A2EB',
+                                                                        '#FFCE56',
+                                                                        '#FF6384',
+                                                                        '#9966FF',
+                                                                        '#FF9F40'
+                                                                    ],
+                                                                    borderColor: '#fff',
+                                                                    borderWidth: 1
+                                                                }]
+                                                            }}
+                                                            options={{
+                                                                responsive: true,
+                                                                maintainAspectRatio: false,
+                                                                plugins: {
+                                                                    legend: {
+                                                                        position: 'bottom',
+                                                                        labels: {
+                                                                            boxWidth: 12
+                                                                        }
+                                                                    },
+                                                                    title: {
+                                                                        display: true,
+                                                                        text: 'Expected Total by Category'
+                                                                    },
+                                                                    tooltip: {
+                                                                        callbacks: {
+                                                                            label: function(context) {
+                                                                                const value = context.raw;
+                                                                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                                                                const percentage = ((value / total) * 100).toFixed(1);
+                                                                                return `₱${value.toLocaleString()} (${percentage}%)`;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="text-center mt-3">
+                                                        <h6>Total Expected: ₱{expectedAmounts.reduce((sum, category) => sum + (category.expectedTotal || 0), 0).toLocaleString()}</h6>
+                                                        <div className="small text-muted">
+                                                            {expectedAmounts.map((category, index) => {
+                                                                const total = expectedAmounts.reduce((sum, cat) => sum + (cat.expectedTotal || 0), 0);
+                                                                const percentage = ((category.expectedTotal / total) * 100).toFixed(1);
+                                                                return (
+                                                                    <div key={index}>
+                                                                        {category.categoryName}: ₱{(category.expectedTotal || 0).toLocaleString()} ({percentage}%)
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="col-md-4 mb-4">
+                                                    <div className="chart-container" style={{ position: 'relative', height: '300px' }}>
+                                                        <Pie 
+                                                            data={{
+                                                                labels: expectedAmounts.map(category => category.categoryName),
+                                                                datasets: [{
+                                                                    label: 'Actually Received',
+                                                                    data: expectedAmounts.map(category => category.actualReceived),
+                                                                    backgroundColor: [
+                                                                        '#28a745',
+                                                                        '#36A2EB',
+                                                                        '#FFCE56',
+                                                                        '#FF6384',
+                                                                        '#9966FF',
+                                                                        '#FF9F40'
+                                                                    ],
+                                                                    borderColor: '#fff',
+                                                                    borderWidth: 1
+                                                                }]
+                                                            }}
+                                                            options={{
+                                                                responsive: true,
+                                                                maintainAspectRatio: false,
+                                                                plugins: {
+                                                                    legend: {
+                                                                        position: 'bottom',
+                                                                        labels: {
+                                                                            boxWidth: 12
+                                                                        }
+                                                                    },
+                                                                    title: {
+                                                                        display: true,
+                                                                        text: 'Payments Received by Category'
+                                                                    },
+                                                                    tooltip: {
+                                                                        callbacks: {
+                                                                            label: function(context) {
+                                                                                const value = context.raw;
+                                                                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                                                                const percentage = ((value / total) * 100).toFixed(1);
+                                                                                return `₱${value.toLocaleString()} (${percentage}%)`;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="text-center mt-3">
+                                                        <h6>Total Received: ₱{expectedAmounts.reduce((sum, category) => sum + (category.actualReceived || 0), 0).toLocaleString()}</h6>
+                                                        <div className="small text-muted">
+                                                            {expectedAmounts.map((category, index) => {
+                                                                const total = expectedAmounts.reduce((sum, cat) => sum + (cat.actualReceived || 0), 0);
+                                                                const percentage = ((category.actualReceived / total) * 100).toFixed(1);
+                                                                return (
+                                                                    <div key={index}>
+                                                                        {category.categoryName}: ₱{(category.actualReceived || 0).toLocaleString()} ({percentage}%)
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="col-md-4 mb-4">
+                                                    <div className="chart-container" style={{ position: 'relative', height: '300px' }}>
+                                                        <Pie 
+                                                            data={{
+                                                                labels: expectedAmounts.map(category => category.categoryName),
+                                                                datasets: [{
+                                                                    label: 'Remaining Amount',
+                                                                    data: expectedAmounts.map(category => category.remainingAmount),
+                                                                    backgroundColor: [
+                                                                        '#dc3545',
+                                                                        '#36A2EB',
+                                                                        '#FFCE56',
+                                                                        '#FF6384',
+                                                                        '#9966FF',
+                                                                        '#FF9F40'
+                                                                    ],
+                                                                    borderColor: '#fff',
+                                                                    borderWidth: 1
+                                                                }]
+                                                            }}
+                                                            options={{
+                                                                responsive: true,
+                                                                maintainAspectRatio: false,
+                                                                plugins: {
+                                                                    legend: {
+                                                                        position: 'bottom',
+                                                                        labels: {
+                                                                            boxWidth: 12
+                                                                        }
+                                                                    },
+                                                                    title: {
+                                                                        display: true,
+                                                                        text: 'Remaining Amount by Category'
+                                                                    },
+                                                                    tooltip: {
+                                                                        callbacks: {
+                                                                            label: function(context) {
+                                                                                const value = context.raw;
+                                                                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                                                                const percentage = ((value / total) * 100).toFixed(1);
+                                                                                return `₱${value.toLocaleString()} (${percentage}%)`;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="text-center mt-3">
+                                                        <h6>Total Remaining: ₱{expectedAmounts.reduce((sum, category) => sum + (category.remainingAmount || 0), 0).toLocaleString()}</h6>
+                                                        <div className="small text-muted">
+                                                            {expectedAmounts.map((category, index) => {
+                                                                const total = expectedAmounts.reduce((sum, cat) => sum + (cat.remainingAmount || 0), 0);
+                                                                const percentage = total > 0 ? ((category.remainingAmount / total) * 100).toFixed(1) : '0.0';
+                                                                return (
+                                                                    <div key={index}>
+                                                                        {category.categoryName}: ₱{(category.remainingAmount || 0).toLocaleString()} ({percentage}%)
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
 
+                                        <div className="col-12">
+                                            <h5 className="text-center mb-4">Student Payment Status</h5>
+                                            <div className="row">
+                                                <div className="col-md-6 mb-4">
+                                                    <div className="chart-container" style={{ position: 'relative', height: '300px' }}>
+                                                        <Pie 
+                                                            data={{
+                                                                labels: ['Not Paid', 'Partially Paid', 'Fully Paid'],
+                                                                datasets: [{
+                                                                    label: 'Student Payment Status',
+                                                                    data: expectedAmounts.reduce((acc, category) => [
+                                                                        acc[0] + (category.unpaidStudents || 0),
+                                                                        acc[1] + (category.partiallyPaidStudents || 0),
+                                                                        acc[2] + (category.fullyPaidStudents || 0)
+                                                                    ], [0, 0, 0]),
+                                                                    backgroundColor: [
+                                                                        '#dc3545', // Red for Not Paid
+                                                                        '#ffc107', // Yellow for Partially Paid
+                                                                        '#28a745'  // Green for Fully Paid
+                                                                    ],
+                                                                    borderColor: '#fff',
+                                                                    borderWidth: 1
+                                                                }]
+                                                            }}
+                                                            options={{
+                                                                responsive: true,
+                                                                maintainAspectRatio: false,
+                                                                plugins: {
+                                                                    legend: {
+                                                                        position: 'bottom',
+                                                                        labels: {
+                                                                            boxWidth: 12
+                                                                        }
+                                                                    },
+                                                                    title: {
+                                                                        display: true,
+                                                                        text: 'Overall Student Payment Status'
+                                                                    },
+                                                                    tooltip: {
+                                                                        callbacks: {
+                                                                            label: function(context) {
+                                                                                const value = context.raw;
+                                                                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                                                                const percentage = ((value / total) * 100).toFixed(1);
+                                                                                return `${value} students (${percentage}%)`;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="text-center mt-3">
+                                                        <h6>Total Students: {expectedAmounts.reduce((sum, category) => sum + category.totalStudents, 0)}</h6>
+                                                        <div className="small text-muted">
+                                                            <div style={{ color: '#dc3545' }}>
+                                                                Not Paid: {expectedAmounts.reduce((sum, category) => sum + (category.unpaidStudents || 0), 0)} students
+                                                            </div>
+                                                            <div style={{ color: '#ffc107' }}>
+                                                                Partially Paid: {expectedAmounts.reduce((sum, category) => sum + (category.partiallyPaidStudents || 0), 0)} students
+                                                            </div>
+                                                            <div style={{ color: '#28a745' }}>
+                                                                Fully Paid: {expectedAmounts.reduce((sum, category) => sum + (category.fullyPaidStudents || 0), 0)} students
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="col-md-6 mb-4">
+                                                    <div className="chart-container" style={{ position: 'relative', height: '300px' }}>
+                                                        <Pie 
+                                                            data={{
+                                                                labels: expectedAmounts.map(category => category.categoryName),
+                                                                datasets: [{
+                                                                    label: 'Students by Category',
+                                                                    data: expectedAmounts.map(category => category.totalStudents),
+                                                                    backgroundColor: [
+                                                                        '#4BC0C0',
+                                                                        '#36A2EB',
+                                                                        '#FFCE56',
+                                                                        '#FF6384',
+                                                                        '#9966FF',
+                                                                        '#FF9F40'
+                                                                    ],
+                                                                    borderColor: '#fff',
+                                                                    borderWidth: 1
+                                                                }]
+                                                            }}
+                                                            options={{
+                                                                responsive: true,
+                                                                maintainAspectRatio: false,
+                                                                plugins: {
+                                                                    legend: {
+                                                                        position: 'bottom',
+                                                                        labels: {
+                                                                            boxWidth: 12
+                                                                        }
+                                                                    },
+                                                                    title: {
+                                                                        display: true,
+                                                                        text: 'Students by Category'
+                                                                    },
+                                                                    tooltip: {
+                                                                        callbacks: {
+                                                                            label: function(context) {
+                                                                                const category = expectedAmounts[context.dataIndex];
+                                                                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                                                                const percentage = ((context.raw / total) * 100).toFixed(1);
+                                                                                return [
+                                                                                    `Total: ${category.totalStudents} students (${percentage}%)`,
+                                                                                    `Not Paid: ${category.unpaidStudents} students`,
+                                                                                    `Partially Paid: ${category.partiallyPaidStudents} students`,
+                                                                                    `Fully Paid: ${category.fullyPaidStudents} students`
+                                                                                ];
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="text-center mt-3">
+                                                        <h6>Students by Category</h6>
+                                                        <div className="small text-muted">
+                                                            {expectedAmounts.map((category, index) => (
+                                                                <div key={index}>
+                                                                    {category.categoryName}: {category.totalStudents} students
+                                                                    <div className="ms-3">
+                                                                        <span style={{ color: '#dc3545' }}>Not Paid: {category.unpaidStudents}</span> | 
+                                                                        <span style={{ color: '#ffc107' }}> Partially Paid: {category.partiallyPaidStudents}</span> | 
+                                                                        <span style={{ color: '#28a745' }}> Fully Paid: {category.fullyPaidStudents}</span>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* SELECT REPORT CATEGORY */}
+                                        <div className="d-flex justify-content-start mb-3">
+                                            <div className="d-flex align-items-center">
+                                                <label className="me-2 mb-0">Select Reports</label>
+                                                <div className="dashboard-select" style={{ width: 'auto' }}>
+                                                    <select
+                                                        className="form-control"
+                                                        value={reportType}
+                                                        onChange={(e) => setReportType(e.target.value)}
+                                                    >
+                                                        <option value="monthly">Monthly Report</option>
+                                                        <option value="program">Report by Categories</option>
+                                                        <option value="programTotal">Report by Program</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            {reportType === 'monthly' && (
+                                                <div className="d-flex align-items-center ms-3">
+                                                    <label className="me-2 mb-0">Select Month</label>
+                                                    <div className="dashboard-select" style={{ width: 'auto' }}>
+                                                        <select
+                                                            className="form-control"
+                                                            value={selectedMonth}
+                                                            onChange={(e) => setSelectedMonth(e.target.value)}
+                                                        >
+                                                            <option key="all" value="">All Months</option>
+                                                            {reportData.map(item => (
+                                                                <option key={item.month} value={item.month}>
+                                                                    {item.month}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                             <div className="ms-auto">
+                                                <button
+                                                    className="add-button btn btn-sm me-2"
+                                                    onClick={handleDownloadExcel}
+                                                >
+                                                    <i className="fas fa-file-excel me-2"></i>
+                                                    Download Excel
+                                                </button>
+                                                {/* SUPPOSEDLY FOR PDF */}
+                                                {/* <button
+                                                    className="add-button btn btn-sm me-2"
+                                                    onClick={handleDownloadPDF}
+                                                >
+                                                    <i className="fas fa-file-pdf me-2"></i>
+                                                    Download PDF
+                                                </button> */}
+                                            </div>
+                                        </div>
+
+                                        <div style={{ height: '400px' }}>
+                                            <Bar data={chartData} options={options} />
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
-
-
                 </div>
             </div>
         </div>
