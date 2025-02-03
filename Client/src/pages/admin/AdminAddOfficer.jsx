@@ -62,10 +62,17 @@ const AdminAddOfficer = () => {
             setTimeout(() => {
                 navigate('/admin/officers');
             }, 10000);
-        } catch (error) {
-            setError(error.response?.data?.message || 'Failed to add officer');
+        }  catch (error) {
+            // Check if it's a duplicate email error
+            if (error.response?.data?.message?.includes('E11000') && 
+                error.response?.data?.message?.includes('email')) {
+                setError('Failed to add officer. Email already exists.');
+            } else {
+                setError(error.response?.data?.message || 'Failed to add officer');
+            }
         }
     };
+    
     const toggleSidebar = () => {
         setIsCollapsed(prev => !prev);
     };
