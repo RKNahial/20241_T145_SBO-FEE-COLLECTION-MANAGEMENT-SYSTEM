@@ -433,3 +433,25 @@ exports.cleanUserLocks = async (req, res) => {
         });
     }
 };
+
+exports.toggleArchive = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const student = await Student.findById(id);
+        
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+
+        student.isArchived = !student.isArchived; // Toggle the archive status
+        await student.save();
+
+        res.json({ 
+            success: true, 
+            message: `Student ${student.isArchived ? 'archived' : 'unarchived'} successfully`,
+            student 
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

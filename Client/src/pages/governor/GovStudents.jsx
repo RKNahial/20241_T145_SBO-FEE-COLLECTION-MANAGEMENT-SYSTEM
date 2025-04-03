@@ -109,10 +109,15 @@ const GovStudents = () => {
     const handleArchiveAction = async (studentId, studentName, isArchived) => {
         try {
             const token = localStorage.getItem('token');
+
+            // First check if the student is locked
             const lockStatus = await axios.get(
                 `http://localhost:8000/api/students/${studentId}/check-lock/ARCHIVE`,
                 {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
                 }
             );
 
@@ -128,8 +133,8 @@ const GovStudents = () => {
             });
             setShowModal(true);
         } catch (error) {
-            console.error('Error:', error);
-            setError(error.response?.data?.message || 'An error occurred');
+            console.error('Lock check error:', error);
+            setError(error.response?.data?.message || 'Failed to check student lock status');
         }
     };
 
@@ -140,22 +145,30 @@ const GovStudents = () => {
             const token = localStorage.getItem('token');
             const response = await axios.put(
                 `http://localhost:8000/api/students/${modalAction.student.id}/toggle-archive`,
-                {},
                 {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    isArchived: modalAction.type === 'archive'  // Add explicit archive status
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
                 }
             );
 
             if (response.data.success) {
                 setSuccessMessage(`Student successfully ${modalAction.type}d`);
-                fetchStudents();
+                await fetchStudents(); // Refresh the student list
+            } else {
+                throw new Error(response.data.message || 'Failed to update student status');
             }
         } catch (error) {
-            setError(error.response?.data?.message || 'Failed to update student status');
+            console.error('Archive action error:', error);
+            setError(error.response?.data?.message || `Failed to ${modalAction.type} student`);
+        } finally {
+            setShowModal(false);
+            setModalAction({ type: '', student: null });
         }
-
-        setShowModal(false);
-        setModalAction({ type: '', student: null });
     };
 
     const handleEditClick = (student) => {
@@ -210,7 +223,7 @@ const GovStudents = () => {
                                     <div className="d-flex justify-content-between mb-3 align-items-center">
                                         <div className="d-flex gap-3">
                                             {/* Add Student Button */}
-                                            <Link 
+                                            <Link
                                                 to="/governor/students/add-new"
                                                 className="btn btn-sm"
                                                 style={{
@@ -267,19 +280,19 @@ const GovStudents = () => {
                                             </div>
 
                                             {/* Search Form */}
-                                            <form 
-                                                className="d-flex search-bar" 
+                                            <form
+                                                className="d-flex search-bar"
                                                 onSubmit={(e) => e.preventDefault()}
                                             >
-                                                <input 
-                                                    type="text" 
-                                                    placeholder="Search student" 
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search student"
                                                     className="search-input me-2"
                                                     value={searchTerm}
                                                     onChange={(e) => setSearchTerm(e.target.value)}
                                                 />
-                                                <button 
-                                                    type="submit" 
+                                                <button
+                                                    type="submit"
                                                     className="search btn btn-sm"
                                                 >
                                                     <i className="fas fa-search"></i>
@@ -302,10 +315,10 @@ const GovStudents = () => {
                                     )}
 
                                     {loading ? (
-                                        <LoadingSpinner 
-                                            text="Loading Students" 
-                                            icon="users" 
-                                            subtext="Fetching student records..." 
+                                        <LoadingSpinner
+                                            text="Loading Students"
+                                            icon="users"
+                                            subtext="Fetching student records..."
                                         />
                                     ) : (
                                         <div className="table-responsive table-shadow">
@@ -371,8 +384,8 @@ const GovStudents = () => {
                                 </div>
 
                                 {/* Pagination */}
-                                <div className="d-flex justify-content-between align-items-center" 
-                                    style={{ 
+                                <div className="d-flex justify-content-between align-items-center"
+                                    style={{
                                         paddingLeft: '1rem', paddingRight: '1rem'
                                     }}
                                 >
@@ -392,8 +405,8 @@ const GovStudents = () => {
                                                 </button>
                                             </li>
                                             {[...Array(totalPages)].map((_, index) => (
-                                                <li 
-                                                    key={index} 
+                                                <li
+                                                    key={index}
                                                     className={`page-item ${index + 1 === currentPage ? 'active' : ''}`}
                                                 >
                                                     <button

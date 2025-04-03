@@ -17,5 +17,6 @@ router.put('/unarchive/:id', auth, studentArchiveController.unarchiveStudent);
 // Other student routes
 router.get('/students', auth, studentController.getAllStudents);
 router.put('/students/:id', auth, studentController.updateStudent);
+router.put('/students/:id/toggle-archive', studentController.toggleArchive);
 
 module.exports = router; 
