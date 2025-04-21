@@ -2,7 +2,7 @@
 import { Helmet } from 'react-helmet';
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import GovSidebar from "./GovSidebar"; 
+import GovSidebar from "./GovSidebar";
 import GovNavbar from "./GovNavbar";
 import axios from 'axios';
 import { Modal } from 'react-bootstrap';
@@ -11,6 +11,8 @@ const GovAddOfficer = () => {
     // NAV AND SIDEBAR
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [showModal, setShowModal] = useState(false);
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const [formData, setFormData] = useState({
         name: '',
         ID: '',
@@ -36,7 +38,7 @@ const GovAddOfficer = () => {
         e.preventDefault();
         setShowModal(true);
     };
-    
+
     const confirmSubmit = async () => {
         setShowModal(false);
         try {
@@ -45,19 +47,43 @@ const GovAddOfficer = () => {
                 { ...formData },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-    
+
             if (response.data.temporaryPassword) {
                 setSuccess(`Officer added successfully!\nTemporary Password: ${response.data.temporaryPassword}`);
             } else {
-                setError('No temporary password received from server');
+                setErrorMessage('No temporary password received from server');
+                setShowErrorModal(true);
                 return;
             }
-    
+
             setTimeout(() => {
                 navigate('/governor/officers');
             }, 10000);
         } catch (error) {
-            setError(error.response?.data?.message || 'Failed to add officer');
+            console.error('Error adding officer:', error);
+
+            // Handle specific error cases
+            let friendlyErrorMessage = 'Failed to add officer';
+
+            if (error.response?.data?.message) {
+                if (error.response.data.message.includes('duplicate key') ||
+                    error.response.data.message.includes('already exists')) {
+
+                    // Check which field is duplicate
+                    if (error.response.data.message.includes('ID')) {
+                        friendlyErrorMessage = `Officer ID "${formData.ID}" is already registered in the system.`;
+                    } else if (error.response.data.message.includes('email')) {
+                        friendlyErrorMessage = `Email "${formData.email}" is already registered in the system.`;
+                    } else {
+                        friendlyErrorMessage = 'This officer record already exists in the system.';
+                    }
+                } else {
+                    friendlyErrorMessage = error.response.data.message;
+                }
+            }
+
+            setErrorMessage(friendlyErrorMessage);
+            setShowErrorModal(true);
         }
     };
 
@@ -70,18 +96,18 @@ const GovAddOfficer = () => {
             <GovNavbar toggleSidebar={toggleSidebar} />
             <div style={{ display: 'flex' }}>
                 <GovSidebar isCollapsed={isCollapsed} />
-                <div 
-                    id="layoutSidenav_content" 
-                    style={{ 
-                        marginLeft: isCollapsed ? '5rem' : '15.625rem', 
-                        transition: 'margin-left 0.3s', 
+                <div
+                    id="layoutSidenav_content"
+                    style={{
+                        marginLeft: isCollapsed ? '5rem' : '15.625rem',
+                        transition: 'margin-left 0.3s',
                         flexGrow: 1,
-                        marginTop: '3.5rem' 
+                        marginTop: '3.5rem'
                     }}
                 >
                     {/* CONTENT */}
                     <div className="container-fluid px-4 mb-5 form-top">
-                         {error && <div className="alert alert-danger">{error}</div>}
+                        {error && <div className="alert alert-danger">{error}</div>}
                         {success && (
                             <div className="alert alert-success">
                                 <div className="mb-2" style={{ whiteSpace: 'pre-line' }}>{success}</div>
@@ -224,6 +250,45 @@ const GovAddOfficer = () => {
                             Cancel
                         </button>
                     </div>
+                </Modal.Footer>
+            </Modal>
+
+            {/* Error Modal */}
+            <Modal show={showErrorModal} onHide={() => setShowErrorModal(false)}>
+                <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
+                    <Modal.Title style={{ color: '#dc3545' }}>
+                        <i className="fas fa-exclamation-circle me-2"></i>
+                        Error
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="text-center mb-4">
+                        <div style={{ fontSize: '3rem', color: '#dc3545' }}>
+                            <i className="fas fa-times-circle"></i>
+                        </div>
+                    </div>
+                    <p className="mb-1 text-center">
+                        {errorMessage}
+                    </p>
+                </Modal.Body>
+                <Modal.Footer style={{ border: 'none', padding: '1rem', justifyContent: 'center' }}>
+                    <button
+                        type="button"
+                        onClick={() => setShowErrorModal(false)}
+                        style={{
+                            borderRadius: '0.35rem',
+                            color: '#EAEAEA',
+                            border: 'none',
+                            padding: '0.5rem 1.5rem',
+                            transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                            backgroundColor: '#6c757d',
+                            cursor: 'pointer'
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = '#5a6268'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = '#6c757d'}
+                    >
+                        Close
+                    </button>
                 </Modal.Footer>
             </Modal>
         </div>

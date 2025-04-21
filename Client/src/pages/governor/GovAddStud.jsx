@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { Modal, Button } from 'react-bootstrap';
 import GovSidebar from "./GovSidebar";
 import GovNavbar from "./GovNavbar";
-import React, { useState, useEffect } from "react"; 
+import React, { useState, useEffect } from "react";
 
 const GovAddStud = () => {
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
     // State to handle form data
     const [formData, setFormData] = useState({
         name: '',
@@ -16,13 +16,16 @@ const GovAddStud = () => {
         yearLevel: '',
         program: ''
     });
-    
+
 
     // State to handle messages
     const [message, setMessage] = useState(null);
 
     // State to handle modal visibility
     const [showModal, setShowModal] = useState(false);
+    // State to handle error modal visibility
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     // Handle sidebar collapse
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -61,7 +64,7 @@ const GovAddStud = () => {
     useEffect(() => {
         if (id) {
             setIsEditMode(true);
-            
+
             const fetchStudentData = async () => {
                 try {
                     const token = localStorage.getItem('token');
@@ -93,14 +96,12 @@ const GovAddStud = () => {
                         });
                     } else {
                         console.error('Failed to fetch student data:', response);
-                        setMessage({
-                            type: 'error',
-                            text: 'Unable to retrieve student information'
-                        });
+                        setErrorMessage('Unable to retrieve student information');
+                        setShowErrorModal(true);
                     }
                 } catch (error) {
                     console.error('Error fetching student data:', error);
-                    
+
                     if (error.response) {
                         console.error('Error response data:', error.response.data);
                         console.error('Error response status:', error.response.status);
@@ -111,10 +112,8 @@ const GovAddStud = () => {
                         console.error('Error message:', error.message);
                     }
 
-                    setMessage({
-                        type: 'error',
-                        text: error.response?.data?.message || 'Failed to fetch student data'
-                    });
+                    setErrorMessage(error.response?.data?.message || 'Failed to fetch student data');
+                    setShowErrorModal(true);
                 }
             };
 
@@ -135,7 +134,7 @@ const GovAddStud = () => {
     // Form submission handler
     const handleSubmit = (e) => {
         e.preventDefault();
-        setShowModal(true); 
+        setShowModal(true);
     };
 
     const confirmSubmit = async () => {
@@ -143,22 +142,20 @@ const GovAddStud = () => {
         try {
             const token = localStorage.getItem('token');
             const userDetailsStr = localStorage.getItem('userDetails');
-    
+
             if (!userDetailsStr) {
-                setMessage({
-                    type: 'error',
-                    text: 'Session expired. Please login again.'
-                });
+                setErrorMessage('Session expired. Please login again.');
+                setShowErrorModal(true);
                 return;
             }
-    
+
             const userDetails = JSON.parse(userDetailsStr);
             const endpoint = isEditMode
                 ? `http://localhost:8000/api/update/students/${id}`
                 : 'http://localhost:8000/api/add/students';
-    
+
             const response = await axios.post(
-                endpoint, 
+                endpoint,
                 {
                     ...formData,
                     userName: userDetails.name || userDetails.email.split('@')[0],
@@ -187,10 +184,29 @@ const GovAddStud = () => {
 
         } catch (error) {
             console.error('Error adding student:', error);
-            setMessage({
-                type: 'error',
-                text: error.response?.data?.message || 'Failed to add student'
-            });
+
+            // Handle specific error cases
+            let friendlyErrorMessage = 'Failed to add student';
+
+            if (error.response?.data?.message) {
+                if (error.response.data.message.includes('duplicate key') ||
+                    error.response.data.message.includes('already exists')) {
+
+                    // Check which field is duplicate
+                    if (error.response.data.message.includes('studentId')) {
+                        friendlyErrorMessage = `Student ID "${formData.studentId}" is already registered in the system.`;
+                    } else if (error.response.data.message.includes('institutionalEmail')) {
+                        friendlyErrorMessage = `Email "${formData.institutionalEmail}" is already registered in the system.`;
+                    } else {
+                        friendlyErrorMessage = 'This student record already exists in the system.';
+                    }
+                } else {
+                    friendlyErrorMessage = error.response.data.message;
+                }
+            }
+
+            setErrorMessage(friendlyErrorMessage);
+            setShowErrorModal(true);
         }
     };
 
@@ -312,8 +328,8 @@ const GovAddStud = () => {
                     </div>
                 </div>
             </div >
-             {/* Confirmation Modal */}
-             <Modal show={showModal} onHide={() => setShowModal(false)}>
+            {/* Confirmation Modal */}
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
                     <Modal.Title>
                         Confirm Add Student
@@ -373,6 +389,45 @@ const GovAddStud = () => {
                             Cancel
                         </button>
                     </div>
+                </Modal.Footer>
+            </Modal>
+
+            {/* Error Modal */}
+            <Modal show={showErrorModal} onHide={() => setShowErrorModal(false)}>
+                <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
+                    <Modal.Title style={{ color: '#dc3545' }}>
+                        <i className="fas fa-exclamation-circle me-2"></i>
+                        Error
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="text-center mb-4">
+                        <div style={{ fontSize: '3rem', color: '#dc3545' }}>
+                            <i className="fas fa-times-circle"></i>
+                        </div>
+                    </div>
+                    <p className="mb-1 text-center">
+                        {errorMessage}
+                    </p>
+                </Modal.Body>
+                <Modal.Footer style={{ border: 'none', padding: '1rem', justifyContent: 'center' }}>
+                    <button
+                        type="button"
+                        onClick={() => setShowErrorModal(false)}
+                        style={{
+                            borderRadius: '0.35rem',
+                            color: '#EAEAEA',
+                            border: 'none',
+                            padding: '0.5rem 1.5rem',
+                            transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                            backgroundColor: '#6c757d',
+                            cursor: 'pointer'
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = '#5a6268'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = '#6c757d'}
+                    >
+                        Close
+                    </button>
                 </Modal.Footer>
             </Modal>
         </div >

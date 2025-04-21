@@ -5,51 +5,42 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    const [initialCheckDone, setInitialCheckDone] = useState(false);
 
     useEffect(() => {
         const checkSession = () => {
-            const userDetails = localStorage.getItem('userDetails');
-            const token = localStorage.getItem('token');
+            try {
+                const userDetails = localStorage.getItem('userDetails');
+                const token = localStorage.getItem('token');
 
-            if (userDetails && token) {
-                const parsedUser = JSON.parse(userDetails);
-                const currentTime = new Date().getTime();
-
-                if (parsedUser.sessionExpiry && currentTime < parsedUser.sessionExpiry) {
+                if (userDetails && token) {
+                    const parsedUser = JSON.parse(userDetails);
                     setUser(parsedUser);
-
-
-
-                    if (!initialCheckDone) {
-                        switch (parsedUser.position.toLowerCase().trim()) {
-                            case 'officer':
-
-                                navigate('/officer/dashboard');
-                                break;
-                            case 'admin':
-                                navigate('/admin/dashboard');
-                                break;
-                            case 'treasurer':
-                                navigate('/treasurer/dashboard');
-                                break;
-                            case 'governor':
-                                navigate('/governor/dashboard');
-                                break;
-                        }
-                    }
-                } else {
-                    localStorage.removeItem('userDetails');
-                    localStorage.removeItem('token');
-                    setUser(null);
+                } else if (
+                    !window.location.pathname.startsWith('/sbo-fee-collection')
+                ) {
+                    navigate('/sbo-fee-collection/login');
                 }
+            } catch (error) {
+                console.error('Session check error:', error);
+                localStorage.removeItem('userDetails');
+                localStorage.removeItem('token');
+                setUser(null);
+                if (!window.location.pathname.startsWith('/sbo-fee-collection')) {
+                    navigate('/sbo-fee-collection/login');
+                }
+            } finally {
+                setLoading(false);
             }
-            setInitialCheckDone(true);
         };
 
         checkSession();
-    }, [navigate, initialCheckDone]);
+    }, [navigate]);
+
+    if (loading) {
+        return null; // or a loading spinner
+    }
 
     return (
         <AuthContext.Provider value={{ user, setUser }}>
